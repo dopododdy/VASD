@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>VASD – Veterinary Animal Sterilization Dashboard</title>
+  <title>VASD – Veterinary Academic Service Division</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -104,7 +104,7 @@
   <!-- HEADER -->
   <header>
     <h1>VASD</h1>
-    <span>Veterinary Animal Sterilization Dashboard</span>
+    <span>Veterinary Academic Service Division</span>
   </header>
 
   <!-- CONTENT -->
@@ -140,12 +140,12 @@
 
       <div class="card" onclick="alert('จะทำหน้า Queue / Dashboard ต่อ')">
         <h3>📋 คิวผ่าตัด</h3>
-        <p>เรียกคิว ส / ม และติดตามสถานะ</p>
+        <p>เรียกคิวและติดตามสถานะ</p>
       </div>
 
       <div class="card" onclick="alert('จะทำหน้า Anesthesia ต่อ')">
         <h3>💉 วิสัญญี</h3>
-        <p>คำนวณยา บันทึก vital signs</p>
+        <p>คำนวณยาและบันทึก vital signs</p>
       </div>
 
       <div class="card" onclick="alert('จะทำหน้า Recovery ต่อ')">
@@ -155,23 +155,22 @@
 
       <div class="card" onclick="alert('จะทำหน้า Report ต่อ')">
         <h3>📊 รายงาน</h3>
-        <p>สรุปผลการออกหน่วย</p>
+        <p>สรุปผลการออกหน่วยบริการ</p>
       </div>
 
     </div>
   </div>
 
   <footer>
-    VASD © 2026
+    VASD © 2026 – Veterinary Academic Service Division
   </footer>
 
   <!-- SUPABASE CONNECTION -->
   <script type="module">
     import { supabase } from "./js/supabase.js";
-
     console.log("Supabase ready:", supabase);
 
-    // 🔧 ทดสอบเบื้องต้น (ยังไม่มี table ก็ไม่ error)
+    // placeholder (รอผูกกับ table จริง)
     document.getElementById("totalAnimal").innerText = "-";
     document.getElementById("inSurgery").innerText = "-";
     document.getElementById("recovery").innerText = "-";
