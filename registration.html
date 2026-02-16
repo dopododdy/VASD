@@ -47,19 +47,23 @@
       .owner-grid { grid-template-columns: 1fr; }
     }
 
-    label { font-weight: bold; display:block; margin-bottom:4px; }
-    input, select { width:100%; padding:8px; box-sizing:border-box; }
+    label { font-weight: normal; }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
 
     table {
-      width:100%;
-      border-collapse:collapse;
-      margin-top:10px;
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
     }
     th, td {
-      border:1px solid #ddd;
-      padding:6px;
-      text-align:center;
-      vertical-align:middle;
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+      vertical-align: middle;
     }
 
     button {
@@ -72,24 +76,21 @@
     .btn-add { background:#6c757d; color:#fff; margin-top:10px; }
     .btn-save { background:#2c7be5; color:#fff; font-size:16px; }
 
-    /* 🔹 หัตถการเรียงแนวนอนสำหรับจอใหญ่ */
+    /* ===== หัตถการ ===== */
     .service-line {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-      text-align: left;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: center;
+      justify-content: flex-start;
     }
 
-    @media (min-width: 1200px) {
-      .service-line {
-        flex-direction: row;
-        gap: 20px;
-        align-items: center;
-      }
-      .service-line label {
-        font-weight: normal;
-        white-space: nowrap;
-      }
+    .service-line label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -144,63 +145,46 @@
 
 </div>
 
-<!-- SUCCESS -->
-<div id="successBox" style="
-  display:none;
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.4);
-  align-items:center; justify-content:center;
-">
-  <div style="
-    background:#fff;
-    padding:24px;
-    border-radius:12px;
-    max-width:420px;
-    text-align:center;
-  ">
-    <h3>บันทึกข้อมูลเรียบร้อยแล้ว ✅</h3>
-    <div id="queueResult" style="margin:10px 0; font-size:18px;"></div>
-    <button onclick="location.reload()">ปิด</button>
-  </div>
-</div>
-
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ---------- UX: Enter = Tab ---------- */
-document.addEventListener("keydown", function(e) {
+/* ========= UX: Enter = Tab ========= */
+document.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
   const el = document.activeElement;
   if (!el) return;
   e.preventDefault();
-  focusNext(el);
-});
 
-function focusNext(current) {
   const focusable = Array.from(document.querySelectorAll(
-    'input, select, button'
+    "input, select, button"
   )).filter(el => !el.disabled && el.offsetParent !== null);
 
-  const index = focusable.indexOf(current);
-  if (index > -1 && index < focusable.length - 1) {
-    focusable[index + 1].focus();
+  const idx = focusable.indexOf(el);
+  if (idx > -1 && idx < focusable.length - 1) {
+    focusable[idx + 1].focus();
   }
-}
+});
 
-/* ---------- Registration Logic ---------- */
+/* ========= Registration Logic ========= */
 function neuterText(sex) {
   return sex === "ผู้" ? "ทำหมันเพศผู้ (ตอน)" : "ทำหมันเพศเมีย";
 }
 
-function serviceHTML(sex) {
+function serviceHTML(sex, checked = true) {
   return `
     <div class="service-line">
       <label>
-        <input type="checkbox" checked disabled>
+        <input type="checkbox" class="neuter-checkbox" value="${neuterText(sex)}" ${checked ? "checked" : ""}>
         ${neuterText(sex)}
       </label>
-      <label><input type="checkbox" value="วัคซีนพิษสุนัขบ้า"> วัคซีนพิษสุนัขบ้า</label>
-      <label><input type="checkbox" value="ป้องกันเห็บหมัด"> ป้องกันเห็บหมัด</label>
+      <label>
+        <input type="checkbox" value="วัคซีนพิษสุนัขบ้า">
+        วัคซีนพิษสุนัขบ้า
+      </label>
+      <label>
+        <input type="checkbox" value="ป้องกันเห็บหมัด">
+        ป้องกันเห็บหมัด
+      </label>
     </div>
   `;
 }
@@ -224,7 +208,7 @@ function addAnimal() {
     <td>
       <input class="weightInput" type="number" min="0" step="0.1" value="3">
     </td>
-    <td class="serviceCell">${serviceHTML("เมีย")}</td>
+    <td class="serviceCell"></td>
   `;
 
   const speciesSel = row.querySelector(".speciesSelect");
@@ -232,28 +216,33 @@ function addAnimal() {
   const weightInput = row.querySelector(".weightInput");
   const serviceCell = row.querySelector(".serviceCell");
 
+  serviceCell.innerHTML = serviceHTML("เมีย", true);
+
   speciesSel.addEventListener("change", () => {
     if (speciesSel.value === "ม") weightInput.value = 3;
   });
 
   sexSel.addEventListener("change", () => {
-    serviceCell.innerHTML = serviceHTML(sexSel.value);
+    const prevChecked =
+      serviceCell.querySelector(".neuter-checkbox")?.checked ?? true;
+    serviceCell.innerHTML = serviceHTML(sexSel.value, prevChecked);
   });
 
   document.querySelector("#animalTable tbody").appendChild(row);
 }
 
-/* 🔑 ทำให้ปุ่ม onclick เรียกได้ */
+/* ทำให้ onclick ใช้งานได้ */
 window.addAnimal = addAnimal;
 
 /* แสดงสัตว์ 1 ตัวทันที */
 addAnimal();
 
-/* ---------- Save (ตัดทอนเหลือ core) ---------- */
+/* ========= Save (ตัวอย่าง) ========= */
 async function saveAll() {
-  alert("บันทึกข้อมูล (logic เดิมยังใช้ได้)");
+  alert("บันทึกข้อมูล (เชื่อม Supabase ต่อได้ตาม logic เดิม)");
 }
 window.saveAll = saveAll;
+
 </script>
 
 </body>
