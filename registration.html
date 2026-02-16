@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>VASD – ลงทะเบียนสัตว์</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #2c7be5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-add {
+      background: #6c757d;
+      color: #fff;
+      margin-top: 10px;
+    }
+    .btn-save {
+      background: #2c7be5;
+      color: #fff;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📝 ลงทะเบียนสัตว์ – VASD</h1>
+  <button onclick="location.href='index.html'">🏠 Home</button>
+</header>
+
+<div class="container">
+
+  <!-- OWNER -->
+  <div class="card">
+    <h3>ข้อมูลเจ้าของ</h3>
+    <label>ชื่อเจ้าของ</label>
+    <input id="ownerName" placeholder="ชื่อ-สกุล">
+
+    <label>เบอร์โทร</label>
+    <input id="phone" placeholder="08x-xxx-xxxx">
+  </div>
+
+  <!-- ANIMAL -->
+  <div class="card">
+    <h3>สัตว์ที่นำมา</h3>
+
+    <table id="animalTable">
+      <thead>
+        <tr>
+          <th>ชื่อสัตว์</th>
+          <th>ชนิด</th>
+          <th>เพศ</th>
+          <th>น้ำหนักประมาณ (กก.)</th>
+          <th>หัตถการ</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button class="btn-add" onclick="addAnimal()">➕ เพิ่มสัตว์</button>
+  </div>
+
+  <!-- SAVE -->
+  <div class="card" style="text-align:center">
+    <button class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูล</button>
+  </div>
+
+</div>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+// 👉 ใส่ event_id ของ "วันนี้"
+const EVENT_ID = prompt("กรุณาใส่ event_id ของวันนี้");
+
+function addAnimal() {
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><input></td>
+    <td>
+      <select>
+        <option value="ส">สุนัข</option>
+        <option value="ม">แมว</option>
+      </select>
+    </td>
+    <td>
+      <select>
+        <option>ผู้</option>
+        <option>เมีย</option>
+      </select>
+    </td>
+    <td><input type="number" step="0.1"></td>
+    <td>
+      <label><input type="checkbox" value="ทำหมัน"> ทำหมัน</label><br>
+      <label><input type="checkbox" value="วัคซีนพิษสุนัขบ้า"> วัคซีน</label><br>
+      <label><input type="checkbox" value="ป้องกันเห็บหมัด"> เห็บหมัด</label>
+    </td>
+  `;
+  document.querySelector("#animalTable tbody").appendChild(row);
+}
+
+addAnimal();
+
+async function saveAll() {
+  const ownerName = ownerName.value;
+  const phone = phone.value;
+
+  if (!ownerName || !phone) {
+    alert("กรอกข้อมูลเจ้าของให้ครบ");
+    return;
+  }
+
+  // 1) insert owner
+  const { data: owner, error: ownerErr } = await supabase
+    .from("vasd_owner")
+    .insert({ owner_name: ownerName, phone, event_id: EVENT_ID })
+    .select()
+    .single();
+
+  if (ownerErr) {
+    alert(ownerErr.message);
+    return;
+  }
+
+  // 2) หาเลขคิวล่าสุด
+  const { data: lastQueue } = await supabase
+    .from("vasd_animal")
+    .select("queue_number")
+    .eq("event_id", EVENT_ID)
+    .order("queue_number", { ascending: false })
+    .limit(1)
+    .single();
+
+  let nextQueue = lastQueue ? lastQueue.queue_number + 1 : 1;
+
+  // 3) loop animal
+  const rows = document.querySelectorAll("#animalTable tbody tr");
+
+  for (const r of rows) {
+    const tds = r.querySelectorAll("td");
+
+    const animalName = tds[0].querySelector("input").value;
+    const species = tds[1].querySelector("select").value;
+    const sex = tds[2].querySelector("select").value;
+    const weight = tds[3].querySelector("input").value;
+
+    const { data: animal } = await supabase
+      .from("vasd_animal")
+      .insert({
+        event_id: EVENT_ID,
+        owner_id: owner.id,
+        queue_number: nextQueue++,
+        species,
+        animal_name: animalName,
+        sex,
+        est_weight: weight
+      })
+      .select()
+      .single();
+
+    // service
+    const checks = tds[4].querySelectorAll("input:checked");
+    for (const c of checks) {
+      await supabase.from("vasd_service").insert({
+        animal_id: animal.id,
+        service_type: c.value
+      });
+    }
+
+    // queue status
+    await supabase.from("vasd_queue").insert({
+      animal_id: animal.id,
+      status: "waiting"
+    });
+  }
+
+  alert("บันทึกสำเร็จ 🎉");
+  location.reload();
+}
+</script>
+
+</body>
+</html>
