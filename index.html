@@ -1,12 +1,182 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>VASD</title>
+  <meta charset="UTF-8" />
+  <title>VASD – Veterinary Animal Sterilization Dashboard</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f4f6f8;
+      color: #333;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #2c7be5;
+    }
+
+    header span {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .summary-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .summary-card h2 {
+      margin: 0;
+      font-size: 26px;
+      color: #2c7be5;
+    }
+
+    .summary-card p {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #2c7be5;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #999;
+      margin: 40px 0 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>VASD</h1>
-  <p>Veterinary Animal Sterilization Dashboard</p>
-  <p>สร้างผ่าน Codespaces สำเร็จ 🎉</p>
+
+  <!-- HEADER -->
+  <header>
+    <h1>VASD</h1>
+    <span>Veterinary Animal Sterilization Dashboard</span>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="container">
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      <div class="summary-card">
+        <h2 id="totalAnimal">–</h2>
+        <p>สัตว์ทั้งหมดวันนี้</p>
+      </div>
+      <div class="summary-card">
+        <h2 id="inSurgery">–</h2>
+        <p>กำลังผ่าตัด</p>
+      </div>
+      <div class="summary-card">
+        <h2 id="recovery">–</h2>
+        <p>พักฟื้น</p>
+      </div>
+      <div class="summary-card">
+        <h2 id="done">–</h2>
+        <p>กลับบ้านแล้ว</p>
+      </div>
+    </div>
+
+    <!-- MAIN MENU -->
+    <div class="menu">
+
+      <div class="card" onclick="alert('จะทำหน้า Registration (PC) ต่อ')">
+        <h3>📝 ลงทะเบียน</h3>
+        <p>เพิ่มเจ้าของและสัตว์เข้าระบบ</p>
+      </div>
+
+      <div class="card" onclick="alert('จะทำหน้า Queue / Dashboard ต่อ')">
+        <h3>📋 คิวผ่าตัด</h3>
+        <p>เรียกคิว ส / ม และติดตามสถานะ</p>
+      </div>
+
+      <div class="card" onclick="alert('จะทำหน้า Anesthesia ต่อ')">
+        <h3>💉 วิสัญญี</h3>
+        <p>คำนวณยา บันทึก vital signs</p>
+      </div>
+
+      <div class="card" onclick="alert('จะทำหน้า Recovery ต่อ')">
+        <h3>🟣 พักฟื้น</h3>
+        <p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
+      </div>
+
+      <div class="card" onclick="alert('จะทำหน้า Report ต่อ')">
+        <h3>📊 รายงาน</h3>
+        <p>สรุปผลการออกหน่วย</p>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    VASD © 2026
+  </footer>
+
+  <!-- SUPABASE CONNECTION -->
+  <script type="module">
+    import { supabase } from "./js/supabase.js";
+
+    console.log("Supabase ready:", supabase);
+
+    // 🔧 ทดสอบเบื้องต้น (ยังไม่มี table ก็ไม่ error)
+    document.getElementById("totalAnimal").innerText = "-";
+    document.getElementById("inSurgery").innerText = "-";
+    document.getElementById("recovery").innerText = "-";
+    document.getElementById("done").innerText = "-";
+  </script>
+
 </body>
 </html>
