@@ -37,17 +37,31 @@
       margin-bottom: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
+
+    /* 🔹 GRID สำหรับข้อมูลเจ้าของ */
+    .owner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 700px) {
+      .owner-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     label {
       font-weight: bold;
       display: block;
-      margin-top: 10px;
+      margin-bottom: 4px;
     }
     input, select {
       width: 100%;
       padding: 8px;
-      margin-top: 4px;
       box-sizing: border-box;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -59,6 +73,7 @@
       text-align: center;
       vertical-align: top;
     }
+
     button {
       padding: 10px 16px;
       border: none;
@@ -90,11 +105,18 @@
   <!-- OWNER -->
   <div class="card">
     <h3>ข้อมูลเจ้าของสัตว์</h3>
-    <label>ชื่อเจ้าของ</label>
-    <input id="ownerName" placeholder="ชื่อ-สกุล">
 
-    <label>เบอร์โทรศัพท์</label>
-    <input id="phone" placeholder="08x-xxx-xxxx">
+    <div class="owner-grid">
+      <div>
+        <label>ชื่อเจ้าของ</label>
+        <input id="ownerName" placeholder="ชื่อ-สกุล">
+      </div>
+
+      <div>
+        <label>เบอร์โทรศัพท์</label>
+        <input id="phone" placeholder="08x-xxx-xxxx">
+      </div>
+    </div>
   </div>
 
   <!-- ANIMAL -->
@@ -157,10 +179,7 @@ function createServiceHTML(sex) {
     : "ทำหมันเพศเมีย";
 
   return `
-    <label>
-      <input type="checkbox" class="neuter" value="${neuterText}" checked>
-      ${neuterText}
-    </label><br>
+    <label><input type="checkbox" value="${neuterText}" checked> ${neuterText}</label><br>
     <label><input type="checkbox" value="วัคซีนพิษสุนัขบ้า"> วัคซีนพิษสุนัขบ้า</label><br>
     <label><input type="checkbox" value="ป้องกันเห็บหมัด"> ป้องกันเห็บหมัด</label>
   `;
@@ -182,12 +201,8 @@ function addAnimal() {
         <option value="ผู้">ผู้</option>
       </select>
     </td>
-    <td>
-      <input type="number" step="0.1" min="0" placeholder="กก.">
-    </td>
-    <td class="serviceCell">
-      ${createServiceHTML("เมีย")}
-    </td>
+    <td><input type="number" min="0" step="0.1" placeholder="กก."></td>
+    <td class="serviceCell">${createServiceHTML("เมีย")}</td>
   `;
 
   row.querySelector(".sexSelect").addEventListener("change", e => {
@@ -269,17 +284,3 @@ async function saveAll() {
     }
 
     await supabase.from("vasd_queue").insert({
-      animal_id: animal.id,
-      status: "waiting"
-    });
-  }
-
-  document.getElementById("queueResult").innerHTML =
-    "เลขคิวของสัตว์:<br><b>" + queueTexts.join(", ") + "</b>";
-
-  document.getElementById("successBox").style.display = "flex";
-}
-</script>
-
-</body>
-</html>
