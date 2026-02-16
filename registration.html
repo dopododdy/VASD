@@ -87,10 +87,9 @@
 
 <div class="container">
 
-  <!-- OWNER INFO -->
+  <!-- OWNER -->
   <div class="card">
     <h3>ข้อมูลเจ้าของสัตว์</h3>
-
     <label>ชื่อเจ้าของ</label>
     <input id="ownerName" placeholder="ชื่อ-สกุล">
 
@@ -98,7 +97,7 @@
     <input id="phone" placeholder="08x-xxx-xxxx">
   </div>
 
-  <!-- ANIMAL INFO -->
+  <!-- ANIMAL -->
   <div class="card">
     <h3>สัตว์ที่นำมาเข้ารับบริการ</h3>
 
@@ -125,7 +124,7 @@
 
 </div>
 
-<!-- SUCCESS MESSAGE -->
+<!-- SUCCESS -->
 <div id="successBox" style="
   display:none;
   position:fixed; inset:0;
@@ -152,45 +151,64 @@
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
+function createServiceHTML(sex) {
+  const neuterText = sex === "ผู้"
+    ? "ทำหมันเพศผู้ (ตอน)"
+    : "ทำหมันเพศเมีย";
+
+  return `
+    <label>
+      <input type="checkbox" class="neuter" value="${neuterText}" checked>
+      ${neuterText}
+    </label><br>
+    <label><input type="checkbox" value="วัคซีนพิษสุนัขบ้า"> วัคซีนพิษสุนัขบ้า</label><br>
+    <label><input type="checkbox" value="ป้องกันเห็บหมัด"> ป้องกันเห็บหมัด</label>
+  `;
+}
+
 function addAnimal() {
   const row = document.createElement("tr");
   row.innerHTML = `
     <td><input placeholder="ชื่อสัตว์"></td>
     <td>
       <select>
+        <option value="ม" selected>แมว</option>
         <option value="ส">สุนัข</option>
-        <option value="ม">แมว</option>
       </select>
     </td>
     <td>
-      <select>
+      <select class="sexSelect">
+        <option value="เมีย" selected>เมีย</option>
         <option value="ผู้">ผู้</option>
-        <option value="เมีย">เมีย</option>
       </select>
     </td>
-    <td><input type="number" step="0.1"></td>
-    <td style="text-align:left">
-      <label><input type="checkbox" value="ทำหมัน"> ทำหมัน</label><br>
-      <label><input type="checkbox" value="วัคซีนพิษสุนัขบ้า"> วัคซีนพิษสุนัขบ้า</label><br>
-      <label><input type="checkbox" value="ป้องกันเห็บหมัด"> ป้องกันเห็บหมัด</label>
+    <td>
+      <input type="number" step="0.1" min="0" placeholder="กก.">
+    </td>
+    <td class="serviceCell">
+      ${createServiceHTML("เมีย")}
     </td>
   `;
+
+  row.querySelector(".sexSelect").addEventListener("change", e => {
+    row.querySelector(".serviceCell").innerHTML =
+      createServiceHTML(e.target.value);
+  });
+
   document.querySelector("#animalTable tbody").appendChild(row);
 }
 
-// เพิ่มแถวแรกอัตโนมัติ
 addAnimal();
 
 async function saveAll() {
-  const ownerName = document.getElementById("ownerName").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+  const ownerName = ownerName.value.trim();
+  const phone = phone.value.trim();
 
   if (!ownerName || !phone) {
     alert("กรุณากรอกข้อมูลเจ้าของให้ครบ");
     return;
   }
 
-  // 1) insert owner
   const { data: owner, error: ownerErr } = await supabase
     .from("vasd_owner")
     .insert({ owner_name: ownerName, phone })
@@ -202,7 +220,6 @@ async function saveAll() {
     return;
   }
 
-  // 2) หาเลขคิวล่าสุด
   const { data: lastQueue } = await supabase
     .from("vasd_animal")
     .select("queue_number")
@@ -211,21 +228,23 @@ async function saveAll() {
     .maybeSingle();
 
   let nextQueue = lastQueue ? lastQueue.queue_number + 1 : 1;
-
   const queueTexts = [];
 
-  // 3) loop สัตว์
   const rows = document.querySelectorAll("#animalTable tbody tr");
 
   for (const r of rows) {
     const tds = r.querySelectorAll("td");
-
     const animalName = tds[0].querySelector("input").value;
     const species = tds[1].querySelector("select").value;
     const sex = tds[2].querySelector("select").value;
-    const weight = tds[3].querySelector("input").value;
+    const weight = parseFloat(tds[3].querySelector("input").value || 0);
 
-    const { data: animal, error: aniErr } = await supabase
+    if (weight < 0) {
+      alert("น้ำหนักต้องไม่ติดลบ");
+      return;
+    }
+
+    const { data: animal } = await supabase
       .from("vasd_animal")
       .insert({
         owner_id: owner.id,
@@ -238,32 +257,23 @@ async function saveAll() {
       .select()
       .single();
 
-    if (aniErr) {
-      alert(aniErr.message);
-      return;
-    }
-
-    // เก็บเลขคิวแสดงผล
-    queueTexts.push(`${species}${String(nextQueue).padStart(2, "0")}`);
+    queueTexts.push(`${species}${String(nextQueue).padStart(2,"0")}`);
     nextQueue++;
 
-    // service
-    const checks = tds[4].querySelectorAll("input:checked");
-    for (const c of checks) {
+    const services = tds[4].querySelectorAll("input:checked");
+    for (const s of services) {
       await supabase.from("vasd_service").insert({
         animal_id: animal.id,
-        service_type: c.value
+        service_type: s.value
       });
     }
 
-    // queue status
     await supabase.from("vasd_queue").insert({
       animal_id: animal.id,
       status: "waiting"
     });
   }
 
-  // แสดงผลสำเร็จ
   document.getElementById("queueResult").innerHTML =
     "เลขคิวของสัตว์:<br><b>" + queueTexts.join(", ") + "</b>";
 
