@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>VASD – Veterinary Academic Service Division</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -38,6 +37,17 @@
       max-width: 1100px;
       margin: auto;
       padding: 24px;
+    }
+
+    .notice {
+      background: #ffffff;
+      border: 1px dashed #2c7be5;
+      padding: 18px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      text-align: center;
+      color: #2c7be5;
+      font-weight: bold;
     }
 
     .summary {
@@ -110,6 +120,12 @@
   <!-- CONTENT -->
   <div class="container">
 
+    <!-- NOTICE -->
+    <div class="notice">
+      หน้านี้อยู่ระหว่างการพัฒนา<br>
+      ระบบลงทะเบียน (Registration – PC) เปิดให้ใช้งานแล้ว
+    </div>
+
     <!-- SUMMARY -->
     <div class="summary">
       <div class="summary-card">
@@ -133,27 +149,28 @@
     <!-- MAIN MENU -->
     <div class="menu">
 
-      <div class="card" onclick="alert('จะทำหน้า Registration (PC) ต่อ')">
+      <!-- ✅ FIXED LINK -->
+      <div class="card" onclick="location.href='registration.html'">
         <h3>📝 ลงทะเบียน</h3>
         <p>เพิ่มเจ้าของและสัตว์เข้าระบบ</p>
       </div>
 
-      <div class="card" onclick="alert('จะทำหน้า Queue / Dashboard ต่อ')">
+      <div class="card" onclick="alert('กำลังพัฒนา: คิวผ่าตัด')">
         <h3>📋 คิวผ่าตัด</h3>
-        <p>เรียกคิวและติดตามสถานะ</p>
+        <p>เรียกคิว ส / ม และติดตามสถานะ</p>
       </div>
 
-      <div class="card" onclick="alert('จะทำหน้า Anesthesia ต่อ')">
+      <div class="card" onclick="alert('กำลังพัฒนา: วิสัญญี')">
         <h3>💉 วิสัญญี</h3>
         <p>คำนวณยาและบันทึก vital signs</p>
       </div>
 
-      <div class="card" onclick="alert('จะทำหน้า Recovery ต่อ')">
+      <div class="card" onclick="alert('กำลังพัฒนา: พักฟื้น')">
         <h3>🟣 พักฟื้น</h3>
         <p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
       </div>
 
-      <div class="card" onclick="alert('จะทำหน้า Report ต่อ')">
+      <div class="card" onclick="alert('กำลังพัฒนา: รายงาน')">
         <h3>📊 รายงาน</h3>
         <p>สรุปผลการออกหน่วยบริการ</p>
       </div>
@@ -170,7 +187,7 @@
     import { supabase } from "./js/supabase.js";
     console.log("Supabase ready:", supabase);
 
-    // placeholder (รอผูกกับ table จริง)
+    // placeholder (รอผูกข้อมูลจริง)
     document.getElementById("totalAnimal").innerText = "-";
     document.getElementById("inSurgery").innerText = "-";
     document.getElementById("recovery").innerText = "-";
