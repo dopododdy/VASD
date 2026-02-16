@@ -38,41 +38,20 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
-    /* 🔹 GRID สำหรับข้อมูลเจ้าของ */
     .owner-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
-
-    @media (max-width: 700px) {
-      .owner-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width:700px) {
+      .owner-grid { grid-template-columns: 1fr; }
     }
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 4px;
-    }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
+    label { font-weight: bold; display:block; margin-bottom:4px; }
+    input, select { width:100%; padding:8px; box-sizing:border-box; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 6px;
-      text-align: center;
-      vertical-align: top;
-    }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th, td { border:1px solid #ddd; padding:6px; text-align:center; vertical-align:top; }
 
     button {
       padding: 10px 16px;
@@ -81,16 +60,8 @@
       cursor: pointer;
       font-weight: bold;
     }
-    .btn-add {
-      background: #6c757d;
-      color: #fff;
-      margin-top: 10px;
-    }
-    .btn-save {
-      background: #2c7be5;
-      color: #fff;
-      font-size: 16px;
-    }
+    .btn-add { background:#6c757d; color:#fff; margin-top:10px; }
+    .btn-save { background:#2c7be5; color:#fff; font-size:16px; }
   </style>
 </head>
 <body>
@@ -105,13 +76,11 @@
   <!-- OWNER -->
   <div class="card">
     <h3>ข้อมูลเจ้าของสัตว์</h3>
-
     <div class="owner-grid">
       <div>
         <label>ชื่อเจ้าของ</label>
-        <input id="ownerName" placeholder="ชื่อ-สกุล">
+        <input id="ownerName" placeholder="ชื่อ-สกุล" autofocus>
       </div>
-
       <div>
         <label>เบอร์โทรศัพท์</label>
         <input id="phone" placeholder="08x-xxx-xxxx">
@@ -173,13 +142,51 @@
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-function createServiceHTML(sex) {
-  const neuterText = sex === "ผู้"
-    ? "ทำหมันเพศผู้ (ตอน)"
-    : "ทำหมันเพศเมีย";
+/* ---------- UX: Enter = Tab & Skip checked neuter ---------- */
+document.addEventListener("keydown", function(e) {
+  if (e.key !== "Enter") return;
 
+  const el = document.activeElement;
+  if (!el) return;
+
+  // ป้องกัน Enter submit form
+  e.preventDefault();
+
+  // ข้าม checkbox ที่ถูกติ๊กอัตโนมัติ (ทำหมัน)
+  if (el.type === "checkbox" && el.checked && el.classList.contains("auto-skip")) {
+    focusNext(el);
+    return;
+  }
+
+  focusNext(el);
+});
+
+function focusNext(current) {
+  const focusable = Array.from(document.querySelectorAll(
+    'input, select, button'
+  )).filter(el =>
+    !el.disabled &&
+    el.offsetParent !== null &&
+    !(el.type === "checkbox" && el.checked && el.classList.contains("auto-skip"))
+  );
+
+  const index = focusable.indexOf(current);
+  if (index > -1 && index < focusable.length - 1) {
+    focusable[index + 1].focus();
+  }
+}
+
+/* ---------- Registration Logic ---------- */
+function neuterText(sex) {
+  return sex === "ผู้" ? "ทำหมันเพศผู้ (ตอน)" : "ทำหมันเพศเมีย";
+}
+
+function serviceHTML(sex) {
   return `
-    <label><input type="checkbox" value="${neuterText}" checked> ${neuterText}</label><br>
+    <label>
+      <input type="checkbox" class="auto-skip" value="${neuterText(sex)}" checked>
+      ${neuterText(sex)}
+    </label><br>
     <label><input type="checkbox" value="วัคซีนพิษสุนัขบ้า"> วัคซีนพิษสุนัขบ้า</label><br>
     <label><input type="checkbox" value="ป้องกันเห็บหมัด"> ป้องกันเห็บหมัด</label>
   `;
@@ -190,7 +197,7 @@ function addAnimal() {
   row.innerHTML = `
     <td><input placeholder="ชื่อสัตว์"></td>
     <td>
-      <select>
+      <select class="speciesSelect">
         <option value="ม" selected>แมว</option>
         <option value="ส">สุนัข</option>
       </select>
@@ -201,20 +208,34 @@ function addAnimal() {
         <option value="ผู้">ผู้</option>
       </select>
     </td>
-    <td><input type="number" min="0" step="0.1" placeholder="กก."></td>
-    <td class="serviceCell">${createServiceHTML("เมีย")}</td>
+    <td>
+      <input class="weightInput" type="number" min="0" step="0.1" value="3">
+    </td>
+    <td class="serviceCell">
+      ${serviceHTML("เมีย")}
+    </td>
   `;
 
-  row.querySelector(".sexSelect").addEventListener("change", e => {
-    row.querySelector(".serviceCell").innerHTML =
-      createServiceHTML(e.target.value);
+  const speciesSel = row.querySelector(".speciesSelect");
+  const sexSel = row.querySelector(".sexSelect");
+  const weightInput = row.querySelector(".weightInput");
+  const serviceCell = row.querySelector(".serviceCell");
+
+  speciesSel.addEventListener("change", () => {
+    if (speciesSel.value === "ม") weightInput.value = 3;
+  });
+
+  sexSel.addEventListener("change", () => {
+    serviceCell.innerHTML = serviceHTML(sexSel.value);
   });
 
   document.querySelector("#animalTable tbody").appendChild(row);
 }
 
+// แสดงสัตว์ 1 ตัวทันที
 addAnimal();
 
+/* ---------- Save ---------- */
 async function saveAll() {
   const ownerName = ownerName.value.trim();
   const phone = phone.value.trim();
@@ -224,21 +245,16 @@ async function saveAll() {
     return;
   }
 
-  const { data: owner, error: ownerErr } = await supabase
+  const { data: owner } = await supabase
     .from("vasd_owner")
     .insert({ owner_name: ownerName, phone })
     .select()
     .single();
 
-  if (ownerErr) {
-    alert(ownerErr.message);
-    return;
-  }
-
   const { data: lastQueue } = await supabase
     .from("vasd_animal")
     .select("queue_number")
-    .order("queue_number", { ascending: false })
+    .order("queue_number", { ascending:false })
     .limit(1)
     .maybeSingle();
 
@@ -284,3 +300,17 @@ async function saveAll() {
     }
 
     await supabase.from("vasd_queue").insert({
+      animal_id: animal.id,
+      status: "waiting"
+    });
+  }
+
+  document.getElementById("queueResult").innerHTML =
+    "เลขคิวของสัตว์:<br><b>" + queueTexts.join(", ") + "</b>";
+
+  document.getElementById("successBox").style.display = "flex";
+}
+</script>
+
+</body>
+</html>
