@@ -163,14 +163,32 @@ footer {
     <div class="card" onclick="location.href='registration.html'">
       <h3>📝 ลงทะเบียน</h3>
     </div>
+
     <div class="card" onclick="location.href='animals.html'">
       <h3>🐾 สัตว์ทั้งหมดวันนี้</h3>
     </div>
-    <div class="card"><h3>📋 คิวผ่าตัด</h3></div>
-    <div class="card"><h3>💉 วิสัญญี</h3></div>
-    <div class="card"><h3>🟣 พักฟื้น</h3></div>
-    <div class="card"><h3>📊 รายงาน</h3></div>
-    <div class="card"><h3>⚙️ ตั้งค่า</h3></div>
+
+    <div class="card">
+      <h3>📋 คิวผ่าตัด</h3>
+    </div>
+
+    <!-- ✅ แก้ตรงนี้ -->
+    <div class="card" onclick="location.href='anesthesia.html'">
+      <h3>💉 วิสัญญี</h3>
+      <p>วางยาสลบ / บันทึก vital signs</p>
+    </div>
+
+    <div class="card">
+      <h3>🟣 พักฟื้น</h3>
+    </div>
+
+    <div class="card">
+      <h3>📊 รายงาน</h3>
+    </div>
+
+    <div class="card">
+      <h3>⚙️ ตั้งค่า</h3>
+    </div>
   </div>
 
 </div>
@@ -237,13 +255,13 @@ async function loadSummary() {
     .select("*", { count:"exact", head:true }).eq("event_id", eventId)).count;
 
   const surgery = (await supabase.from("vasd_queue")
-    .select("*", { count:"exact", head:true }).eq("status","surgery")).count;
+    .select("*", { count:"exact", head:true }).eq("status","กำลังผ่าตัด")).count;
 
   const recovery = (await supabase.from("vasd_queue")
-    .select("*", { count:"exact", head:true }).eq("status","recovery")).count;
+    .select("*", { count:"exact", head:true }).eq("status","กำลังพักฟื้น")).count;
 
   const done = (await supabase.from("vasd_queue")
-    .select("*", { count:"exact", head:true }).eq("status","done")).count;
+    .select("*", { count:"exact", head:true }).eq("status","รับกลับแล้ว")).count;
 
   totalAnimal.innerText = total ?? 0;
   inSurgery.innerText = surgery ?? 0;
