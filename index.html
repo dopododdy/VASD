@@ -89,6 +89,11 @@
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
     }
 
     .card h3 {
@@ -106,6 +111,7 @@
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
   <h1>RMUTTO - VASD</h1>
   <span>RMUTTO - Veterinary Academic Service Division</span>
@@ -113,10 +119,12 @@
 
 <div class="container">
 
+  <!-- NOTICE -->
   <div class="notice">
     ระบบลงทะเบียน (Registration – PC) เปิดใช้งานแล้ว
   </div>
 
+  <!-- SUMMARY -->
   <div class="summary">
     <div class="summary-card">
       <h2 id="totalAnimal">–</h2>
@@ -136,10 +144,17 @@
     </div>
   </div>
 
+  <!-- MENU -->
   <div class="menu">
+
     <div class="card" onclick="location.href='registration.html'">
       <h3>📝 ลงทะเบียน</h3>
       <p>เพิ่มเจ้าของและสัตว์เข้าระบบ</p>
+    </div>
+
+    <div class="card" onclick="location.href='animal.html'">
+      <h3>🐾 สัตว์ทั้งหมดวันนี้</h3>
+      <p>ดูและแก้ไขข้อมูลสัตว์ที่ลงทะเบียน</p>
     </div>
 
     <div class="card" onclick="alert('กำลังพัฒนา: คิวผ่าตัด')">
@@ -162,11 +177,11 @@
       <p>สรุปผลการออกหน่วยบริการ</p>
     </div>
 
-    <!-- ✅ เมนูใหม่ -->
     <div class="card" onclick="alert('กำลังพัฒนา: ตั้งค่า')">
       <h3>⚙️ ตั้งค่า</h3>
-      <p>ตั้งค่าระบบ (กำลังพัฒนา)</p>
+      <p>ตั้งค่าระบบ (admin)</p>
     </div>
+
   </div>
 
 </div>
@@ -175,7 +190,7 @@
   RMUTTO - VASD © 2026 – RMUTTO - Veterinary Academic Service Division
 </footer>
 
-<!-- REALTIME SUPABASE -->
+<!-- SUPABASE REALTIME -->
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
@@ -212,8 +227,10 @@ async function loadSummary() {
   document.getElementById("done").innerText = done ?? 0;
 }
 
+// โหลดครั้งแรก
 loadSummary();
 
+// realtime update
 supabase
   .channel("vasd-dashboard")
   .on(
