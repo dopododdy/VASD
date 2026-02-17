@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+/* ===== GLOBAL ===== */
 body {
   font-family: "Segoe UI", Tahoma, sans-serif;
   background:#f4f6f8;
@@ -15,9 +16,6 @@ header {
   background:#fff;
   border-bottom:1px solid #ddd;
   padding:14px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
 }
 .container {
   max-width:1400px;
@@ -32,30 +30,45 @@ header {
   box-shadow:0 2px 6px rgba(0,0,0,.05);
 }
 
+/* ===== OWNER ===== */
 .owner-grid {
   display:grid;
   grid-template-columns:2fr 1fr auto;
   gap:12px;
 }
+
+/* ===== INPUT FIX (สำคัญมาก) ===== */
 input, select {
   width:100%;
-  padding:8px;
+  box-sizing:border-box;   /* 🔑 แก้ล้น */
+  padding:6px;
+  font-size:14px;
 }
+
+/* ให้ input ใน table กระชับขึ้น */
+td input,
+td select {
+  padding:4px 6px;
+}
+
+/* ===== BUTTON ===== */
 button {
-  padding:10px 16px;
+  padding:8px 12px;
   border:none;
   border-radius:6px;
   cursor:pointer;
   font-weight:bold;
 }
-.btn-add { background:#6c757d; color:#fff; }
+.btn-add  { background:#6c757d; color:#fff; }
 .btn-save { background:#2c7be5; color:#fff; }
+.btn-del  { background:#dc3545; color:#fff; }
 
 button:disabled {
   opacity:.4;
   cursor:not-allowed;
 }
 
+/* ===== TABLE ===== */
 table {
   width:100%;
   border-collapse:collapse;
@@ -64,8 +77,10 @@ th, td {
   border:1px solid #ddd;
   padding:6px;
   text-align:center;
+  vertical-align:middle;
 }
 
+/* ===== SERVICE ===== */
 .service-line {
   display:flex;
   gap:20px;
@@ -78,6 +93,12 @@ th, td {
   gap:6px;
   cursor:pointer;
   white-space:nowrap;
+}
+
+/* ===== FOCUS ===== */
+td input:focus,
+td select:focus {
+  outline:2px solid #2c7be5;
 }
 </style>
 </head>
@@ -107,11 +128,12 @@ th, td {
   <table>
     <thead>
       <tr>
-        <th>ชื่อสัตว์</th>
-        <th>ชนิด</th>
-        <th>เพศ</th>
-        <th>น้ำหนัก (กก.)</th>
+        <th style="width:18%">ชื่อสัตว์</th>
+        <th style="width:10%">ชนิด</th>
+        <th style="width:10%">เพศ</th>
+        <th style="width:10%">น้ำหนัก</th>
         <th>หัตถการ</th>
+        <th style="width:6%">ลบ</th>
       </tr>
     </thead>
     <tbody id="animalBody"></tbody>
@@ -132,13 +154,12 @@ th, td {
 </div>
 
 <script>
-/* ================= DEVICE CHECK ================= */
-// แสดงปุ่มอ่านบัตร เฉพาะ PC (mouse)
+/* ===== DEVICE CHECK (PC only) ===== */
 if (!window.matchMedia("(pointer:fine)").matches) {
   document.getElementById("btnReadID").style.display = "none";
 }
 
-/* ================= OWNER VALIDATION ================= */
+/* ===== OWNER VALIDATION ===== */
 const ownerName = document.getElementById("ownerName");
 const phone = document.getElementById("phone");
 const btnAdd = document.getElementById("btnAdd");
@@ -151,7 +172,7 @@ function checkOwnerReady() {
 }
 ownerName.oninput = phone.oninput = checkOwnerReady;
 
-/* ================= ANIMAL ================= */
+/* ===== ANIMAL ===== */
 function neuterText(sex) {
   return sex === "ผู้" ? "ทำหมันเพศผู้ (ตอน)" : "ทำหมันเพศเมีย";
 }
@@ -175,7 +196,7 @@ function serviceHTML(sex, species) {
   </div>`;
 }
 
-/* ===== ตรวจว่าสัตว์ตัวล่าสุดกรอกครบหรือยัง ===== */
+/* ตรวจแถวล่าสุดก่อนเพิ่มตัวใหม่ */
 function lastAnimalIsValid() {
   const rows = document.querySelectorAll("#animalBody tr");
   if (rows.length === 0) return true;
@@ -189,7 +210,7 @@ function lastAnimalIsValid() {
     return false;
   }
   if (services.length === 0) {
-    alert("กรุณาเลือกหัตถการอย่างน้อย 1 อย่าง สำหรับสัตว์ตัวก่อนหน้า");
+    alert("กรุณาเลือกหัตถการอย่างน้อย 1 อย่าง");
     return false;
   }
   return true;
@@ -217,6 +238,9 @@ function addAnimal() {
       <input type="number" min="0" step="0.1" value="3">
     </td>
     <td class="svcCell"></td>
+    <td>
+      <button class="btn-del" onclick="deleteRow(this)">🗑</button>
+    </td>
   `;
 
   const species = tr.querySelector(".species");
@@ -240,13 +264,19 @@ function addAnimal() {
   document.getElementById("animalBody").appendChild(tr);
 }
 
-/* ================= SAVE ================= */
-function saveAll() {
-  if (!lastAnimalIsValid()) return;
-  alert("ข้อมูลครบ พร้อมบันทึกจริง");
+/* ===== DELETE ===== */
+function deleteRow(btn) {
+  if (!confirm("ต้องการลบสัตว์ตัวนี้หรือไม่?")) return;
+  btn.closest("tr").remove();
 }
 
-/* ================= MOCK THAI ID ================= */
+/* ===== SAVE ===== */
+function saveAll() {
+  if (!lastAnimalIsValid()) return;
+  alert("ข้อมูลครบ พร้อมเชื่อม Supabase / พิมพ์บัตรคิว");
+}
+
+/* ===== MOCK THAI ID ===== */
 function readThaiID() {
   alert("อ่านข้อมูลจากเครื่องอ่านบัตรประชาชน (mock)");
 }
