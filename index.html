@@ -15,7 +15,7 @@ body {
 header {
   background: #ffffff;
   border-bottom: 1px solid #e0e0e0;
-  padding: 16px 24px;
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -30,20 +30,34 @@ header span {
   color: #666;
 }
 
-.user-box {
-  font-size: 14px;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: #f1f3f5;
+/* ===== USER PANEL ===== */
+.user-panel {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
+.user-panel input,
+.user-panel select {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+.user-panel button {
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-ok { background:#2c7be5; color:#fff; }
+.btn-logout { background:#6c757d; color:#fff; }
 
+/* ===== MAIN ===== */
 .container {
   max-width: 1100px;
   margin: auto;
   padding: 24px;
 }
-
 .notice {
   background: #ffffff;
   border: 1px dashed #2c7be5;
@@ -54,7 +68,6 @@ header span {
   color: #2c7be5;
   font-weight: bold;
 }
-
 .summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -73,12 +86,6 @@ header span {
   font-size: 28px;
   color: #2c7be5;
 }
-.summary-card p {
-  margin: 6px 0 0;
-  font-size: 14px;
-  color: #666;
-}
-
 .menu {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -90,16 +97,11 @@ header span {
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   cursor: pointer;
-  transition: transform 0.12s ease;
-}
-.card:hover {
-  transform: translateY(-3px);
 }
 .card h3 {
   margin-top: 0;
   color: #2c7be5;
 }
-
 footer {
   text-align: center;
   font-size: 13px;
@@ -117,9 +119,29 @@ footer {
     <span>RMUTTO - Veterinary Academic Service Division</span>
   </div>
 
-  <!-- USER ROLE -->
-  <div class="user-box" onclick="selectRole()">
-    👤 <span id="currentRole">ยังไม่ระบุหน้าที่</span>
+  <!-- USER LOGIN -->
+  <div class="user-panel" id="loginPanel">
+    <input id="userName" placeholder="ชื่อผู้ใช้">
+    <select id="userRole">
+      <option value="">เลือกหน้าที่</option>
+      <option value="admin">admin</option>
+      <option value="อาจารย์">อาจารย์</option>
+      <option value="สัตวแพทย์">สัตวแพทย์</option>
+      <option value="นศ ปี 4 วิสัญญี">นศ ปี 4 วิสัญญี</option>
+      <option value="นศ ปี 4 ศัลยแพทย์">นศ ปี 4 ศัลยแพทย์</option>
+      <option value="นศ พยาบาล">นศ พยาบาล</option>
+      <option value="นศ ผู้ช่วยผ่าตัด">นศ ผู้ช่วยผ่าตัด</option>
+      <option value="นศ ช่วยงานทั่วไป">นศ ช่วยงานทั่วไป</option>
+    </select>
+    <input id="adminPwd" type="password" placeholder="รหัส admin"
+           style="display:none;width:80px">
+    <button class="btn-ok" onclick="login()">OK</button>
+  </div>
+
+  <!-- USER INFO -->
+  <div class="user-panel" id="userInfo" style="display:none">
+    👤 <span id="showUser"></span>
+    <button class="btn-logout" onclick="logout()">ออก</button>
   </div>
 </header>
 
@@ -130,62 +152,26 @@ footer {
   </div>
 
   <div class="summary">
-    <div class="summary-card">
-      <h2 id="totalAnimal">–</h2>
-      <p>สัตว์ทั้งหมดวันนี้</p>
-    </div>
-    <div class="summary-card">
-      <h2 id="inSurgery">–</h2>
-      <p>กำลังผ่าตัด</p>
-    </div>
-    <div class="summary-card">
-      <h2 id="recovery">–</h2>
-      <p>พักฟื้น</p>
-    </div>
-    <div class="summary-card">
-      <h2 id="done">–</h2>
-      <p>กลับบ้านแล้ว</p>
-    </div>
+    <div class="summary-card"><h2 id="totalAnimal">–</h2><p>สัตว์ทั้งหมดวันนี้</p></div>
+    <div class="summary-card"><h2 id="inSurgery">–</h2><p>กำลังผ่าตัด</p></div>
+    <div class="summary-card"><h2 id="recovery">–</h2><p>พักฟื้น</p></div>
+    <div class="summary-card"><h2 id="done">–</h2><p>กลับบ้านแล้ว</p></div>
   </div>
 
   <div class="menu">
-
     <div class="card" onclick="location.href='registration.html'">
       <h3>📝 ลงทะเบียน</h3>
-      <p>เพิ่มเจ้าของและสัตว์เข้าระบบ</p>
     </div>
-
     <div class="card" onclick="location.href='animals.html'">
       <h3>🐾 สัตว์ทั้งหมดวันนี้</h3>
-      <p>ดูและแก้ไขข้อมูลสัตว์</p>
     </div>
-
-    <div class="card" onclick="alert('กำลังพัฒนา')">
-      <h3>📋 คิวผ่าตัด</h3>
-      <p>เรียกคิวและติดตามสถานะ</p>
-    </div>
-
-    <div class="card" onclick="alert('กำลังพัฒนา')">
-      <h3>💉 วิสัญญี</h3>
-      <p>คำนวณยาและ monitor</p>
-    </div>
-
-    <div class="card" onclick="alert('กำลังพัฒนา')">
-      <h3>🟣 พักฟื้น</h3>
-      <p>ติดตามการฟื้นตัว</p>
-    </div>
-
-    <div class="card" onclick="alert('กำลังพัฒนา')">
-      <h3>📊 รายงาน</h3>
-      <p>สรุปผลการออกหน่วย</p>
-    </div>
-
-    <div class="card" onclick="alert('กำลังพัฒนา')">
-      <h3>⚙️ ตั้งค่า</h3>
-      <p>ตั้งค่าระบบ</p>
-    </div>
-
+    <div class="card"><h3>📋 คิวผ่าตัด</h3></div>
+    <div class="card"><h3>💉 วิสัญญี</h3></div>
+    <div class="card"><h3>🟣 พักฟื้น</h3></div>
+    <div class="card"><h3>📊 รายงาน</h3></div>
+    <div class="card"><h3>⚙️ ตั้งค่า</h3></div>
   </div>
+
 </div>
 
 <footer>
@@ -195,65 +181,68 @@ footer {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ======================
-   ROLE
-====================== */
-const roleEl = document.getElementById("currentRole");
-const savedRole = localStorage.getItem("vasd_role");
-if (savedRole) roleEl.innerText = savedRole;
+/* ===== LOGIN ===== */
+const nameInput = document.getElementById("userName");
+const roleSelect = document.getElementById("userRole");
+const pwdInput  = document.getElementById("adminPwd");
+const loginPanel = document.getElementById("loginPanel");
+const userInfo = document.getElementById("userInfo");
+const showUser = document.getElementById("showUser");
 
-window.selectRole = function () {
-  const role = prompt(
-`เลือกหน้าที่:
-- admin
-- อาจารย์
-- สัตวแพทย์
-- นศ ปี 4 วิสัญญี
-- นศ ปี 4 ศัลยแพทย์
-- นศ พยาบาล
-- นศ ผู้ช่วยผ่าตัด
-- นศ ช่วยงานทั่วไป`
-  );
-
-  if (!role) return;
-
-  if (role === "admin") {
-    const pwd = prompt("กรอกรหัสผ่าน admin");
-    if (pwd !== "2500") {
-      alert("รหัสผ่านไม่ถูกต้อง");
-      return;
-    }
-  }
-
-  localStorage.setItem("vasd_role", role);
-  roleEl.innerText = role;
+roleSelect.onchange = () => {
+  pwdInput.style.display = roleSelect.value === "admin" ? "inline-block" : "none";
 };
 
-/* ======================
-   DASHBOARD SUMMARY
-====================== */
+window.login = function () {
+  const name = nameInput.value.trim();
+  const role = roleSelect.value;
+
+  if (!name || !role) {
+    alert("กรุณาใส่ชื่อและเลือกหน้าที่");
+    return;
+  }
+
+  if (role === "admin" && pwdInput.value !== "2500") {
+    alert("รหัสผ่าน admin ไม่ถูกต้อง");
+    return;
+  }
+
+  localStorage.setItem("vasd_user", name);
+  localStorage.setItem("vasd_role", role);
+  showUser.innerText = `${name} (${role})`;
+  loginPanel.style.display = "none";
+  userInfo.style.display = "flex";
+};
+
+window.logout = function () {
+  localStorage.clear();
+  location.reload();
+};
+
+/* ===== LOAD SESSION ===== */
+const savedName = localStorage.getItem("vasd_user");
+const savedRole = localStorage.getItem("vasd_role");
+if (savedName && savedRole) {
+  showUser.innerText = `${savedName} (${savedRole})`;
+  loginPanel.style.display = "none";
+  userInfo.style.display = "flex";
+}
+
+/* ===== DASHBOARD ===== */
 async function loadSummary() {
   const { data: eventId } = await supabase.rpc("get_today_event");
 
-  const { count: total } = await supabase
-    .from("vasd_animal")
-    .select("*", { count:"exact", head:true })
-    .eq("event_id", eventId);
+  const total = (await supabase.from("vasd_animal")
+    .select("*", { count:"exact", head:true }).eq("event_id", eventId)).count;
 
-  const { count: surgery } = await supabase
-    .from("vasd_queue")
-    .select("*", { count:"exact", head:true })
-    .eq("status", "surgery");
+  const surgery = (await supabase.from("vasd_queue")
+    .select("*", { count:"exact", head:true }).eq("status","surgery")).count;
 
-  const { count: recovery } = await supabase
-    .from("vasd_queue")
-    .select("*", { count:"exact", head:true })
-    .eq("status", "recovery");
+  const recovery = (await supabase.from("vasd_queue")
+    .select("*", { count:"exact", head:true }).eq("status","recovery")).count;
 
-  const { count: done } = await supabase
-    .from("vasd_queue")
-    .select("*", { count:"exact", head:true })
-    .eq("status", "done");
+  const done = (await supabase.from("vasd_queue")
+    .select("*", { count:"exact", head:true }).eq("status","done")).count;
 
   totalAnimal.innerText = total ?? 0;
   inSurgery.innerText = surgery ?? 0;
@@ -262,15 +251,6 @@ async function loadSummary() {
 }
 
 loadSummary();
-
-supabase
-  .channel("vasd-dashboard")
-  .on(
-    "postgres_changes",
-    { event:"*", schema:"public", table:"vasd_queue" },
-    () => loadSummary()
-  )
-  .subscribe();
 </script>
 
 </body>
