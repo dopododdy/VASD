@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>VASD – ลงทะเบียนสัตว์</title>
+<title>RMUTTO - VASD | ลงทะเบียนสัตว์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -24,7 +24,21 @@ input, select, textarea {
 }
 table { width:100%; border-collapse:collapse; }
 th, td { border:1px solid #ddd; padding:6px; text-align:center; }
+
+/* zebra row */
+tbody tr:nth-child(even) { background:#f9fbff; }
+
 .service-line { display:flex; gap:16px; flex-wrap:wrap; }
+
+.important-warning {
+  background:#fff3cd;
+  border:2px solid #ff9800;
+}
+.important-warning::before {
+  content:"⚠️ ";
+  font-weight:bold;
+}
+
 button {
   padding:8px 12px; border:none; border-radius:6px;
   cursor:pointer; font-weight:bold;
@@ -38,23 +52,23 @@ button {
 <body>
 
 <header>
-  <h3>📝 ลงทะเบียนสัตว์ – VASD</h3>
+  <h3>📝 RMUTTO - VASD</h3>
   <button onclick="location.href='index.html'">🏠 Home</button>
 </header>
 
 <div class="container">
 
 <div class="card">
-  <h4>ข้อมูลเจ้าของ</h4>
+  <h4>ข้อมูลเจ้าของสัตว์</h4>
   <div class="owner-grid">
     <input id="ownerName" placeholder="ชื่อเจ้าของ">
-    <input id="phone" placeholder="เบอร์โทร">
+    <input id="phone" placeholder="เบอร์โทร (ไม่บังคับ)">
     <button id="btnReadID" onclick="alert('อ่านบัตร (mock)')">📇 อ่านบัตร</button>
   </div>
 </div>
 
 <div class="card">
-  <h4>สัตว์</h4>
+  <h4>ข้อมูลสัตว์</h4>
   <table>
     <thead>
       <tr>
@@ -77,17 +91,45 @@ button {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ---------- UI ---------- */
-function serviceHTML(species) {
+/* ===== PC ONLY: READ CARD ===== */
+if (!window.matchMedia("(pointer:fine)").matches) {
+  document.getElementById("btnReadID").style.display = "none";
+}
+
+/* ===== FORMAT PHONE ===== */
+const phoneInput = document.getElementById("phone");
+phoneInput.addEventListener("input", () => {
+  let v = phoneInput.value.replace(/\D/g,"").slice(0,10);
+  if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d+)/,"$1-$2-$3");
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d+)/,"$1-$2");
+  phoneInput.value = v;
+});
+
+/* ===== SERVICE TEXT ===== */
+function neuterText(sex) {
+  return sex === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย";
+}
+
+function serviceHTML(sex, species) {
   return `
     <div class="service-line">
-      <label><input type="checkbox" class="svc" value="ทำหมัน" checked> ทำหมัน</label>
-      <label><input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า"> วัคซีนพิษสุนัขบ้า</label>
-      ${species==="ส"?
-        `<label><input type="checkbox" class="svc" value="ป้องกันเห็บหมัด"> ป้องกันเห็บหมัด</label>`:""}
+      <label>
+        <input type="checkbox" class="svc" checked value="${neuterText(sex)}">
+        ${neuterText(sex)}
+      </label>
+      <label>
+        <input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า">
+        วัคซีนพิษสุนัขบ้า
+      </label>
+      ${species==="ส" ?
+        `<label>
+          <input type="checkbox" class="svc" value="ป้องกันเห็บหมัด">
+          ป้องกันเห็บหมัด
+        </label>` : ""}
     </div>`;
 }
 
+/* ===== ADD ANIMAL ===== */
 window.addAnimal = function () {
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -100,60 +142,70 @@ window.addAnimal = function () {
     </td>
     <td>
       <select class="sex">
-        <option>เมีย</option>
-        <option>ผู้</option>
+        <option value="เมีย">เมีย</option>
+        <option value="ผู้">ผู้</option>
       </select>
     </td>
     <td><input type="number" value="3"></td>
     <td class="svcCell"></td>
-    <td><textarea></textarea></td>
+    <td class="noteCell">
+      <textarea placeholder="เช่น โรคหัวใจ / ไม่ได้อดอาหาร"></textarea>
+    </td>
     <td><button class="btn-del" onclick="this.closest('tr').remove()">🗑</button></td>
   `;
+
   const species = tr.querySelector(".species");
+  const sex = tr.querySelector(".sex");
   const svcCell = tr.querySelector(".svcCell");
-  svcCell.innerHTML = serviceHTML("ม");
-  species.onchange = () => svcCell.innerHTML = serviceHTML(species.value);
+  const note = tr.querySelector("textarea");
+  const noteCell = tr.querySelector(".noteCell");
+
+  function refreshService() {
+    svcCell.innerHTML = serviceHTML(sex.value, species.value);
+  }
+  refreshService();
+  species.onchange = refreshService;
+  sex.onchange = refreshService;
+
+  note.oninput = () => {
+    noteCell.classList.toggle("important-warning", note.value.trim() !== "");
+  };
+
   document.getElementById("animalBody").appendChild(tr);
 };
 
-/* ---------- SAVE REAL ---------- */
+/* ===== SAVE REAL ===== */
 window.saveAll = async function () {
   const ownerName = document.getElementById("ownerName").value.trim();
   const phone = document.getElementById("phone").value.trim();
-  if (!ownerName || !phone) {
-    alert("กรุณากรอกชื่อและเบอร์โทร");
+
+  if (!ownerName) {
+    alert("กรุณาใส่ชื่อเจ้าของสัตว์");
     return;
   }
 
   const rows = document.querySelectorAll("#animalBody tr");
   if (rows.length === 0) {
-    alert("ยังไม่มีสัตว์");
+    alert("ยังไม่มีข้อมูลสัตว์");
     return;
   }
 
-  // 1) event วันนี้
-  const { data: eventId, error: e1 } = await supabase.rpc("get_today_event");
-  if (e1) { alert("event error"); console.error(e1); return; }
+  const { data: eventId } = await supabase.rpc("get_today_event");
 
-  // 2) owner
-  const { data: owner, error: e2 } = await supabase
+  const { data: owner } = await supabase
     .from("vasd_owner")
     .insert({ event_id: eventId, owner_name: ownerName, phone })
     .select().single();
 
-  if (e2) { alert("owner error"); console.error(e2); return; }
-
-  // 3) queue start
   const { count } = await supabase
     .from("vasd_animal")
-    .select("*", { count: "exact", head: true })
+    .select("*", { count:"exact", head:true })
     .eq("event_id", eventId);
 
   let q = (count || 0) + 1;
 
-  // 4) animals
   for (const r of rows) {
-    const { data: animal, error: e3 } = await supabase
+    const { data: animal } = await supabase
       .from("vasd_animal")
       .insert({
         event_id: eventId,
@@ -167,16 +219,12 @@ window.saveAll = async function () {
       })
       .select().single();
 
-    if (e3) { alert("animal error"); console.error(e3); return; }
-
-    // services
     const svcs = [];
     r.querySelectorAll(".svc:checked").forEach(s =>
       svcs.push({ animal_id: animal.id, service_type: s.value })
     );
     if (svcs.length) await supabase.from("vasd_service").insert(svcs);
 
-    // queue
     await supabase.from("vasd_queue").insert({
       animal_id: animal.id,
       status: "registered"
