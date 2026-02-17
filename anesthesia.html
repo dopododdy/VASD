@@ -24,27 +24,20 @@ header {
   margin:auto;
   padding:20px;
 }
-
 .card {
   background:#fff;
   border-radius:10px;
   padding:16px;
   margin-bottom:16px;
   box-shadow:0 2px 6px rgba(0,0,0,.05);
-}
-
-.queue-item {
   border-left:8px solid #ffc107;
 }
-
 .queue-header {
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
-
 h3 { margin:0 0 8px; }
-
 button {
   padding:6px 12px;
   border:none;
@@ -52,7 +45,6 @@ button {
   cursor:pointer;
   font-weight:bold;
 }
-
 .btn-start { background:#fd7e14; color:#fff; }
 .btn-save  { background:#198754; color:#fff; }
 .btn-home  { background:#6c757d; color:#fff; }
@@ -63,7 +55,6 @@ button {
   gap:10px;
   margin-top:10px;
 }
-
 input {
   width:100%;
   padding:6px;
@@ -89,32 +80,48 @@ label {
 import { supabase } from "./js/supabase.js";
 
 /* ============================
-   LOAD WAITING CASES
+   LOAD CASES : รอผ่าตัด
 ============================ */
 async function loadWaiting() {
-  const { data: eventId } = await supabase.rpc("get_today_event");
 
-  const { data } = await supabase
+  const { data: eventId, error: e0 } = await supabase.rpc("get_today_event");
+  if (e0) { console.error(e0); return; }
+
+  const { data, error } = await supabase
     .from("vasd_queue")
     .select(`
-      status,
       animal_id,
-      vasd_animal (
+      status,
+      vasd_animal!inner (
+        id,
+        event_id,
         animal_name,
         species,
         sex,
         est_weight
       )
     `)
-    .eq("status", "รอผ่าตัด");
+    .eq("status", "รอผ่าตัด")
+    .eq("vasd_animal.event_id", eventId)
+    .order("animal_id");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   const box = document.getElementById("list");
   box.innerHTML = "";
 
+  if (!data || data.length === 0) {
+    box.innerHTML = "<p style='color:#888'>ไม่มีเคสรอวางยาสลบ</p>";
+    return;
+  }
+
   data.forEach(row => {
     const a = row.vasd_animal;
     const div = document.createElement("div");
-    div.className = "card queue-item";
+    div.className = "card";
     div.innerHTML = `
       <div class="queue-header">
         <h3>🐾 ${a.animal_name || "(ไม่ระบุชื่อ)"} (${a.species})</h3>
@@ -128,27 +135,22 @@ async function loadWaiting() {
           <label>น้ำหนักจริง (kg)</label>
           <input type="number" step="0.1" class="actualWeight" value="${a.est_weight ?? ""}">
         </div>
-
         <div>
           <label>Xylazine (mg)</label>
           <input type="number" step="0.1" class="xylazine">
         </div>
-
         <div>
           <label>Zoletil induction (mg)</label>
           <input type="number" step="0.1" class="zoletil">
         </div>
-
         <div>
           <label>Zoletil เติม (mg)</label>
           <input type="number" step="0.1" class="zoletilAdd">
         </div>
-
         <div>
           <label>Pen-Strep (ml)</label>
           <input type="number" step="0.1" class="penstrep">
         </div>
-
         <div>
           <label>Tolfedine (mg)</label>
           <input type="number" step="0.1" class="tolfedine">
@@ -164,7 +166,7 @@ async function loadWaiting() {
 
       <br>
       <button class="btn-save" onclick="saveAnes(this,'${row.animal_id}')">
-        บันทึกการวางยา
+        บันทึก → ส่งเข้าผ่าตัด
       </button>
     `;
     box.appendChild(div);
@@ -174,7 +176,7 @@ async function loadWaiting() {
 loadWaiting();
 
 /* ============================
-   START + SAVE
+   ACTIONS
 ============================ */
 window.startAnes = async function (animalId) {
   await supabase
@@ -197,14 +199,15 @@ window.saveAnes = async function (btn, animalId) {
   const t  = card.querySelector(".tolfedine").value;
 
   const services = [];
-  if (x)  services.push({ animal_id: animalId, service_type: "Xylazine " + x + " mg" });
-  if (z)  services.push({ animal_id: animalId, service_type: "Zoletil induction " + z + " mg" });
-  if (za) services.push({ animal_id: animalId, service_type: "Zoletil เติม " + za + " mg" });
-  if (p)  services.push({ animal_id: animalId, service_type: "Pen-Strep " + p + " ml" });
-  if (t)  services.push({ animal_id: animalId, service_type: "Tolfedine " + t + " mg" });
+  if (x)  services.push({ animal_id: animalId, service_type: `Xylazine ${x} mg` });
+  if (z)  services.push({ animal_id: animalId, service_type: `Zoletil induction ${z} mg` });
+  if (za) services.push({ animal_id: animalId, service_type: `Zoletil เติม ${za} mg` });
+  if (p)  services.push({ animal_id: animalId, service_type: `Pen-Strep ${p} ml` });
+  if (t)  services.push({ animal_id: animalId, service_type: `Tolfedine ${t} mg` });
 
-  if (services.length)
+  if (services.length) {
     await supabase.from("vasd_service").insert(services);
+  }
 
   await supabase
     .from("vasd_animal")
@@ -219,7 +222,6 @@ window.saveAnes = async function (btn, animalId) {
     })
     .eq("animal_id", animalId);
 
-  alert("✅ บันทึกและส่งเข้าผ่าตัดแล้ว");
   loadWaiting();
 };
 
