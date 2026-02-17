@@ -4,76 +4,34 @@
 <meta charset="UTF-8">
 <title>RMUTTO - VASD | สัตว์ทั้งหมดวันนี้</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-body {
-  font-family:"Segoe UI", sans-serif;
-  background:#f4f6f8;
-  margin:0;
-}
-header {
-  background:#fff;
-  border-bottom:1px solid #ddd;
-  padding:14px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.container {
-  max-width:1600px;
-  margin:auto;
-  padding:20px;
-}
-table {
-  width:100%;
-  border-collapse:collapse;
-  background:#fff;
-}
-th, td {
-  border:1px solid #ddd;
-  padding:8px;
-  text-align:center;
-}
-th { background:#f1f3f5; }
+  body { font-family:"Segoe UI", sans-serif; background:#f4f6f8; margin:0; }
+  header { background:#fff; border-bottom:1px solid #ddd; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; }
+  .container { max-width:1600px; margin:auto; padding:20px; }
+  table { width:100%; border-collapse:collapse; background:#fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  th, td { border:1px solid #ddd; padding:10px; text-align:center; }
+  th { background:#f1f3f5; }
+  input, select { width:100%; box-sizing:border-box; padding: 4px; }
+  
+  /* ===== STATUS COLORS ===== */
+  .status-wait       { background:#eeeeee; }
+  .status-anesthesia { background:#e3f2fd; }
+  .status-surgery    { background:#fdecea; }
+  .status-recovery   { background:#f3e5f5; }
+  .status-ready      { background:#fff9c4; }
+  .status-done       { background:#e8f5e9; }
+  .status-cancel     { background:#eeeeee; opacity:0.6; }
 
-input, select {
-  width:100%;
-  box-sizing:border-box;
-}
-
-/* ===== STATUS COLORS ===== */
-.status-wait       { background:#eeeeee; }
-.status-anesthesia { background:#e3f2fd; }
-.status-surgery    { background:#fdecea; }
-.status-recovery   { background:#f3e5f5; }
-.status-ready      { background:#fff9c4; }
-.status-done       { background:#e8f5e9; }
-.status-cancel     { background:#eeeeee; opacity:0.6; }
-
-button {
-  padding:4px 8px;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-  font-size:13px;
-}
-.btn-edit { background:#2c7be5; color:#fff; }
-.btn-save { background:#198754; color:#fff; }
-.btn-cancel { background:#6c757d; color:#fff; }
-.btn-del { background:#dc3545; color:#fff; }
-.btn-home { background:#6c757d; color:#fff; }
-
-.btn-save:disabled {
-  opacity:.4;
-  cursor:not-allowed;
-}
-.footer-actions {
-  margin-top:16px;
-  text-align:right;
-}
+  button { padding:6px 10px; border:none; border-radius:4px; cursor:pointer; font-size:13px; margin: 2px; }
+  .btn-edit { background:#2c7be5; color:#fff; }
+  .btn-save { background:#198754; color:#fff; }
+  .btn-cancel { background:#fd7e14; color:#fff; }
+  .btn-del { background:#dc3545; color:#fff; }
+  .btn-home { background:#6c757d; color:#fff; }
+  .btn-save:disabled { opacity:.4; cursor:not-allowed; }
+  .footer-actions { margin-top:20px; text-align:right; }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -82,28 +40,26 @@ button {
 </header>
 
 <div class="container">
+  <table>
+    <thead>
+      <tr>
+        <th>คิว</th>
+        <th>ชื่อสัตว์</th>
+        <th>ชนิด</th>
+        <th>เพศ</th>
+        <th>น้ำหนัก</th>
+        <th>สถานะ</th>
+        <th>เจ้าของ</th>
+        <th>โทร</th>
+        <th>จัดการ</th>
+      </tr>
+    </thead>
+    <tbody id="animalTable"></tbody>
+  </table>
 
-<table>
-<thead>
-<tr>
-  <th>คิว</th>
-  <th>ชื่อสัตว์</th>
-  <th>ชนิด</th>
-  <th>เพศ</th>
-  <th>น้ำหนัก</th>
-  <th>สถานะ</th>
-  <th>เจ้าของ</th>
-  <th>โทร</th>
-  <th>จัดการ</th>
-</tr>
-</thead>
-<tbody id="animalTable"></tbody>
-</table>
-
-<div class="footer-actions">
-  <button class="btn-del" onclick="deleteAll()">❌ ลบทั้งหมด (วันนี้)</button>
-</div>
-
+  <div class="footer-actions">
+    <button class="btn-del" onclick="deleteAll()" style="padding: 10px 20px;">❌ ลบทั้งหมด (วันนี้)</button>
+  </div>
 </div>
 
 <script type="module">
@@ -111,42 +67,38 @@ import { supabase } from "./js/supabase.js";
 
 const ADMIN_PASSWORD = "2500";
 
-/* ===== STATUS MAP ===== */
 const statusMap = {
-  waiting:   { text:"รอผ่าตัด", cls:"status-wait" },
-  anesthesia:{ text:"กำลังวางยาสลบ", cls:"status-anesthesia" },
-  surgery:   { text:"กำลังผ่าตัด", cls:"status-surgery" },
-  recovery:  { text:"กำลังพักฟื้น", cls:"status-recovery" },
-  ready_to_go_home:{ text:"ฟื้นแล้ว / รอรับกลับ", cls:"status-ready" },
-  done:      { text:"รับกลับแล้ว", cls:"status-done" },
-  cancel:    { text:"ยกเลิก", cls:"status-cancel" }
+  waiting:    { text:"รอผ่าตัด", cls:"status-wait" },
+  anesthesia: { text:"กำลังวางยาสลบ", cls:"status-anesthesia" },
+  surgery:    { text:"กำลังผ่าตัด", cls:"status-surgery" },
+  recovery:   { text:"กำลังพักฟื้น", cls:"status-recovery" },
+  ready_to_go_home: { text:"ฟื้นแล้ว / รอรับกลับ", cls:"status-ready" },
+  done:       { text:"รับกลับแล้ว", cls:"status-done" },
+  cancel:     { text:"ยกเลิก", cls:"status-cancel" }
 };
 
-/* ===== LOAD DATA ===== */
 async function loadAnimals() {
   const { data: eventId } = await supabase.rpc("get_today_event");
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("vasd_animal")
     .select(`
-      id,
-      queue_number,
-      animal_name,
-      species,
-      sex,
-      est_weight,
+      id, queue_number, animal_name, species, sex, est_weight,
       vasd_owner ( owner_name, phone ),
       vasd_queue ( status )
     `)
     .eq("event_id", eventId)
     .order("queue_number");
 
+  if (error) { console.error(error); return; }
+
   const tbody = document.getElementById("animalTable");
   tbody.innerHTML = "";
 
   data.forEach(a => {
+    // แก้ไขจุดที่ทำให้เกิด Error cls undefined
     const statusKey = a.vasd_queue?.status || "waiting";
-    const s = statusMap[statusKey];
+    const s = statusMap[statusKey] || statusMap.waiting;
 
     const tr = document.createElement("tr");
     tr.dataset.id = a.id;
@@ -154,25 +106,20 @@ async function loadAnimals() {
 
     tr.innerHTML = `
       <td>${a.queue_number}</td>
-
       <td><input class="f" value="${a.animal_name}" readonly></td>
-
       <td>
         <select class="f" disabled>
           <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
           <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
         </select>
       </td>
-
       <td>
         <select class="f" disabled>
-          <option ${a.sex==="เมีย"?"selected":""}>เมีย</option>
-          <option ${a.sex==="ผู้"?"selected":""}>ผู้</option>
+          <option value="เมีย" ${a.sex==="เมีย"?"selected":""}>เมีย</option>
+          <option value="ผู้" ${a.sex==="ผู้"?"selected":""}>ผู้</option>
         </select>
       </td>
-
       <td><input class="f" type="number" value="${a.est_weight ?? ""}" readonly></td>
-
       <td>
         <select class="status" disabled>
           ${Object.entries(statusMap).map(([k,v]) =>
@@ -180,10 +127,8 @@ async function loadAnimals() {
           ).join("")}
         </select>
       </td>
-
       <td>${a.vasd_owner?.owner_name ?? ""}</td>
       <td>${a.vasd_owner?.phone ?? ""}</td>
-
       <td>
         <button class="btn-edit" onclick="enableEdit(this)">แก้ไข</button>
         <button class="btn-save" onclick="saveRow(this)" disabled>บันทึก</button>
@@ -195,26 +140,17 @@ async function loadAnimals() {
   });
 }
 
-loadAnimals();
-
-/* ===== ENABLE EDIT ===== */
 window.enableEdit = function(btn){
   const pass = prompt("กรอกรหัสผ่าน admin");
   if (pass !== ADMIN_PASSWORD) return;
-
   const tr = btn.closest("tr");
-  tr.querySelectorAll(".f, .status").forEach(el=>{
-    el.readOnly = false;
-    el.disabled = false;
-  });
+  tr.querySelectorAll(".f, .status").forEach(el=>{ el.readOnly = false; el.disabled = false; });
   tr.querySelector(".btn-save").disabled = false;
 };
 
-/* ===== SAVE ===== */
 window.saveRow = async function(btn){
   const tr = btn.closest("tr");
   const id = tr.dataset.id;
-
   const f = tr.querySelectorAll(".f");
   const status = tr.querySelector(".status").value;
 
@@ -225,68 +161,46 @@ window.saveRow = async function(btn){
     est_weight: f[3].value
   }).eq("id", id);
 
-  await supabase.from("vasd_queue")
-    .update({ status, updated_at:new Date() })
-    .eq("animal_id", id);
-
+  await supabase.from("vasd_queue").update({ status, updated_at:new Date() }).eq("animal_id", id);
   loadAnimals();
 };
 
-/* ===== CANCEL ===== */
 window.cancelRow = async function(id){
-  await supabase.from("vasd_queue")
-    .update({ status:"cancel", updated_at:new Date() })
-    .eq("animal_id", id);
-
+  if(!confirm("ยืนยันยกเลิกคิว?")) return;
+  await supabase.from("vasd_queue").update({ status:"cancel", updated_at:new Date() }).eq("animal_id", id);
   loadAnimals();
 };
 
-/* ===== DELETE ONE (ADMIN) ===== */
 window.deleteRow = async function(id){
   const pwd = prompt("กรอกรหัส admin เพื่อยืนยันการลบ");
   if (!pwd) return;
-
-  const { error } = await supabase.rpc("admin_delete_animal", {
-    p_animal_id: id,
-    p_admin_password: pwd
-  });
-
-  if (error) {
-    alert("❌ ลบไม่สำเร็จ");
-    return;
-  }
-
-  loadAnimals();
+  const { error } = await supabase.rpc("admin_delete_animal", { p_animal_id: id, p_admin_password: pwd });
+  if (error) alert("ลบไม่สำเร็จ");
+  else loadAnimals();
 };
 
-/* ===== DELETE ALL (ADMIN) ===== */
 window.deleteAll = async function(){
   if (!confirm("⚠️ ต้องการลบสัตว์ทั้งหมดของวันนี้หรือไม่?")) return;
-
   const pwd = prompt("กรอกรหัส admin");
   if (!pwd) return;
 
-  const { error } = await supabase.rpc("admin_delete_all_today", {
-    p_admin_password: pwd
-  });
+  // ส่ง parameter p_admin_password ให้ตรงกับ SQL
+  const { error } = await supabase.rpc("admin_delete_all_today", { p_admin_password: pwd });
 
   if (error) {
-    alert("❌ ลบไม่สำเร็จ");
-    return;
+    alert("❌ ลบไม่สำเร็จ: " + error.message);
+  } else {
+    alert("✅ ลบข้อมูลทั้งหมดแล้ว");
+    loadAnimals();
   }
-
-  alert("✅ ลบข้อมูลทั้งหมดแล้ว");
-  loadAnimals();
 };
 
-/* ===== REALTIME ===== */
-supabase
-  .channel("vasd-animal-live")
-  .on("postgres_changes",
-      { event:"*", schema:"public", table:"vasd_queue" },
-      () => loadAnimals())
+loadAnimals();
+
+supabase.channel("vasd-live")
+  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_queue" }, () => loadAnimals())
+  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_animal" }, () => loadAnimals())
   .subscribe();
 </script>
-
 </body>
 </html>
