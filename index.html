@@ -67,7 +67,7 @@
 
     .summary-card h2 {
       margin: 0;
-      font-size: 26px;
+      font-size: 28px;
       color: #2c7be5;
     }
 
@@ -89,11 +89,6 @@
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       cursor: pointer;
-      transition: transform 0.1s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
     }
 
     .card h3 {
@@ -111,88 +106,125 @@
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <h1>VASD</h1>
-    <span>Veterinary Academic Service Division</span>
-  </header>
+<header>
+  <h1>VASD</h1>
+  <span>Veterinary Academic Service Division</span>
+</header>
 
-  <!-- CONTENT -->
-  <div class="container">
+<div class="container">
 
-    <!-- NOTICE -->
-    <div class="notice">
-      หน้านี้อยู่ระหว่างการพัฒนา<br>
-      ระบบลงทะเบียน (Registration – PC) เปิดให้ใช้งานแล้ว
+  <div class="notice">
+    ระบบลงทะเบียน (Registration – PC) เปิดใช้งานแล้ว
+  </div>
+
+  <div class="summary">
+    <div class="summary-card">
+      <h2 id="totalAnimal">–</h2>
+      <p>สัตว์ทั้งหมดวันนี้</p>
     </div>
-
-    <!-- SUMMARY -->
-    <div class="summary">
-      <div class="summary-card">
-        <h2 id="totalAnimal">–</h2>
-        <p>สัตว์ทั้งหมดวันนี้</p>
-      </div>
-      <div class="summary-card">
-        <h2 id="inSurgery">–</h2>
-        <p>กำลังผ่าตัด</p>
-      </div>
-      <div class="summary-card">
-        <h2 id="recovery">–</h2>
-        <p>พักฟื้น</p>
-      </div>
-      <div class="summary-card">
-        <h2 id="done">–</h2>
-        <p>กลับบ้านแล้ว</p>
-      </div>
+    <div class="summary-card">
+      <h2 id="inSurgery">–</h2>
+      <p>กำลังผ่าตัด</p>
     </div>
-
-    <!-- MAIN MENU -->
-    <div class="menu">
-
-      <!-- ✅ FIXED LINK -->
-      <div class="card" onclick="location.href='registration.html'">
-        <h3>📝 ลงทะเบียน</h3>
-        <p>เพิ่มเจ้าของและสัตว์เข้าระบบ</p>
-      </div>
-
-      <div class="card" onclick="alert('กำลังพัฒนา: คิวผ่าตัด')">
-        <h3>📋 คิวผ่าตัด</h3>
-        <p>เรียกคิว ส / ม และติดตามสถานะ</p>
-      </div>
-
-      <div class="card" onclick="alert('กำลังพัฒนา: วิสัญญี')">
-        <h3>💉 วิสัญญี</h3>
-        <p>คำนวณยาและบันทึก vital signs</p>
-      </div>
-
-      <div class="card" onclick="alert('กำลังพัฒนา: พักฟื้น')">
-        <h3>🟣 พักฟื้น</h3>
-        <p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
-      </div>
-
-      <div class="card" onclick="alert('กำลังพัฒนา: รายงาน')">
-        <h3>📊 รายงาน</h3>
-        <p>สรุปผลการออกหน่วยบริการ</p>
-      </div>
-
+    <div class="summary-card">
+      <h2 id="recovery">–</h2>
+      <p>พักฟื้น</p>
+    </div>
+    <div class="summary-card">
+      <h2 id="done">–</h2>
+      <p>กลับบ้านแล้ว</p>
     </div>
   </div>
 
-  <footer>
-    VASD © 2026 – Veterinary Academic Service Division
-  </footer>
+  <div class="menu">
+    <div class="card" onclick="location.href='registration.html'">
+      <h3>📝 ลงทะเบียน</h3>
+      <p>เพิ่มเจ้าของและสัตว์เข้าระบบ</p>
+    </div>
 
-  <!-- SUPABASE CONNECTION -->
-  <script type="module">
-    import { supabase } from "./js/supabase.js";
-    console.log("Supabase ready:", supabase);
+    <div class="card" onclick="alert('กำลังพัฒนา: คิวผ่าตัด')">
+      <h3>📋 คิวผ่าตัด</h3>
+      <p>เรียกคิวและติดตามสถานะ</p>
+    </div>
 
-    // placeholder (รอผูกข้อมูลจริง)
-    document.getElementById("totalAnimal").innerText = "-";
-    document.getElementById("inSurgery").innerText = "-";
-    document.getElementById("recovery").innerText = "-";
-    document.getElementById("done").innerText = "-";
-  </script>
+    <div class="card" onclick="alert('กำลังพัฒนา: วิสัญญี')">
+      <h3>💉 วิสัญญี</h3>
+      <p>คำนวณยาและบันทึก vital signs</p>
+    </div>
+
+    <div class="card" onclick="alert('กำลังพัฒนา: พักฟื้น')">
+      <h3>🟣 พักฟื้น</h3>
+      <p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
+    </div>
+
+    <div class="card" onclick="alert('กำลังพัฒนา: รายงาน')">
+      <h3>📊 รายงาน</h3>
+      <p>สรุปผลการออกหน่วยบริการ</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  VASD © 2026 – Veterinary Academic Service Division
+</footer>
+
+<!-- REALTIME SUPABASE -->
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+async function loadSummary() {
+  // event วันนี้
+  const { data: eventId, error: e0 } = await supabase.rpc("get_today_event");
+  if (e0) {
+    console.error(e0);
+    return;
+  }
+
+  // สัตว์ทั้งหมดวันนี้
+  const { count: total } = await supabase
+    .from("vasd_animal")
+    .select("*", { count: "exact", head: true })
+    .eq("event_id", eventId);
+
+  // กำลังผ่าตัด
+  const { count: surgery } = await supabase
+    .from("vasd_queue")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "surgery");
+
+  // พักฟื้น
+  const { count: recovery } = await supabase
+    .from("vasd_queue")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "recovery");
+
+  // กลับบ้านแล้ว
+  const { count: done } = await supabase
+    .from("vasd_queue")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "done");
+
+  document.getElementById("totalAnimal").innerText = total ?? 0;
+  document.getElementById("inSurgery").innerText = surgery ?? 0;
+  document.getElementById("recovery").innerText = recovery ?? 0;
+  document.getElementById("done").innerText = done ?? 0;
+}
+
+// โหลดครั้งแรก
+loadSummary();
+
+// 🔄 realtime: ถ้ามีการเปลี่ยน queue จะ refresh อัตโนมัติ
+supabase
+  .channel("vasd-dashboard")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "vasd_queue" },
+    () => loadSummary()
+  )
+  .subscribe();
+
+</script>
 
 </body>
 </html>
