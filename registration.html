@@ -302,10 +302,44 @@ function deleteRow(btn) {
   btn.closest("tr").remove();
 }
 
-/* ===== SAVE ===== */
+/* ===== SAVE (TEST MODE) ===== */
 function saveAll() {
   if (!lastAnimalIsValid()) return;
-  alert("ข้อมูลครบ พร้อมเชื่อม Supabase / พิมพ์บัตรคิว");
+
+  const data = {
+    owner: {
+      name: ownerName.value.trim(),
+      phone: phone.value.trim()
+    },
+    animals: []
+  };
+
+  const rows = document.querySelectorAll("#animalBody tr");
+
+  rows.forEach(r => {
+    const animal = {
+      name: r.querySelector(".petName").value.trim(),
+      species: r.querySelector(".species").value,
+      sex: r.querySelector(".sex").value,
+      weight: r.querySelector("input[type=number]").value,
+      services: [],
+      importantNote: r.querySelector("textarea").value.trim()
+    };
+
+    r.querySelectorAll(".svc:checked").forEach(svc => {
+      animal.services.push(svc.value);
+    });
+
+    data.animals.push(animal);
+  });
+
+  console.clear();
+  console.log("📦 DATA TO SAVE (TEST MODE):", data);
+
+  alert(
+    "บันทึกข้อมูลสำเร็จ (โหมดทดลอง)\n\n" +
+    "เปิด Console (F12) เพื่อดูข้อมูล"
+  );
 }
 
 /* ===== MOCK THAI ID ===== */
