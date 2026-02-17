@@ -16,6 +16,12 @@ header {
   background:#fff;
   border-bottom:1px solid #ddd;
   padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header h2 {
+  margin:0;
 }
 .container {
   max-width:1400px;
@@ -37,15 +43,13 @@ header {
   gap:12px;
 }
 
-/* ===== INPUT FIX (สำคัญมาก) ===== */
+/* ===== INPUT FIX ===== */
 input, select {
   width:100%;
-  box-sizing:border-box;   /* 🔑 แก้ล้น */
+  box-sizing:border-box;
   padding:6px;
   font-size:14px;
 }
-
-/* ให้ input ใน table กระชับขึ้น */
 td input,
 td select {
   padding:4px 6px;
@@ -59,6 +63,7 @@ button {
   cursor:pointer;
   font-weight:bold;
 }
+.btn-home { background:#6c757d; color:#fff; }
 .btn-add  { background:#6c757d; color:#fff; }
 .btn-save { background:#2c7be5; color:#fff; }
 .btn-del  { background:#dc3545; color:#fff; }
@@ -107,6 +112,7 @@ td select:focus {
 
 <header>
   <h2>📝 ลงทะเบียนสัตว์ – VASD</h2>
+  <button class="btn-home" onclick="goHome()">🏠 Home</button>
 </header>
 
 <div class="container">
@@ -154,6 +160,11 @@ td select:focus {
 </div>
 
 <script>
+/* ===== HOME ===== */
+function goHome() {
+  location.href = "index.html";
+}
+
 /* ===== DEVICE CHECK (PC only) ===== */
 if (!window.matchMedia("(pointer:fine)").matches) {
   document.getElementById("btnReadID").style.display = "none";
@@ -196,7 +207,6 @@ function serviceHTML(sex, species) {
   </div>`;
 }
 
-/* ตรวจแถวล่าสุดก่อนเพิ่มตัวใหม่ */
 function lastAnimalIsValid() {
   const rows = document.querySelectorAll("#animalBody tr");
   if (rows.length === 0) return true;
@@ -264,19 +274,16 @@ function addAnimal() {
   document.getElementById("animalBody").appendChild(tr);
 }
 
-/* ===== DELETE ===== */
 function deleteRow(btn) {
   if (!confirm("ต้องการลบสัตว์ตัวนี้หรือไม่?")) return;
   btn.closest("tr").remove();
 }
 
-/* ===== SAVE ===== */
 function saveAll() {
   if (!lastAnimalIsValid()) return;
-  alert("ข้อมูลครบ พร้อมเชื่อม Supabase / พิมพ์บัตรคิว");
+  alert("ข้อมูลครบ พร้อมบันทึกจริง");
 }
 
-/* ===== MOCK THAI ID ===== */
 function readThaiID() {
   alert("อ่านข้อมูลจากเครื่องอ่านบัตรประชาชน (mock)");
 }
