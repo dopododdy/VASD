@@ -40,15 +40,6 @@ th {
 tbody tr:nth-child(even) {
   background:#f9fbff;
 }
-button {
-  padding:4px 8px;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-}
-.btn-edit { background:#2c7be5; color:#fff; }
-.btn-save { background:#198754; color:#fff; }
-.btn-home { background:#6c757d; color:#fff; }
 input, select {
   width:100%;
   box-sizing:border-box;
@@ -56,6 +47,15 @@ input, select {
 .readonly {
   background:#f1f3f5;
 }
+button {
+  padding:4px 10px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  font-size:13px;
+}
+.btn-save { background:#198754; color:#fff; }
+.btn-home { background:#6c757d; color:#fff; }
 </style>
 </head>
 
@@ -63,9 +63,7 @@ input, select {
 
 <header>
   <h3>🐾 สัตว์ทั้งหมด (วันนี้)</h3>
-  <div>
-    <button class="btn-home" onclick="location.href='index.html'">🏠 Home</button>
-  </div>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 Home</button>
 </header>
 
 <div class="container">
@@ -77,10 +75,10 @@ input, select {
       <th>ชื่อสัตว์</th>
       <th>ชนิด</th>
       <th>เพศ</th>
-      <th>น้ำหนัก</th>
+      <th>น้ำหนัก (กก.)</th>
       <th>เจ้าของ</th>
       <th>โทร</th>
-      <th>แก้ไข</th>
+      <th>การจัดการ</th>
     </tr>
   </thead>
   <tbody id="animalTable"></tbody>
@@ -94,7 +92,6 @@ import { supabase } from "./js/supabase.js";
 /* ======================
    ROLE (ชั่วคราว)
 ====================== */
-// เปลี่ยนเป็น true เมื่อเป็น admin
 const isAdmin = localStorage.getItem("vasd_role") === "admin";
 
 /* ======================
@@ -132,25 +129,37 @@ async function loadAnimals() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${a.queue_number}</td>
-      <td><input value="${a.animal_name ?? ""}" ${!isAdmin?"readonly class='readonly'":""}></td>
+
       <td>
-        <select ${!isAdmin?"disabled":""}>
+        <input value="${a.animal_name ?? ""}"
+          ${!isAdmin ? "readonly class='readonly'" : ""}>
+      </td>
+
+      <td>
+        <select ${!isAdmin ? "disabled" : ""}>
           <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
           <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
         </select>
       </td>
+
       <td>
-        <select ${!isAdmin?"disabled":""}>
+        <select ${!isAdmin ? "disabled" : ""}>
           <option ${a.sex==="เมีย"?"selected":""}>เมีย</option>
           <option ${a.sex==="ผู้"?"selected":""}>ผู้</option>
         </select>
       </td>
-      <td><input type="number" value="${a.est_weight ?? ""}" ${!isAdmin?"readonly class='readonly'":""}></td>
+
+      <td>
+        <input type="number" value="${a.est_weight ?? ""}"
+          ${!isAdmin ? "readonly class='readonly'" : ""}>
+      </td>
+
       <td>${a.vasd_owner?.owner_name ?? ""}</td>
       <td>${a.vasd_owner?.phone ?? ""}</td>
+
       <td>
         ${isAdmin
-          ? `<button class="btn-save" onclick="saveRow('${a.id}', this)">บันทึก</button>`
+          ? `<button class="btn-save" onclick="saveRow('${a.id}', this)">💾 บันทึก</button>`
           : `–`}
       </td>
     `;
@@ -161,14 +170,14 @@ async function loadAnimals() {
 loadAnimals();
 
 /* ======================
-   SAVE (ADMIN ONLY)
+   SAVE ROW (ADMIN)
 ====================== */
 window.saveRow = async function (animalId, btn) {
   const tr = btn.closest("tr");
   const inputs = tr.querySelectorAll("input, select");
 
   const payload = {
-    animal_name: inputs[0].value,
+    animal_name: inputs[0].value.trim(),
     species: inputs[1].value,
     sex: inputs[2].value,
     est_weight: inputs[3].value
@@ -183,8 +192,8 @@ window.saveRow = async function (animalId, btn) {
     alert("บันทึกไม่สำเร็จ");
     console.error(error);
   } else {
-    btn.textContent = "✔";
-    setTimeout(() => btn.textContent = "บันทึก", 1000);
+    btn.textContent = "✔ บันทึกแล้ว";
+    setTimeout(() => btn.textContent = "💾 บันทึก", 1200);
   }
 };
 
