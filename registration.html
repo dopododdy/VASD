@@ -17,7 +17,9 @@ header {
   margin-bottom:20px; box-shadow:0 2px 6px rgba(0,0,0,.05);
 }
 .owner-grid {
-  display:grid; grid-template-columns:2fr 1fr auto; gap:12px;
+  display:grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap:12px;
 }
 input, select, textarea {
   width:100%; box-sizing:border-box; padding:6px;
@@ -30,6 +32,7 @@ tbody tr:nth-child(even) { background:#f9fbff; }
 
 .service-line { display:flex; gap:16px; flex-wrap:wrap; }
 
+/* important note */
 .important-warning {
   background:#fff3cd;
   border:2px solid #ff9800;
@@ -46,6 +49,7 @@ button {
 .btn-add{background:#6c757d;color:#fff;}
 .btn-save{background:#2c7be5;color:#fff;}
 .btn-del{background:#dc3545;color:#fff;}
+.btn-paste{background:#198754;color:#fff;}
 </style>
 </head>
 
@@ -58,15 +62,17 @@ button {
 
 <div class="container">
 
+<!-- OWNER -->
 <div class="card">
   <h4>ข้อมูลเจ้าของสัตว์</h4>
   <div class="owner-grid">
-    <input id="ownerName" placeholder="ชื่อเจ้าของ">
+    <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์">
     <input id="phone" placeholder="เบอร์โทร (ไม่บังคับ)">
-    <button id="btnReadID" onclick="alert('อ่านบัตร (mock)')">📇 อ่านบัตร</button>
+    <button class="btn-paste" onclick="pasteOwnerName()">📋 วางชื่อ</button>
   </div>
 </div>
 
+<!-- ANIMAL -->
 <div class="card">
   <h4>ข้อมูลสัตว์</h4>
   <table>
@@ -91,12 +97,27 @@ button {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ===== PC ONLY: READ CARD ===== */
-if (!window.matchMedia("(pointer:fine)").matches) {
-  document.getElementById("btnReadID").style.display = "none";
-}
+/* =========================
+   PASTE OWNER NAME
+   (รับจาก NameReader ผ่าน Clipboard)
+========================= */
+window.pasteOwnerName = async function () {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) {
+      alert("ยังไม่มีข้อมูลจากบัตรประชาชน");
+      return;
+    }
+    document.getElementById("ownerName").value = text;
+    document.getElementById("phone").focus();
+  } catch {
+    alert("ไม่สามารถอ่าน Clipboard ได้ กรุณาใช้ Chrome และกดปุ่มด้วยตนเอง");
+  }
+};
 
-/* ===== FORMAT PHONE ===== */
+/* =========================
+   FORMAT PHONE
+========================= */
 const phoneInput = document.getElementById("phone");
 phoneInput.addEventListener("input", () => {
   let v = phoneInput.value.replace(/\D/g,"").slice(0,10);
@@ -105,7 +126,9 @@ phoneInput.addEventListener("input", () => {
   phoneInput.value = v;
 });
 
-/* ===== SERVICE TEXT ===== */
+/* =========================
+   SERVICE
+========================= */
 function neuterText(sex) {
   return sex === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย";
 }
@@ -121,15 +144,17 @@ function serviceHTML(sex, species) {
         <input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า">
         วัคซีนพิษสุนัขบ้า
       </label>
-      ${species==="ส" ?
-        `<label>
+      ${species==="ส" ? `
+        <label>
           <input type="checkbox" class="svc" value="ป้องกันเห็บหมัด">
           ป้องกันเห็บหมัด
         </label>` : ""}
     </div>`;
 }
 
-/* ===== ADD ANIMAL ===== */
+/* =========================
+   ADD ANIMAL
+========================= */
 window.addAnimal = function () {
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -174,7 +199,9 @@ window.addAnimal = function () {
   document.getElementById("animalBody").appendChild(tr);
 };
 
-/* ===== SAVE REAL ===== */
+/* =========================
+   SAVE (REAL)
+========================= */
 window.saveAll = async function () {
   const ownerName = document.getElementById("ownerName").value.trim();
   const phone = document.getElementById("phone").value.trim();
