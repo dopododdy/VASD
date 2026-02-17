@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>RMUTTO - VASD | สัตว์ทั้งหมด</title>
+<title>RMUTTO - VASD | สัตว์ทั้งหมดวันนี้</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -20,7 +20,7 @@ header {
   align-items:center;
 }
 .container {
-  max-width:1500px;
+  max-width:1600px;
   margin:auto;
   padding:20px;
 }
@@ -40,9 +40,6 @@ input, select {
   width:100%;
   box-sizing:border-box;
 }
-.readonly {
-  background:#f1f3f5;
-}
 
 /* ===== STATUS COLORS ===== */
 .status-wait       { background:#eeeeee; }
@@ -51,23 +48,28 @@ input, select {
 .status-recovery   { background:#f3e5f5; }
 .status-ready      { background:#fff9c4; }
 .status-done       { background:#e8f5e9; }
-.status-cancel     { background:#f0f0f0; color:#999; text-decoration:line-through; }
+.status-cancel     { background:#eeeeee; opacity:0.6; }
 
 button {
   padding:4px 8px;
   border:none;
   border-radius:4px;
   cursor:pointer;
-  font-size:12px;
+  font-size:13px;
 }
 .btn-edit { background:#2c7be5; color:#fff; }
 .btn-save { background:#198754; color:#fff; }
-.btn-cancel { background:#ffc107; }
-.btn-delete { background:#dc3545; color:#fff; }
+.btn-cancel { background:#6c757d; color:#fff; }
+.btn-del { background:#dc3545; color:#fff; }
 .btn-home { background:#6c757d; color:#fff; }
+
 .btn-save:disabled {
   opacity:.4;
   cursor:not-allowed;
+}
+.footer-actions {
+  margin-top:16px;
+  text-align:right;
 }
 </style>
 </head>
@@ -82,41 +84,45 @@ button {
 <div class="container">
 
 <table>
-  <thead>
-    <tr>
-      <th>คิว</th>
-      <th>ชื่อสัตว์</th>
-      <th>ชนิด</th>
-      <th>เพศ</th>
-      <th>น้ำหนัก</th>
-      <th>สถานะ</th>
-      <th>เจ้าของ</th>
-      <th>โทร</th>
-      <th>จัดการ</th>
-    </tr>
-  </thead>
-  <tbody id="animalTable"></tbody>
+<thead>
+<tr>
+  <th>คิว</th>
+  <th>ชื่อสัตว์</th>
+  <th>ชนิด</th>
+  <th>เพศ</th>
+  <th>น้ำหนัก</th>
+  <th>สถานะ</th>
+  <th>เจ้าของ</th>
+  <th>โทร</th>
+  <th>จัดการ</th>
+</tr>
+</thead>
+<tbody id="animalTable"></tbody>
 </table>
+
+<div class="footer-actions">
+  <button class="btn-del" onclick="deleteAll()">❌ ลบทั้งหมด (วันนี้)</button>
+</div>
 
 </div>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-const EDIT_PASSWORD = "2500";
+const ADMIN_PASSWORD = "2500";
 
 /* ===== STATUS MAP ===== */
 const statusMap = {
-  "registered": { text:"รอผ่าตัด", cls:"status-wait" },
-  "anesthesia": { text:"กำลังวางยาสลบ", cls:"status-anesthesia" },
-  "surgery":    { text:"กำลังผ่าตัด", cls:"status-surgery" },
-  "recovery":   { text:"กำลังพักฟื้น", cls:"status-recovery" },
-  "ready":      { text:"ฟื้นแล้ว / รอรับกลับ", cls:"status-ready" },
-  "done":       { text:"รับกลับแล้ว", cls:"status-done" },
-  "cancel":     { text:"ยกเลิก", cls:"status-cancel" }
+  waiting:   { text:"รอผ่าตัด", cls:"status-wait" },
+  anesthesia:{ text:"กำลังวางยาสลบ", cls:"status-anesthesia" },
+  surgery:   { text:"กำลังผ่าตัด", cls:"status-surgery" },
+  recovery:  { text:"กำลังพักฟื้น", cls:"status-recovery" },
+  ready_to_go_home:{ text:"ฟื้นแล้ว / รอรับกลับ", cls:"status-ready" },
+  done:      { text:"รับกลับแล้ว", cls:"status-done" },
+  cancel:    { text:"ยกเลิก", cls:"status-cancel" }
 };
 
-/* ===== LOAD ===== */
+/* ===== LOAD DATA ===== */
 async function loadAnimals() {
   const { data: eventId } = await supabase.rpc("get_today_event");
 
@@ -139,7 +145,7 @@ async function loadAnimals() {
   tbody.innerHTML = "";
 
   data.forEach(a => {
-    const statusKey = a.vasd_queue?.status || "registered";
+    const statusKey = a.vasd_queue?.status || "waiting";
     const s = statusMap[statusKey];
 
     const tr = document.createElement("tr");
@@ -148,20 +154,25 @@ async function loadAnimals() {
 
     tr.innerHTML = `
       <td>${a.queue_number}</td>
-      <td><input class="f" value="${a.animal_name ?? ""}" readonly></td>
+
+      <td><input class="f" value="${a.animal_name}" readonly></td>
+
       <td>
         <select class="f" disabled>
           <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
           <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
         </select>
       </td>
+
       <td>
         <select class="f" disabled>
           <option ${a.sex==="เมีย"?"selected":""}>เมีย</option>
           <option ${a.sex==="ผู้"?"selected":""}>ผู้</option>
         </select>
       </td>
+
       <td><input class="f" type="number" value="${a.est_weight ?? ""}" readonly></td>
+
       <td>
         <select class="status" disabled>
           ${Object.entries(statusMap).map(([k,v]) =>
@@ -169,13 +180,15 @@ async function loadAnimals() {
           ).join("")}
         </select>
       </td>
+
       <td>${a.vasd_owner?.owner_name ?? ""}</td>
       <td>${a.vasd_owner?.phone ?? ""}</td>
+
       <td>
         <button class="btn-edit" onclick="enableEdit(this)">แก้ไข</button>
-        <button class="btn-save" onclick="saveRow(this)" disabled>บันทึก</button><br><br>
-        <button class="btn-cancel" onclick="cancelRow(this)">ยกเลิก</button>
-        <button class="btn-delete" onclick="deleteRow(this)">ลบ</button>
+        <button class="btn-save" onclick="saveRow(this)" disabled>บันทึก</button>
+        <button class="btn-cancel" onclick="cancelRow('${a.id}')">ยกเลิก</button>
+        <button class="btn-del" onclick="deleteRow('${a.id}')">ลบ</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -186,8 +199,8 @@ loadAnimals();
 
 /* ===== ENABLE EDIT ===== */
 window.enableEdit = function(btn){
-  const pass = prompt("กรุณาใส่รหัสผ่าน");
-  if (pass !== EDIT_PASSWORD) return;
+  const pass = prompt("กรอกรหัสผ่าน admin");
+  if (pass !== ADMIN_PASSWORD) return;
 
   const tr = btn.closest("tr");
   tr.querySelectorAll(".f, .status").forEach(el=>{
@@ -201,6 +214,7 @@ window.enableEdit = function(btn){
 window.saveRow = async function(btn){
   const tr = btn.closest("tr");
   const id = tr.dataset.id;
+
   const f = tr.querySelectorAll(".f");
   const status = tr.querySelector(".status").value;
 
@@ -212,36 +226,62 @@ window.saveRow = async function(btn){
   }).eq("id", id);
 
   await supabase.from("vasd_queue")
-    .update({ status })
+    .update({ status, updated_at:new Date() })
     .eq("animal_id", id);
 
   loadAnimals();
 };
 
 /* ===== CANCEL ===== */
-window.cancelRow = async function(btn){
-  if (!confirm("ยืนยันการยกเลิกเคสนี้?")) return;
-  const id = btn.closest("tr").dataset.id;
-
+window.cancelRow = async function(id){
   await supabase.from("vasd_queue")
-    .update({ status:"cancel" })
+    .update({ status:"cancel", updated_at:new Date() })
     .eq("animal_id", id);
 
   loadAnimals();
 };
 
-/* ===== DELETE ===== */
-window.deleteRow = async function(btn){
-  if (!confirm("⚠️ ลบข้อมูลสัตว์ถาวร?")) return;
-  const id = btn.closest("tr").dataset.id;
+/* ===== DELETE ONE (ADMIN) ===== */
+window.deleteRow = async function(id){
+  const pwd = prompt("กรอกรหัส admin เพื่อยืนยันการลบ");
+  if (!pwd) return;
 
-  await supabase.from("vasd_animal").delete().eq("id", id);
+  const { error } = await supabase.rpc("admin_delete_animal", {
+    p_animal_id: id,
+    p_admin_password: pwd
+  });
+
+  if (error) {
+    alert("❌ ลบไม่สำเร็จ");
+    return;
+  }
+
+  loadAnimals();
+};
+
+/* ===== DELETE ALL (ADMIN) ===== */
+window.deleteAll = async function(){
+  if (!confirm("⚠️ ต้องการลบสัตว์ทั้งหมดของวันนี้หรือไม่?")) return;
+
+  const pwd = prompt("กรอกรหัส admin");
+  if (!pwd) return;
+
+  const { error } = await supabase.rpc("admin_delete_all_today", {
+    p_admin_password: pwd
+  });
+
+  if (error) {
+    alert("❌ ลบไม่สำเร็จ");
+    return;
+  }
+
+  alert("✅ ลบข้อมูลทั้งหมดแล้ว");
   loadAnimals();
 };
 
 /* ===== REALTIME ===== */
 supabase
-  .channel("vasd-animal-status")
+  .channel("vasd-animal-live")
   .on("postgres_changes",
       { event:"*", schema:"public", table:"vasd_queue" },
       () => loadAnimals())
