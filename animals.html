@@ -7,7 +7,7 @@
 
 <style>
 body {
-  font-family: "Segoe UI", sans-serif;
+  font-family:"Segoe UI", sans-serif;
   background:#f4f6f8;
   margin:0;
 }
@@ -20,7 +20,7 @@ header {
   align-items:center;
 }
 .container {
-  max-width:1400px;
+  max-width:1500px;
   margin:auto;
   padding:20px;
 }
@@ -34,12 +34,8 @@ th, td {
   padding:8px;
   text-align:center;
 }
-th {
-  background:#f1f3f5;
-}
-tbody tr:nth-child(even) {
-  background:#f9fbff;
-}
+th { background:#f1f3f5; }
+
 input, select {
   width:100%;
   box-sizing:border-box;
@@ -47,6 +43,15 @@ input, select {
 .readonly {
   background:#f1f3f5;
 }
+
+/* ===== STATUS COLORS (ทั้งแถว) ===== */
+.status-wait       { background:#eeeeee; }
+.status-anesthesia { background:#e3f2fd; }
+.status-surgery    { background:#fdecea; }
+.status-recovery   { background:#f3e5f5; }
+.status-ready      { background:#fff9c4; }
+.status-done       { background:#e8f5e9; }
+
 button {
   padding:4px 10px;
   border:none;
@@ -54,7 +59,12 @@ button {
   cursor:pointer;
   font-size:13px;
 }
+.btn-edit { background:#2c7be5; color:#fff; }
 .btn-save { background:#198754; color:#fff; }
+.btn-save:disabled {
+  opacity:.4;
+  cursor:not-allowed;
+}
 .btn-home { background:#6c757d; color:#fff; }
 </style>
 </head>
@@ -75,10 +85,11 @@ button {
       <th>ชื่อสัตว์</th>
       <th>ชนิด</th>
       <th>เพศ</th>
-      <th>น้ำหนัก (กก.)</th>
+      <th>น้ำหนัก</th>
+      <th>สถานะ</th>
       <th>เจ้าของ</th>
       <th>โทร</th>
-      <th>การจัดการ</th>
+      <th>จัดการ</th>
     </tr>
   </thead>
   <tbody id="animalTable"></tbody>
@@ -89,18 +100,23 @@ button {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ======================
-   ROLE (ชั่วคราว)
-====================== */
-const isAdmin = localStorage.getItem("vasd_role") === "admin";
+const EDIT_PASSWORD = "2500";
 
-/* ======================
-   LOAD DATA
-====================== */
+/* ===== STATUS MAP ===== */
+const statusMap = {
+  "registered": { text:"รอผ่าตัด", cls:"status-wait" },
+  "anesthesia": { text:"กำลังวางยาสลบ", cls:"status-anesthesia" },
+  "surgery":    { text:"กำลังผ่าตัด", cls:"status-surgery" },
+  "recovery":   { text:"กำลังพักฟื้น", cls:"status-recovery" },
+  "ready":      { text:"ฟื้นแล้ว / รอรับกลับ", cls:"status-ready" },
+  "done":       { text:"รับกลับแล้ว", cls:"status-done" }
+};
+
+/* ===== LOAD ===== */
 async function loadAnimals() {
   const { data: eventId } = await supabase.rpc("get_today_event");
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("vasd_animal")
     .select(`
       id,
@@ -109,104 +125,109 @@ async function loadAnimals() {
       species,
       sex,
       est_weight,
-      vasd_owner (
-        owner_name,
-        phone
-      )
+      vasd_owner ( owner_name, phone ),
+      vasd_queue ( status )
     `)
     .eq("event_id", eventId)
     .order("queue_number");
-
-  if (error) {
-    console.error(error);
-    return;
-  }
 
   const tbody = document.getElementById("animalTable");
   tbody.innerHTML = "";
 
   data.forEach(a => {
+    const statusKey = a.vasd_queue?.status || "registered";
+    const statusInfo = statusMap[statusKey];
+
     const tr = document.createElement("tr");
+    tr.dataset.id = a.id;
+    tr.className = statusInfo.cls;
+
     tr.innerHTML = `
       <td>${a.queue_number}</td>
+      <td><input class="f" value="${a.animal_name ?? ""}" readonly></td>
 
       <td>
-        <input value="${a.animal_name ?? ""}"
-          ${!isAdmin ? "readonly class='readonly'" : ""}>
-      </td>
-
-      <td>
-        <select ${!isAdmin ? "disabled" : ""}>
+        <select class="f" disabled>
           <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
           <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
         </select>
       </td>
 
       <td>
-        <select ${!isAdmin ? "disabled" : ""}>
+        <select class="f" disabled>
           <option ${a.sex==="เมีย"?"selected":""}>เมีย</option>
           <option ${a.sex==="ผู้"?"selected":""}>ผู้</option>
         </select>
       </td>
 
+      <td><input class="f" type="number" value="${a.est_weight ?? ""}" readonly></td>
+
       <td>
-        <input type="number" value="${a.est_weight ?? ""}"
-          ${!isAdmin ? "readonly class='readonly'" : ""}>
+        <select class="status" disabled>
+          ${Object.entries(statusMap).map(([k,v]) =>
+            `<option value="${k}" ${k===statusKey?"selected":""}>${v.text}</option>`
+          ).join("")}
+        </select>
       </td>
 
       <td>${a.vasd_owner?.owner_name ?? ""}</td>
       <td>${a.vasd_owner?.phone ?? ""}</td>
 
       <td>
-        ${isAdmin
-          ? `<button class="btn-save" onclick="saveRow('${a.id}', this)">💾 บันทึก</button>`
-          : `–`}
+        <button class="btn-edit" onclick="enableEdit(this)">แก้ไข</button>
+        <button class="btn-save" onclick="saveRow(this)" disabled>บันทึก</button>
       </td>
     `;
+
     tbody.appendChild(tr);
   });
 }
 
 loadAnimals();
 
-/* ======================
-   SAVE ROW (ADMIN)
-====================== */
-window.saveRow = async function (animalId, btn) {
+/* ===== ENABLE EDIT ===== */
+window.enableEdit = function(btn){
+  const pass = prompt("กรุณาใส่รหัสผ่าน");
+  if (pass !== EDIT_PASSWORD) return;
+
   const tr = btn.closest("tr");
-  const inputs = tr.querySelectorAll("input, select");
+  tr.querySelectorAll(".f, .status").forEach(el=>{
+    el.readOnly = false;
+    el.disabled = false;
+    el.classList.remove("readonly");
+  });
 
-  const payload = {
-    animal_name: inputs[0].value.trim(),
-    species: inputs[1].value,
-    sex: inputs[2].value,
-    est_weight: inputs[3].value
-  };
-
-  const { error } = await supabase
-    .from("vasd_animal")
-    .update(payload)
-    .eq("id", animalId);
-
-  if (error) {
-    alert("บันทึกไม่สำเร็จ");
-    console.error(error);
-  } else {
-    btn.textContent = "✔ บันทึกแล้ว";
-    setTimeout(() => btn.textContent = "💾 บันทึก", 1200);
-  }
+  tr.querySelector(".btn-save").disabled = false;
 };
 
-/* ======================
-   REALTIME REFRESH
-====================== */
+/* ===== SAVE ===== */
+window.saveRow = async function(btn){
+  const tr = btn.closest("tr");
+  const id = tr.dataset.id;
+
+  const f = tr.querySelectorAll(".f");
+  const status = tr.querySelector(".status").value;
+
+  await supabase.from("vasd_animal").update({
+    animal_name: f[0].value,
+    species: f[1].value,
+    sex: f[2].value,
+    est_weight: f[3].value
+  }).eq("id", id);
+
+  await supabase.from("vasd_queue")
+    .update({ status })
+    .eq("animal_id", id);
+
+  loadAnimals();
+};
+
+/* ===== REALTIME ===== */
 supabase
-  .channel("vasd-animal-edit")
-  .on(
-    "postgres_changes",
-    { event:"*", schema:"public", table:"vasd_animal" },
-    () => loadAnimals()
-  )
+  .channel("vasd-animal-status")
+  .on("postgres_changes",
+      { event:"*", schema:"public", table:"vasd_queue" },
+      () => loadAnimals())
   .subscribe();
 </script>
 
