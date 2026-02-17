@@ -44,28 +44,31 @@ input, select {
   background:#f1f3f5;
 }
 
-/* ===== STATUS COLORS (ทั้งแถว) ===== */
+/* ===== STATUS COLORS ===== */
 .status-wait       { background:#eeeeee; }
 .status-anesthesia { background:#e3f2fd; }
 .status-surgery    { background:#fdecea; }
 .status-recovery   { background:#f3e5f5; }
 .status-ready      { background:#fff9c4; }
 .status-done       { background:#e8f5e9; }
+.status-cancel     { background:#f0f0f0; color:#999; text-decoration:line-through; }
 
 button {
-  padding:4px 10px;
+  padding:4px 8px;
   border:none;
   border-radius:4px;
   cursor:pointer;
-  font-size:13px;
+  font-size:12px;
 }
 .btn-edit { background:#2c7be5; color:#fff; }
 .btn-save { background:#198754; color:#fff; }
+.btn-cancel { background:#ffc107; }
+.btn-delete { background:#dc3545; color:#fff; }
+.btn-home { background:#6c757d; color:#fff; }
 .btn-save:disabled {
   opacity:.4;
   cursor:not-allowed;
 }
-.btn-home { background:#6c757d; color:#fff; }
 </style>
 </head>
 
@@ -109,7 +112,8 @@ const statusMap = {
   "surgery":    { text:"กำลังผ่าตัด", cls:"status-surgery" },
   "recovery":   { text:"กำลังพักฟื้น", cls:"status-recovery" },
   "ready":      { text:"ฟื้นแล้ว / รอรับกลับ", cls:"status-ready" },
-  "done":       { text:"รับกลับแล้ว", cls:"status-done" }
+  "done":       { text:"รับกลับแล้ว", cls:"status-done" },
+  "cancel":     { text:"ยกเลิก", cls:"status-cancel" }
 };
 
 /* ===== LOAD ===== */
@@ -136,32 +140,28 @@ async function loadAnimals() {
 
   data.forEach(a => {
     const statusKey = a.vasd_queue?.status || "registered";
-    const statusInfo = statusMap[statusKey];
+    const s = statusMap[statusKey];
 
     const tr = document.createElement("tr");
     tr.dataset.id = a.id;
-    tr.className = statusInfo.cls;
+    tr.className = s.cls;
 
     tr.innerHTML = `
       <td>${a.queue_number}</td>
       <td><input class="f" value="${a.animal_name ?? ""}" readonly></td>
-
       <td>
         <select class="f" disabled>
           <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
           <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
         </select>
       </td>
-
       <td>
         <select class="f" disabled>
           <option ${a.sex==="เมีย"?"selected":""}>เมีย</option>
           <option ${a.sex==="ผู้"?"selected":""}>ผู้</option>
         </select>
       </td>
-
       <td><input class="f" type="number" value="${a.est_weight ?? ""}" readonly></td>
-
       <td>
         <select class="status" disabled>
           ${Object.entries(statusMap).map(([k,v]) =>
@@ -169,16 +169,15 @@ async function loadAnimals() {
           ).join("")}
         </select>
       </td>
-
       <td>${a.vasd_owner?.owner_name ?? ""}</td>
       <td>${a.vasd_owner?.phone ?? ""}</td>
-
       <td>
         <button class="btn-edit" onclick="enableEdit(this)">แก้ไข</button>
-        <button class="btn-save" onclick="saveRow(this)" disabled>บันทึก</button>
+        <button class="btn-save" onclick="saveRow(this)" disabled>บันทึก</button><br><br>
+        <button class="btn-cancel" onclick="cancelRow(this)">ยกเลิก</button>
+        <button class="btn-delete" onclick="deleteRow(this)">ลบ</button>
       </td>
     `;
-
     tbody.appendChild(tr);
   });
 }
@@ -194,9 +193,7 @@ window.enableEdit = function(btn){
   tr.querySelectorAll(".f, .status").forEach(el=>{
     el.readOnly = false;
     el.disabled = false;
-    el.classList.remove("readonly");
   });
-
   tr.querySelector(".btn-save").disabled = false;
 };
 
@@ -204,7 +201,6 @@ window.enableEdit = function(btn){
 window.saveRow = async function(btn){
   const tr = btn.closest("tr");
   const id = tr.dataset.id;
-
   const f = tr.querySelectorAll(".f");
   const status = tr.querySelector(".status").value;
 
@@ -219,6 +215,27 @@ window.saveRow = async function(btn){
     .update({ status })
     .eq("animal_id", id);
 
+  loadAnimals();
+};
+
+/* ===== CANCEL ===== */
+window.cancelRow = async function(btn){
+  if (!confirm("ยืนยันการยกเลิกเคสนี้?")) return;
+  const id = btn.closest("tr").dataset.id;
+
+  await supabase.from("vasd_queue")
+    .update({ status:"cancel" })
+    .eq("animal_id", id);
+
+  loadAnimals();
+};
+
+/* ===== DELETE ===== */
+window.deleteRow = async function(btn){
+  if (!confirm("⚠️ ลบข้อมูลสัตว์ถาวร?")) return;
+  const id = btn.closest("tr").dataset.id;
+
+  await supabase.from("vasd_animal").delete().eq("id", id);
   loadAnimals();
 };
 
