@@ -1,130 +1,134 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>RMUTTO - VASD – Veterinary Academic Service Division</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>RMUTTO - VASD – Veterinary Academic Service Division</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: #f4f6f8;
-      color: #333;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #f4f6f8;
+  color: #333;
+}
+header {
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header h1 {
+  margin: 0;
+  font-size: 22px;
+  color: #2c7be5;
+}
+header span {
+  font-size: 14px;
+  color: #666;
+}
 
-    header {
-      background: #ffffff;
-      border-bottom: 1px solid #e0e0e0;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.user-box {
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #f1f3f5;
+}
 
-    header h1 {
-      margin: 0;
-      font-size: 22px;
-      color: #2c7be5;
-    }
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 24px;
+}
 
-    header span {
-      font-size: 14px;
-      color: #666;
-    }
+.notice {
+  background: #ffffff;
+  border: 1px dashed #2c7be5;
+  padding: 18px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #2c7be5;
+  font-weight: bold;
+}
 
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 24px;
-    }
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+.summary-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.summary-card h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #2c7be5;
+}
+.summary-card p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #666;
+}
 
-    .notice {
-      background: #ffffff;
-      border: 1px dashed #2c7be5;
-      padding: 18px;
-      border-radius: 10px;
-      margin-bottom: 24px;
-      text-align: center;
-      color: #2c7be5;
-      font-weight: bold;
-    }
+.menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+}
+.card h3 {
+  margin-top: 0;
+  color: #2c7be5;
+}
 
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-bottom: 30px;
-    }
-
-    .summary-card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .summary-card h2 {
-      margin: 0;
-      font-size: 28px;
-      color: #2c7be5;
-    }
-
-    .summary-card p {
-      margin: 6px 0 0;
-      font-size: 14px;
-      color: #666;
-    }
-
-    .menu {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      cursor: pointer;
-      transition: transform 0.12s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-    }
-
-    .card h3 {
-      margin-top: 0;
-      color: #2c7be5;
-    }
-
-    footer {
-      text-align: center;
-      font-size: 13px;
-      color: #999;
-      margin: 40px 0 10px;
-    }
-  </style>
+footer {
+  text-align: center;
+  font-size: 13px;
+  color: #999;
+  margin: 40px 0 10px;
+}
+</style>
 </head>
+
 <body>
 
-<!-- HEADER -->
 <header>
-  <h1>RMUTTO - VASD</h1>
-  <span>RMUTTO - Veterinary Academic Service Division</span>
+  <div>
+    <h1>RMUTTO - VASD</h1>
+    <span>RMUTTO - Veterinary Academic Service Division</span>
+  </div>
+
+  <!-- USER ROLE -->
+  <div class="user-box" onclick="selectRole()">
+    👤 <span id="currentRole">ยังไม่ระบุหน้าที่</span>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- NOTICE -->
   <div class="notice">
     ระบบลงทะเบียน (Registration – PC) เปิดใช้งานแล้ว
   </div>
 
-  <!-- SUMMARY -->
   <div class="summary">
     <div class="summary-card">
       <h2 id="totalAnimal">–</h2>
@@ -144,7 +148,6 @@
     </div>
   </div>
 
-  <!-- MENU -->
   <div class="menu">
 
     <div class="card" onclick="location.href='registration.html'">
@@ -154,88 +157,117 @@
 
     <div class="card" onclick="location.href='animals.html'">
       <h3>🐾 สัตว์ทั้งหมดวันนี้</h3>
-      <p>ดูและแก้ไขข้อมูลสัตว์ที่ลงทะเบียน</p>
+      <p>ดูและแก้ไขข้อมูลสัตว์</p>
     </div>
 
-    <div class="card" onclick="alert('กำลังพัฒนา: คิวผ่าตัด')">
+    <div class="card" onclick="alert('กำลังพัฒนา')">
       <h3>📋 คิวผ่าตัด</h3>
       <p>เรียกคิวและติดตามสถานะ</p>
     </div>
 
-    <div class="card" onclick="alert('กำลังพัฒนา: วิสัญญี')">
+    <div class="card" onclick="alert('กำลังพัฒนา')">
       <h3>💉 วิสัญญี</h3>
-      <p>คำนวณยาและบันทึก vital signs</p>
+      <p>คำนวณยาและ monitor</p>
     </div>
 
-    <div class="card" onclick="alert('กำลังพัฒนา: พักฟื้น')">
+    <div class="card" onclick="alert('กำลังพัฒนา')">
       <h3>🟣 พักฟื้น</h3>
-      <p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
+      <p>ติดตามการฟื้นตัว</p>
     </div>
 
-    <div class="card" onclick="alert('กำลังพัฒนา: รายงาน')">
+    <div class="card" onclick="alert('กำลังพัฒนา')">
       <h3>📊 รายงาน</h3>
-      <p>สรุปผลการออกหน่วยบริการ</p>
+      <p>สรุปผลการออกหน่วย</p>
     </div>
 
-    <div class="card" onclick="alert('กำลังพัฒนา: ตั้งค่า')">
+    <div class="card" onclick="alert('กำลังพัฒนา')">
       <h3>⚙️ ตั้งค่า</h3>
-      <p>ตั้งค่าระบบ (admin)</p>
+      <p>ตั้งค่าระบบ</p>
     </div>
 
   </div>
-
 </div>
 
 <footer>
   RMUTTO - VASD © 2026 – RMUTTO - Veterinary Academic Service Division
 </footer>
 
-<!-- SUPABASE REALTIME -->
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-async function loadSummary() {
-  const { data: eventId, error: e0 } = await supabase.rpc("get_today_event");
-  if (e0) {
-    console.error(e0);
-    return;
+/* ======================
+   ROLE
+====================== */
+const roleEl = document.getElementById("currentRole");
+const savedRole = localStorage.getItem("vasd_role");
+if (savedRole) roleEl.innerText = savedRole;
+
+window.selectRole = function () {
+  const role = prompt(
+`เลือกหน้าที่:
+- admin
+- อาจารย์
+- สัตวแพทย์
+- นศ ปี 4 วิสัญญี
+- นศ ปี 4 ศัลยแพทย์
+- นศ พยาบาล
+- นศ ผู้ช่วยผ่าตัด
+- นศ ช่วยงานทั่วไป`
+  );
+
+  if (!role) return;
+
+  if (role === "admin") {
+    const pwd = prompt("กรอกรหัสผ่าน admin");
+    if (pwd !== "2500") {
+      alert("รหัสผ่านไม่ถูกต้อง");
+      return;
+    }
   }
+
+  localStorage.setItem("vasd_role", role);
+  roleEl.innerText = role;
+};
+
+/* ======================
+   DASHBOARD SUMMARY
+====================== */
+async function loadSummary() {
+  const { data: eventId } = await supabase.rpc("get_today_event");
 
   const { count: total } = await supabase
     .from("vasd_animal")
-    .select("*", { count: "exact", head: true })
+    .select("*", { count:"exact", head:true })
     .eq("event_id", eventId);
 
   const { count: surgery } = await supabase
     .from("vasd_queue")
-    .select("*", { count: "exact", head: true })
+    .select("*", { count:"exact", head:true })
     .eq("status", "surgery");
 
   const { count: recovery } = await supabase
     .from("vasd_queue")
-    .select("*", { count: "exact", head: true })
+    .select("*", { count:"exact", head:true })
     .eq("status", "recovery");
 
   const { count: done } = await supabase
     .from("vasd_queue")
-    .select("*", { count: "exact", head: true })
+    .select("*", { count:"exact", head:true })
     .eq("status", "done");
 
-  document.getElementById("totalAnimal").innerText = total ?? 0;
-  document.getElementById("inSurgery").innerText = surgery ?? 0;
-  document.getElementById("recovery").innerText = recovery ?? 0;
-  document.getElementById("done").innerText = done ?? 0;
+  totalAnimal.innerText = total ?? 0;
+  inSurgery.innerText = surgery ?? 0;
+  recovery.innerText = recovery ?? 0;
+  done.innerText = done ?? 0;
 }
 
-// โหลดครั้งแรก
 loadSummary();
 
-// realtime update
 supabase
   .channel("vasd-dashboard")
   .on(
     "postgres_changes",
-    { event: "*", schema: "public", table: "vasd_queue" },
+    { event:"*", schema:"public", table:"vasd_queue" },
     () => loadSummary()
   )
   .subscribe();
