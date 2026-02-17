@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>VASD – Veterinary Academic Service Division</title>
+  <title>RMUTTO - VASD – Veterinary Academic Service Division</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -107,8 +107,8 @@
 <body>
 
 <header>
-  <h1>VASD</h1>
-  <span>Veterinary Academic Service Division</span>
+  <h1>RMUTTO - VASD</h1>
+  <span>RMUTTO - Veterinary Academic Service Division</span>
 </header>
 
 <div class="container">
@@ -161,12 +161,18 @@
       <h3>📊 รายงาน</h3>
       <p>สรุปผลการออกหน่วยบริการ</p>
     </div>
+
+    <!-- ✅ เมนูใหม่ -->
+    <div class="card" onclick="alert('กำลังพัฒนา: ตั้งค่า')">
+      <h3>⚙️ ตั้งค่า</h3>
+      <p>ตั้งค่าระบบ (กำลังพัฒนา)</p>
+    </div>
   </div>
 
 </div>
 
 <footer>
-  VASD © 2026 – Veterinary Academic Service Division
+  RMUTTO - VASD © 2026 – RMUTTO - Veterinary Academic Service Division
 </footer>
 
 <!-- REALTIME SUPABASE -->
@@ -174,32 +180,27 @@
 import { supabase } from "./js/supabase.js";
 
 async function loadSummary() {
-  // event วันนี้
   const { data: eventId, error: e0 } = await supabase.rpc("get_today_event");
   if (e0) {
     console.error(e0);
     return;
   }
 
-  // สัตว์ทั้งหมดวันนี้
   const { count: total } = await supabase
     .from("vasd_animal")
     .select("*", { count: "exact", head: true })
     .eq("event_id", eventId);
 
-  // กำลังผ่าตัด
   const { count: surgery } = await supabase
     .from("vasd_queue")
     .select("*", { count: "exact", head: true })
     .eq("status", "surgery");
 
-  // พักฟื้น
   const { count: recovery } = await supabase
     .from("vasd_queue")
     .select("*", { count: "exact", head: true })
     .eq("status", "recovery");
 
-  // กลับบ้านแล้ว
   const { count: done } = await supabase
     .from("vasd_queue")
     .select("*", { count: "exact", head: true })
@@ -211,10 +212,8 @@ async function loadSummary() {
   document.getElementById("done").innerText = done ?? 0;
 }
 
-// โหลดครั้งแรก
 loadSummary();
 
-// 🔄 realtime: ถ้ามีการเปลี่ยน queue จะ refresh อัตโนมัติ
 supabase
   .channel("vasd-dashboard")
   .on(
@@ -223,7 +222,6 @@ supabase
     () => loadSummary()
   )
   .subscribe();
-
 </script>
 
 </body>
