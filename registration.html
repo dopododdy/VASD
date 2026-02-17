@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ===== GLOBAL ===== */
 body {
   font-family: "Segoe UI", Tahoma, sans-serif;
   background:#f4f6f8;
@@ -20,11 +19,8 @@ header {
   justify-content:space-between;
   align-items:center;
 }
-header h2 {
-  margin:0;
-}
 .container {
-  max-width:1400px;
+  max-width:1500px;
   margin:auto;
   padding:20px;
 }
@@ -36,26 +32,57 @@ header h2 {
   box-shadow:0 2px 6px rgba(0,0,0,.05);
 }
 
-/* ===== OWNER ===== */
-.owner-grid {
-  display:grid;
-  grid-template-columns:2fr 1fr auto;
-  gap:12px;
-}
-
-/* ===== INPUT FIX ===== */
-input, select {
+/* INPUT */
+input, select, textarea {
   width:100%;
   box-sizing:border-box;
   padding:6px;
   font-size:14px;
 }
-td input,
-td select {
+td input, td select, td textarea {
   padding:4px 6px;
 }
 
-/* ===== BUTTON ===== */
+/* TABLE */
+table {
+  width:100%;
+  border-collapse:collapse;
+}
+th, td {
+  border:1px solid #ddd;
+  padding:6px;
+  text-align:center;
+  vertical-align:middle;
+}
+
+/* SERVICE */
+.service-line {
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.service-line label {
+  display:flex;
+  gap:6px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+/* IMPORTANT NOTE */
+.important-cell textarea {
+  min-height:38px;
+  resize:vertical;
+}
+.important-warning {
+  background:#fff3cd;
+  border:2px solid #ff9800;
+}
+.important-warning::before {
+  content:"⚠️ ";
+  font-weight:bold;
+}
+
+/* BUTTON */
 button {
   padding:8px 12px;
   border:none;
@@ -72,39 +99,6 @@ button:disabled {
   opacity:.4;
   cursor:not-allowed;
 }
-
-/* ===== TABLE ===== */
-table {
-  width:100%;
-  border-collapse:collapse;
-}
-th, td {
-  border:1px solid #ddd;
-  padding:6px;
-  text-align:center;
-  vertical-align:middle;
-}
-
-/* ===== SERVICE ===== */
-.service-line {
-  display:flex;
-  gap:20px;
-  justify-content:flex-start;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.service-line label {
-  display:flex;
-  gap:6px;
-  cursor:pointer;
-  white-space:nowrap;
-}
-
-/* ===== FOCUS ===== */
-td input:focus,
-td select:focus {
-  outline:2px solid #2c7be5;
-}
 </style>
 </head>
 
@@ -112,130 +106,59 @@ td select:focus {
 
 <header>
   <h2>📝 ลงทะเบียนสัตว์ – VASD</h2>
-  <button class="btn-home" onclick="goHome()">🏠 Home</button>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 Home</button>
 </header>
 
 <div class="container">
 
-<!-- OWNER -->
-<div class="card">
-  <h3>ข้อมูลเจ้าของสัตว์</h3>
-  <div class="owner-grid">
-    <input id="ownerName" placeholder="ชื่อ-สกุล" autofocus>
-    <input id="phone" placeholder="เบอร์โทร">
-    <button id="btnReadID" onclick="readThaiID()">📇 อ่านบัตรประชาชน</button>
-  </div>
-</div>
-
-<!-- ANIMAL -->
 <div class="card">
   <h3>ข้อมูลสัตว์</h3>
 
   <table>
     <thead>
       <tr>
-        <th style="width:18%">ชื่อสัตว์</th>
-        <th style="width:10%">ชนิด</th>
-        <th style="width:10%">เพศ</th>
-        <th style="width:10%">น้ำหนัก</th>
+        <th>ชื่อสัตว์</th>
+        <th>ชนิด</th>
+        <th>เพศ</th>
+        <th>น้ำหนัก</th>
         <th>หัตถการ</th>
-        <th style="width:6%">ลบ</th>
+        <th style="width:20%">⚠️ ข้อความสำคัญ</th>
+        <th>ลบ</th>
       </tr>
     </thead>
     <tbody id="animalBody"></tbody>
   </table>
 
   <br>
-  <button class="btn-add" id="btnAdd" onclick="addAnimal()" disabled>
-    ➕ เพิ่มสัตว์
-  </button>
-</div>
-
-<div class="card" style="text-align:center">
-  <button class="btn-save" id="btnSave" onclick="saveAll()" disabled>
-    💾 บันทึกข้อมูล
-  </button>
+  <button class="btn-add" onclick="addAnimal()">➕ เพิ่มสัตว์</button>
 </div>
 
 </div>
 
 <script>
-/* ===== HOME ===== */
-function goHome() {
-  location.href = "index.html";
-}
-
-/* ===== DEVICE CHECK (PC only) ===== */
-if (!window.matchMedia("(pointer:fine)").matches) {
-  document.getElementById("btnReadID").style.display = "none";
-}
-
-/* ===== OWNER VALIDATION ===== */
-const ownerName = document.getElementById("ownerName");
-const phone = document.getElementById("phone");
-const btnAdd = document.getElementById("btnAdd");
-const btnSave = document.getElementById("btnSave");
-
-function checkOwnerReady() {
-  const ok = ownerName.value.trim() && phone.value.trim();
-  btnAdd.disabled = !ok;
-  btnSave.disabled = !ok;
-}
-ownerName.oninput = phone.oninput = checkOwnerReady;
-
-/* ===== ANIMAL ===== */
 function neuterText(sex) {
   return sex === "ผู้" ? "ทำหมันเพศผู้ (ตอน)" : "ทำหมันเพศเมีย";
 }
 
-function serviceHTML(sex, species) {
+function serviceHTML(sex) {
   return `
   <div class="service-line">
     <label>
-      <input type="checkbox" class="svc" value="${neuterText(sex)}" checked>
+      <input type="checkbox" class="svc" checked>
       ${neuterText(sex)}
     </label>
-    <label>
-      <input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า">
-      วัคซีนพิษสุนัขบ้า
-    </label>
-    ${species === "ส" ? `
-    <label>
-      <input type="checkbox" class="svc" value="ป้องกันเห็บหมัด">
-      ป้องกันเห็บหมัด
-    </label>` : ``}
+    <label><input type="checkbox" class="svc"> วัคซีนพิษสุนัขบ้า</label>
   </div>`;
 }
 
-function lastAnimalIsValid() {
-  const rows = document.querySelectorAll("#animalBody tr");
-  if (rows.length === 0) return true;
-
-  const r = rows[rows.length - 1];
-  const name = r.querySelector(".petName").value.trim();
-  const services = r.querySelectorAll(".svc:checked");
-
-  if (!name) {
-    alert("กรุณาใส่ชื่อสัตว์ของตัวก่อนหน้า");
-    return false;
-  }
-  if (services.length === 0) {
-    alert("กรุณาเลือกหัตถการอย่างน้อย 1 อย่าง");
-    return false;
-  }
-  return true;
-}
-
 function addAnimal() {
-  if (!lastAnimalIsValid()) return;
-
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td><input class="petName"></td>
     <td>
-      <select class="species">
-        <option value="ม">แมว</option>
-        <option value="ส">สุนัข</option>
+      <select>
+        <option>แมว</option>
+        <option>สุนัข</option>
       </select>
     </td>
     <td>
@@ -244,48 +167,34 @@ function addAnimal() {
         <option value="ผู้">ผู้</option>
       </select>
     </td>
-    <td>
-      <input type="number" min="0" step="0.1" value="3">
-    </td>
+    <td><input type="number" value="3"></td>
     <td class="svcCell"></td>
+    <td class="important-cell">
+      <textarea placeholder="เช่น ไม่ได้อดอาหาร / โรคหัวใจ"></textarea>
+    </td>
     <td>
-      <button class="btn-del" onclick="deleteRow(this)">🗑</button>
+      <button class="btn-del" onclick="this.closest('tr').remove()">🗑</button>
     </td>
   `;
 
-  const species = tr.querySelector(".species");
   const sex = tr.querySelector(".sex");
   const svcCell = tr.querySelector(".svcCell");
+  const note = tr.querySelector("textarea");
+  const noteCell = tr.querySelector(".important-cell");
 
-  svcCell.innerHTML = serviceHTML("เมีย","ม");
+  svcCell.innerHTML = serviceHTML("เมีย");
 
-  function refreshService() {
-    const wasChecked =
-      svcCell.querySelector(".svc")?.checked ?? true;
-    svcCell.innerHTML = serviceHTML(sex.value, species.value);
-    if (!wasChecked) {
-      svcCell.querySelector(".svc").checked = false;
+  sex.onchange = () => svcCell.innerHTML = serviceHTML(sex.value);
+
+  note.oninput = () => {
+    if (note.value.trim()) {
+      noteCell.classList.add("important-warning");
+    } else {
+      noteCell.classList.remove("important-warning");
     }
-  }
-
-  species.onchange = refreshService;
-  sex.onchange = refreshService;
+  };
 
   document.getElementById("animalBody").appendChild(tr);
-}
-
-function deleteRow(btn) {
-  if (!confirm("ต้องการลบสัตว์ตัวนี้หรือไม่?")) return;
-  btn.closest("tr").remove();
-}
-
-function saveAll() {
-  if (!lastAnimalIsValid()) return;
-  alert("ข้อมูลครบ พร้อมบันทึกจริง");
-}
-
-function readThaiID() {
-  alert("อ่านข้อมูลจากเครื่องอ่านบัตรประชาชน (mock)");
 }
 </script>
 
