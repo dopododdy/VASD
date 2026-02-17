@@ -6,241 +6,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ===== GLOBAL ===== */
-body {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-}
+body { font-family:Segoe UI, sans-serif; background:#f4f6f8; margin:0; }
 header {
-  background:#fff;
-  border-bottom:1px solid #ddd;
-  padding:14px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  background:#fff; border-bottom:1px solid #ddd;
+  padding:14px 20px; display:flex; justify-content:space-between;
 }
-header h2 { margin:0; }
-
-.container {
-  max-width:1600px;
-  margin:auto;
-  padding:20px;
-}
+.container { max-width:1600px; margin:auto; padding:20px; }
 .card {
-  background:#fff;
-  border-radius:10px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 2px 6px rgba(0,0,0,.05);
+  background:#fff; border-radius:10px; padding:20px;
+  margin-bottom:20px; box-shadow:0 2px 6px rgba(0,0,0,.05);
 }
-
-/* ===== OWNER ===== */
 .owner-grid {
-  display:grid;
-  grid-template-columns:2fr 1fr auto;
-  gap:12px;
+  display:grid; grid-template-columns:2fr 1fr auto; gap:12px;
 }
-
-/* ===== INPUT FIX ===== */
 input, select, textarea {
-  width:100%;
-  box-sizing:border-box;
-  padding:6px;
-  font-size:14px;
+  width:100%; box-sizing:border-box; padding:6px;
 }
-td input, td select, td textarea {
-  padding:4px 6px;
-}
-
-/* ===== TABLE ===== */
-table {
-  width:100%;
-  border-collapse:collapse;
-}
-th, td {
-  border:1px solid #ddd;
-  padding:6px;
-  text-align:center;
-  vertical-align:middle;
-}
-
-/* ===== SERVICE ===== */
-.service-line {
-  display:flex;
-  gap:18px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.service-line label {
-  display:flex;
-  gap:6px;
-  cursor:pointer;
-  white-space:nowrap;
-}
-
-/* ===== IMPORTANT NOTE ===== */
-.important-cell textarea {
-  min-height:38px;
-  resize:vertical;
-}
-.important-warning {
-  background:#fff3cd;
-  border:2px solid #ff9800;
-}
-.important-warning::before {
-  content:"⚠️ ";
-  font-weight:bold;
-}
-
-/* ===== BUTTON ===== */
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #ddd; padding:6px; text-align:center; }
+.service-line { display:flex; gap:16px; flex-wrap:wrap; }
 button {
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
+  padding:8px 12px; border:none; border-radius:6px;
+  cursor:pointer; font-weight:bold;
 }
-.btn-home { background:#6c757d; color:#fff; }
-.btn-add  { background:#6c757d; color:#fff; }
-.btn-save { background:#2c7be5; color:#fff; }
-.btn-del  { background:#dc3545; color:#fff; }
-
-button:disabled {
-  opacity:.4;
-  cursor:not-allowed;
-}
-
-/* ===== FOCUS ===== */
-td input:focus,
-td select:focus,
-td textarea:focus {
-  outline:2px solid #2c7be5;
-}
+.btn-add{background:#6c757d;color:#fff;}
+.btn-save{background:#2c7be5;color:#fff;}
+.btn-del{background:#dc3545;color:#fff;}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>📝 ลงทะเบียนสัตว์ – VASD</h2>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 Home</button>
+  <h3>📝 ลงทะเบียนสัตว์ – VASD</h3>
+  <button onclick="location.href='index.html'">🏠 Home</button>
 </header>
 
 <div class="container">
 
-<!-- OWNER -->
 <div class="card">
-  <h3>ข้อมูลเจ้าของสัตว์</h3>
+  <h4>ข้อมูลเจ้าของ</h4>
   <div class="owner-grid">
-    <input id="ownerName" placeholder="ชื่อ-สกุล" autofocus>
+    <input id="ownerName" placeholder="ชื่อเจ้าของ">
     <input id="phone" placeholder="เบอร์โทร">
-    <button id="btnReadID" onclick="readThaiID()">📇 อ่านบัตรประชาชน</button>
+    <button id="btnReadID" onclick="alert('อ่านบัตร (mock)')">📇 อ่านบัตร</button>
   </div>
 </div>
 
-<!-- ANIMAL -->
 <div class="card">
-  <h3>ข้อมูลสัตว์</h3>
-
+  <h4>สัตว์</h4>
   <table>
     <thead>
       <tr>
-        <th style="width:14%">ชื่อสัตว์</th>
-        <th style="width:8%">ชนิด</th>
-        <th style="width:8%">เพศ</th>
-        <th style="width:8%">น้ำหนัก</th>
-        <th>หัตถการ</th>
-        <th style="width:20%">⚠️ ข้อความสำคัญ</th>
-        <th style="width:6%">ลบ</th>
+        <th>ชื่อ</th><th>ชนิด</th><th>เพศ</th>
+        <th>นน.</th><th>หัตถการ</th><th>ข้อความสำคัญ</th><th>ลบ</th>
       </tr>
     </thead>
     <tbody id="animalBody"></tbody>
   </table>
-
   <br>
-  <button class="btn-add" id="btnAdd" onclick="addAnimal()" disabled>
-    ➕ เพิ่มสัตว์
-  </button>
+  <button class="btn-add" onclick="addAnimal()">➕ เพิ่มสัตว์</button>
 </div>
 
 <div class="card" style="text-align:center">
-  <button class="btn-save" id="btnSave" onclick="saveAll()" disabled>
-    💾 บันทึกข้อมูล
-  </button>
+  <button class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูล</button>
 </div>
 
 </div>
 
-<script>
-/* ===== DEVICE CHECK (PC only) ===== */
-if (!window.matchMedia("(pointer:fine)").matches) {
-  document.getElementById("btnReadID").style.display = "none";
-}
+<script type="module">
+import { supabase } from "./js/supabase.js";
 
-/* ===== OWNER VALIDATION ===== */
-const ownerName = document.getElementById("ownerName");
-const phone = document.getElementById("phone");
-const btnAdd = document.getElementById("btnAdd");
-const btnSave = document.getElementById("btnSave");
-
-function checkOwnerReady() {
-  const ok = ownerName.value.trim() && phone.value.trim();
-  btnAdd.disabled = !ok;
-  btnSave.disabled = !ok;
-}
-ownerName.oninput = phone.oninput = checkOwnerReady;
-
-/* ===== ANIMAL ===== */
-function neuterText(sex) {
-  return sex === "ผู้" ? "ทำหมันเพศผู้ (ตอน)" : "ทำหมันเพศเมีย";
-}
-
-function serviceHTML(sex, species) {
+/* ---------- UI ---------- */
+function serviceHTML(species) {
   return `
-  <div class="service-line">
-    <label>
-      <input type="checkbox" class="svc" value="${neuterText(sex)}" checked>
-      ${neuterText(sex)}
-    </label>
-    <label>
-      <input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า">
-      วัคซีนพิษสุนัขบ้า
-    </label>
-    ${species === "ส" ? `
-    <label>
-      <input type="checkbox" class="svc" value="ป้องกันเห็บหมัด">
-      ป้องกันเห็บหมัด
-    </label>` : ``}
-  </div>`;
+    <div class="service-line">
+      <label><input type="checkbox" class="svc" value="ทำหมัน" checked> ทำหมัน</label>
+      <label><input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า"> วัคซีนพิษสุนัขบ้า</label>
+      ${species==="ส"?
+        `<label><input type="checkbox" class="svc" value="ป้องกันเห็บหมัด"> ป้องกันเห็บหมัด</label>`:""}
+    </div>`;
 }
 
-/* ตรวจแถวล่าสุด */
-function lastAnimalIsValid() {
-  const rows = document.querySelectorAll("#animalBody tr");
-  if (rows.length === 0) return true;
-
-  const r = rows[rows.length - 1];
-  const name = r.querySelector(".petName").value.trim();
-  const services = r.querySelectorAll(".svc:checked");
-
-  if (!name) {
-    alert("กรุณาใส่ชื่อสัตว์ของตัวก่อนหน้า");
-    return false;
-  }
-  if (services.length === 0) {
-    alert("กรุณาเลือกหัตถการอย่างน้อย 1 อย่าง");
-    return false;
-  }
-  return true;
-}
-
-function addAnimal() {
-  if (!lastAnimalIsValid()) return;
-
+window.addAnimal = function () {
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td><input class="petName"></td>
+    <td><input class="animalName"></td>
     <td>
       <select class="species">
         <option value="ม">แมว</option>
@@ -249,103 +100,92 @@ function addAnimal() {
     </td>
     <td>
       <select class="sex">
-        <option value="เมีย">เมีย</option>
-        <option value="ผู้">ผู้</option>
+        <option>เมีย</option>
+        <option>ผู้</option>
       </select>
     </td>
-    <td>
-      <input type="number" min="0" step="0.1" value="3">
-    </td>
+    <td><input type="number" value="3"></td>
     <td class="svcCell"></td>
-    <td class="important-cell">
-      <textarea placeholder="เช่น ไม่ได้อดอาหาร / โรคหัวใจ"></textarea>
-    </td>
-    <td>
-      <button class="btn-del" onclick="deleteRow(this)">🗑</button>
-    </td>
+    <td><textarea></textarea></td>
+    <td><button class="btn-del" onclick="this.closest('tr').remove()">🗑</button></td>
   `;
-
   const species = tr.querySelector(".species");
-  const sex = tr.querySelector(".sex");
   const svcCell = tr.querySelector(".svcCell");
-  const note = tr.querySelector("textarea");
-  const noteCell = tr.querySelector(".important-cell");
+  svcCell.innerHTML = serviceHTML("ม");
+  species.onchange = () => svcCell.innerHTML = serviceHTML(species.value);
+  document.getElementById("animalBody").appendChild(tr);
+};
 
-  svcCell.innerHTML = serviceHTML("เมีย","ม");
-
-  function refreshService() {
-    const wasChecked =
-      svcCell.querySelector(".svc")?.checked ?? true;
-    svcCell.innerHTML = serviceHTML(sex.value, species.value);
-    if (!wasChecked) {
-      svcCell.querySelector(".svc").checked = false;
-    }
+/* ---------- SAVE REAL ---------- */
+window.saveAll = async function () {
+  const ownerName = document.getElementById("ownerName").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  if (!ownerName || !phone) {
+    alert("กรุณากรอกชื่อและเบอร์โทร");
+    return;
   }
 
-  species.onchange = refreshService;
-  sex.onchange = refreshService;
-
-  note.oninput = () => {
-    if (note.value.trim()) {
-      noteCell.classList.add("important-warning");
-    } else {
-      noteCell.classList.remove("important-warning");
-    }
-  };
-
-  document.getElementById("animalBody").appendChild(tr);
-}
-
-/* ===== DELETE ===== */
-function deleteRow(btn) {
-  if (!confirm("ต้องการลบสัตว์ตัวนี้หรือไม่?")) return;
-  btn.closest("tr").remove();
-}
-
-/* ===== SAVE (TEST MODE) ===== */
-function saveAll() {
-  if (!lastAnimalIsValid()) return;
-
-  const data = {
-    owner: {
-      name: ownerName.value.trim(),
-      phone: phone.value.trim()
-    },
-    animals: []
-  };
-
   const rows = document.querySelectorAll("#animalBody tr");
+  if (rows.length === 0) {
+    alert("ยังไม่มีสัตว์");
+    return;
+  }
 
-  rows.forEach(r => {
-    const animal = {
-      name: r.querySelector(".petName").value.trim(),
-      species: r.querySelector(".species").value,
-      sex: r.querySelector(".sex").value,
-      weight: r.querySelector("input[type=number]").value,
-      services: [],
-      importantNote: r.querySelector("textarea").value.trim()
-    };
+  // 1) event วันนี้
+  const { data: eventId, error: e1 } = await supabase.rpc("get_today_event");
+  if (e1) { alert("event error"); console.error(e1); return; }
 
-    r.querySelectorAll(".svc:checked").forEach(svc => {
-      animal.services.push(svc.value);
+  // 2) owner
+  const { data: owner, error: e2 } = await supabase
+    .from("vasd_owner")
+    .insert({ event_id: eventId, owner_name: ownerName, phone })
+    .select().single();
+
+  if (e2) { alert("owner error"); console.error(e2); return; }
+
+  // 3) queue start
+  const { count } = await supabase
+    .from("vasd_animal")
+    .select("*", { count: "exact", head: true })
+    .eq("event_id", eventId);
+
+  let q = (count || 0) + 1;
+
+  // 4) animals
+  for (const r of rows) {
+    const { data: animal, error: e3 } = await supabase
+      .from("vasd_animal")
+      .insert({
+        event_id: eventId,
+        owner_id: owner.id,
+        queue_number: q++,
+        species: r.querySelector(".species").value,
+        animal_name: r.querySelector(".animalName").value,
+        sex: r.querySelector(".sex").value,
+        est_weight: r.querySelector("input[type=number]").value,
+        health_note: r.querySelector("textarea").value
+      })
+      .select().single();
+
+    if (e3) { alert("animal error"); console.error(e3); return; }
+
+    // services
+    const svcs = [];
+    r.querySelectorAll(".svc:checked").forEach(s =>
+      svcs.push({ animal_id: animal.id, service_type: s.value })
+    );
+    if (svcs.length) await supabase.from("vasd_service").insert(svcs);
+
+    // queue
+    await supabase.from("vasd_queue").insert({
+      animal_id: animal.id,
+      status: "registered"
     });
+  }
 
-    data.animals.push(animal);
-  });
-
-  console.clear();
-  console.log("📦 DATA TO SAVE (TEST MODE):", data);
-
-  alert(
-    "บันทึกข้อมูลสำเร็จ (โหมดทดลอง)\n\n" +
-    "เปิด Console (F12) เพื่อดูข้อมูล"
-  );
-}
-
-/* ===== MOCK THAI ID ===== */
-function readThaiID() {
-  alert("อ่านข้อมูลจากเครื่องอ่านบัตรประชาชน (mock)");
-}
+  alert("✅ บันทึกข้อมูลเรียบร้อย");
+  location.href = "index.html";
+};
 </script>
 
 </body>
