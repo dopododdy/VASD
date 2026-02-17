@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>RMUTTO - VASD | สัตว์ทั้งหมด</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background:#f4f6f8;
+  margin:0;
+}
+header {
+  background:#fff;
+  border-bottom:1px solid #ddd;
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container {
+  max-width:1400px;
+  margin:auto;
+  padding:20px;
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+th, td {
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+}
+th {
+  background:#f1f3f5;
+}
+tbody tr:nth-child(even) {
+  background:#f9fbff;
+}
+button {
+  padding:4px 8px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+}
+.btn-edit { background:#2c7be5; color:#fff; }
+.btn-save { background:#198754; color:#fff; }
+.btn-home { background:#6c757d; color:#fff; }
+input, select {
+  width:100%;
+  box-sizing:border-box;
+}
+.readonly {
+  background:#f1f3f5;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h3>🐾 สัตว์ทั้งหมด (วันนี้)</h3>
+  <div>
+    <button class="btn-home" onclick="location.href='index.html'">🏠 Home</button>
+  </div>
+</header>
+
+<div class="container">
+
+<table>
+  <thead>
+    <tr>
+      <th>คิว</th>
+      <th>ชื่อสัตว์</th>
+      <th>ชนิด</th>
+      <th>เพศ</th>
+      <th>น้ำหนัก</th>
+      <th>เจ้าของ</th>
+      <th>โทร</th>
+      <th>แก้ไข</th>
+    </tr>
+  </thead>
+  <tbody id="animalTable"></tbody>
+</table>
+
+</div>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+/* ======================
+   ROLE (ชั่วคราว)
+====================== */
+// เปลี่ยนเป็น true เมื่อเป็น admin
+const isAdmin = localStorage.getItem("vasd_role") === "admin";
+
+/* ======================
+   LOAD DATA
+====================== */
+async function loadAnimals() {
+  const { data: eventId } = await supabase.rpc("get_today_event");
+
+  const { data, error } = await supabase
+    .from("vasd_animal")
+    .select(`
+      id,
+      queue_number,
+      animal_name,
+      species,
+      sex,
+      est_weight,
+      vasd_owner (
+        owner_name,
+        phone
+      )
+    `)
+    .eq("event_id", eventId)
+    .order("queue_number");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const tbody = document.getElementById("animalTable");
+  tbody.innerHTML = "";
+
+  data.forEach(a => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${a.queue_number}</td>
+      <td><input value="${a.animal_name ?? ""}" ${!isAdmin?"readonly class='readonly'":""}></td>
+      <td>
+        <select ${!isAdmin?"disabled":""}>
+          <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
+          <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
+        </select>
+      </td>
+      <td>
+        <select ${!isAdmin?"disabled":""}>
+          <option ${a.sex==="เมีย"?"selected":""}>เมีย</option>
+          <option ${a.sex==="ผู้"?"selected":""}>ผู้</option>
+        </select>
+      </td>
+      <td><input type="number" value="${a.est_weight ?? ""}" ${!isAdmin?"readonly class='readonly'":""}></td>
+      <td>${a.vasd_owner?.owner_name ?? ""}</td>
+      <td>${a.vasd_owner?.phone ?? ""}</td>
+      <td>
+        ${isAdmin
+          ? `<button class="btn-save" onclick="saveRow('${a.id}', this)">บันทึก</button>`
+          : `–`}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+loadAnimals();
+
+/* ======================
+   SAVE (ADMIN ONLY)
+====================== */
+window.saveRow = async function (animalId, btn) {
+  const tr = btn.closest("tr");
+  const inputs = tr.querySelectorAll("input, select");
+
+  const payload = {
+    animal_name: inputs[0].value,
+    species: inputs[1].value,
+    sex: inputs[2].value,
+    est_weight: inputs[3].value
+  };
+
+  const { error } = await supabase
+    .from("vasd_animal")
+    .update(payload)
+    .eq("id", animalId);
+
+  if (error) {
+    alert("บันทึกไม่สำเร็จ");
+    console.error(error);
+  } else {
+    btn.textContent = "✔";
+    setTimeout(() => btn.textContent = "บันทึก", 1000);
+  }
+};
+
+/* ======================
+   REALTIME REFRESH
+====================== */
+supabase
+  .channel("vasd-animal-edit")
+  .on(
+    "postgres_changes",
+    { event:"*", schema:"public", table:"vasd_animal" },
+    () => loadAnimals()
+  )
+  .subscribe();
+</script>
+
+</body>
+</html>
