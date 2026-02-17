@@ -26,13 +26,10 @@ input, select, textarea {
 }
 table { width:100%; border-collapse:collapse; }
 th, td { border:1px solid #ddd; padding:6px; text-align:center; }
-
-/* zebra row */
 tbody tr:nth-child(even) { background:#f9fbff; }
 
 .service-line { display:flex; gap:16px; flex-wrap:wrap; }
 
-/* important note */
 .important-warning {
   background:#fff3cd;
   border:2px solid #ff9800;
@@ -56,13 +53,13 @@ button {
 <body>
 
 <header>
-  <h3>📝 RMUTTO - VASD</h3>
+  <h3>📝 RMUTTO - VASD | ลงทะเบียนสัตว์</h3>
   <button onclick="location.href='index.html'">🏠 Home</button>
 </header>
 
 <div class="container">
 
-<!-- OWNER -->
+<!-- ================= OWNER ================= -->
 <div class="card">
   <h4>ข้อมูลเจ้าของสัตว์</h4>
   <div class="owner-grid">
@@ -72,14 +69,19 @@ button {
   </div>
 </div>
 
-<!-- ANIMAL -->
+<!-- ================= ANIMAL ================= -->
 <div class="card">
   <h4>ข้อมูลสัตว์</h4>
   <table>
     <thead>
       <tr>
-        <th>ชื่อ</th><th>ชนิด</th><th>เพศ</th>
-        <th>นน.</th><th>หัตถการ</th><th>ข้อความสำคัญ</th><th>ลบ</th>
+        <th>ชื่อ</th>
+        <th>ชนิด</th>
+        <th>เพศ</th>
+        <th>นน. (กก.)</th>
+        <th>หัตถการ</th>
+        <th>ข้อความสำคัญ</th>
+        <th>ลบ</th>
       </tr>
     </thead>
     <tbody id="animalBody"></tbody>
@@ -88,6 +90,7 @@ button {
   <button class="btn-add" onclick="addAnimal()">➕ เพิ่มสัตว์</button>
 </div>
 
+<!-- ================= SAVE ================= -->
 <div class="card" style="text-align:center">
   <button class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูล</button>
 </div>
@@ -99,7 +102,6 @@ import { supabase } from "./js/supabase.js";
 
 /* =========================
    PASTE OWNER NAME
-   (รับจาก NameReader ผ่าน Clipboard)
 ========================= */
 window.pasteOwnerName = async function () {
   try {
@@ -111,7 +113,7 @@ window.pasteOwnerName = async function () {
     document.getElementById("ownerName").value = text;
     document.getElementById("phone").focus();
   } catch {
-    alert("ไม่สามารถอ่าน Clipboard ได้ กรุณาใช้ Chrome และกดปุ่มด้วยตนเอง");
+    alert("ไม่สามารถอ่าน Clipboard ได้ (ต้องใช้ Chrome และกดปุ่ม)");
   }
 };
 
@@ -158,7 +160,7 @@ function serviceHTML(sex, species) {
 window.addAnimal = function () {
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td><input class="animalName"></td>
+    <td><input class="animalName" placeholder="ชื่อสัตว์ (ห้ามเว้นว่าง)"></td>
     <td>
       <select class="species">
         <option value="ม">แมว</option>
@@ -171,12 +173,14 @@ window.addAnimal = function () {
         <option value="ผู้">ผู้</option>
       </select>
     </td>
-    <td><input type="number" value="3"></td>
+    <td><input type="number" value="3" min="0"></td>
     <td class="svcCell"></td>
     <td class="noteCell">
       <textarea placeholder="เช่น โรคหัวใจ / ไม่ได้อดอาหาร"></textarea>
     </td>
-    <td><button class="btn-del" onclick="this.closest('tr').remove()">🗑</button></td>
+    <td>
+      <button class="btn-del" onclick="this.closest('tr').remove()">🗑</button>
+    </td>
   `;
 
   const species = tr.querySelector(".species");
@@ -200,7 +204,7 @@ window.addAnimal = function () {
 };
 
 /* =========================
-   SAVE (REAL)
+   SAVE (REAL + VALIDATE)
 ========================= */
 window.saveAll = async function () {
   const ownerName = document.getElementById("ownerName").value.trim();
@@ -208,6 +212,7 @@ window.saveAll = async function () {
 
   if (!ownerName) {
     alert("กรุณาใส่ชื่อเจ้าของสัตว์");
+    document.getElementById("ownerName").focus();
     return;
   }
 
@@ -217,6 +222,22 @@ window.saveAll = async function () {
     return;
   }
 
+  /* ===== VALIDATE ANIMAL NAME ===== */
+  for (let i = 0; i < rows.length; i++) {
+    const nameInput = rows[i].querySelector(".animalName");
+    const name = nameInput.value.trim();
+
+    if (!name) {
+      alert(`กรุณาใส่ชื่อสัตว์ (แถวที่ ${i + 1})`);
+      nameInput.focus();
+      nameInput.style.backgroundColor = "#ffecec";
+      return;
+    } else {
+      nameInput.style.backgroundColor = "";
+    }
+  }
+
+  /* ===== SAVE TO SUPABASE ===== */
   const { data: eventId } = await supabase.rpc("get_today_event");
 
   const { data: owner } = await supabase
@@ -239,7 +260,7 @@ window.saveAll = async function () {
         owner_id: owner.id,
         queue_number: q++,
         species: r.querySelector(".species").value,
-        animal_name: r.querySelector(".animalName").value,
+        animal_name: r.querySelector(".animalName").value.trim(),
         sex: r.querySelector(".sex").value,
         est_weight: r.querySelector("input[type=number]").value,
         health_note: r.querySelector("textarea").value
@@ -250,7 +271,9 @@ window.saveAll = async function () {
     r.querySelectorAll(".svc:checked").forEach(s =>
       svcs.push({ animal_id: animal.id, service_type: s.value })
     );
-    if (svcs.length) await supabase.from("vasd_service").insert(svcs);
+    if (svcs.length) {
+      await supabase.from("vasd_service").insert(svcs);
+    }
 
     await supabase.from("vasd_queue").insert({
       animal_id: animal.id,
