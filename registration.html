@@ -96,7 +96,7 @@ th, td {
   <div class="owner-grid">
     <input id="ownerName" placeholder="ชื่อ-สกุล" autofocus>
     <input id="phone" placeholder="เบอร์โทร">
-    <button onclick="readThaiID()">📇 อ่านบัตรประชาชน</button>
+    <button id="btnReadID" onclick="readThaiID()">📇 อ่านบัตรประชาชน</button>
   </div>
 </div>
 
@@ -132,6 +132,12 @@ th, td {
 </div>
 
 <script>
+/* ================= DEVICE CHECK ================= */
+// แสดงปุ่มอ่านบัตร เฉพาะ PC (mouse)
+if (!window.matchMedia("(pointer:fine)").matches) {
+  document.getElementById("btnReadID").style.display = "none";
+}
+
 /* ================= OWNER VALIDATION ================= */
 const ownerName = document.getElementById("ownerName");
 const phone = document.getElementById("phone");
@@ -169,7 +175,29 @@ function serviceHTML(sex, species) {
   </div>`;
 }
 
+/* ===== ตรวจว่าสัตว์ตัวล่าสุดกรอกครบหรือยัง ===== */
+function lastAnimalIsValid() {
+  const rows = document.querySelectorAll("#animalBody tr");
+  if (rows.length === 0) return true;
+
+  const r = rows[rows.length - 1];
+  const name = r.querySelector(".petName").value.trim();
+  const services = r.querySelectorAll(".svc:checked");
+
+  if (!name) {
+    alert("กรุณาใส่ชื่อสัตว์ของตัวก่อนหน้า");
+    return false;
+  }
+  if (services.length === 0) {
+    alert("กรุณาเลือกหัตถการอย่างน้อย 1 อย่าง สำหรับสัตว์ตัวก่อนหน้า");
+    return false;
+  }
+  return true;
+}
+
 function addAnimal() {
+  if (!lastAnimalIsValid()) return;
+
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td><input class="petName"></td>
@@ -190,6 +218,7 @@ function addAnimal() {
     </td>
     <td class="svcCell"></td>
   `;
+
   const species = tr.querySelector(".species");
   const sex = tr.querySelector(".sex");
   const svcCell = tr.querySelector(".svcCell");
@@ -213,55 +242,13 @@ function addAnimal() {
 
 /* ================= SAVE ================= */
 function saveAll() {
-  const rows = document.querySelectorAll("#animalBody tr");
-  if (rows.length === 0) {
-    alert("กรุณาเพิ่มสัตว์อย่างน้อย 1 ตัว");
-    return;
-  }
-
-  for (const r of rows) {
-    const name = r.querySelector(".petName").value.trim();
-    const services = r.querySelectorAll(".svc:checked");
-
-    if (!name) {
-      alert("กรุณาใส่ชื่อสัตว์");
-      return;
-    }
-    if (services.length === 0) {
-      alert("ต้องเลือกหัตถการอย่างน้อย 1 อย่าง");
-      return;
-    }
-  }
-
-  generateQueueTicket();
+  if (!lastAnimalIsValid()) return;
+  alert("ข้อมูลครบ พร้อมบันทึกจริง");
 }
 
-/* ================= TICKET JPG ================= */
-function generateQueueTicket() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 600;
-  canvas.height = 400;
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0,0,600,400);
-  ctx.fillStyle = "#000";
-  ctx.font = "28px Arial";
-  ctx.fillText("VASD บัตรคิว", 200, 60);
-  ctx.font = "20px Arial";
-  ctx.fillText("เจ้าของ: " + ownerName.value, 40, 120);
-  ctx.fillText("โทร: " + phone.value, 40, 160);
-  ctx.fillText("กรุณารอเรียกคิว", 40, 220);
-
-  const a = document.createElement("a");
-  a.href = canvas.toDataURL("image/jpeg");
-  a.download = "VASD-queue.jpg";
-  a.click();
-}
-
-/* ================= THAI ID ================= */
+/* ================= MOCK THAI ID ================= */
 function readThaiID() {
-  alert("เชื่อมต่อเครื่องอ่านบัตรประชาชน\n(จะต่อจริงเมื่อทราบรุ่นอุปกรณ์)");
+  alert("อ่านข้อมูลจากเครื่องอ่านบัตรประชาชน (mock)");
 }
 </script>
 
