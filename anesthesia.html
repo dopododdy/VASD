@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>RMUTTO - VASD | วิสัญญี (โต๊ะกลาง)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background:#f4f6f8;
+  margin:0;
+}
+header {
+  background:#fff;
+  border-bottom:1px solid #ddd;
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.container {
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+
+.card {
+  background:#fff;
+  border-radius:10px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+
+.queue-item {
+  border-left:8px solid #ffc107;
+}
+
+.queue-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+h3 { margin:0 0 8px; }
+
+button {
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.btn-start { background:#fd7e14; color:#fff; }
+.btn-save  { background:#198754; color:#fff; }
+.btn-home  { background:#6c757d; color:#fff; }
+
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+
+input {
+  width:100%;
+  padding:6px;
+  box-sizing:border-box;
+}
+label {
+  font-size:13px;
+  color:#555;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h3>💉 วิสัญญี – โต๊ะกลาง</h3>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 Home</button>
+</header>
+
+<div class="container" id="list"></div>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+/* ============================
+   LOAD WAITING CASES
+============================ */
+async function loadWaiting() {
+  const { data: eventId } = await supabase.rpc("get_today_event");
+
+  const { data } = await supabase
+    .from("vasd_queue")
+    .select(`
+      status,
+      animal_id,
+      vasd_animal (
+        animal_name,
+        species,
+        sex,
+        est_weight
+      )
+    `)
+    .eq("status", "รอผ่าตัด");
+
+  const box = document.getElementById("list");
+  box.innerHTML = "";
+
+  data.forEach(row => {
+    const a = row.vasd_animal;
+    const div = document.createElement("div");
+    div.className = "card queue-item";
+    div.innerHTML = `
+      <div class="queue-header">
+        <h3>🐾 ${a.animal_name || "(ไม่ระบุชื่อ)"} (${a.species})</h3>
+        <button class="btn-start" onclick="startAnes('${row.animal_id}')">
+          เริ่มวางยา
+        </button>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>น้ำหนักจริง (kg)</label>
+          <input type="number" step="0.1" class="actualWeight" value="${a.est_weight ?? ""}">
+        </div>
+
+        <div>
+          <label>Xylazine (mg)</label>
+          <input type="number" step="0.1" class="xylazine">
+        </div>
+
+        <div>
+          <label>Zoletil induction (mg)</label>
+          <input type="number" step="0.1" class="zoletil">
+        </div>
+
+        <div>
+          <label>Zoletil เติม (mg)</label>
+          <input type="number" step="0.1" class="zoletilAdd">
+        </div>
+
+        <div>
+          <label>Pen-Strep (ml)</label>
+          <input type="number" step="0.1" class="penstrep">
+        </div>
+
+        <div>
+          <label>Tolfedine (mg)</label>
+          <input type="number" step="0.1" class="tolfedine">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div><label>HR</label><input class="hr"></div>
+        <div><label>RR</label><input class="rr"></div>
+        <div><label>O₂ Sat</label><input class="spo2"></div>
+        <div><label>Fluid (ml)</label><input class="fluid"></div>
+      </div>
+
+      <br>
+      <button class="btn-save" onclick="saveAnes(this,'${row.animal_id}')">
+        บันทึกการวางยา
+      </button>
+    `;
+    box.appendChild(div);
+  });
+}
+
+loadWaiting();
+
+/* ============================
+   START + SAVE
+============================ */
+window.startAnes = async function (animalId) {
+  await supabase
+    .from("vasd_queue")
+    .update({
+      status: "กำลังวางยาสลบ",
+      updated_at: new Date()
+    })
+    .eq("animal_id", animalId);
+};
+
+window.saveAnes = async function (btn, animalId) {
+  const card = btn.closest(".card");
+
+  const w  = card.querySelector(".actualWeight").value;
+  const x  = card.querySelector(".xylazine").value;
+  const z  = card.querySelector(".zoletil").value;
+  const za = card.querySelector(".zoletilAdd").value;
+  const p  = card.querySelector(".penstrep").value;
+  const t  = card.querySelector(".tolfedine").value;
+
+  const services = [];
+  if (x)  services.push({ animal_id: animalId, service_type: "Xylazine " + x + " mg" });
+  if (z)  services.push({ animal_id: animalId, service_type: "Zoletil induction " + z + " mg" });
+  if (za) services.push({ animal_id: animalId, service_type: "Zoletil เติม " + za + " mg" });
+  if (p)  services.push({ animal_id: animalId, service_type: "Pen-Strep " + p + " ml" });
+  if (t)  services.push({ animal_id: animalId, service_type: "Tolfedine " + t + " mg" });
+
+  if (services.length)
+    await supabase.from("vasd_service").insert(services);
+
+  await supabase
+    .from("vasd_animal")
+    .update({ actual_weight: w })
+    .eq("id", animalId);
+
+  await supabase
+    .from("vasd_queue")
+    .update({
+      status: "กำลังผ่าตัด",
+      updated_at: new Date()
+    })
+    .eq("animal_id", animalId);
+
+  alert("✅ บันทึกและส่งเข้าผ่าตัดแล้ว");
+  loadWaiting();
+};
+
+/* ============================
+   REALTIME
+============================ */
+supabase
+  .channel("vasd-anes")
+  .on(
+    "postgres_changes",
+    { event:"*", schema:"public", table:"vasd_queue" },
+    () => loadWaiting()
+  )
+  .subscribe();
+</script>
+
+</body>
+</html>
