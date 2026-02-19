@@ -2,82 +2,56 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>VASD - ตั้งค่าเครื่องพิมพ์</title>
+<title>VASD - ตั้งค่าเครื่องพิมพ์และกระดาษ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  margin:0;
-  font-family:"Segoe UI",sans-serif;
-  background:#f4f6f8;
-}
-
+body{margin:0;font-family:"Segoe UI",sans-serif;background:#f4f6f8;}
 header{
-  background:#fff;
-  border-bottom:1px solid #ddd;
-  padding:14px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  background:#fff;border-bottom:1px solid #ddd;
+  padding:14px 20px;display:flex;
+  justify-content:space-between;align-items:center;
 }
-
 .container{
   display:grid;
-  grid-template-columns: 350px 1fr;
+  grid-template-columns:400px 1fr;
   height:calc(100vh - 70px);
 }
-
 .sidebar{
-  background:#fff;
+  background:#fff;padding:15px;overflow:auto;
   border-right:1px solid #ddd;
-  padding:15px;
-  overflow:auto;
 }
-
 .preview{
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display:flex;justify-content:center;align-items:center;
   background:#e9ecef;
 }
-
 .sticker{
   position:relative;
   width:80mm;
   height:50mm;
   background:#fff;
   box-shadow:0 0 10px rgba(0,0,0,0.2);
-  overflow:hidden;
 }
-
 .line{
   position:absolute;
-  cursor:move;
 }
-
-label{
-  font-size:13px;
-}
-
-input,select{
-  width:100%;
-  margin-bottom:8px;
-}
-
+input,select{width:100%;margin-bottom:8px;}
 button{
-  padding:6px 10px;
-  border:none;
-  border-radius:4px;
-  background:#2c7be5;
-  color:#fff;
-  cursor:pointer;
+  padding:6px 10px;border:none;
+  border-radius:4px;background:#2c7be5;
+  color:#fff;cursor:pointer;margin-bottom:6px;
 }
+.line-block{
+  border:1px solid #ddd;
+  padding:8px;margin-bottom:8px;
+}
+.small{font-size:12px;color:#888;}
 </style>
 </head>
 <body>
 
 <header>
-  <h3>🖨 ตั้งค่าเครื่องพิมพ์และกระดาษ</h3>
+  <h3>🖨 ตั้งค่า Sticker Template</h3>
   <button onclick="location.href='index.html'">🏠 Home</button>
 </header>
 
@@ -85,7 +59,7 @@ button{
 
 <div class="sidebar">
 
-<h4>ประเภทสติ๊กเกอร์</h4>
+<label>ประเภทสติ๊กเกอร์</label>
 <select id="templateType">
   <option value="queue">คิว</option>
   <option value="cage">ติดกรง</option>
@@ -95,40 +69,28 @@ button{
   <option value="microchip">ติดใบรับรองไมโครชิฟ</option>
 </select>
 
-<hr>
-
-<h4>ตั้งค่าบรรทัด</h4>
-
-<label>ข้อความ</label>
-<input id="textValue" value="คิวที่ 1">
-
-<label>ขนาดตัวอักษร (px)</label>
-<input id="fontSize" type="number" value="18">
-
-<label>ตำแหน่ง X (px)</label>
-<input id="posX" type="number" value="10">
-
-<label>ตำแหน่ง Y (px)</label>
-<input id="posY" type="number" value="10">
-
-<label>ตัวหนา</label>
-<select id="bold">
-  <option value="normal">ปกติ</option>
-  <option value="bold">หนา</option>
-</select>
-
-<button onclick="applyChanges()">ปรับใช้</button>
+<button onclick="loadTemplate()">โหลด Template</button>
 
 <hr>
 
+<div id="lineEditor"></div>
+
+<button onclick="addLine()">➕ เพิ่มบรรทัด</button>
 <button onclick="saveTemplate()">💾 บันทึก Template</button>
+
+<p class="small">
+สามารถใช้ตัวแปร:<br>
+{{queue_number}}<br>
+{{animal_name}}<br>
+{{species}}<br>
+{{sex}}<br>
+{{owner_name}}<br>
+</p>
 
 </div>
 
 <div class="preview">
-  <div class="sticker" id="sticker">
-    <div class="line" id="line1">คิวที่ 1</div>
-  </div>
+  <div class="sticker" id="sticker"></div>
 </div>
 
 </div>
@@ -136,36 +98,110 @@ button{
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-const line = document.getElementById("line1");
+let currentConfig = [];
 
-function applyChanges(){
-  line.innerText = textValue.value;
-  line.style.fontSize = fontSize.value + "px";
-  line.style.left = posX.value + "px";
-  line.style.top = posY.value + "px";
-  line.style.fontWeight = bold.value;
+function renderPreview(){
+  const box = document.getElementById("sticker");
+  box.innerHTML = "";
+  currentConfig.forEach((l,i)=>{
+    const div = document.createElement("div");
+    div.className="line";
+    div.style.left=l.x+"px";
+    div.style.top=l.y+"px";
+    div.style.fontSize=l.size+"px";
+    div.style.fontWeight=l.weight;
+    div.style.fontFamily=l.font;
+    div.innerText=l.text;
+    box.appendChild(div);
+  });
 }
 
-window.applyChanges = applyChanges;
+function renderEditor(){
+  const area = document.getElementById("lineEditor");
+  area.innerHTML="";
+  currentConfig.forEach((l,i)=>{
+    const block=document.createElement("div");
+    block.className="line-block";
+    block.innerHTML=`
+      <label>ข้อความ</label>
+      <input value="${l.text}" onchange="updateLine(${i},'text',this.value)">
+      <label>Font</label>
+      <select onchange="updateLine(${i},'font',this.value)">
+        <option ${l.font==="monospace"?"selected":""}>monospace</option>
+        <option ${l.font==="Arial"?"selected":""}>Arial</option>
+        <option ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
+      </select>
+      <label>ขนาด</label>
+      <input type="number" value="${l.size}" onchange="updateLine(${i},'size',this.value)">
+      <label>X</label>
+      <input type="number" value="${l.x}" onchange="updateLine(${i},'x',this.value)">
+      <label>Y</label>
+      <input type="number" value="${l.y}" onchange="updateLine(${i},'y',this.value)">
+      <label>น้ำหนัก</label>
+      <select onchange="updateLine(${i},'weight',this.value)">
+        <option ${l.weight==="normal"?"selected":""}>normal</option>
+        <option ${l.weight==="bold"?"selected":""}>bold</option>
+      </select>
+      <button onclick="removeLine(${i})" style="background:#dc3545">ลบ</button>
+    `;
+    area.appendChild(block);
+  });
+}
 
-window.saveTemplate = async function(){
+window.updateLine=function(i,key,val){
+  if(key==="size"||key==="x"||key==="y") val=parseInt(val);
+  currentConfig[i][key]=val;
+  renderPreview();
+}
 
-  const { error } = await supabase
+window.removeLine=function(i){
+  currentConfig.splice(i,1);
+  renderEditor();
+  renderPreview();
+}
+
+window.addLine=function(){
+  currentConfig.push({
+    text:"ข้อความใหม่",
+    font:"monospace",
+    size:14,
+    x:10,
+    y:10,
+    weight:"normal"
+  });
+  renderEditor();
+  renderPreview();
+}
+
+window.loadTemplate=async function(){
+  const { data } = await supabase
+    .from("vasd_print_template")
+    .select("*")
+    .eq("template_type",templateType.value)
+    .single();
+
+  if(data){
+    currentConfig=data.config;
+  }else{
+    currentConfig=[];
+  }
+
+  renderEditor();
+  renderPreview();
+}
+
+window.saveTemplate=async function(){
+  await supabase
     .from("vasd_print_template")
     .upsert({
-      template_type: templateType.value,
-      config: {
-        text: textValue.value,
-        size: fontSize.value,
-        x: posX.value,
-        y: posY.value,
-        weight: bold.value
-      }
+      template_type:templateType.value,
+      config:currentConfig
     });
 
-  if(error) alert("บันทึกไม่สำเร็จ");
-  else alert("บันทึกเรียบร้อย");
-};
+  alert("บันทึกเรียบร้อย");
+}
+
+loadTemplate();
 </script>
 
 </body>
