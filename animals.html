@@ -8,22 +8,31 @@
 <style>
 body { font-family:"Segoe UI", sans-serif; background:#f4f6f8; margin:0; }
 header {
-  background:#fff; border-bottom:1px solid #ddd;
-  padding:14px 20px; display:flex;
-  justify-content:space-between; align-items:center;
+  background:#fff;
+  border-bottom:1px solid #ddd;
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 .container { max-width:1600px; margin:auto; padding:20px; }
 
 table {
-  width:100%; border-collapse:collapse;
-  background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
-th, td { border:1px solid #ddd; padding:10px; text-align:center; }
+th, td {
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:center;
+}
 th { background:#f1f3f5; }
 
 input, select { width:100%; box-sizing:border-box; padding:4px; }
 
-/* ===== STATUS COLORS ===== */
+/* STATUS COLORS */
 .status-wait       { background:#eeeeee; }
 .status-anesthesia { background:#e3f2fd; }
 .status-surgery    { background:#fdecea; }
@@ -33,8 +42,12 @@ input, select { width:100%; box-sizing:border-box; padding:4px; }
 .status-cancel     { background:#eeeeee; opacity:0.6; }
 
 button {
-  padding:6px 10px; border:none; border-radius:4px;
-  cursor:pointer; font-size:13px; margin:2px;
+  padding:6px 10px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  font-size:13px;
+  margin:2px;
 }
 .btn-edit   { background:#2c7be5; color:#fff; }
 .btn-save   { background:#198754; color:#fff; }
@@ -87,7 +100,7 @@ import { supabase } from "./js/supabase.js";
 const ADMIN_PASSWORD = "2500";
 
 const statusMap = {
-  waiting: { text:"รอผ่าตัด", cls:"status-wait" },
+  waiting:{ text:"รอผ่าตัด", cls:"status-wait" },
   anesthesia:{ text:"กำลังวางยาสลบ", cls:"status-anesthesia" },
   surgery:{ text:"กำลังผ่าตัด", cls:"status-surgery" },
   recovery:{ text:"กำลังพักฟื้น", cls:"status-recovery" },
@@ -97,9 +110,9 @@ const statusMap = {
 };
 
 /* ================= LOAD ================= */
-async function loadAnimals() {
+async function loadAnimals(){
 
-  const { data: eventId } = await supabase.rpc("get_today_event");
+  const { data:eventId } = await supabase.rpc("get_today_event");
 
   const { data, error } = await supabase
     .from("vasd_animal")
@@ -111,7 +124,7 @@ async function loadAnimals() {
     .eq("event_id", eventId)
     .order("queue_number");
 
-  if (error) { console.error(error); return; }
+  if(error){ console.error(error); return; }
 
   const tbody = document.getElementById("animalTable");
   tbody.innerHTML = "";
@@ -170,7 +183,7 @@ async function loadAnimals() {
 
 loadAnimals();
 
-/* ================= PRINT ================= */
+/* ================= PRINT (FIXED 1 PAGE ONLY) ================= */
 window.printQueue = async function(animalId){
 
   const { data } = await supabase
@@ -186,51 +199,72 @@ window.printQueue = async function(animalId){
     .eq("id", animalId)
     .single();
 
-  if (!data) return alert("ไม่พบข้อมูล");
+  if(!data) return alert("ไม่พบข้อมูล");
 
   const speciesText = data.species === "ส" ? "สุนัข" : "แมว";
   const sexText = data.sex === "เมีย" ? "เพศเมีย" : "เพศผู้";
+  const services = data.vasd_service?.map(s=>s.service_type).join(", ") || "-";
 
-  const services = data.vasd_service?.map(s => s.service_type).join(", ") || "-";
-
-  const win = window.open("", "", "width=400,height=600");
+  const win = window.open("", "", "width=400,height=500");
 
   win.document.write(`
   <html>
   <head>
-    <style>
-      @page { size:80mm 50mm; margin:0; }
-      body {
-        width:80mm; height:50mm;
-        font-family:monospace;
-        padding:6mm;
-        font-size:14px;
-      }
-      .big { font-size:18px; font-weight:bold; }
-      .section { margin-top:4px; }
-    </style>
+  <style>
+    @page { size:80mm 50mm; margin:0; }
+
+    html,body{
+      width:80mm;
+      height:50mm;
+      margin:0;
+      padding:0;
+      overflow:hidden;
+      font-family:monospace;
+      line-height:1.2;
+    }
+
+    .wrap{
+      padding:5mm;
+      box-sizing:border-box;
+      height:50mm;
+    }
+
+    .big{ font-size:18px; font-weight:bold; }
+    .small{ font-size:12px; }
+
+    *{
+      page-break-after:avoid !important;
+      page-break-before:avoid !important;
+      page-break-inside:avoid !important;
+    }
+  </style>
   </head>
+
   <body>
-    <div class="big">คิวที่ ${data.queue_number}</div>
-    <div>${speciesText}${sexText}</div>
+    <div class="wrap">
+      <div class="big">คิวที่ ${data.queue_number}</div>
+      <div>${speciesText}${sexText}</div>
 
-    <div class="section">${data.animal_name}</div>
+      <div style="margin-top:4px;">
+        ${data.animal_name}
+      </div>
 
-    <div class="section">
-      เจ้าของคุณ: ${data.vasd_owner?.owner_name || "-"}
-    </div>
+      <div style="margin-top:4px;">
+        เจ้าของคุณ: ${data.vasd_owner?.owner_name || "-"}
+      </div>
 
-    <div class="section">
-      รับบริการ:
-      <div style="font-size:12px;">
-        ${services}
+      <div class="small" style="margin-top:4px;">
+        รับบริการ: ${services}
       </div>
     </div>
 
     <script>
-      window.print();
-      window.onafterprint = function(){ window.close(); }
+      window.onload=function(){
+        window.print();
+        setTimeout(()=>window.close(),300);
+      }
     <\/script>
+
   </body>
   </html>
   `);
@@ -238,73 +272,71 @@ window.printQueue = async function(animalId){
   win.document.close();
 };
 
-/* ================= EDIT / SAVE ================= */
-window.enableEdit = function(btn){
-  const pass = prompt("กรอกรหัสผ่าน admin");
-  if (pass !== ADMIN_PASSWORD) return;
+/* ================= EDIT / DELETE ================= */
+window.enableEdit=function(btn){
+  const pass = prompt("กรอกรหัส admin");
+  if(pass!==ADMIN_PASSWORD) return;
 
   const tr = btn.closest("tr");
-  tr.querySelectorAll(".f, .status").forEach(el=>{
-    el.readOnly = false;
-    el.disabled = false;
+  tr.querySelectorAll(".f,.status").forEach(el=>{
+    el.readOnly=false;
+    el.disabled=false;
   });
-  tr.querySelector(".btn-save").disabled = false;
+  tr.querySelector(".btn-save").disabled=false;
 };
 
-window.saveRow = async function(btn){
-  const tr = btn.closest("tr");
-  const id = tr.dataset.id;
+window.saveRow=async function(btn){
+  const tr=btn.closest("tr");
+  const id=tr.dataset.id;
 
-  const f = tr.querySelectorAll(".f");
-  const status = tr.querySelector(".status").value;
+  const f=tr.querySelectorAll(".f");
+  const status=tr.querySelector(".status").value;
 
   await supabase.from("vasd_animal").update({
-    animal_name: f[0].value,
-    species: f[1].value,
-    sex: f[2].value,
-    est_weight: f[3].value
-  }).eq("id", id);
+    animal_name:f[0].value,
+    species:f[1].value,
+    sex:f[2].value,
+    est_weight:f[3].value
+  }).eq("id",id);
 
   await supabase.from("vasd_queue")
     .update({ status, updated_at:new Date() })
-    .eq("animal_id", id);
+    .eq("animal_id",id);
 
   loadAnimals();
 };
 
-window.cancelRow = async function(id){
+window.cancelRow=async function(id){
   await supabase.from("vasd_queue")
     .update({ status:"cancel", updated_at:new Date() })
-    .eq("animal_id", id);
-
+    .eq("animal_id",id);
   loadAnimals();
 };
 
-window.deleteRow = async function(id){
-  const pwd = prompt("กรอกรหัส admin เพื่อยืนยันการลบ");
-  if (!pwd) return;
+window.deleteRow=async function(id){
+  const pwd=prompt("กรอกรหัส admin เพื่อยืนยันการลบ");
+  if(!pwd) return;
 
-  const { error } = await supabase.rpc("admin_delete_animal", {
-    p_animal_id: id,
-    p_admin_password: pwd
+  const { error } = await supabase.rpc("admin_delete_animal",{
+    p_animal_id:id,
+    p_admin_password:pwd
   });
 
-  if (error) alert("❌ ลบไม่สำเร็จ");
+  if(error) alert("❌ ลบไม่สำเร็จ");
   else loadAnimals();
 };
 
-window.deleteAll = async function(){
-  if (!confirm("⚠️ ต้องการลบสัตว์ทั้งหมดของวันนี้หรือไม่?")) return;
+window.deleteAll=async function(){
+  if(!confirm("⚠️ ต้องการลบสัตว์ทั้งหมดของวันนี้หรือไม่?")) return;
+  const pwd=prompt("กรอกรหัส admin");
+  if(!pwd) return;
 
-  const pwd = prompt("กรอกรหัส admin");
-  if (!pwd) return;
-
-  const { error } = await supabase.rpc("admin_delete_all_today", {
-    p_admin_password: pwd
+  const { error } = await supabase.rpc("admin_delete_all_today",{
+    p_admin_password:pwd
   });
 
-  if (error) alert("❌ ลบไม่สำเร็จ");
-  else {
+  if(error) alert("❌ ลบไม่สำเร็จ");
+  else{
     alert("✅ ลบข้อมูลทั้งหมดแล้ว");
     loadAnimals();
   }
@@ -312,8 +344,8 @@ window.deleteAll = async function(){
 
 /* ================= REALTIME ================= */
 supabase.channel("vasd-live")
-  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_queue" }, loadAnimals)
-  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_animal" }, loadAnimals)
+  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"},loadAnimals)
+  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_animal"},loadAnimals)
   .subscribe();
 
 </script>
