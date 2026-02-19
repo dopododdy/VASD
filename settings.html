@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>VASD - ตั้งค่าเครื่องพิมพ์</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family:"Segoe UI",sans-serif;
+  background:#f4f6f8;
+}
+
+header{
+  background:#fff;
+  border-bottom:1px solid #ddd;
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.container{
+  display:grid;
+  grid-template-columns: 350px 1fr;
+  height:calc(100vh - 70px);
+}
+
+.sidebar{
+  background:#fff;
+  border-right:1px solid #ddd;
+  padding:15px;
+  overflow:auto;
+}
+
+.preview{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#e9ecef;
+}
+
+.sticker{
+  position:relative;
+  width:80mm;
+  height:50mm;
+  background:#fff;
+  box-shadow:0 0 10px rgba(0,0,0,0.2);
+  overflow:hidden;
+}
+
+.line{
+  position:absolute;
+  cursor:move;
+}
+
+label{
+  font-size:13px;
+}
+
+input,select{
+  width:100%;
+  margin-bottom:8px;
+}
+
+button{
+  padding:6px 10px;
+  border:none;
+  border-radius:4px;
+  background:#2c7be5;
+  color:#fff;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h3>🖨 ตั้งค่าเครื่องพิมพ์และกระดาษ</h3>
+  <button onclick="location.href='index.html'">🏠 Home</button>
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<h4>ประเภทสติ๊กเกอร์</h4>
+<select id="templateType">
+  <option value="queue">คิว</option>
+  <option value="cage">ติดกรง</option>
+  <option value="envelope">ติดซองยา</option>
+  <option value="bag">ติดถุงยา</option>
+  <option value="vaccine">ติดหน้าสมุดวัคซีน</option>
+  <option value="microchip">ติดใบรับรองไมโครชิฟ</option>
+</select>
+
+<hr>
+
+<h4>ตั้งค่าบรรทัด</h4>
+
+<label>ข้อความ</label>
+<input id="textValue" value="คิวที่ 1">
+
+<label>ขนาดตัวอักษร (px)</label>
+<input id="fontSize" type="number" value="18">
+
+<label>ตำแหน่ง X (px)</label>
+<input id="posX" type="number" value="10">
+
+<label>ตำแหน่ง Y (px)</label>
+<input id="posY" type="number" value="10">
+
+<label>ตัวหนา</label>
+<select id="bold">
+  <option value="normal">ปกติ</option>
+  <option value="bold">หนา</option>
+</select>
+
+<button onclick="applyChanges()">ปรับใช้</button>
+
+<hr>
+
+<button onclick="saveTemplate()">💾 บันทึก Template</button>
+
+</div>
+
+<div class="preview">
+  <div class="sticker" id="sticker">
+    <div class="line" id="line1">คิวที่ 1</div>
+  </div>
+</div>
+
+</div>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+const line = document.getElementById("line1");
+
+function applyChanges(){
+  line.innerText = textValue.value;
+  line.style.fontSize = fontSize.value + "px";
+  line.style.left = posX.value + "px";
+  line.style.top = posY.value + "px";
+  line.style.fontWeight = bold.value;
+}
+
+window.applyChanges = applyChanges;
+
+window.saveTemplate = async function(){
+
+  const { error } = await supabase
+    .from("vasd_print_template")
+    .upsert({
+      template_type: templateType.value,
+      config: {
+        text: textValue.value,
+        size: fontSize.value,
+        x: posX.value,
+        y: posY.value,
+        weight: bold.value
+      }
+    });
+
+  if(error) alert("บันทึกไม่สำเร็จ");
+  else alert("บันทึกเรียบร้อย");
+};
+</script>
+
+</body>
+</html>
