@@ -104,7 +104,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
           <th width="10%">ชนิด</th>
           <th width="10%">เพศ</th>
           <th width="10%">นน. (กก.)</th>
-          <th width="25%">หัตถการเบื้องต้น</th>
+          <th width="25%">บริการ</th>
           <th width="20%">บันทึกสุขภาพ / ข้อความสำคัญ</th>
           <th width="10%">จัดการ</th>
         </tr>
@@ -168,14 +168,22 @@ function serviceHTML(sex, species) {
         ${neuterText(sex)}
       </label>
       <label>
-        <input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า">
-        วัคซีนพิษสุนัขบ้า
+        <input type="checkbox" class="svc" value="ฉีดวัคซีนพิษสุนัขบ้า">
+        ฉีดวัคซีนพิษสุนัขบ้า
       </label>
       ${species === "ส" ? `
         <label>
-          <input type="checkbox" class="svc" value="ป้องกันเห็บหมัด">
-          ป้องกันเห็บหมัด
+          <input type="checkbox" class="svc" value="ฉีดยาป้องกันเห็บ">
+          ฉีดยาป้องกันเห็บ
         </label>` : ""}
+      <label>
+        <input type="checkbox" class="svc" value="ตรวจเลือด">
+        ตรวจเลือด
+      </label>
+      <label>
+        <input type="checkbox" class="svc" value="ฝังไมโครชิฟ">
+        ฝังไมโครชิฟ
+      </label>
     </div>`;
 }
 
@@ -331,7 +339,7 @@ window.saveAll = async function () {
       queuesToInsert.push({ animal_id: animal.id, status: "registered" });
     }
 
-    // 5. Batch Insert ข้อมูล Service และ Queue (ทำงานไวขึ้น)
+    // 5. Batch Insert ข้อมูล Service และ Queue
     if (svcsToInsert.length > 0) {
       const { error: svcErr } = await supabase.from("vasd_service").insert(svcsToInsert);
       if (svcErr) throw svcErr;
