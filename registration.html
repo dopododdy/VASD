@@ -6,47 +6,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body { font-family:Segoe UI, sans-serif; background:#f4f6f8; margin:0; }
+/* ================= CSS ปรับปรุงใหม่ ================= */
+body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f8; margin: 0; color: #333; }
 header {
-  background:#fff; border-bottom:1px solid #ddd;
-  padding:14px 20px; display:flex; justify-content:space-between;
+  background: #fff; border-bottom: 1px solid #ddd;
+  padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
-.container { max-width:1600px; margin:auto; padding:20px; }
+header h3 { margin: 0; color: #2c7be5; }
+.container { max-width: 1200px; margin: auto; padding: 20px; }
 .card {
-  background:#fff; border-radius:10px; padding:20px;
-  margin-bottom:20px; box-shadow:0 2px 6px rgba(0,0,0,.05);
+  background: #fff; border-radius: 8px; padding: 20px;
+  margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #e9ecef;
 }
+.card h4 { margin-top: 0; margin-bottom: 15px; color: #495057; border-bottom: 2px solid #f4f6f8; padding-bottom: 10px; }
+
 .owner-grid {
-  display:grid;
+  display: grid;
   grid-template-columns: 2fr 1fr auto;
-  gap:12px;
+  gap: 12px;
 }
+
 input, select, textarea {
-  width:100%; box-sizing:border-box; padding:6px;
+  width: 100%; box-sizing: border-box; padding: 10px;
+  border: 1px solid #ced4da; border-radius: 4px;
+  font-family: inherit; font-size: 14px; transition: border-color 0.15s ease-in-out;
 }
-table { width:100%; border-collapse:collapse; }
-th, td { border:1px solid #ddd; padding:6px; text-align:center; }
-tbody tr:nth-child(even) { background:#f9fbff; }
+input:focus, select:focus, textarea:focus {
+  border-color: #80bdff; outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+textarea { resize: vertical; min-height: 42px; }
 
-.service-line { display:flex; gap:16px; flex-wrap:wrap; }
+/* Responsive Table Wrapper */
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; min-width: 800px; }
+th, td { border: 1px solid #e9ecef; padding: 10px; text-align: center; vertical-align: middle; }
+th { background: #f8f9fa; color: #495057; font-weight: 600; }
+tbody tr:nth-child(even) { background: #fcfcfc; }
+tbody tr:hover { background: #f1f3f5; }
 
-.important-warning {
-  background:#fff3cd;
-  border:2px solid #ff9800;
-}
-.important-warning::before {
-  content:"⚠️ ";
-  font-weight:bold;
-}
+.service-line { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-start; text-align: left; }
+.service-line label { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 13px; }
+
+.important-warning { background: #fff3cd !important; border: 2px solid #ffc107 !important; transition: all 0.3s; }
+.important-warning::before { content: "⚠️ "; font-weight: bold; }
 
 button {
-  padding:8px 12px; border:none; border-radius:6px;
-  cursor:pointer; font-weight:bold;
+  padding: 10px 16px; border: none; border-radius: 4px;
+  cursor: pointer; font-weight: bold; font-size: 14px;
+  transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
 }
-.btn-add{background:#6c757d;color:#fff;}
-.btn-save{background:#2c7be5;color:#fff;}
-.btn-del{background:#dc3545;color:#fff;}
-.btn-paste{background:#198754;color:#fff;}
+button:hover { opacity: 0.85; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.btn-add { background: #6c757d; color: #fff; }
+.btn-save { background: #2c7be5; color: #fff; font-size: 16px; padding: 12px 24px; }
+.btn-del { background: #dc3545; color: #fff; padding: 6px 10px; }
+.btn-paste { background: #198754; color: #fff; }
+.btn-home { background: #e9ecef; color: #495057; }
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .owner-grid { grid-template-columns: 1fr; }
+  .btn-paste { width: 100%; }
+}
 </style>
 </head>
 
@@ -54,45 +80,44 @@ button {
 
 <header>
   <h3>📝 RMUTTO - VASD | ลงทะเบียนสัตว์</h3>
-  <button onclick="location.href='index.html'">🏠 Home</button>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
 </header>
 
 <div class="container">
 
-<!-- ================= OWNER ================= -->
 <div class="card">
   <h4>ข้อมูลเจ้าของสัตว์</h4>
   <div class="owner-grid">
-    <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์">
-    <input id="phone" placeholder="เบอร์โทร (ไม่บังคับ)">
-    <button class="btn-paste" onclick="pasteOwnerName()">📋 วางชื่อ</button>
+    <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์ (บังคับ)" required>
+    <input id="phone" type="tel" placeholder="เบอร์โทร (ไม่บังคับ)">
+    <button class="btn-paste" onclick="pasteOwnerName()">📋 ดึงชื่อจากบัตร</button>
   </div>
 </div>
 
-<!-- ================= ANIMAL ================= -->
 <div class="card">
   <h4>ข้อมูลสัตว์</h4>
-  <table>
-    <thead>
-      <tr>
-        <th>ชื่อ</th>
-        <th>ชนิด</th>
-        <th>เพศ</th>
-        <th>นน. (กก.)</th>
-        <th>หัตถการ</th>
-        <th>ข้อความสำคัญ</th>
-        <th>ลบ</th>
-      </tr>
-    </thead>
-    <tbody id="animalBody"></tbody>
-  </table>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th width="15%">ชื่อ</th>
+          <th width="10%">ชนิด</th>
+          <th width="10%">เพศ</th>
+          <th width="10%">นน. (กก.)</th>
+          <th width="25%">หัตถการเบื้องต้น</th>
+          <th width="20%">บันทึกสุขภาพ / ข้อความสำคัญ</th>
+          <th width="10%">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody id="animalBody"></tbody>
+    </table>
+  </div>
   <br>
-  <button class="btn-add" onclick="addAnimal()">➕ เพิ่มสัตว์</button>
+  <button class="btn-add" onclick="addAnimal()">➕ เพิ่มรายการสัตว์</button>
 </div>
 
-<!-- ================= SAVE ================= -->
-<div class="card" style="text-align:center">
-  <button class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูล</button>
+<div class="card" style="text-align:center; background: transparent; border: none; box-shadow: none;">
+  <button id="btnSaveAll" class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูลเข้าระบบ</button>
 </div>
 
 </div>
@@ -107,13 +132,13 @@ window.pasteOwnerName = async function () {
   try {
     const text = await navigator.clipboard.readText();
     if (!text) {
-      alert("ยังไม่มีข้อมูลจากบัตรประชาชน");
+      alert("⚠️ ยังไม่มีข้อมูลใน Clipboard");
       return;
     }
-    document.getElementById("ownerName").value = text;
+    document.getElementById("ownerName").value = text.trim();
     document.getElementById("phone").focus();
-  } catch {
-    alert("ไม่สามารถอ่าน Clipboard ได้ (ต้องใช้ Chrome และกดปุ่ม)");
+  } catch (err) {
+    alert("⚠️ ไม่สามารถอ่าน Clipboard ได้ (ต้องใช้อุปกรณ์ที่รองรับและอนุญาตให้เข้าถึง Clipboard)");
   }
 };
 
@@ -121,15 +146,15 @@ window.pasteOwnerName = async function () {
    FORMAT PHONE
 ========================= */
 const phoneInput = document.getElementById("phone");
-phoneInput.addEventListener("input", () => {
-  let v = phoneInput.value.replace(/\D/g,"").slice(0,10);
+phoneInput.addEventListener("input", function() {
+  let v = this.value.replace(/\D/g,"").slice(0,10);
   if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d+)/,"$1-$2-$3");
   else if (v.length > 3) v = v.replace(/(\d{3})(\d+)/,"$1-$2");
-  phoneInput.value = v;
+  this.value = v;
 });
 
 /* =========================
-   SERVICE
+   SERVICE LOGIC
 ========================= */
 function neuterText(sex) {
   return sex === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย";
@@ -146,7 +171,7 @@ function serviceHTML(sex, species) {
         <input type="checkbox" class="svc" value="วัคซีนพิษสุนัขบ้า">
         วัคซีนพิษสุนัขบ้า
       </label>
-      ${species==="ส" ? `
+      ${species === "ส" ? `
         <label>
           <input type="checkbox" class="svc" value="ป้องกันเห็บหมัด">
           ป้องกันเห็บหมัด
@@ -160,7 +185,7 @@ function serviceHTML(sex, species) {
 window.addAnimal = function () {
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td><input class="animalName" placeholder="ชื่อสัตว์ (ห้ามเว้นว่าง)"></td>
+    <td><input class="animalName" placeholder="ระบุชื่อ..." required></td>
     <td>
       <select class="species">
         <option value="ม">แมว</option>
@@ -173,29 +198,35 @@ window.addAnimal = function () {
         <option value="ผู้">ผู้</option>
       </select>
     </td>
-    <td><input type="number" value="3" min="0"></td>
+    <td><input type="number" class="estWeight" value="3" min="0" step="0.1"></td>
     <td class="svcCell"></td>
     <td class="noteCell">
-      <textarea placeholder="เช่น โรคหัวใจ / ไม่ได้อดอาหาร"></textarea>
+      <textarea class="healthNote" placeholder="เช่น โรคประจำตัว / ดุ / ไม่ได้อดอาหาร..."></textarea>
     </td>
     <td>
-      <button class="btn-del" onclick="this.closest('tr').remove()">🗑</button>
+      <button class="btn-del" onclick="this.closest('tr').remove()" title="ลบรายการนี้">🗑 ลบ</button>
     </td>
   `;
 
   const species = tr.querySelector(".species");
   const sex = tr.querySelector(".sex");
   const svcCell = tr.querySelector(".svcCell");
-  const note = tr.querySelector("textarea");
+  const note = tr.querySelector(".healthNote");
   const noteCell = tr.querySelector(".noteCell");
+  const nameInput = tr.querySelector(".animalName");
+
+  // รีเซ็ตสีแดงเมื่อเริ่มพิมพ์
+  nameInput.oninput = () => { nameInput.style.backgroundColor = ""; };
 
   function refreshService() {
     svcCell.innerHTML = serviceHTML(sex.value, species.value);
   }
+  
   refreshService();
   species.onchange = refreshService;
   sex.onchange = refreshService;
 
+  // ไฮไลต์ข้อความสำคัญ
   note.oninput = () => {
     noteCell.classList.toggle("important-warning", note.value.trim() !== "");
   };
@@ -203,86 +234,125 @@ window.addAnimal = function () {
   document.getElementById("animalBody").appendChild(tr);
 };
 
+// เริ่มต้นเปิดหน้ามาให้มีสัตว์ 1 ตัวเสมอ
+window.addEventListener('DOMContentLoaded', () => {
+  addAnimal();
+});
+
 /* =========================
    SAVE (REAL + VALIDATE)
 ========================= */
 window.saveAll = async function () {
-  const ownerName = document.getElementById("ownerName").value.trim();
+  const btnSave = document.getElementById("btnSaveAll");
+  const ownerNameInput = document.getElementById("ownerName");
+  const ownerName = ownerNameInput.value.trim();
   const phone = document.getElementById("phone").value.trim();
 
+  // Validate Owner
   if (!ownerName) {
-    alert("กรุณาใส่ชื่อเจ้าของสัตว์");
-    document.getElementById("ownerName").focus();
+    alert("❌ กรุณาระบุชื่อเจ้าของสัตว์");
+    ownerNameInput.focus();
     return;
   }
 
   const rows = document.querySelectorAll("#animalBody tr");
   if (rows.length === 0) {
-    alert("ยังไม่มีข้อมูลสัตว์");
+    alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
     return;
   }
 
-  /* ===== VALIDATE ANIMAL NAME ===== */
-  for (let i = 0; i < rows.length; i++) {
-    const nameInput = rows[i].querySelector(".animalName");
-    const name = nameInput.value.trim();
-
-    if (!name) {
-      alert(`กรุณาใส่ชื่อสัตว์ (แถวที่ ${i + 1})`);
+  // Validate Animals
+  let hasError = false;
+  rows.forEach((row, index) => {
+    const nameInput = row.querySelector(".animalName");
+    if (!nameInput.value.trim()) {
+      alert(`❌ กรุณาระบุชื่อสัตว์ในรายการที่ ${index + 1}`);
       nameInput.focus();
       nameInput.style.backgroundColor = "#ffecec";
-      return;
-    } else {
-      nameInput.style.backgroundColor = "";
+      hasError = true;
     }
-  }
+  });
+  if (hasError) return;
 
-  /* ===== SAVE TO SUPABASE ===== */
-  const { data: eventId } = await supabase.rpc("get_today_event");
+  // Lock UI & Start Loading
+  btnSave.disabled = true;
+  btnSave.innerHTML = "⏳ กำลังบันทึกข้อมูล...";
 
-  const { data: owner } = await supabase
-    .from("vasd_owner")
-    .insert({ event_id: eventId, owner_name: ownerName, phone })
-    .select().single();
+  try {
+    // 1. Get Event ID
+    const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
+    if (evtErr) throw evtErr;
 
-  const { count } = await supabase
-    .from("vasd_animal")
-    .select("*", { count:"exact", head:true })
-    .eq("event_id", eventId);
+    // 2. Insert Owner
+    const { data: owner, error: ownerErr } = await supabase
+      .from("vasd_owner")
+      .insert({ event_id: eventId, owner_name: ownerName, phone: phone })
+      .select()
+      .single();
+    if (ownerErr) throw ownerErr;
 
-  let q = (count || 0) + 1;
-
-  for (const r of rows) {
-    const { data: animal } = await supabase
+    // 3. Get latest queue number
+    const { count, error: countErr } = await supabase
       .from("vasd_animal")
-      .insert({
-        event_id: eventId,
-        owner_id: owner.id,
-        queue_number: q++,
-        species: r.querySelector(".species").value,
-        animal_name: r.querySelector(".animalName").value.trim(),
-        sex: r.querySelector(".sex").value,
-        est_weight: r.querySelector("input[type=number]").value,
-        health_note: r.querySelector("textarea").value
-      })
-      .select().single();
+      .select("*", { count: "exact", head: true })
+      .eq("event_id", eventId);
+    if (countErr) throw countErr;
 
-    const svcs = [];
-    r.querySelectorAll(".svc:checked").forEach(s =>
-      svcs.push({ animal_id: animal.id, service_type: s.value })
-    );
-    if (svcs.length) {
-      await supabase.from("vasd_service").insert(svcs);
+    let currentQueue = (count || 0) + 1;
+
+    // 4. บันทึกข้อมูลทีละตัวเพื่อเอา ID มาเชื่อมต่อ Service และ Queue
+    let svcsToInsert = [];
+    let queuesToInsert = [];
+
+    for (const r of rows) {
+      const { data: animal, error: animalErr } = await supabase
+        .from("vasd_animal")
+        .insert({
+          event_id: eventId,
+          owner_id: owner.id,
+          queue_number: currentQueue++,
+          species: r.querySelector(".species").value,
+          animal_name: r.querySelector(".animalName").value.trim(),
+          sex: r.querySelector(".sex").value,
+          est_weight: r.querySelector(".estWeight").value || 0,
+          health_note: r.querySelector(".healthNote").value.trim()
+        })
+        .select()
+        .single();
+      
+      if (animalErr) throw animalErr;
+
+      // เตรียมข้อมูล Services
+      r.querySelectorAll(".svc:checked").forEach(s => {
+        svcsToInsert.push({ animal_id: animal.id, service_type: s.value });
+      });
+
+      // เตรียมข้อมูล Queue
+      queuesToInsert.push({ animal_id: animal.id, status: "registered" });
     }
 
-    await supabase.from("vasd_queue").insert({
-      animal_id: animal.id,
-      status: "registered"
-    });
-  }
+    // 5. Batch Insert ข้อมูล Service และ Queue (ทำงานไวขึ้น)
+    if (svcsToInsert.length > 0) {
+      const { error: svcErr } = await supabase.from("vasd_service").insert(svcsToInsert);
+      if (svcErr) throw svcErr;
+    }
+    
+    if (queuesToInsert.length > 0) {
+      const { error: qErr } = await supabase.from("vasd_queue").insert(queuesToInsert);
+      if (qErr) throw qErr;
+    }
 
-  alert("✅ บันทึกข้อมูลเรียบร้อย");
-  location.href = "index.html";
+    alert("✅ บันทึกข้อมูลการลงทะเบียนเรียบร้อยแล้ว");
+    location.href = "index.html";
+
+  } catch (error) {
+    console.error("Save Error:", error);
+    alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (error.message || "โปรดลองใหม่อีกครั้ง"));
+  } finally {
+    // Unlock UI
+    btnSave.disabled = false;
+    btnSave.innerHTML = "💾 บันทึกข้อมูลเข้าระบบ";
+  }
 };
 </script>
 
