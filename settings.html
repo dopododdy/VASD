@@ -25,34 +25,57 @@ header{
   display:flex;justify-content:center;align-items:center;
   background:#e9ecef;
 }
-.sticker{
-  position:relative;
-  width:80mm;
-  height:50mm;
-  background:#fff;
-  box-shadow:0 0 10px rgba(0,0,0,0.2);
+/* กำหนดขนาด Sticker ตามจริง (80mm x 50mm) */
+.sticker {
+  position: relative;
+  width: 80mm;
+  height: 50mm;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  overflow: hidden;
 }
-.line{
-  position:absolute;
+.line {
+  position: absolute;
+  white-space: nowrap;
 }
-input,select{width:100%;margin-bottom:8px;}
+input,select{width:100%;margin-bottom:8px;padding:5px;box-sizing:border-box;}
 button{
-  padding:6px 10px;border:none;
+  padding:8px 12px;border:none;
   border-radius:4px;background:#2c7be5;
   color:#fff;cursor:pointer;margin-bottom:6px;
+  width: 100%;
 }
+button:hover{opacity:0.9;}
 .line-block{
   border:1px solid #ddd;
-  padding:8px;margin-bottom:8px;
+  padding:10px;margin-bottom:12px;
+  background: #fdffdf;
+  border-radius: 5px;
 }
 .small{font-size:12px;color:#888;}
+hr{margin: 15px 0; border: 0; border-top: 1px solid #eee;}
+
+/* CSS สำหรับการพิมพ์ */
+@media print {
+  body * { visibility: hidden; }
+  #sticker, #sticker * { visibility: visible; }
+  #sticker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-shadow: none;
+  }
+}
 </style>
 </head>
 <body>
 
 <header>
   <h3>🖨 ตั้งค่า Sticker Template</h3>
-  <button onclick="location.href='index.html'">🏠 Home</button>
+  <div style="display:flex; gap:10px;">
+    <button onclick="window.printTest()" style="background:#28a745; margin-bottom:0;">🖨️ ทดสอบการพิมพ์</button>
+    <button onclick="location.href='index.html'" style="background:#6c757d; margin-bottom:0; width:auto;">🏠 Home</button>
+  </div>
 </header>
 
 <div class="container">
@@ -69,22 +92,18 @@ button{
   <option value="microchip">ติดใบรับรองไมโครชิฟ</option>
 </select>
 
-<button onclick="loadTemplate()">โหลด Template</button>
+<button onclick="loadTemplate()" style="background:#17a2b8;">🔄 โหลด Template</button>
 
 <hr>
 
 <div id="lineEditor"></div>
 
 <button onclick="addLine()">➕ เพิ่มบรรทัด</button>
-<button onclick="saveTemplate()">💾 บันทึก Template</button>
+<button onclick="saveTemplate()" style="background:#2c7be5; font-weight:bold;">💾 บันทึก Template</button>
 
 <p class="small">
-สามารถใช้ตัวแปร:<br>
-{{queue_number}}<br>
-{{animal_name}}<br>
-{{species}}<br>
-{{sex}}<br>
-{{owner_name}}<br>
+<b>ตัวแปรที่ใช้ได้:</b><br>
+{{queue_number}}, {{animal_name}}, {{species}}, {{sex}}, {{owner_name}}
 </p>
 
 </div>
@@ -100,10 +119,11 @@ import { supabase } from "./js/supabase.js";
 
 let currentConfig = [];
 
+// ฟังก์ชันวาด Sticker ในหน้า Preview
 function renderPreview(){
   const box = document.getElementById("sticker");
   box.innerHTML = "";
-  currentConfig.forEach((l,i)=>{
+  currentConfig.forEach((l)=>{
     const div = document.createElement("div");
     div.className="line";
     div.style.left=l.x+"px";
@@ -111,11 +131,20 @@ function renderPreview(){
     div.style.fontSize=l.size+"px";
     div.style.fontWeight=l.weight;
     div.style.fontFamily=l.font;
-    div.innerText=l.text;
+    
+    // แทนที่ตัวแปรจำลองเพื่อให้เห็นภาพตอนพิมพ์
+    let previewText = l.text
+      .replace("{{queue_number}}", "A001")
+      .replace("{{animal_name}}", "น้องถุงทอง")
+      .replace("{{species}}", "แมว")
+      .replace("{{owner_name}}", "สมชาย ใจดี");
+      
+    div.innerText = previewText;
     box.appendChild(div);
   });
 }
 
+// ฟังก์ชันสร้าง Form แก้ไขแต่ละบรรทัด
 function renderEditor(){
   const area = document.getElementById("lineEditor");
   area.innerHTML="";
@@ -123,33 +152,43 @@ function renderEditor(){
     const block=document.createElement("div");
     block.className="line-block";
     block.innerHTML=`
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b>บรรทัดที่ ${i+1}</b>
+        <button onclick="removeLine(${i})" style="background:#dc3545; width:auto; padding:2px 8px;">ลบ</button>
+      </div>
       <label>ข้อความ</label>
-      <input value="${l.text}" onchange="updateLine(${i},'text',this.value)">
-      <label>Font</label>
-      <select onchange="updateLine(${i},'font',this.value)">
-        <option ${l.font==="monospace"?"selected":""}>monospace</option>
-        <option ${l.font==="Arial"?"selected":""}>Arial</option>
-        <option ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
-      </select>
-      <label>ขนาด</label>
-      <input type="number" value="${l.size}" onchange="updateLine(${i},'size',this.value)">
-      <label>X</label>
-      <input type="number" value="${l.x}" onchange="updateLine(${i},'x',this.value)">
-      <label>Y</label>
-      <input type="number" value="${l.y}" onchange="updateLine(${i},'y',this.value)">
-      <label>น้ำหนัก</label>
-      <select onchange="updateLine(${i},'weight',this.value)">
-        <option ${l.weight==="normal"?"selected":""}>normal</option>
-        <option ${l.weight==="bold"?"selected":""}>bold</option>
-      </select>
-      <button onclick="removeLine(${i})" style="background:#dc3545">ลบ</button>
+      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)">
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+        <div>
+          <label>Font</label>
+          <select onchange="updateLine(${i},'font',this.value)">
+            <option value="monospace" ${l.font==="monospace"?"selected":""}>Monospace</option>
+            <option value="Arial" ${l.font==="Arial"?"selected":""}>Arial</option>
+            <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
+          </select>
+        </div>
+        <div>
+          <label>น้ำหนัก</label>
+          <select onchange="updateLine(${i},'weight',this.value)">
+            <option value="normal" ${l.weight==="normal"?"selected":""}>Normal</option>
+            <option value="bold" ${l.weight==="bold"?"selected":""}>Bold</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
+        <div><label>ขนาด(px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
+        <div><label>X (ซ้าย)</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
+        <div><label>Y (บน)</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
+      </div>
     `;
     area.appendChild(block);
   });
 }
 
 window.updateLine=function(i,key,val){
-  if(key==="size"||key==="x"||key==="y") val=parseInt(val);
+  if(key==="size"||key==="x"||key==="y") val=parseInt(val) || 0;
   currentConfig[i][key]=val;
   renderPreview();
 }
@@ -164,7 +203,7 @@ window.addLine=function(){
   currentConfig.push({
     text:"ข้อความใหม่",
     font:"monospace",
-    size:14,
+    size:16,
     x:10,
     y:10,
     weight:"normal"
@@ -174,33 +213,77 @@ window.addLine=function(){
 }
 
 window.loadTemplate=async function(){
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("vasd_print_template")
     .select("*")
-    .eq("template_type",templateType.value)
+    .eq("template_type", document.getElementById("templateType").value)
     .single();
 
   if(data){
-    currentConfig=data.config;
+    currentConfig = data.config;
   }else{
-    currentConfig=[];
+    currentConfig = [];
   }
-
   renderEditor();
   renderPreview();
 }
 
 window.saveTemplate=async function(){
-  await supabase
+  const type = document.getElementById("templateType").value;
+  const { error } = await supabase
     .from("vasd_print_template")
     .upsert({
-      template_type:templateType.value,
-      config:currentConfig
-    });
+      template_type: type,
+      config: currentConfig
+    }, { onConflict: 'template_type' });
 
-  alert("บันทึกเรียบร้อย");
+  if(error) alert("เกิดข้อผิดพลาด: " + error.message);
+  else alert("บันทึก Template " + type + " เรียบร้อยแล้ว");
 }
 
+// --- ฟังก์ชันทดสอบการพิมพ์ ---
+window.printTest = function() {
+  const printContents = document.getElementById('sticker').innerHTML;
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
+  
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Test</title>
+        <style>
+          body { margin: 0; padding: 0; }
+          .sticker {
+            position: relative;
+            width: 80mm;
+            height: 50mm;
+            background: #fff;
+            overflow: hidden;
+          }
+          .line {
+            position: absolute;
+            white-space: nowrap;
+          }
+          @page {
+            size: 80mm 50mm;
+            margin: 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="sticker">${printContents}</div>
+        <script>
+          window.onload = function() {
+            window.print();
+            window.close();
+          };
+        <\/script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// โหลดข้อมูลครั้งแรก
 loadTemplate();
 </script>
 
