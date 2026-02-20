@@ -84,7 +84,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
     page-break-after: always; /* ตัดขึ้นแผ่นใหม่เสมอ */
     overflow: hidden;
     background: #fff;
-    /* ถ้าฟอนต์โหลดไม่ทัน จะใช้ฟอนต์ระบบเป็นตัวสำรอง */
     font-family: "Segoe UI", sans-serif;
   }
   .line {
@@ -92,6 +91,10 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
     white-space: pre-wrap;
     word-break: break-word;
     max-width: 95%;
+    /* บังคับสีดำและให้พิมพ์แบบชัดเจน */
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   @page {
     size: 80mm 50mm;
@@ -207,7 +210,7 @@ window.addAnimal = function () {
 };
 window.addEventListener('DOMContentLoaded', () => { addAnimal(); });
 
-/* ========================= SAVE & PRINT (Auto Print) ========================= */
+/* ========================= SAVE & PRINT ========================= */
 window.saveAll = async function () {
   const btnSave = document.getElementById("btnSaveAll");
   const ownerNameInput = document.getElementById("ownerName");
@@ -264,7 +267,6 @@ window.saveAll = async function () {
       });
       queuesToInsert.push({ animal_id: animal.id, status: "waiting" });
 
-      // เก็บข้อมูลไว้เตรียมสร้างสติ๊กเกอร์
       animalsForPrint.push({
         q: animal.queue_number,
         name: animal.animal_name,
@@ -280,7 +282,6 @@ window.saveAll = async function () {
     // ==========================================
     // ส่วนของการสร้างสติ๊กเกอร์และสั่งพิมพ์
     // ==========================================
-    // 1. ดึง Template คิว
     const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
     
     if (tmplData && tmplData.config) {
@@ -294,7 +295,7 @@ window.saveAll = async function () {
             .replace("{{species}}", a.spc)
             .replace("{{sex}}", a.sex)
             .replace("{{owner_name}}", ownerName)
-            .replace("{{phone}}", phone || "ไม่ระบุ") // เพิ่มการดึงเบอร์โทรตรงนี้
+            .replace("{{phone}}", phone || "ไม่ระบุ")
             .replace("{{services}}", a.svc);
           pageHtml += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font};">${text}</div>`;
         });
@@ -303,11 +304,9 @@ window.saveAll = async function () {
       });
       document.getElementById("printArea").innerHTML = printHtml;
       
-      // สั่งพิมพ์
       window.print();
     }
 
-    // หน่วงเวลา 1 วินาทีเพื่อให้ระบบพิมพ์ทำงานเสร็จ แล้วเด้งไปหน้า Home
     setTimeout(() => {
       location.href = "index.html";
     }, 1000);
