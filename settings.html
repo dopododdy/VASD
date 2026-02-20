@@ -103,7 +103,7 @@ hr{margin: 15px 0; border: 0; border-top: 1px solid #eee;}
 
 <p class="small">
 <b>ตัวแปรที่ใช้ได้:</b><br>
-{{queue_number}}, {{animal_name}}, {{species}}, {{sex}}, {{owner_name}}
+{{queue_number}}, {{animal_name}}, {{species}}, {{sex}}, {{owner_name}}, <span style="color:#d9534f; font-weight:bold;">{{services}}</span>
 </p>
 
 </div>
@@ -134,10 +134,12 @@ function renderPreview(){
     
     // แทนที่ตัวแปรจำลองเพื่อให้เห็นภาพตอนพิมพ์
     let previewText = l.text
-      .replace("{{queue_number}}", "A001")
+      .replace("{{queue_number}}", "1")
       .replace("{{animal_name}}", "น้องถุงทอง")
       .replace("{{species}}", "แมว")
-      .replace("{{owner_name}}", "สมชาย ใจดี");
+      .replace("{{sex}}", "ผู้")
+      .replace("{{owner_name}}", "สมชาย ใจดี")
+      .replace("{{services}}", "ทำหมัน, วัคซีน");
       
     div.innerText = previewText;
     box.appendChild(div);
@@ -222,6 +224,7 @@ window.loadTemplate=async function(){
   if(data){
     currentConfig = data.config;
   }else{
+    // ถ้ายังไม่มีข้อมูลในระบบ ให้โหลดเป็นค่าว่าง
     currentConfig = [];
   }
   renderEditor();
