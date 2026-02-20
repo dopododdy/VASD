@@ -38,13 +38,14 @@ header{
 }
 
 /* ========================================= */
-/* แก้ไขให้ข้อความปัดบรรทัด ไม่ทะลุขอบกระดาษด้านขวา */
+/* แก้ไขให้ข้อความปัดบรรทัด และรองรับการจัด Center/Right */
 /* ========================================= */
 .line {
   position: absolute;
   white-space: pre-wrap;
   word-break: break-word;
-  max-width: 95%;
+  padding-right: 5px; /* กันข้อความชิดขอบกระดาษเกินไป */
+  box-sizing: border-box;
 }
 
 input,select{width:100%;margin-bottom:8px;padding:5px;box-sizing:border-box;}
@@ -141,14 +142,21 @@ function renderPreview(){
     div.style.fontWeight=l.weight;
     div.style.fontFamily=l.font;
     
-    // แทนที่ตัวแปรจำลองเพื่อให้เห็นภาพตอนพิมพ์ รวมถึง {{phone}}
+    // ==========================================
+    // ส่วนที่เพิ่มใหม่: รองรับการจัดหน้า ซ้าย-กลาง-ขวา
+    // ==========================================
+    div.style.textAlign = l.align || "left";
+    div.style.width = `calc(100% - ${l.x}px)`; 
+    // ==========================================
+    
+    // แทนที่ตัวแปรจำลองเพื่อให้เห็นภาพตอนพิมพ์
     let previewText = l.text
       .replace("{{queue_number}}", "1")
       .replace("{{animal_name}}", "น้องถุงทอง")
       .replace("{{species}}", "แมว")
       .replace("{{sex}}", "ผู้")
       .replace("{{owner_name}}", "สมชาย ใจดี")
-      .replace("{{phone}}", "081-234-5678") // ข้อมูลเบอร์โทรจำลอง
+      .replace("{{phone}}", "081-234-5678")
       .replace("{{services}}", "ทำหมัน, วัคซีน");
       
     div.innerText = previewText;
@@ -171,18 +179,16 @@ function renderEditor(){
       <label>ข้อความ</label>
       <input value="${l.text}" oninput="updateLine(${i},'text',this.value)">
       
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+      <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:5px;">
         <div>
           <label>Font</label>
           <select onchange="updateLine(${i},'font',this.value)">
             <option value="monospace" ${l.font==="monospace"?"selected":""}>Monospace</option>
-            <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma (ระบบ)</option>
-            <option value="'Segoe UI'" ${l.font==="'Segoe UI'"?"selected":""}>Segoe UI (ระบบ)</option>
-            <option value="'Prompt', sans-serif" ${l.font==="'Prompt', sans-serif"?"selected":""}>Prompt (พร้อม)</option>
-            <option value="'Kanit', sans-serif" ${l.font==="'Kanit', sans-serif"?"selected":""}>Kanit (คณิต)</option>
-            <option value="'Sarabun', sans-serif" ${l.font==="'Sarabun', sans-serif"?"selected":""}>Sarabun (สารบรรณ)</option>
-            <option value="'Cordia New', sans-serif" ${l.font==="'Cordia New', sans-serif"?"selected":""}>Cordia New</option>
-            <option value="'Angsana New', sans-serif" ${l.font==="'Angsana New', sans-serif"?"selected":""}>Angsana New</option>
+            <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
+            <option value="'Segoe UI'" ${l.font==="'Segoe UI'"?"selected":""}>Segoe UI</option>
+            <option value="'Prompt', sans-serif" ${l.font==="'Prompt', sans-serif"?"selected":""}>Prompt</option>
+            <option value="'Kanit', sans-serif" ${l.font==="'Kanit', sans-serif"?"selected":""}>Kanit</option>
+            <option value="'Sarabun', sans-serif" ${l.font==="'Sarabun', sans-serif"?"selected":""}>Sarabun</option>
           </select>
         </div>
         <div>
@@ -192,9 +198,17 @@ function renderEditor(){
             <option value="bold" ${l.weight==="bold"?"selected":""}>หนา</option>
           </select>
         </div>
+        <div>
+          <label>จัดตำแหน่ง</label>
+          <select onchange="updateLine(${i},'align',this.value)">
+            <option value="left" ${l.align==="left" || !l.align ? "selected":""}>ซ้าย</option>
+            <option value="center" ${l.align==="center"?"selected":""}>กลาง</option>
+            <option value="right" ${l.align==="right"?"selected":""}>ขวา</option>
+          </select>
+        </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; margin-top:5px;">
         <div><label>ขนาด(px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
         <div><label>X (ซ้าย)</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
         <div><label>Y (บน)</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
@@ -223,7 +237,8 @@ window.addLine=function(){
     size:16,
     x:10,
     y:10,
-    weight:"normal"
+    weight:"normal",
+    align:"left" // <--- เพิ่มค่า Default จัดหน้าชิดซ้าย
   });
   renderEditor();
   renderPreview();
@@ -281,7 +296,8 @@ window.printTest = function() {
             position: absolute;
             white-space: pre-wrap;
             word-break: break-word;
-            max-width: 95%;
+            padding-right: 5px;
+            box-sizing: border-box;
           }
           @page {
             size: 80mm 50mm;
@@ -293,7 +309,6 @@ window.printTest = function() {
         <div class="sticker">${printContents}</div>
         <script>
           window.onload = function() {
-            // หน่วงเวลาเล็กน้อยให้ฟอนต์โหลดเสร็จก่อนค่อยสั่งพิมพ์
             setTimeout(() => {
               window.print();
               window.close();
