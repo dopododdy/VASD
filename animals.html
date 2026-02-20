@@ -226,7 +226,11 @@ window.printQueue = async function(animalId){
       .replace("{{phone}}", phone)
       .replace("{{services}}", services);
       
-    printContents += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font};">${text}</div>`;
+    // เพิ่มการอ่านค่า l.align และการคำนวณ width ให้เหมือนในหน้าตั้งค่า
+    let textAlign = l.align || "left";
+    let width = `calc(100% - ${l.x}px)`;
+      
+    printContents += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font}; text-align:${textAlign}; width:${width};">${text}</div>`;
   });
 
   // 4. สั่งพิมพ์ (เปิดหน้าต่างใหม่เหมือนหน้าเทสต์พิมพ์)
@@ -250,7 +254,8 @@ window.printQueue = async function(animalId){
             position: absolute;
             white-space: pre-wrap;
             word-break: break-word;
-            max-width: 95%;
+            padding-right: 5px; /* กันข้อความทะลุขอบ */
+            box-sizing: border-box; /* สำคัญสำหรับการคำนวณ Width */
             color: #000 !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
