@@ -5,6 +5,8 @@
 <title>VASD - ตั้งค่าเครื่องพิมพ์และกระดาษ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+
 <style>
 body{margin:0;font-family:"Segoe UI",sans-serif;background:#f4f6f8;}
 header{
@@ -40,9 +42,9 @@ header{
 /* ========================================= */
 .line {
   position: absolute;
-  white-space: pre-wrap; /* อนุญาตให้ปัดบรรทัดได้ */
-  word-break: break-word; /* ตัดคำเมื่อยาวเกิน */
-  max-width: 95%; /* ไม่ให้ชิดขอบขวาเกินไป */
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 95%;
 }
 
 input,select{width:100%;margin-bottom:8px;padding:5px;box-sizing:border-box;}
@@ -173,15 +175,20 @@ function renderEditor(){
           <label>Font</label>
           <select onchange="updateLine(${i},'font',this.value)">
             <option value="monospace" ${l.font==="monospace"?"selected":""}>Monospace</option>
-            <option value="Arial" ${l.font==="Arial"?"selected":""}>Arial</option>
-            <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
+            <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma (ระบบ)</option>
+            <option value="'Segoe UI'" ${l.font==="'Segoe UI'"?"selected":""}>Segoe UI (ระบบ)</option>
+            <option value="'Prompt', sans-serif" ${l.font==="'Prompt', sans-serif"?"selected":""}>Prompt (พร้อม)</option>
+            <option value="'Kanit', sans-serif" ${l.font==="'Kanit', sans-serif"?"selected":""}>Kanit (คณิต)</option>
+            <option value="'Sarabun', sans-serif" ${l.font==="'Sarabun', sans-serif"?"selected":""}>Sarabun (สารบรรณ)</option>
+            <option value="'Cordia New', sans-serif" ${l.font==="'Cordia New', sans-serif"?"selected":""}>Cordia New</option>
+            <option value="'Angsana New', sans-serif" ${l.font==="'Angsana New', sans-serif"?"selected":""}>Angsana New</option>
           </select>
         </div>
         <div>
           <label>น้ำหนัก</label>
           <select onchange="updateLine(${i},'weight',this.value)">
-            <option value="normal" ${l.weight==="normal"?"selected":""}>Normal</option>
-            <option value="bold" ${l.weight==="bold"?"selected":""}>Bold</option>
+            <option value="normal" ${l.weight==="normal"?"selected":""}>ปกติ</option>
+            <option value="bold" ${l.weight==="bold"?"selected":""}>หนา</option>
           </select>
         </div>
       </div>
@@ -211,7 +218,7 @@ window.removeLine=function(i){
 window.addLine=function(){
   currentConfig.push({
     text:"ข้อความใหม่",
-    font:"monospace",
+    font:"'Prompt', sans-serif",
     size:16,
     x:10,
     y:10,
@@ -259,6 +266,7 @@ window.printTest = function() {
     <html>
       <head>
         <title>Print Test</title>
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
         <style>
           body { margin: 0; padding: 0; }
           .sticker {
@@ -268,9 +276,6 @@ window.printTest = function() {
             background: #fff;
             overflow: hidden;
           }
-          /* ========================================= */
-          /* อัปเดตบรรทัดนี้ในหน้าตอนสั่งพิมพ์ด้วย */
-          /* ========================================= */
           .line {
             position: absolute;
             white-space: pre-wrap;
@@ -287,8 +292,11 @@ window.printTest = function() {
         <div class="sticker">${printContents}</div>
         <script>
           window.onload = function() {
-            window.print();
-            window.close();
+            // หน่วงเวลาเล็กน้อยให้ฟอนต์โหลดเสร็จก่อนค่อยสั่งพิมพ์
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 300);
           };
         <\/script>
       </body>
