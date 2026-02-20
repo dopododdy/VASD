@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ================= CSS ปรับปรุงใหม่ ================= */
+/* ================= CSS พื้นฐาน ================= */
 body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f8; margin: 0; color: #333; }
 header {
   background: #fff; border-bottom: 1px solid #ddd;
@@ -22,24 +22,15 @@ header h3 { margin: 0; color: #2c7be5; }
 }
 .card h4 { margin-top: 0; margin-bottom: 15px; color: #495057; border-bottom: 2px solid #f4f6f8; padding-bottom: 10px; }
 
-.owner-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr auto;
-  gap: 12px;
-}
-
+.owner-grid { display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; }
 input, select, textarea {
   width: 100%; box-sizing: border-box; padding: 10px;
   border: 1px solid #ced4da; border-radius: 4px;
   font-family: inherit; font-size: 14px; transition: border-color 0.15s ease-in-out;
 }
-input:focus, select:focus, textarea:focus {
-  border-color: #80bdff; outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-}
+input:focus, select:focus, textarea:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
 textarea { resize: vertical; min-height: 42px; }
 
-/* Responsive Table Wrapper */
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; min-width: 900px; }
 th, td { border: 1px solid #e9ecef; padding: 10px; text-align: center; vertical-align: middle; }
@@ -47,44 +38,16 @@ th { background: #f8f9fa; color: #495057; font-weight: 600; }
 tbody tr:nth-child(even) { background: #fcfcfc; }
 tbody tr:hover { background: #f1f3f5; }
 
-/* ================= จัดหน้าตาช่องบริการ ================= */
-.service-line { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
-  gap: 8px; 
-  text-align: left; 
-}
+.service-line { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; text-align: left; }
 .service-line label { 
-  display: flex; 
-  align-items: center; 
-  gap: 6px; 
-  cursor: pointer; 
-  font-size: 13px; 
-  background: #f8f9fa; 
-  padding: 8px 10px; 
-  border: 1px solid #dee2e6; 
-  border-radius: 6px; 
-  transition: all 0.2s ease-in-out;
-  user-select: none; 
-  margin: 0;
+  display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; 
+  background: #f8f9fa; padding: 8px 10px; border: 1px solid #dee2e6; border-radius: 6px; user-select: none; margin: 0;
 }
-.service-line label:hover {
-  background: #e9ecef;
-  border-color: #ced4da;
-}
-.service-line label:has(input:checked) {
-  background: #e8f4fd;
-  border-color: #b8daff;
-  color: #004085;
-  font-weight: 500;
-}
-.service-line input[type="checkbox"] {
-  width: auto;
-  margin: 0;
-}
-/* ============================================================== */
+.service-line label:hover { background: #e9ecef; border-color: #ced4da; }
+.service-line label:has(input:checked) { background: #e8f4fd; border-color: #b8daff; color: #004085; font-weight: 500; }
+.service-line input[type="checkbox"] { width: auto; margin: 0; }
 
-.important-warning { background: #fff3cd !important; border: 2px solid #ffc107 !important; transition: all 0.3s; }
+.important-warning { background: #fff3cd !important; border: 2px solid #ffc107 !important; }
 .important-warning::before { content: "⚠️ "; font-weight: bold; }
 
 button {
@@ -92,9 +55,8 @@ button {
   cursor: pointer; font-weight: bold; font-size: 14px;
   transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
 }
-button:hover { opacity: 0.85; transform: translateY(-1px); }
-button:active { transform: translateY(0); }
-button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+button:hover { opacity: 0.85; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-add { background: #6c757d; color: #fff; }
 .btn-save { background: #2c7be5; color: #fff; font-size: 16px; padding: 12px 24px; }
@@ -102,10 +64,36 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 .btn-paste { background: #198754; color: #fff; }
 .btn-home { background: #e9ecef; color: #495057; }
 
-/* Mobile Adjustments */
 @media (max-width: 768px) {
   .owner-grid { grid-template-columns: 1fr; }
   .btn-paste { width: 100%; }
+}
+
+/* ================= CSS สำหรับการพิมพ์บัตรคิว ================= */
+#printArea { display: none; }
+@media print {
+  body > :not(#printArea) { display: none !important; } /* ซ่อนทุกอย่างยกเว้นพื้นที่พิมพ์ */
+  #printArea { display: block !important; }
+  
+  .sticker-page {
+    position: relative;
+    width: 80mm;
+    height: 50mm;
+    page-break-after: always; /* ตัดขึ้นแผ่นใหม่เสมอ */
+    overflow: hidden;
+    background: #fff;
+    font-family: "Segoe UI", sans-serif;
+  }
+  .line {
+    position: absolute;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 95%;
+  }
+  @page {
+    size: 80mm 50mm;
+    margin: 0;
+  }
 }
 </style>
 </head>
@@ -118,67 +106,60 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 </header>
 
 <div class="container">
+  <div class="card">
+    <h4>ข้อมูลเจ้าของสัตว์</h4>
+    <div class="owner-grid">
+      <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์ (บังคับ)" required>
+      <input id="phone" type="tel" placeholder="เบอร์โทร (ไม่บังคับ)">
+      <button class="btn-paste" onclick="pasteOwnerName()">📋 ดึงชื่อจากบัตร</button>
+    </div>
+  </div>
 
-<div class="card">
-  <h4>ข้อมูลเจ้าของสัตว์</h4>
-  <div class="owner-grid">
-    <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์ (บังคับ)" required>
-    <input id="phone" type="tel" placeholder="เบอร์โทร (ไม่บังคับ)">
-    <button class="btn-paste" onclick="pasteOwnerName()">📋 ดึงชื่อจากบัตร</button>
+  <div class="card">
+    <h4>ข้อมูลสัตว์</h4>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th width="15%">ชื่อ</th>
+            <th width="8%">ชนิด</th>
+            <th width="8%">เพศ</th>
+            <th width="8%">นน. (กก.)</th>
+            <th width="35%">บริการ</th>
+            <th width="16%">บันทึกสุขภาพ / ข้อความสำคัญ</th>
+            <th width="10%">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="animalBody"></tbody>
+      </table>
+    </div>
+    <br>
+    <button class="btn-add" onclick="addAnimal()">➕ เพิ่มรายการสัตว์</button>
+  </div>
+
+  <div class="card" style="text-align:center; background: transparent; border: none; box-shadow: none;">
+    <button id="btnSaveAll" class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว</button>
   </div>
 </div>
 
-<div class="card">
-  <h4>ข้อมูลสัตว์</h4>
-  <div class="table-responsive">
-    <table>
-      <thead>
-        <tr>
-          <th width="15%">ชื่อ</th>
-          <th width="8%">ชนิด</th>
-          <th width="8%">เพศ</th>
-          <th width="8%">นน. (กก.)</th>
-          <th width="35%">บริการ</th>
-          <th width="16%">บันทึกสุขภาพ / ข้อความสำคัญ</th>
-          <th width="10%">จัดการ</th>
-        </tr>
-      </thead>
-      <tbody id="animalBody"></tbody>
-    </table>
-  </div>
-  <br>
-  <button class="btn-add" onclick="addAnimal()">➕ เพิ่มรายการสัตว์</button>
-</div>
-
-<div class="card" style="text-align:center; background: transparent; border: none; box-shadow: none;">
-  <button id="btnSaveAll" class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูลเข้าระบบ</button>
-</div>
-
-</div>
+<div id="printArea"></div>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* =========================
-   PASTE OWNER NAME
-========================= */
+/* ========================= วางชื่อเจ้าของ ========================= */
 window.pasteOwnerName = async function () {
   try {
     const text = await navigator.clipboard.readText();
-    if (!text) {
-      alert("⚠️ ยังไม่มีข้อมูลใน Clipboard");
-      return;
-    }
+    if (!text) return alert("⚠️ ยังไม่มีข้อมูลใน Clipboard");
     document.getElementById("ownerName").value = text.trim();
     document.getElementById("phone").focus();
   } catch (err) {
-    alert("⚠️ ไม่สามารถอ่าน Clipboard ได้ (ต้องใช้อุปกรณ์ที่รองรับและอนุญาตให้เข้าถึง Clipboard)");
+    alert("⚠️ ไม่สามารถอ่าน Clipboard ได้");
   }
 };
 
-/* =========================
-   FORMAT PHONE
-========================= */
+/* ========================= ฟอร์แมตเบอร์โทร ========================= */
 const phoneInput = document.getElementById("phone");
 phoneInput.addEventListener("input", function() {
   let v = this.value.replace(/\D/g,"").slice(0,10);
@@ -187,201 +168,151 @@ phoneInput.addEventListener("input", function() {
   this.value = v;
 });
 
-/* =========================
-   SERVICE LOGIC
-========================= */
-function neuterText(sex) {
-  return sex === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย";
-}
-
+/* ========================= บริการ ========================= */
+function neuterText(sex) { return sex === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย"; }
 function serviceHTML(sex, species) {
   return `
     <div class="service-line">
-      <label>
-        <input type="checkbox" class="svc" checked value="${neuterText(sex)}">
-        ${neuterText(sex)}
-      </label>
-      <label>
-        <input type="checkbox" class="svc" value="ฉีดวัคซีนพิษสุนัขบ้า">
-        ฉีดวัคซีนพิษสุนัขบ้า
-      </label>
-      ${species === "ส" ? `
-        <label>
-          <input type="checkbox" class="svc" value="ฉีดยาป้องกันเห็บ">
-          ฉีดยาป้องกันเห็บ
-        </label>` : ""}
-      <label>
-        <input type="checkbox" class="svc" value="ตรวจเลือด">
-        ตรวจเลือด
-      </label>
-      <label>
-        <input type="checkbox" class="svc" value="ฝังไมโครชิฟ">
-        ฝังไมโครชิฟ
-      </label>
+      <label><input type="checkbox" class="svc" checked value="${neuterText(sex)}"> ${neuterText(sex)}</label>
+      <label><input type="checkbox" class="svc" value="ฉีดวัคซีนพิษสุนัขบ้า"> ฉีดวัคซีนพิษสุนัขบ้า</label>
+      ${species === "ส" ? `<label><input type="checkbox" class="svc" value="ฉีดยาป้องกันเห็บ"> ฉีดยาป้องกันเห็บ</label>` : ""}
+      <label><input type="checkbox" class="svc" value="ตรวจเลือด"> ตรวจเลือด</label>
+      <label><input type="checkbox" class="svc" value="ฝังไมโครชิฟ"> ฝังไมโครชิฟ</label>
     </div>`;
 }
 
-/* =========================
-   ADD ANIMAL
-========================= */
+/* ========================= เพิ่มสัตว์ ========================= */
 window.addAnimal = function () {
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td><input class="animalName" placeholder="ระบุชื่อ..." required></td>
-    <td>
-      <select class="species">
-        <option value="ม">แมว</option>
-        <option value="ส">สุนัข</option>
-      </select>
-    </td>
-    <td>
-      <select class="sex">
-        <option value="เมีย">เมีย</option>
-        <option value="ผู้">ผู้</option>
-      </select>
-    </td>
+    <td><select class="species"><option value="ม">แมว</option><option value="ส">สุนัข</option></select></td>
+    <td><select class="sex"><option value="เมีย">เมีย</option><option value="ผู้">ผู้</option></select></td>
     <td><input type="number" class="estWeight" value="3" min="0" step="0.1"></td>
     <td class="svcCell"></td>
-    <td class="noteCell">
-      <textarea class="healthNote" placeholder="เช่น โรคประจำตัว..."></textarea>
-    </td>
-    <td>
-      <button class="btn-del" onclick="this.closest('tr').remove()" title="ลบรายการนี้">🗑 ลบ</button>
-    </td>
+    <td class="noteCell"><textarea class="healthNote" placeholder="เช่น โรคประจำตัว..."></textarea></td>
+    <td><button class="btn-del" onclick="this.closest('tr').remove()" title="ลบรายการนี้">🗑 ลบ</button></td>
   `;
 
-  const species = tr.querySelector(".species");
-  const sex = tr.querySelector(".sex");
-  const svcCell = tr.querySelector(".svcCell");
-  const note = tr.querySelector(".healthNote");
-  const noteCell = tr.querySelector(".noteCell");
-  const nameInput = tr.querySelector(".animalName");
-
+  const species = tr.querySelector(".species"), sex = tr.querySelector(".sex"), svcCell = tr.querySelector(".svcCell"), note = tr.querySelector(".healthNote"), noteCell = tr.querySelector(".noteCell"), nameInput = tr.querySelector(".animalName");
   nameInput.oninput = () => { nameInput.style.backgroundColor = ""; };
-
-  function refreshService() {
-    svcCell.innerHTML = serviceHTML(sex.value, species.value);
-  }
-  
+  function refreshService() { svcCell.innerHTML = serviceHTML(sex.value, species.value); }
   refreshService();
-  species.onchange = refreshService;
-  sex.onchange = refreshService;
-
-  note.oninput = () => {
-    noteCell.classList.toggle("important-warning", note.value.trim() !== "");
-  };
-
+  species.onchange = refreshService; sex.onchange = refreshService;
+  note.oninput = () => { noteCell.classList.toggle("important-warning", note.value.trim() !== ""); };
   document.getElementById("animalBody").appendChild(tr);
 };
+window.addEventListener('DOMContentLoaded', () => { addAnimal(); });
 
-window.addEventListener('DOMContentLoaded', () => {
-  addAnimal();
-});
-
-/* =========================
-   SAVE (REAL + VALIDATE)
-========================= */
+/* ========================= SAVE & PRINT (Auto Print) ========================= */
 window.saveAll = async function () {
   const btnSave = document.getElementById("btnSaveAll");
   const ownerNameInput = document.getElementById("ownerName");
   const ownerName = ownerNameInput.value.trim();
   const phone = document.getElementById("phone").value.trim();
 
-  if (!ownerName) {
-    alert("❌ กรุณาระบุชื่อเจ้าของสัตว์");
-    ownerNameInput.focus();
-    return;
-  }
-
+  if (!ownerName) return alert("❌ กรุณาระบุชื่อเจ้าของสัตว์"), ownerNameInput.focus();
   const rows = document.querySelectorAll("#animalBody tr");
-  if (rows.length === 0) {
-    alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
-    return;
-  }
+  if (rows.length === 0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
 
   let hasError = false;
   rows.forEach((row, index) => {
     const nameInput = row.querySelector(".animalName");
     if (!nameInput.value.trim()) {
       alert(`❌ กรุณาระบุชื่อสัตว์ในรายการที่ ${index + 1}`);
-      nameInput.focus();
-      nameInput.style.backgroundColor = "#ffecec";
-      hasError = true;
+      nameInput.focus(); nameInput.style.backgroundColor = "#ffecec"; hasError = true;
     }
   });
   if (hasError) return;
 
   btnSave.disabled = true;
-  btnSave.innerHTML = "⏳ กำลังบันทึกข้อมูล...";
+  btnSave.innerHTML = "⏳ กำลังบันทึกและพิมพ์คิว...";
 
   try {
     const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
     if (evtErr) throw evtErr;
 
-    const { data: owner, error: ownerErr } = await supabase
-      .from("vasd_owner")
-      .insert({ event_id: eventId, owner_name: ownerName, phone: phone })
-      .select()
-      .single();
+    const { data: owner, error: ownerErr } = await supabase.from("vasd_owner")
+      .insert({ event_id: eventId, owner_name: ownerName, phone: phone }).select().single();
     if (ownerErr) throw ownerErr;
 
-    const { count, error: countErr } = await supabase
-      .from("vasd_animal")
-      .select("*", { count: "exact", head: true })
-      .eq("event_id", eventId);
+    const { count, error: countErr } = await supabase.from("vasd_animal")
+      .select("*", { count: "exact", head: true }).eq("event_id", eventId);
     if (countErr) throw countErr;
 
     let currentQueue = (count || 0) + 1;
-    let svcsToInsert = [];
-    let queuesToInsert = [];
+    let svcsToInsert = [], queuesToInsert = [], animalsForPrint = [];
 
     for (const r of rows) {
-      const { data: animal, error: animalErr } = await supabase
-        .from("vasd_animal")
+      const speciesVal = r.querySelector(".species").value;
+      const { data: animal, error: animalErr } = await supabase.from("vasd_animal")
         .insert({
-          event_id: eventId,
-          owner_id: owner.id,
-          queue_number: currentQueue++,
-          species: r.querySelector(".species").value,
-          animal_name: r.querySelector(".animalName").value.trim(),
-          sex: r.querySelector(".sex").value,
-          est_weight: r.querySelector(".estWeight").value || 0,
+          event_id: eventId, owner_id: owner.id, queue_number: currentQueue++,
+          species: speciesVal, animal_name: r.querySelector(".animalName").value.trim(),
+          sex: r.querySelector(".sex").value, est_weight: r.querySelector(".estWeight").value || 0,
           health_note: r.querySelector(".healthNote").value.trim()
-        })
-        .select()
-        .single();
-      
+        }).select().single();
       if (animalErr) throw animalErr;
 
+      let sNames = [];
       r.querySelectorAll(".svc:checked").forEach(s => {
         svcsToInsert.push({ animal_id: animal.id, service_type: s.value });
+        sNames.push(s.value);
       });
-
-      // ===============================================
-      // แก้ไขตรงนี้: เปลี่ยนจาก "registered" เป็น "waiting"
-      // ===============================================
       queuesToInsert.push({ animal_id: animal.id, status: "waiting" });
+
+      // เก็บข้อมูลไว้เตรียมสร้างสติ๊กเกอร์
+      animalsForPrint.push({
+        q: animal.queue_number,
+        name: animal.animal_name,
+        spc: speciesVal === 'ม' ? 'แมว' : 'สุนัข',
+        sex: animal.sex,
+        svc: sNames.join(', ')
+      });
     }
 
-    if (svcsToInsert.length > 0) {
-      const { error: svcErr } = await supabase.from("vasd_service").insert(svcsToInsert);
-      if (svcErr) throw svcErr;
-    }
+    if (svcsToInsert.length > 0) await supabase.from("vasd_service").insert(svcsToInsert);
+    if (queuesToInsert.length > 0) await supabase.from("vasd_queue").insert(queuesToInsert);
+
+    // ==========================================
+    // ส่วนของการสร้างสติ๊กเกอร์และสั่งพิมพ์
+    // ==========================================
+    // 1. ดึง Template คิว
+    const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
     
-    if (queuesToInsert.length > 0) {
-      const { error: qErr } = await supabase.from("vasd_queue").insert(queuesToInsert);
-      if (qErr) throw qErr;
+    if (tmplData && tmplData.config) {
+      let printHtml = '';
+      animalsForPrint.forEach(a => {
+        let pageHtml = '<div class="sticker-page">';
+        tmplData.config.forEach(l => {
+          let text = l.text
+            .replace("{{queue_number}}", a.q)
+            .replace("{{animal_name}}", a.name)
+            .replace("{{species}}", a.spc)
+            .replace("{{sex}}", a.sex)
+            .replace("{{owner_name}}", ownerName)
+            .replace("{{services}}", a.svc);
+          pageHtml += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font};">${text}</div>`;
+        });
+        pageHtml += '</div>';
+        printHtml += pageHtml;
+      });
+      document.getElementById("printArea").innerHTML = printHtml;
+      
+      // สั่งพิมพ์
+      window.print();
     }
 
-    alert("✅ บันทึกข้อมูลการลงทะเบียนเรียบร้อยแล้ว");
-    location.href = "index.html";
+    // หน่วงเวลา 1 วินาทีเพื่อให้ระบบพิมพ์ทำงานเสร็จ แล้วเด้งไปหน้า Home
+    setTimeout(() => {
+      location.href = "index.html";
+    }, 1000);
 
   } catch (error) {
     console.error("Save Error:", error);
     alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (error.message || "โปรดลองใหม่อีกครั้ง"));
-  } finally {
     btnSave.disabled = false;
-    btnSave.innerHTML = "💾 บันทึกข้อมูลเข้าระบบ";
+    btnSave.innerHTML = "💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว";
   }
 };
 </script>
