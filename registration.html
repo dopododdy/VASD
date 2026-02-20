@@ -47,7 +47,7 @@ th { background: #f8f9fa; color: #495057; font-weight: 600; }
 tbody tr:nth-child(even) { background: #fcfcfc; }
 tbody tr:hover { background: #f1f3f5; }
 
-/* ================= จัดหน้าตาช่องบริการ (แก้ไขใหม่) ================= */
+/* ================= จัดหน้าตาช่องบริการ ================= */
 .service-line { 
   display: grid; 
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
@@ -357,7 +357,10 @@ window.saveAll = async function () {
         svcsToInsert.push({ animal_id: animal.id, service_type: s.value });
       });
 
-      queuesToInsert.push({ animal_id: animal.id, status: "registered" });
+      // ===============================================
+      // แก้ไขตรงนี้: เปลี่ยนจาก "registered" เป็น "waiting"
+      // ===============================================
+      queuesToInsert.push({ animal_id: animal.id, status: "waiting" });
     }
 
     if (svcsToInsert.length > 0) {
