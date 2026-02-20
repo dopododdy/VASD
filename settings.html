@@ -112,7 +112,7 @@ hr{margin: 15px 0; border: 0; border-top: 1px solid #eee;}
 
 <p class="small">
 <b>ตัวแปรที่ใช้ได้:</b><br>
-{{queue_number}}, {{animal_name}}, {{species}}, {{sex}}, {{owner_name}}, <span style="color:#d9534f; font-weight:bold;">{{services}}</span>
+{{queue_number}}, {{animal_name}}, {{species}}, {{sex}}, {{owner_name}}, <span style="color:#28a745; font-weight:bold;">{{phone}}</span>, <span style="color:#d9534f; font-weight:bold;">{{services}}</span>
 </p>
 
 </div>
@@ -141,13 +141,14 @@ function renderPreview(){
     div.style.fontWeight=l.weight;
     div.style.fontFamily=l.font;
     
-    // แทนที่ตัวแปรจำลองเพื่อให้เห็นภาพตอนพิมพ์
+    // แทนที่ตัวแปรจำลองเพื่อให้เห็นภาพตอนพิมพ์ รวมถึง {{phone}}
     let previewText = l.text
       .replace("{{queue_number}}", "1")
       .replace("{{animal_name}}", "น้องถุงทอง")
       .replace("{{species}}", "แมว")
       .replace("{{sex}}", "ผู้")
       .replace("{{owner_name}}", "สมชาย ใจดี")
+      .replace("{{phone}}", "081-234-5678") // ข้อมูลเบอร์โทรจำลอง
       .replace("{{services}}", "ทำหมัน, วัคซีน");
       
     div.innerText = previewText;
