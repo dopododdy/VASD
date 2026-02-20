@@ -5,6 +5,8 @@
 <title>RMUTTO - VASD | ลงทะเบียนสัตว์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+
 <style>
 /* ================= CSS พื้นฐาน ================= */
 body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f8; margin: 0; color: #333; }
@@ -82,6 +84,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
     page-break-after: always; /* ตัดขึ้นแผ่นใหม่เสมอ */
     overflow: hidden;
     background: #fff;
+    /* ถ้าฟอนต์โหลดไม่ทัน จะใช้ฟอนต์ระบบเป็นตัวสำรอง */
     font-family: "Segoe UI", sans-serif;
   }
   .line {
@@ -291,6 +294,7 @@ window.saveAll = async function () {
             .replace("{{species}}", a.spc)
             .replace("{{sex}}", a.sex)
             .replace("{{owner_name}}", ownerName)
+            .replace("{{phone}}", phone || "ไม่ระบุ") // เพิ่มการดึงเบอร์โทรตรงนี้
             .replace("{{services}}", a.svc);
           pageHtml += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font};">${text}</div>`;
         });
