@@ -41,14 +41,48 @@ textarea { resize: vertical; min-height: 42px; }
 
 /* Responsive Table Wrapper */
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
 th, td { border: 1px solid #e9ecef; padding: 10px; text-align: center; vertical-align: middle; }
 th { background: #f8f9fa; color: #495057; font-weight: 600; }
 tbody tr:nth-child(even) { background: #fcfcfc; }
 tbody tr:hover { background: #f1f3f5; }
 
-.service-line { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-start; text-align: left; }
-.service-line label { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 13px; }
+/* ================= จัดหน้าตาช่องบริการ (แก้ไขใหม่) ================= */
+.service-line { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+  gap: 8px; 
+  text-align: left; 
+}
+.service-line label { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+  cursor: pointer; 
+  font-size: 13px; 
+  background: #f8f9fa; 
+  padding: 8px 10px; 
+  border: 1px solid #dee2e6; 
+  border-radius: 6px; 
+  transition: all 0.2s ease-in-out;
+  user-select: none; 
+  margin: 0;
+}
+.service-line label:hover {
+  background: #e9ecef;
+  border-color: #ced4da;
+}
+.service-line label:has(input:checked) {
+  background: #e8f4fd;
+  border-color: #b8daff;
+  color: #004085;
+  font-weight: 500;
+}
+.service-line input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+/* ============================================================== */
 
 .important-warning { background: #fff3cd !important; border: 2px solid #ffc107 !important; transition: all 0.3s; }
 .important-warning::before { content: "⚠️ "; font-weight: bold; }
@@ -101,11 +135,11 @@ button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
       <thead>
         <tr>
           <th width="15%">ชื่อ</th>
-          <th width="10%">ชนิด</th>
-          <th width="10%">เพศ</th>
-          <th width="10%">นน. (กก.)</th>
-          <th width="25%">บริการ</th>
-          <th width="20%">บันทึกสุขภาพ / ข้อความสำคัญ</th>
+          <th width="8%">ชนิด</th>
+          <th width="8%">เพศ</th>
+          <th width="8%">นน. (กก.)</th>
+          <th width="35%">บริการ</th>
+          <th width="16%">บันทึกสุขภาพ / ข้อความสำคัญ</th>
           <th width="10%">จัดการ</th>
         </tr>
       </thead>
@@ -209,7 +243,7 @@ window.addAnimal = function () {
     <td><input type="number" class="estWeight" value="3" min="0" step="0.1"></td>
     <td class="svcCell"></td>
     <td class="noteCell">
-      <textarea class="healthNote" placeholder="เช่น โรคประจำตัว / ดุ / ไม่ได้อดอาหาร..."></textarea>
+      <textarea class="healthNote" placeholder="เช่น โรคประจำตัว..."></textarea>
     </td>
     <td>
       <button class="btn-del" onclick="this.closest('tr').remove()" title="ลบรายการนี้">🗑 ลบ</button>
@@ -223,7 +257,6 @@ window.addAnimal = function () {
   const noteCell = tr.querySelector(".noteCell");
   const nameInput = tr.querySelector(".animalName");
 
-  // รีเซ็ตสีแดงเมื่อเริ่มพิมพ์
   nameInput.oninput = () => { nameInput.style.backgroundColor = ""; };
 
   function refreshService() {
@@ -234,7 +267,6 @@ window.addAnimal = function () {
   species.onchange = refreshService;
   sex.onchange = refreshService;
 
-  // ไฮไลต์ข้อความสำคัญ
   note.oninput = () => {
     noteCell.classList.toggle("important-warning", note.value.trim() !== "");
   };
@@ -242,7 +274,6 @@ window.addAnimal = function () {
   document.getElementById("animalBody").appendChild(tr);
 };
 
-// เริ่มต้นเปิดหน้ามาให้มีสัตว์ 1 ตัวเสมอ
 window.addEventListener('DOMContentLoaded', () => {
   addAnimal();
 });
@@ -256,7 +287,6 @@ window.saveAll = async function () {
   const ownerName = ownerNameInput.value.trim();
   const phone = document.getElementById("phone").value.trim();
 
-  // Validate Owner
   if (!ownerName) {
     alert("❌ กรุณาระบุชื่อเจ้าของสัตว์");
     ownerNameInput.focus();
@@ -269,7 +299,6 @@ window.saveAll = async function () {
     return;
   }
 
-  // Validate Animals
   let hasError = false;
   rows.forEach((row, index) => {
     const nameInput = row.querySelector(".animalName");
@@ -282,16 +311,13 @@ window.saveAll = async function () {
   });
   if (hasError) return;
 
-  // Lock UI & Start Loading
   btnSave.disabled = true;
   btnSave.innerHTML = "⏳ กำลังบันทึกข้อมูล...";
 
   try {
-    // 1. Get Event ID
     const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
     if (evtErr) throw evtErr;
 
-    // 2. Insert Owner
     const { data: owner, error: ownerErr } = await supabase
       .from("vasd_owner")
       .insert({ event_id: eventId, owner_name: ownerName, phone: phone })
@@ -299,7 +325,6 @@ window.saveAll = async function () {
       .single();
     if (ownerErr) throw ownerErr;
 
-    // 3. Get latest queue number
     const { count, error: countErr } = await supabase
       .from("vasd_animal")
       .select("*", { count: "exact", head: true })
@@ -307,8 +332,6 @@ window.saveAll = async function () {
     if (countErr) throw countErr;
 
     let currentQueue = (count || 0) + 1;
-
-    // 4. บันทึกข้อมูลทีละตัวเพื่อเอา ID มาเชื่อมต่อ Service และ Queue
     let svcsToInsert = [];
     let queuesToInsert = [];
 
@@ -330,16 +353,13 @@ window.saveAll = async function () {
       
       if (animalErr) throw animalErr;
 
-      // เตรียมข้อมูล Services
       r.querySelectorAll(".svc:checked").forEach(s => {
         svcsToInsert.push({ animal_id: animal.id, service_type: s.value });
       });
 
-      // เตรียมข้อมูล Queue
       queuesToInsert.push({ animal_id: animal.id, status: "registered" });
     }
 
-    // 5. Batch Insert ข้อมูล Service และ Queue
     if (svcsToInsert.length > 0) {
       const { error: svcErr } = await supabase.from("vasd_service").insert(svcsToInsert);
       if (svcErr) throw svcErr;
@@ -357,7 +377,6 @@ window.saveAll = async function () {
     console.error("Save Error:", error);
     alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (error.message || "โปรดลองใหม่อีกครั้ง"));
   } finally {
-    // Unlock UI
     btnSave.disabled = false;
     btnSave.innerHTML = "💾 บันทึกข้อมูลเข้าระบบ";
   }
