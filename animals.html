@@ -183,93 +183,98 @@ async function loadAnimals(){
 
 loadAnimals();
 
-/* ================= PRINT (FIXED 1 PAGE ONLY) ================= */
+/* ================= PRINT (ดึงจาก Template) ================= */
 window.printQueue = async function(animalId){
-
-  const { data } = await supabase
+  // 1. ดึงข้อมูลสัตว์และบริการ
+  const { data: a } = await supabase
     .from("vasd_animal")
     .select(`
-      queue_number,
-      animal_name,
-      species,
-      sex,
-      vasd_owner ( owner_name ),
+      queue_number, animal_name, species, sex,
+      vasd_owner ( owner_name, phone ),
       vasd_service ( service_type )
     `)
     .eq("id", animalId)
     .single();
 
-  if(!data) return alert("ไม่พบข้อมูล");
+  if(!a) return alert("ไม่พบข้อมูล");
 
-  const speciesText = data.species === "ส" ? "สุนัข" : "แมว";
-  const sexText = data.sex === "เมีย" ? "เพศเมีย" : "เพศผู้";
-  const services = data.vasd_service?.map(s=>s.service_type).join(", ") || "-";
+  const spcText = a.species === "ส" ? "สุนัข" : "แมว";
+  const services = a.vasd_service?.map(s=>s.service_type).join(", ") || "-";
+  const ownerName = a.vasd_owner?.owner_name || "";
+  const phone = a.vasd_owner?.phone || "ไม่ระบุ";
 
-  const win = window.open("", "", "width=400,height=500");
+  // 2. ดึง Template การตั้งค่าเครื่องพิมพ์ (คิว)
+  const { data: tmplData } = await supabase
+    .from("vasd_print_template")
+    .select("config")
+    .eq("template_type", "queue")
+    .single();
 
-  win.document.write(`
-  <html>
-  <head>
-  <style>
-    @page { size:80mm 50mm; margin:0; }
+  if(!tmplData || !tmplData.config) {
+    return alert("⚠️ ยังไม่ได้บันทึก Template สติ๊กเกอร์คิว กรุณาไปตั้งค่าเครื่องพิมพ์ก่อนครับ");
+  }
 
-    html,body{
-      width:80mm;
-      height:50mm;
-      margin:0;
-      padding:0;
-      overflow:hidden;
-      font-family:monospace;
-      line-height:1.2;
-    }
+  // 3. แทนที่ตัวแปรลงใน Template
+  let printContents = '';
+  tmplData.config.forEach(l => {
+    let text = l.text
+      .replace("{{queue_number}}", a.queue_number)
+      .replace("{{animal_name}}", a.animal_name)
+      .replace("{{species}}", spcText)
+      .replace("{{sex}}", a.sex)
+      .replace("{{owner_name}}", ownerName)
+      .replace("{{phone}}", phone)
+      .replace("{{services}}", services);
+      
+    printContents += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font};">${text}</div>`;
+  });
 
-    .wrap{
-      padding:5mm;
-      box-sizing:border-box;
-      height:50mm;
-    }
-
-    .big{ font-size:18px; font-weight:bold; }
-    .small{ font-size:12px; }
-
-    *{
-      page-break-after:avoid !important;
-      page-break-before:avoid !important;
-      page-break-inside:avoid !important;
-    }
-  </style>
-  </head>
-
-  <body>
-    <div class="wrap">
-      <div class="big">คิวที่ ${data.queue_number}</div>
-      <div>${speciesText}${sexText}</div>
-
-      <div style="margin-top:4px;">
-        ${data.animal_name}
-      </div>
-
-      <div style="margin-top:4px;">
-        เจ้าของคุณ: ${data.vasd_owner?.owner_name || "-"}
-      </div>
-
-      <div class="small" style="margin-top:4px;">
-        รับบริการ: ${services}
-      </div>
-    </div>
-
-    <script>
-      window.onload=function(){
-        window.print();
-        setTimeout(()=>window.close(),300);
-      }
-    <\/script>
-
-  </body>
-  </html>
+  // 4. สั่งพิมพ์ (เปิดหน้าต่างใหม่เหมือนหน้าเทสต์พิมพ์)
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
+  
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Queue</title>
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+        <style>
+          body { margin: 0; padding: 0; color: #000 !important; }
+          .sticker {
+            position: relative;
+            width: 80mm;
+            height: 50mm;
+            background: #fff;
+            overflow: hidden;
+          }
+          .line {
+            position: absolute;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-width: 95%;
+            color: #000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          @page {
+            size: 80mm 50mm;
+            margin: 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="sticker">${printContents}</div>
+        <script>
+          window.onload = function() {
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 300);
+          };
+        <\/script>
+      </body>
+    </html>
   `);
-
-  win.document.close();
+  printWindow.document.close();
 };
 
 /* ================= EDIT / DELETE ================= */
