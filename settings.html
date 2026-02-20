@@ -34,10 +34,17 @@ header{
   box-shadow: 0 0 10px rgba(0,0,0,0.2);
   overflow: hidden;
 }
+
+/* ========================================= */
+/* แก้ไขให้ข้อความปัดบรรทัด ไม่ทะลุขอบกระดาษด้านขวา */
+/* ========================================= */
 .line {
   position: absolute;
-  white-space: nowrap;
+  white-space: pre-wrap; /* อนุญาตให้ปัดบรรทัดได้ */
+  word-break: break-word; /* ตัดคำเมื่อยาวเกิน */
+  max-width: 95%; /* ไม่ให้ชิดขอบขวาเกินไป */
 }
+
 input,select{width:100%;margin-bottom:8px;padding:5px;box-sizing:border-box;}
 button{
   padding:8px 12px;border:none;
@@ -224,7 +231,6 @@ window.loadTemplate=async function(){
   if(data){
     currentConfig = data.config;
   }else{
-    // ถ้ายังไม่มีข้อมูลในระบบ ให้โหลดเป็นค่าว่าง
     currentConfig = [];
   }
   renderEditor();
@@ -262,9 +268,14 @@ window.printTest = function() {
             background: #fff;
             overflow: hidden;
           }
+          /* ========================================= */
+          /* อัปเดตบรรทัดนี้ในหน้าตอนสั่งพิมพ์ด้วย */
+          /* ========================================= */
           .line {
             position: absolute;
-            white-space: nowrap;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-width: 95%;
           }
           @page {
             size: 80mm 50mm;
