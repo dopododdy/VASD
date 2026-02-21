@@ -107,6 +107,12 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 <body>
 
+<div style="position: absolute; opacity: 0; pointer-events: none; z-index: -9999;">
+  <span style="font-family: 'Kanit', sans-serif;">โหลด Kanit</span>
+  <span style="font-family: 'Prompt', sans-serif;">โหลด Prompt</span>
+  <span style="font-family: 'Sarabun', sans-serif;">โหลด Sarabun</span>
+</div>
+
 <header>
   <h3>📝 RMUTTO - VASD | ลงทะเบียนสัตว์</h3>
   <button type="button" class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
@@ -295,7 +301,7 @@ window.saveAll = async function () {
     if (queuesToInsert.length > 0) await supabase.from("vasd_queue").insert(queuesToInsert);
 
     // ==========================================
-    // ส่วนของการสร้างสติ๊กเกอร์และสั่งพิมพ์
+    // ส่วนของการสร้างสติ๊กเกอร์และสั่งพิมพ์ (แก้ไขแล้ว)
     // ==========================================
     const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
     
@@ -316,16 +322,29 @@ window.saveAll = async function () {
           let textAlign = l.align || "left";
           let xPos = l.x || 0;
           let yPos = l.y || 0;
+          
+          // ป้องกันเครื่องหมาย " ตีกันตอนใส่ใน Style
+          let fontStr = l.font ? l.font.replace(/"/g, "'") : "'Segoe UI', sans-serif";
 
-          pageHtml += `<div class="line" style="left:${xPos}px; right:0px; top:${yPos}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font}; text-align:${textAlign};">${text}</div>`;
+          // แก้ไข right: 0px เป็น width: calc(...) เพื่อให้จัดหน้าได้ตรงกับ Settings
+          pageHtml += `<div class="line" style="left:${xPos}px; width:calc(100% - ${xPos}px); top:${yPos}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${fontStr}; text-align:${textAlign};">${text}</div>`;
         });
         pageHtml += '</div>';
         printHtml += pageHtml;
       });
       document.getElementById("printArea").innerHTML = printHtml;
       
+      // บังคับโหลดฟอนต์ผ่าน JS อีกชั้นนึงเพื่อความชัวร์ 100%
+      try {
+        await document.fonts.load("16px 'Kanit'");
+        await document.fonts.load("16px 'Prompt'");
+        await document.fonts.load("16px 'Sarabun'");
+      } catch (e) {
+        console.warn("Font loading API not supported or error:", e);
+      }
+      
       await document.fonts.ready;
-      await new Promise(resolve => setTimeout(resolve, 200)); 
+      await new Promise(resolve => setTimeout(resolve, 300)); 
       
       window.print();
     }
