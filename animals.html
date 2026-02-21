@@ -205,7 +205,7 @@ window.printQueue = async function(animalId){
   const ownerName = a.vasd_owner?.owner_name || "";
   const phone = a.vasd_owner?.phone || "ไม่ระบุ";
 
-  // 2. ดึง Template การตั้งค่าเครื่องพิมพ์ (คิว)
+  // 2. ดึง Template จาก Database มาอ่านใหม่ทุกครั้ง เพื่อให้อิงการตั้งค่าล่าสุด (มาตรฐานเดียวกัน)
   const { data: tmplData } = await supabase
     .from("vasd_print_template")
     .select("config")
@@ -228,14 +228,15 @@ window.printQueue = async function(animalId){
       .replace("{{phone}}", phone)
       .replace("{{services}}", services);
       
-    // เพิ่มการอ่านค่า l.align และการคำนวณ width ให้เหมือนในหน้าตั้งค่า
     let textAlign = l.align || "left";
-    let width = `calc(100% - ${l.x}px)`;
+    let xPos = l.x || 0;
+    let yPos = l.y || 0;
       
-    printContents += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font}; text-align:${textAlign}; width:${width};">${text}</div>`;
+    // ใช้ right: 0px เพื่อบังคับให้กรอบข้อความกว้างเต็มกระดาษ แก้ปัญหาการ Align ซ้าย-กลาง-ขวา
+    printContents += `<div class="line" style="left:${xPos}px; right:0px; top:${yPos}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font}; text-align:${textAlign};">${text}</div>`;
   });
 
-  // 4. สั่งพิมพ์ (เปิดหน้าต่างใหม่เหมือนหน้าเทสต์พิมพ์)
+  // 4. สั่งพิมพ์
   const printWindow = window.open('', '_blank', 'width=800,height=600');
   
   printWindow.document.write(`
@@ -257,7 +258,7 @@ window.printQueue = async function(animalId){
             white-space: pre-wrap;
             word-break: break-word;
             padding-right: 5px; /* กันข้อความทะลุขอบ */
-            box-sizing: border-box; /* สำคัญสำหรับการคำนวณ Width */
+            box-sizing: border-box; 
             color: #000 !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -272,7 +273,7 @@ window.printQueue = async function(animalId){
         <div class="sticker">${printContents}</div>
         <script>
           window.onload = function() {
-            // รอให้ Font โหลดเสร็จก่อนสั่งพิมพ์
+            // รอให้ Font โหลดเสร็จ 100% ก่อนสั่งพิมพ์
             document.fonts.ready.then(function() {
               setTimeout(() => {
                 window.print();
