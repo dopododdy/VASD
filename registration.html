@@ -109,7 +109,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 <header>
   <h3>📝 RMUTTO - VASD | ลงทะเบียนสัตว์</h3>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+  <button type="button" class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
 </header>
 
 <div class="container">
@@ -118,7 +118,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
     <div class="owner-grid">
       <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์ (บังคับ)" required>
       <input id="phone" type="tel" placeholder="เบอร์โทร (ไม่บังคับ)">
-      <button class="btn-paste" onclick="pasteOwnerName()">📋 ดึงชื่อจากบัตร</button>
+      <button type="button" class="btn-paste" onclick="window.pasteOwnerName()">📋 ดึงชื่อจากบัตร</button>
     </div>
   </div>
 
@@ -141,11 +141,11 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
       </table>
     </div>
     <br>
-    <button class="btn-add" onclick="addAnimal()">➕ เพิ่มรายการสัตว์</button>
+    <button type="button" class="btn-add" onclick="window.addAnimal()">➕ เพิ่มรายการสัตว์</button>
   </div>
 
   <div class="card" style="text-align:center; background: transparent; border: none; box-shadow: none;">
-    <button id="btnSaveAll" class="btn-save" onclick="saveAll()">💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว</button>
+    <button type="button" id="btnSaveAll" class="btn-save" onclick="window.saveAll()">💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว</button>
   </div>
 </div>
 
@@ -176,8 +176,8 @@ phoneInput.addEventListener("input", function() {
 });
 
 /* ========================= บริการ ========================= */
-function neuterText(sex) { return sex === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย"; }
-function serviceHTML(sex, species) {
+window.serviceHTML = function(sex, species) {
+  function neuterText(s) { return s === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย"; }
   return `
     <div class="service-line">
       <label><input type="checkbox" class="svc" checked value="${neuterText(sex)}"> ${neuterText(sex)}</label>
@@ -198,7 +198,150 @@ window.addAnimal = function () {
     <td><input type="number" class="estWeight" value="3" min="0" step="0.1"></td>
     <td class="svcCell"></td>
     <td class="noteCell"><textarea class="healthNote" placeholder="เช่น โรคประจำตัว..."></textarea></td>
-    <td><button class="btn-del" onclick="this.closest('tr').remove()" title="ลบรายการนี้">🗑 ลบ</button></td>
+    <td><button type="button" class="btn-del" onclick="this.closest('tr').remove()" title="ลบรายการนี้">🗑 ลบ</button></td>
   `;
 
-  const species = tr.querySelector(".species"), sex = tr.querySelector(".sex"), svcCell = tr.
+  const species = tr.querySelector(".species"), 
+        sex = tr.querySelector(".sex"), 
+        svcCell = tr.querySelector(".svcCell"), 
+        note = tr.querySelector(".healthNote"), 
+        noteCell = tr.querySelector(".noteCell"), 
+        nameInput = tr.querySelector(".animalName");
+        
+  nameInput.oninput = () => { nameInput.style.backgroundColor = ""; };
+  
+  function refreshService() { 
+    svcCell.innerHTML = window.serviceHTML(sex.value, species.value); 
+  }
+  refreshService();
+  
+  species.onchange = refreshService; 
+  sex.onchange = refreshService;
+  note.oninput = () => { noteCell.classList.toggle("important-warning", note.value.trim() !== ""); };
+  
+  document.getElementById("animalBody").appendChild(tr);
+};
+
+// สั่งให้สร้างแถวแรกทันทีที่โหลดสคริปต์เสร็จ (ไม่ต้องรอ DOMContentLoaded)
+window.addAnimal();
+
+/* ========================= SAVE & PRINT ========================= */
+window.saveAll = async function () {
+  const btnSave = document.getElementById("btnSaveAll");
+  const ownerNameInput = document.getElementById("ownerName");
+  const ownerName = ownerNameInput.value.trim();
+  const phone = document.getElementById("phone").value.trim();
+
+  if (!ownerName) return alert("❌ กรุณาระบุชื่อเจ้าของสัตว์"), ownerNameInput.focus();
+  const rows = document.querySelectorAll("#animalBody tr");
+  if (rows.length === 0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
+
+  let hasError = false;
+  rows.forEach((row, index) => {
+    const nameInput = row.querySelector(".animalName");
+    if (!nameInput.value.trim()) {
+      alert(`❌ กรุณาระบุชื่อสัตว์ในรายการที่ ${index + 1}`);
+      nameInput.focus(); nameInput.style.backgroundColor = "#ffecec"; hasError = true;
+    }
+  });
+  if (hasError) return;
+
+  btnSave.disabled = true;
+  btnSave.innerHTML = "⏳ กำลังบันทึกและพิมพ์คิว...";
+
+  try {
+    const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
+    if (evtErr) throw evtErr;
+
+    const { data: owner, error: ownerErr } = await supabase.from("vasd_owner")
+      .insert({ event_id: eventId, owner_name: ownerName, phone: phone }).select().single();
+    if (ownerErr) throw ownerErr;
+
+    const { count, error: countErr } = await supabase.from("vasd_animal")
+      .select("*", { count: "exact", head: true }).eq("event_id", eventId);
+    if (countErr) throw countErr;
+
+    let currentQueue = (count || 0) + 1;
+    let svcsToInsert = [], queuesToInsert = [], animalsForPrint = [];
+
+    for (const r of rows) {
+      const speciesVal = r.querySelector(".species").value;
+      const { data: animal, error: animalErr } = await supabase.from("vasd_animal")
+        .insert({
+          event_id: eventId, owner_id: owner.id, queue_number: currentQueue++,
+          species: speciesVal, animal_name: r.querySelector(".animalName").value.trim(),
+          sex: r.querySelector(".sex").value, est_weight: r.querySelector(".estWeight").value || 0,
+          health_note: r.querySelector(".healthNote").value.trim()
+        }).select().single();
+      if (animalErr) throw animalErr;
+
+      let sNames = [];
+      r.querySelectorAll(".svc:checked").forEach(s => {
+        svcsToInsert.push({ animal_id: animal.id, service_type: s.value });
+        sNames.push(s.value);
+      });
+      queuesToInsert.push({ animal_id: animal.id, status: "waiting" });
+
+      animalsForPrint.push({
+        q: animal.queue_number,
+        name: animal.animal_name,
+        spc: speciesVal === 'ม' ? 'แมว' : 'สุนัข',
+        sex: animal.sex,
+        svc: sNames.join(', ')
+      });
+    }
+
+    if (svcsToInsert.length > 0) await supabase.from("vasd_service").insert(svcsToInsert);
+    if (queuesToInsert.length > 0) await supabase.from("vasd_queue").insert(queuesToInsert);
+
+    // ==========================================
+    // ส่วนของการสร้างสติ๊กเกอร์และสั่งพิมพ์
+    // ==========================================
+    const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
+    
+    if (tmplData && tmplData.config) {
+      let printHtml = '';
+      animalsForPrint.forEach(a => {
+        let pageHtml = '<div class="sticker-page">';
+        tmplData.config.forEach(l => {
+          let text = l.text
+            .replace("{{queue_number}}", a.q)
+            .replace("{{animal_name}}", a.name)
+            .replace("{{species}}", a.spc)
+            .replace("{{sex}}", a.sex)
+            .replace("{{owner_name}}", ownerName)
+            .replace("{{phone}}", phone || "ไม่ระบุ")
+            .replace("{{services}}", a.svc);
+          
+          let textAlign = l.align || "left";
+          let xPos = l.x || 0;
+          let yPos = l.y || 0;
+
+          pageHtml += `<div class="line" style="left:${xPos}px; right:0px; top:${yPos}px; font-size:${l.size}px; font-weight:${l.weight}; font-family:${l.font}; text-align:${textAlign};">${text}</div>`;
+        });
+        pageHtml += '</div>';
+        printHtml += pageHtml;
+      });
+      document.getElementById("printArea").innerHTML = printHtml;
+      
+      await document.fonts.ready;
+      await new Promise(resolve => setTimeout(resolve, 200)); 
+      
+      window.print();
+    }
+
+    setTimeout(() => {
+      location.href = "index.html";
+    }, 1000);
+
+  } catch (error) {
+    console.error("Save Error:", error);
+    alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (error.message || "โปรดลองใหม่อีกครั้ง"));
+    btnSave.disabled = false;
+    btnSave.innerHTML = "💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว";
+  }
+};
+</script>
+
+</body>
+</html>
