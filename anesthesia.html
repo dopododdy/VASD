@@ -2,172 +2,248 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>RMUTTO - VASD | วิสัญญี (โต๊ะกลาง)</title>
+<title>RMUTTO - VASD | วิสัญญี</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-body {
-  font-family: "Segoe UI", sans-serif;
-  background:#f4f6f8;
-  margin:0;
+:root {
+  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
+  --bg:#f0f4f8; --surface:#ffffff; --text:#1a202c; --text-muted:#718096;
+  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
+  --radius:14px; --radius-sm:8px;
 }
-header {
-  background:#fff;
-  border-bottom:1px solid #ddd;
-  padding:14px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.container {
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
-}
-.card {
-  background:#fff;
-  border-radius:10px;
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:0 2px 6px rgba(0,0,0,.05);
-  border-left:8px solid #ffc107;
-}
-.queue-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-h3 { margin:0 0 8px; }
-button {
-  padding:6px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
-}
-.btn-start { background:#fd7e14; color:#fff; }
-.btn-save  { background:#198754; color:#fff; }
-.btn-home  { background:#6c757d; color:#fff; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-.grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
-  gap:10px;
-  margin-top:10px;
+/* HEADER */
+header{
+  background:var(--navy);padding:0 32px;display:flex;
+  justify-content:space-between;align-items:center;height:68px;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
 }
-input {
-  width:100%;
-  padding:6px;
-  box-sizing:border-box;
+.header-brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{
+  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
 }
-label {
-  font-size:13px;
-  color:#555;
+.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
+.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
+.btn-home{
+  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
+  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
+  cursor:pointer;transition:background 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;
 }
+.btn-home:hover{background:rgba(255,255,255,0.18);}
+
+/* MAIN */
+.container{max-width:1100px;margin:0 auto;padding:32px 24px;}
+
+/* PAGE TITLE */
+.page-title{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:28px;animation:fadeUp 0.4s ease both;
+}
+.page-title h2{font-size:22px;font-weight:700;color:var(--navy);}
+.page-subtitle{font-size:13px;color:var(--text-muted);}
+
+/* EMPTY STATE */
+.empty-state{
+  text-align:center;padding:60px 20px;background:var(--surface);
+  border-radius:var(--radius);border:1px solid var(--border);
+  color:var(--text-muted);animation:fadeUp 0.4s ease both;
+}
+.empty-state .icon{font-size:48px;margin-bottom:12px;}
+.empty-state p{font-size:15px;}
+
+/* CASE CARD */
+.case-card{
+  background:var(--surface);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  margin-bottom:20px;overflow:hidden;
+  animation:fadeUp 0.4s ease both;transition:box-shadow 0.2s;
+}
+.case-card:hover{box-shadow:var(--shadow-md);}
+
+.case-header{
+  background:linear-gradient(135deg,var(--navy),#1a2f47);
+  padding:16px 24px;display:flex;justify-content:space-between;align-items:center;
+}
+.case-header-left h3{font-size:17px;font-weight:700;color:#fff;margin-bottom:4px;}
+.case-meta{display:flex;gap:12px;}
+.meta-badge{
+  font-size:12px;color:rgba(255,255,255,0.7);
+  background:rgba(255,255,255,0.1);border-radius:20px;
+  padding:3px 10px;border:1px solid rgba(255,255,255,0.15);
+}
+
+.case-body{padding:20px 24px;}
+
+/* SECTION LABEL */
+.section-label{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:12px;margin-top:20px;
+}
+.section-label:first-child{margin-top:0;}
+
+/* GRID FIELDS */
+.fields-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;
+}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:12px;font-weight:600;color:var(--text-muted);}
+.field input{
+  padding:9px 12px;font-size:14px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:#fff;color:var(--text);outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;width:100%;
+}
+.field input:focus{
+  border-color:var(--teal-light);
+  box-shadow:0 0 0 3px rgba(34,145,154,0.15);
+}
+
+/* VITAL SIGNS STRIP */
+.vitals-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+}
+.vital-field{
+  background:linear-gradient(135deg,#f8fafc,#f0f4f8);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px;text-align:center;
+}
+.vital-field label{
+  font-size:11px;font-weight:700;letter-spacing:0.5px;
+  text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;
+}
+.vital-field input{
+  width:100%;text-align:center;padding:8px;font-size:18px;font-weight:700;
+  color:var(--navy);border:1px solid var(--border);border-radius:6px;
+  font-family:"Sarabun",sans-serif;outline:none;background:#fff;
+  transition:border-color 0.2s;
+}
+.vital-field input:focus{border-color:var(--teal-light);}
+
+/* CARD FOOTER */
+.case-footer{
+  padding:16px 24px;background:#fafbfc;border-top:1px solid var(--border);
+  display:flex;gap:10px;justify-content:flex-end;align-items:center;
+}
+
+/* BUTTONS */
+.btn{
+  padding:9px 20px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  border:none;border-radius:var(--radius-sm);cursor:pointer;
+  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{opacity:0.88;transform:translateY(-1px);}
+.btn-start{background:linear-gradient(135deg,#d69e2e,#f0a500);color:#fff;}
+.btn-save{background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;}
+.btn-secondary{background:var(--border);color:var(--text-muted);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
-
 <body>
 
 <header>
-  <h3>💉 วิสัญญี – โต๊ะกลาง</h3>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 Home</button>
+  <div class="header-brand">
+    <div class="brand-icon">💉</div>
+    <div class="brand-text">
+      <h1>วิสัญญี – โต๊ะกลาง</h1>
+      <span>RMUTTO – Veterinary Academic Service Division</span>
+    </div>
+  </div>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
 </header>
 
-<div class="container" id="list"></div>
+<div class="container">
+
+  <div class="page-title">
+    <div>
+      <h2>เคสรอวางยาสลบ</h2>
+      <p class="page-subtitle">แสดงเฉพาะสัตว์ที่มีสถานะ "รอผ่าตัด"</p>
+    </div>
+  </div>
+
+  <div id="list"></div>
+
+</div>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ============================
-   LOAD CASES : รอผ่าตัด
-============================ */
 async function loadWaiting() {
-
   const { data: eventId, error: e0 } = await supabase.rpc("get_today_event");
   if (e0) { console.error(e0); return; }
 
   const { data, error } = await supabase
     .from("vasd_queue")
-    .select(`
-      animal_id,
-      status,
-      vasd_animal!inner (
-        id,
-        event_id,
-        animal_name,
-        species,
-        sex,
-        est_weight
-      )
-    `)
-    .eq("status", "รอผ่าตัด")
+    .select(`animal_id, status, vasd_animal!inner(id,event_id,animal_name,species,sex,est_weight)`)
+    .eq("status","รอผ่าตัด")
     .eq("vasd_animal.event_id", eventId)
     .order("animal_id");
-
-  if (error) {
-    console.error(error);
-    return;
-  }
 
   const box = document.getElementById("list");
   box.innerHTML = "";
 
+  if (error) { console.error(error); return; }
+
   if (!data || data.length === 0) {
-    box.innerHTML = "<p style='color:#888'>ไม่มีเคสรอวางยาสลบ</p>";
+    box.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">✅</div>
+        <p>ไม่มีเคสรอวางยาสลบในขณะนี้</p>
+      </div>`;
     return;
   }
 
-  data.forEach(row => {
+  data.forEach((row, idx) => {
     const a = row.vasd_animal;
+    const spcText = a.species === "ส" ? "สุนัข" : "แมว";
     const div = document.createElement("div");
-    div.className = "card";
+    div.className = "case-card";
+    div.style.animationDelay = `${idx * 0.07}s`;
     div.innerHTML = `
-      <div class="queue-header">
-        <h3>🐾 ${a.animal_name || "(ไม่ระบุชื่อ)"} (${a.species})</h3>
-        <button class="btn-start" onclick="startAnes('${row.animal_id}')">
-          เริ่มวางยา
+      <div class="case-header">
+        <div class="case-header-left">
+          <h3>🐾 ${a.animal_name || "(ไม่ระบุชื่อ)"}</h3>
+          <div class="case-meta">
+            <span class="meta-badge">${spcText}</span>
+            <span class="meta-badge">${a.sex}</span>
+            <span class="meta-badge">น้ำหนักโดยประมาณ ${a.est_weight ?? "–"} กก.</span>
+          </div>
+        </div>
+        <button class="btn btn-start" onclick="startAnes('${row.animal_id}')">▶ เริ่มวางยา</button>
+      </div>
+
+      <div class="case-body">
+        <div class="section-label">ยาและปริมาณ</div>
+        <div class="fields-grid">
+          <div class="field"><label>น้ำหนักจริง (กก.)</label><input type="number" step="0.1" class="actualWeight" value="${a.est_weight ?? ""}"></div>
+          <div class="field"><label>Xylazine (mg)</label><input type="number" step="0.1" class="xylazine"></div>
+          <div class="field"><label>Zoletil Induction (mg)</label><input type="number" step="0.1" class="zoletil"></div>
+          <div class="field"><label>Zoletil เติม (mg)</label><input type="number" step="0.1" class="zoletilAdd"></div>
+          <div class="field"><label>Pen-Strep (ml)</label><input type="number" step="0.1" class="penstrep"></div>
+          <div class="field"><label>Tolfedine (mg)</label><input type="number" step="0.1" class="tolfedine"></div>
+        </div>
+
+        <div class="section-label">Vital Signs</div>
+        <div class="vitals-grid">
+          <div class="vital-field"><label>HR</label><input class="hr" placeholder="–"></div>
+          <div class="vital-field"><label>RR</label><input class="rr" placeholder="–"></div>
+          <div class="vital-field"><label>O₂ Sat</label><input class="spo2" placeholder="–"></div>
+          <div class="vital-field"><label>Fluid (ml)</label><input class="fluid" placeholder="–"></div>
+        </div>
+      </div>
+
+      <div class="case-footer">
+        <button class="btn btn-save" onclick="saveAnes(this,'${row.animal_id}')">
+          💾 บันทึก → ส่งเข้าผ่าตัด
         </button>
       </div>
-
-      <div class="grid">
-        <div>
-          <label>น้ำหนักจริง (kg)</label>
-          <input type="number" step="0.1" class="actualWeight" value="${a.est_weight ?? ""}">
-        </div>
-        <div>
-          <label>Xylazine (mg)</label>
-          <input type="number" step="0.1" class="xylazine">
-        </div>
-        <div>
-          <label>Zoletil induction (mg)</label>
-          <input type="number" step="0.1" class="zoletil">
-        </div>
-        <div>
-          <label>Zoletil เติม (mg)</label>
-          <input type="number" step="0.1" class="zoletilAdd">
-        </div>
-        <div>
-          <label>Pen-Strep (ml)</label>
-          <input type="number" step="0.1" class="penstrep">
-        </div>
-        <div>
-          <label>Tolfedine (mg)</label>
-          <input type="number" step="0.1" class="tolfedine">
-        </div>
-      </div>
-
-      <div class="grid">
-        <div><label>HR</label><input class="hr"></div>
-        <div><label>RR</label><input class="rr"></div>
-        <div><label>O₂ Sat</label><input class="spo2"></div>
-        <div><label>Fluid (ml)</label><input class="fluid"></div>
-      </div>
-
-      <br>
-      <button class="btn-save" onclick="saveAnes(this,'${row.animal_id}')">
-        บันทึก → ส่งเข้าผ่าตัด
-      </button>
     `;
     box.appendChild(div);
   });
@@ -175,22 +251,12 @@ async function loadWaiting() {
 
 loadWaiting();
 
-/* ============================
-   ACTIONS
-============================ */
 window.startAnes = async function (animalId) {
-  await supabase
-    .from("vasd_queue")
-    .update({
-      status: "กำลังวางยาสลบ",
-      updated_at: new Date()
-    })
-    .eq("animal_id", animalId);
+  await supabase.from("vasd_queue").update({ status:"กำลังวางยาสลบ", updated_at:new Date() }).eq("animal_id", animalId);
 };
 
 window.saveAnes = async function (btn, animalId) {
-  const card = btn.closest(".card");
-
+  const card = btn.closest(".case-card");
   const w  = card.querySelector(".actualWeight").value;
   const x  = card.querySelector(".xylazine").value;
   const z  = card.querySelector(".zoletil").value;
@@ -199,44 +265,21 @@ window.saveAnes = async function (btn, animalId) {
   const t  = card.querySelector(".tolfedine").value;
 
   const services = [];
-  if (x)  services.push({ animal_id: animalId, service_type: `Xylazine ${x} mg` });
-  if (z)  services.push({ animal_id: animalId, service_type: `Zoletil induction ${z} mg` });
-  if (za) services.push({ animal_id: animalId, service_type: `Zoletil เติม ${za} mg` });
-  if (p)  services.push({ animal_id: animalId, service_type: `Pen-Strep ${p} ml` });
-  if (t)  services.push({ animal_id: animalId, service_type: `Tolfedine ${t} mg` });
+  if (x)  services.push({ animal_id:animalId, service_type:`Xylazine ${x} mg` });
+  if (z)  services.push({ animal_id:animalId, service_type:`Zoletil induction ${z} mg` });
+  if (za) services.push({ animal_id:animalId, service_type:`Zoletil เติม ${za} mg` });
+  if (p)  services.push({ animal_id:animalId, service_type:`Pen-Strep ${p} ml` });
+  if (t)  services.push({ animal_id:animalId, service_type:`Tolfedine ${t} mg` });
 
-  if (services.length) {
-    await supabase.from("vasd_service").insert(services);
-  }
-
-  await supabase
-    .from("vasd_animal")
-    .update({ actual_weight: w })
-    .eq("id", animalId);
-
-  await supabase
-    .from("vasd_queue")
-    .update({
-      status: "กำลังผ่าตัด",
-      updated_at: new Date()
-    })
-    .eq("animal_id", animalId);
-
+  if (services.length) await supabase.from("vasd_service").insert(services);
+  await supabase.from("vasd_animal").update({ actual_weight:w }).eq("id", animalId);
+  await supabase.from("vasd_queue").update({ status:"กำลังผ่าตัด", updated_at:new Date() }).eq("animal_id", animalId);
   loadWaiting();
 };
 
-/* ============================
-   REALTIME
-============================ */
-supabase
-  .channel("vasd-anes")
-  .on(
-    "postgres_changes",
-    { event:"*", schema:"public", table:"vasd_queue" },
-    () => loadWaiting()
-  )
+supabase.channel("vasd-anes")
+  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_queue" }, () => loadWaiting())
   .subscribe();
 </script>
-
 </body>
 </html>
