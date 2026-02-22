@@ -291,7 +291,7 @@ async function loadCentral() {
     .from("vasd_queue")
     .select(`animal_id, status,
              vasd_animal!inner(id,event_id,animal_name,species,sex,est_weight,actual_weight)`)
-    .eq("status","รอผ่าตัด")
+    .eq("status","waiting")
     .eq("vasd_animal.event_id", eventId)
     .order("animal_id");
 
@@ -379,7 +379,7 @@ window.assignTable = async function(animalId, queueAnimalId) {
 
   await supabase.from("vasd_animal").update({ actual_weight:w }).eq("id", animalId);
   await supabase.from("vasd_queue").update({
-    status:"กำลังผ่าตัด", table_number:tblNum, updated_at:new Date()
+    status:"surgery", table_number:tblNum, updated_at:new Date()
   }).eq("animal_id", queueAnimalId);
 
   loadCentral();
@@ -399,7 +399,7 @@ async function loadTables() {
     .from("vasd_queue")
     .select(`animal_id, table_number, surgeon_name, anesthesiologist_name, notes,
              vasd_animal!inner(id,event_id,animal_name,species,sex,actual_weight,est_weight)`)
-    .eq("status","กำลังผ่าตัด")
+    .eq("status","surgery")
     .eq("vasd_animal.event_id", eventId);
 
   tableData = {};
@@ -645,7 +645,7 @@ window.endSurgery = async function(animalId, queueAnimalId, weight) {
   }
 
   await supabase.from("vasd_queue").update({
-    status:"กำลังพักฟื้น",
+    status:"recovery",
     surgeon_name:        document.getElementById("s-surg")?.value||"",
     anesthesiologist_name:document.getElementById("s-anes")?.value||"",
     notes:               document.getElementById("s-notes")?.value||"",
