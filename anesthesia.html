@@ -377,10 +377,30 @@ window.assignTable = async function(animalId, queueAnimalId) {
   const w      = parseFloat(card.querySelector(".weight-input").value) || 0;
   const tblNum = parseInt(document.getElementById("tbl-"+animalId).value);
 
-  await supabase.from("vasd_animal").update({ actual_weight:w }).eq("id", animalId);
-  await supabase.from("vasd_queue").update({
-    status:"surgery", table_number:tblNum, updated_at:new Date()
-  }).eq("animal_id", queueAnimalId);
+  // อัพเดทน้ำหนักจริง
+  const { error: wErr } = await supabase.from("vasd_animal")
+    .update({ actual_weight: w }).eq("id", animalId);
+  if (wErr) console.warn("weight err:", wErr.message);
+
+  // ลอง update พร้อม table_number ก่อน ถ้า column ไม่มีใน DB จะ fallback
+  let qErr = null;
+  const r1 = await supabase.from("vasd_queue")
+    .update({ status:"surgery", table_number:tblNum, updated_at:new Date() })
+    .eq("animal_id", queueAnimalId);
+  qErr = r1.error;
+
+  if (qErr) {
+    console.warn("table_number column อาจยังไม่มีใน DB, retry โดยไม่ส่ง:", qErr.message);
+    const r2 = await supabase.from("vasd_queue")
+      .update({ status:"surgery", updated_at:new Date() })
+      .eq("animal_id", queueAnimalId);
+    if (r2.error) { alert("❌ บันทึกไม่สำเร็จ: " + r2.error.message); return; }
+  }
+
+  // เก็บ table assignment ใน localStorage เป็น fallback
+  const tableMap = JSON.parse(localStorage.getItem("vasd_table_map") || "{}");
+  tableMap[queueAnimalId] = tblNum;
+  localStorage.setItem("vasd_table_map", JSON.stringify(tableMap));
 
   loadCentral();
   loadTables();
@@ -395,16 +415,29 @@ let vitalsCache= {};   // animalId → [{time,hr,rr,spo2,bt,zol}]
 
 async function loadTables() {
   const { data:eventId } = await supabase.rpc("get_today_event");
-  const { data } = await supabase
+
+  // ดึงเฉพาะ status="surgery" ไม่ filter event_id บน join (เพื่อความเสถียร)
+  const { data, error } = await supabase
     .from("vasd_queue")
     .select(`animal_id, table_number, surgeon_name, anesthesiologist_name, notes,
-             vasd_animal!inner(id,event_id,animal_name,species,sex,actual_weight,est_weight)`)
-    .eq("status","surgery")
-    .eq("vasd_animal.event_id", eventId);
+             vasd_animal(id,event_id,animal_name,species,sex,actual_weight,est_weight)`)
+    .eq("status","surgery");
+
+  if (error) { console.error("loadTables error:", error.message); }
+
+  // กรอง event_id ฝั่ง JS แทน เพื่อหลีกเลี่ยงปัญหา filter บน join
+  const todayRows = (data||[]).filter(r => r.vasd_animal?.event_id === eventId);
+
+  // อ่าน table map จาก localStorage เป็น fallback ถ้า DB column ยังไม่มี
+  const tableMap = JSON.parse(localStorage.getItem("vasd_table_map") || "{}");
 
   tableData = {};
-  (data||[]).forEach(r=>{ if(r.table_number) tableData[r.table_number]=r; });
-  document.getElementById("badge-tables").textContent=Object.keys(tableData).length;
+  todayRows.forEach(r => {
+    const tbl = r.table_number || tableMap[r.animal_id];
+    if (tbl) tableData[tbl] = r;
+  });
+
+  document.getElementById("badge-tables").textContent = Object.keys(tableData).length;
   renderGrid();
   if (selectedTbl) renderDetail(selectedTbl);
 }
