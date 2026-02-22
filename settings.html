@@ -2,125 +2,199 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>VASD - ตั้งค่าเครื่องพิมพ์และกระดาษ</title>
+<title>RMUTTO - VASD | ตั้งค่าเครื่องพิมพ์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <style>
-body{margin:0;font-family:"Segoe UI",sans-serif;background:#f4f6f8;}
+:root {
+  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
+  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
+  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
+  --radius:14px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
 header{
-  background:#fff;border-bottom:1px solid #ddd;
-  padding:14px 20px;display:flex;
-  justify-content:space-between;align-items:center;
+  background:var(--navy);padding:0 24px;display:flex;
+  justify-content:space-between;align-items:center;height:68px;
+  flex-shrink:0;box-shadow:0 2px 20px rgba(0,0,0,0.25);z-index:10;
 }
-.container{
-  display:grid;
-  grid-template-columns:400px 1fr;
-  height:calc(100vh - 70px);
+.header-brand{display:flex;align-items:center;gap:12px;}
+.brand-icon{
+  width:38px;height:38px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
+  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;
 }
+.brand-text h1{font-size:16px;font-weight:700;color:#fff;line-height:1.2;}
+.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
+.header-actions{display:flex;gap:8px;}
+.btn-header{
+  padding:7px 14px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  border:none;border-radius:var(--radius-sm);cursor:pointer;
+  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:5px;
+}
+.btn-header:hover{opacity:0.88;transform:translateY(-1px);}
+.btn-print-test{background:linear-gradient(135deg,var(--success),#48bb78);color:#fff;}
+.btn-home-h{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.2);}
+.btn-home-h:hover{background:rgba(255,255,255,0.18);}
+
+/* MAIN LAYOUT */
+.layout{display:grid;grid-template-columns:380px 1fr;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
 .sidebar{
-  background:#fff;padding:15px;overflow:auto;
-  border-right:1px solid #ddd;
+  background:var(--surface);border-right:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;
 }
-.preview{
-  display:flex;justify-content:center;align-items:center;
-  background:#e9ecef;
-}
-/* กำหนดขนาด Sticker ตามจริง (80mm x 50mm) */
-.sticker {
-  position: relative;
-  width: 80mm;
-  height: 50mm;
-  background: #fff;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  overflow: hidden;
+.sidebar-top{padding:20px;border-bottom:1px solid var(--border);}
+.sidebar-section{padding:16px 20px;border-bottom:1px solid var(--border);}
+.sidebar-section:last-child{border-bottom:none;}
+.section-title{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:12px;
 }
 
-/* ========================================= */
-/* แก้ไขให้ข้อความปัดบรรทัด และรองรับการจัด Center/Right */
-/* ========================================= */
-.line {
-  position: absolute;
-  white-space: pre-wrap;
-  word-break: break-word;
-  padding-right: 5px; /* กันข้อความชิดขอบกระดาษเกินไป */
-  box-sizing: border-box;
+/* FIELDS */
+label.field-label{font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;}
+input,select{
+  width:100%;padding:9px 12px;font-size:13px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);
+  background:#fff;outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:10px;
 }
+input:focus,select:focus{border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(34,145,154,0.12);}
+input:last-child,select:last-child{margin-bottom:0;}
 
-input,select{width:100%;margin-bottom:8px;padding:5px;box-sizing:border-box;}
-button{
-  padding:8px 12px;border:none;
-  border-radius:4px;background:#2c7be5;
-  color:#fff;cursor:pointer;margin-bottom:6px;
-  width: 100%;
-}
-button:hover{opacity:0.9;}
+/* LINE BLOCK */
 .line-block{
-  border:1px solid #ddd;
-  padding:10px;margin-bottom:12px;
-  background: #fdffdf;
-  border-radius: 5px;
+  background:#fafbfc;border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px;margin-bottom:10px;position:relative;
 }
-.small{font-size:12px;color:#888;}
-hr{margin: 15px 0; border: 0; border-top: 1px solid #eee;}
+.line-block:last-child{margin-bottom:0;}
+.line-block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.line-block-header strong{font-size:13px;color:var(--navy);}
 
-/* CSS สำหรับการพิมพ์ */
-@media print {
-  body * { visibility: hidden; }
-  #sticker, #sticker * { visibility: visible; }
-  #sticker {
-    position: absolute;
-    left: 0;
-    top: 0;
-    box-shadow: none;
-  }
+.prop-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.prop-mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;}
+.prop-grid select,.prop-mini input,.prop-mini select{margin-bottom:0;}
+
+/* VARS HINT */
+.vars-hint{
+  background:#f0fdf9;border:1px solid #a7f3d0;border-radius:var(--radius-sm);
+  padding:12px;font-size:12px;line-height:1.8;color:#065f46;
+}
+.vars-hint strong{color:var(--navy);display:block;margin-bottom:4px;}
+.vars-hint code{
+  background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-size:11px;
+}
+
+/* BUTTONS */
+.btn{
+  width:100%;padding:10px;font-size:13px;font-weight:700;font-family:"Sarabun",sans-serif;
+  border:none;border-radius:var(--radius-sm);cursor:pointer;
+  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  margin-bottom:8px;
+}
+.btn:last-child{margin-bottom:0;}
+.btn:hover{opacity:0.88;transform:translateY(-1px);}
+.btn-load{background:#edf2f7;color:var(--text);}
+.btn-add {background:var(--border);color:var(--text);}
+.btn-save{background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;}
+.btn-del-line{
+  background:none;border:1px solid var(--border);color:var(--danger);
+  padding:3px 8px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;
+}
+.btn-del-line:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
+
+/* PREVIEW PANE */
+.preview-pane{
+  background:#dee3ea;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;gap:20px;overflow:hidden;
+}
+.preview-label{
+  font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:#718096;
+}
+.sticker{
+  position:relative;width:80mm;height:50mm;background:#fff;
+  box-shadow:0 4px 24px rgba(0,0,0,0.2),0 1px 4px rgba(0,0,0,0.1);
+  overflow:hidden;border-radius:3px;
+}
+.line{
+  position:absolute;white-space:pre-wrap;word-break:break-word;
+  padding-right:5px;box-sizing:border-box;
+}
+
+/* PRINT */
+@media print{
+  body*{visibility:hidden;}
+  #sticker,#sticker *{visibility:visible;}
+  #sticker{position:absolute;left:0;top:0;box-shadow:none;}
+  @page{size:80mm 50mm;margin:0;}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <h3>🖨 ตั้งค่า Sticker Template</h3>
-  <div style="display:flex; gap:10px;">
-    <button onclick="window.printTest()" style="background:#28a745; margin-bottom:0;">🖨️ ทดสอบการพิมพ์</button>
-    <button onclick="location.href='index.html'" style="background:#6c757d; margin-bottom:0; width:auto;">🏠 Home</button>
+  <div class="header-brand">
+    <div class="brand-icon">⚙️</div>
+    <div class="brand-text">
+      <h1>ตั้งค่าเครื่องพิมพ์</h1>
+      <span>Sticker Template Configuration</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-header btn-print-test" onclick="window.printTest()">🖨️ ทดสอบพิมพ์</button>
+    <button class="btn-header btn-home-h" onclick="location.href='index.html'">🏠 หน้าแรก</button>
   </div>
 </header>
 
-<div class="container">
+<div class="layout">
 
-<div class="sidebar">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
 
-<label>ประเภทสติ๊กเกอร์</label>
-<select id="templateType">
-  <option value="queue">คิว</option>
-  <option value="cage">ติดกรง</option>
-  <option value="envelope">ติดซองยา</option>
-  <option value="bag">ติดถุงยา</option>
-  <option value="vaccine">ติดหน้าสมุดวัคซีน</option>
-  <option value="microchip">ติดใบรับรองไมโครชิฟ</option>
-</select>
+    <div class="sidebar-top">
+      <label class="field-label">ประเภทสติ๊กเกอร์</label>
+      <select id="templateType">
+        <option value="queue">🏷 คิว</option>
+        <option value="cage">🔒 ติดกรง</option>
+        <option value="envelope">✉️ ติดซองยา</option>
+        <option value="bag">💊 ติดถุงยา</option>
+        <option value="vaccine">📒 ติดหน้าสมุดวัคซีน</option>
+        <option value="microchip">💳 ติดใบรับรองไมโครชิฟ</option>
+      </select>
+      <button class="btn btn-load" onclick="loadTemplate()">🔄 โหลด Template</button>
+    </div>
 
-<button onclick="loadTemplate()" style="background:#17a2b8;">🔄 โหลด Template</button>
+    <div class="sidebar-section" style="flex:1;overflow-y:auto;">
+      <div class="section-title">บรรทัดข้อความ</div>
+      <div id="lineEditor"></div>
+      <button class="btn btn-add" onclick="addLine()">➕ เพิ่มบรรทัด</button>
+    </div>
 
-<hr>
+    <div class="sidebar-section">
+      <div class="vars-hint">
+        <strong>ตัวแปรที่ใช้ได้</strong>
+        <code>{{queue_number}}</code> <code>{{animal_name}}</code> <code>{{species}}</code>
+        <code>{{sex}}</code> <code>{{owner_name}}</code> <code>{{phone}}</code> <code>{{services}}</code>
+      </div>
+    </div>
 
-<div id="lineEditor"></div>
+    <div class="sidebar-section">
+      <button class="btn btn-save" onclick="saveTemplate()">💾 บันทึก Template</button>
+    </div>
 
-<button onclick="addLine()">➕ เพิ่มบรรทัด</button>
-<button onclick="saveTemplate()" style="background:#2c7be5; font-weight:bold;">💾 บันทึก Template</button>
+  </div>
 
-<p class="small">
-<b>ตัวแปรที่ใช้ได้:</b><br>
-{{queue_number}}, {{animal_name}}, {{species}}, {{sex}}, {{owner_name}}, <span style="color:#28a745; font-weight:bold;">{{phone}}</span>, <span style="color:#d9534f; font-weight:bold;">{{services}}</span>
-</p>
-
-</div>
-
-<div class="preview">
-  <div class="sticker" id="sticker"></div>
-</div>
+  <!-- PREVIEW -->
+  <div class="preview-pane">
+    <span class="preview-label">ตัวอย่างสติ๊กเกอร์ (ขนาดจริง 80×50 mm)</span>
+    <div class="sticker" id="sticker"></div>
+  </div>
 
 </div>
 
@@ -129,59 +203,47 @@ import { supabase } from "./js/supabase.js";
 
 let currentConfig = [];
 
-// ฟังก์ชันวาด Sticker ในหน้า Preview
-function renderPreview(){
+function renderPreview() {
   const box = document.getElementById("sticker");
   box.innerHTML = "";
-  currentConfig.forEach((l)=>{
+  currentConfig.forEach(l => {
     const div = document.createElement("div");
-    div.className="line";
-    div.style.left=l.x+"px";
-    div.style.top=l.y+"px";
-    div.style.fontSize=l.size+"px";
-    div.style.fontWeight=l.weight;
-    div.style.fontFamily=l.font;
-    
-    // ==========================================
-    // ส่วนที่เพิ่มใหม่: รองรับการจัดหน้า ซ้าย-กลาง-ขวา
-    // ==========================================
-    div.style.textAlign = l.align || "left";
-    div.style.width = `calc(100% - ${l.x}px)`; 
-    // ==========================================
-    
-    // แทนที่ตัวแปรจำลองเพื่อให้เห็นภาพตอนพิมพ์
-    let previewText = l.text
-      .replace("{{queue_number}}", "1")
-      .replace("{{animal_name}}", "น้องถุงทอง")
-      .replace("{{species}}", "แมว")
-      .replace("{{sex}}", "ผู้")
-      .replace("{{owner_name}}", "สมชาย ใจดี")
-      .replace("{{phone}}", "081-234-5678")
-      .replace("{{services}}", "ทำหมัน, วัคซีน");
-      
-    div.innerText = previewText;
+    div.className = "line";
+    div.style.left = l.x + "px";
+    div.style.top  = l.y + "px";
+    div.style.fontSize   = l.size + "px";
+    div.style.fontWeight = l.weight;
+    div.style.fontFamily = l.font;
+    div.style.textAlign  = l.align || "left";
+    div.style.width      = `calc(100% - ${l.x}px)`;
+    div.innerText = l.text
+      .replace("{{queue_number}}","1")
+      .replace("{{animal_name}}","น้องถุงทอง")
+      .replace("{{species}}","แมว")
+      .replace("{{sex}}","ผู้")
+      .replace("{{owner_name}}","สมชาย ใจดี")
+      .replace("{{phone}}","081-234-5678")
+      .replace("{{services}}","ทำหมัน, วัคซีน");
     box.appendChild(div);
   });
 }
 
-// ฟังก์ชันสร้าง Form แก้ไขแต่ละบรรทัด
-function renderEditor(){
+function renderEditor() {
   const area = document.getElementById("lineEditor");
-  area.innerHTML="";
-  currentConfig.forEach((l,i)=>{
-    const block=document.createElement("div");
-    block.className="line-block";
-    block.innerHTML=`
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <b>บรรทัดที่ ${i+1}</b>
-        <button onclick="removeLine(${i})" style="background:#dc3545; width:auto; padding:2px 8px;">ลบ</button>
+  area.innerHTML = "";
+  currentConfig.forEach((l, i) => {
+    const block = document.createElement("div");
+    block.className = "line-block";
+    block.innerHTML = `
+      <div class="line-block-header">
+        <strong>บรรทัดที่ ${i+1}</strong>
+        <button class="btn-del-line" onclick="removeLine(${i})">ลบ</button>
       </div>
-      <label>ข้อความ</label>
-      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)">
-      
-      <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:5px;">
+      <label class="field-label">ข้อความ</label>
+      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" style="margin-bottom:10px;">
+      <div class="prop-grid">
         <div>
-          <label>Font</label>
+          <label class="field-label">Font</label>
           <select onchange="updateLine(${i},'font',this.value)">
             <option value="monospace" ${l.font==="monospace"?"selected":""}>Monospace</option>
             <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
@@ -192,138 +254,67 @@ function renderEditor(){
           </select>
         </div>
         <div>
-          <label>น้ำหนัก</label>
+          <label class="field-label">น้ำหนัก</label>
           <select onchange="updateLine(${i},'weight',this.value)">
             <option value="normal" ${l.weight==="normal"?"selected":""}>ปกติ</option>
-            <option value="bold" ${l.weight==="bold"?"selected":""}>หนา</option>
+            <option value="bold"   ${l.weight==="bold"  ?"selected":""}>หนา</option>
           </select>
         </div>
         <div>
-          <label>จัดตำแหน่ง</label>
+          <label class="field-label">จัดตำแหน่ง</label>
           <select onchange="updateLine(${i},'align',this.value)">
-            <option value="left" ${l.align==="left" || !l.align ? "selected":""}>ซ้าย</option>
+            <option value="left"   ${!l.align||l.align==="left"  ?"selected":""}>ซ้าย</option>
             <option value="center" ${l.align==="center"?"selected":""}>กลาง</option>
-            <option value="right" ${l.align==="right"?"selected":""}>ขวา</option>
+            <option value="right"  ${l.align==="right" ?"selected":""}>ขวา</option>
           </select>
         </div>
       </div>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; margin-top:5px;">
-        <div><label>ขนาด(px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
-        <div><label>X (ซ้าย)</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
-        <div><label>Y (บน)</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
+      <div class="prop-mini">
+        <div><label class="field-label">ขนาด (px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
+        <div><label class="field-label">X (ซ้าย)</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
+        <div><label class="field-label">Y (บน)</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
       </div>
     `;
     area.appendChild(block);
   });
 }
 
-window.updateLine=function(i,key,val){
-  if(key==="size"||key==="x"||key==="y") val=parseInt(val) || 0;
-  currentConfig[i][key]=val;
+window.updateLine = function(i, key, val) {
+  if (["size","x","y"].includes(key)) val = parseInt(val)||0;
+  currentConfig[i][key] = val;
   renderPreview();
-}
-
-window.removeLine=function(i){
+};
+window.removeLine = function(i) {
   currentConfig.splice(i,1);
-  renderEditor();
-  renderPreview();
-}
-
-window.addLine=function(){
-  currentConfig.push({
-    text:"ข้อความใหม่",
-    font:"'Prompt', sans-serif",
-    size:16,
-    x:10,
-    y:10,
-    weight:"normal",
-    align:"left" // <--- เพิ่มค่า Default จัดหน้าชิดซ้าย
-  });
-  renderEditor();
-  renderPreview();
-}
-
-window.loadTemplate=async function(){
-  const { data, error } = await supabase
-    .from("vasd_print_template")
-    .select("*")
-    .eq("template_type", document.getElementById("templateType").value)
-    .single();
-
-  if(data){
-    currentConfig = data.config;
-  }else{
-    currentConfig = [];
-  }
-  renderEditor();
-  renderPreview();
-}
-
-window.saveTemplate=async function(){
+  renderEditor(); renderPreview();
+};
+window.addLine = function() {
+  currentConfig.push({ text:"ข้อความใหม่", font:"'Prompt', sans-serif", size:16, x:10, y:10, weight:"normal", align:"left" });
+  renderEditor(); renderPreview();
+};
+window.loadTemplate = async function() {
+  const { data } = await supabase.from("vasd_print_template").select("*").eq("template_type", document.getElementById("templateType").value).single();
+  currentConfig = data?.config || [];
+  renderEditor(); renderPreview();
+};
+window.saveTemplate = async function() {
   const type = document.getElementById("templateType").value;
-  const { error } = await supabase
-    .from("vasd_print_template")
-    .upsert({
-      template_type: type,
-      config: currentConfig
-    }, { onConflict: 'template_type' });
-
-  if(error) alert("เกิดข้อผิดพลาด: " + error.message);
-  else alert("บันทึก Template " + type + " เรียบร้อยแล้ว");
-}
-
-// --- ฟังก์ชันทดสอบการพิมพ์ ---
+  const { error } = await supabase.from("vasd_print_template").upsert({ template_type:type, config:currentConfig },{ onConflict:"template_type" });
+  if (error) alert("❌ เกิดข้อผิดพลาด: "+error.message);
+  else alert("✅ บันทึก Template \""+type+"\" เรียบร้อยแล้ว");
+};
 window.printTest = function() {
-  const printContents = document.getElementById('sticker').innerHTML;
-  const printWindow = window.open('', '_blank', 'width=800,height=600');
-  
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Print Test</title>
-        <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
-        <style>
-          body { margin: 0; padding: 0; }
-          .sticker {
-            position: relative;
-            width: 80mm;
-            height: 50mm;
-            background: #fff;
-            overflow: hidden;
-          }
-          .line {
-            position: absolute;
-            white-space: pre-wrap;
-            word-break: break-word;
-            padding-right: 5px;
-            box-sizing: border-box;
-          }
-          @page {
-            size: 80mm 50mm;
-            margin: 0;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="sticker">${printContents}</div>
-        <script>
-          window.onload = function() {
-            setTimeout(() => {
-              window.print();
-              window.close();
-            }, 300);
-          };
-        <\/script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-}
+  const contents = document.getElementById("sticker").innerHTML;
+  const pw = window.open("","_blank","width=800,height=600");
+  pw.document.write(`<html><head><title>Print Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;}@page{size:80mm 50mm;margin:0}</style>
+    </head><body><div class="sticker">${contents}</div>
+    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},300);});}<\/script></body></html>`);
+  pw.document.close();
+};
 
-// โหลดข้อมูลครั้งแรก
 loadTemplate();
 </script>
-
 </body>
 </html>
