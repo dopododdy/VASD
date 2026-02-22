@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>RMUTTO - VASD | สัตว์ทั้งหมดวันนี้</title>
+<title>RMUTTO - VASD | ลงทะเบียนสัตว์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
@@ -17,6 +17,9 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);}
 
+/* HIDDEN font preloader */
+.font-preload{position:absolute;opacity:0;pointer-events:none;z-index:-9999;}
+
 /* HEADER */
 header{
   background:var(--navy);padding:0 32px;display:flex;
@@ -30,7 +33,6 @@ header{
 }
 .brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
 .brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
-
 .btn-home{
   padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
   background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
@@ -39,89 +41,108 @@ header{
 }
 .btn-home:hover{background:rgba(255,255,255,0.18);}
 
-/* MAIN */
-.container{max-width:1400px;margin:0 auto;padding:28px 24px;}
+/* CONTAINER */
+.container{max-width:1200px;margin:0 auto;padding:28px 24px;display:flex;flex-direction:column;gap:20px;}
 
-.page-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:24px;animation:fadeUp 0.4s ease both;
-}
-.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
-
-/* TABLE WRAPPER */
-.table-wrap{
+/* CARD */
+.card{
   background:var(--surface);border-radius:var(--radius);
   border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  overflow:hidden;animation:fadeUp 0.4s 0.05s ease both;
+  overflow:hidden;animation:fadeUp 0.4s ease both;
 }
+.card:nth-child(1){animation-delay:0.05s;}
+.card:nth-child(2){animation-delay:0.1s;}
+
+.card-header{
+  padding:16px 22px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.card-header-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--teal-light),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;
+}
+.card-header h4{font-size:15px;font-weight:700;color:var(--navy);margin:0;}
+
+.card-body{padding:20px 22px;}
+
+/* OWNER GRID */
+.owner-grid{display:grid;grid-template-columns:2fr 1fr auto;gap:12px;align-items:start;}
+@media(max-width:640px){.owner-grid{grid-template-columns:1fr;}}
+
+input,select,textarea{
+  width:100%;padding:10px 12px;font-size:14px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);
+  background:#fff;outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(34,145,154,0.12);
+}
+textarea{resize:vertical;min-height:44px;}
+input::placeholder{color:var(--text-muted);}
+
+/* ANIMAL TABLE */
 .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-
-table{width:100%;border-collapse:collapse;min-width:860px;}
-
+table{width:100%;border-collapse:collapse;min-width:900px;}
 thead tr{background:linear-gradient(135deg,var(--navy),#1a2f47);}
 thead th{
-  padding:13px 12px;text-align:center;font-size:12px;font-weight:700;
+  padding:12px 10px;font-size:11px;font-weight:700;
   letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.8);
-  border:none;white-space:nowrap;
+  border:none;text-align:center;
 }
-
 tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
-tbody td{padding:10px 12px;text-align:center;font-size:13px;border:none;vertical-align:middle;}
 tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#fafbfc;}
+tbody td{padding:10px;border:none;vertical-align:top;text-align:center;}
 
-/* STATUS ROW COLORS */
-.status-wait       {background:#ffffff;}
-.status-anesthesia {background:#ebf8ff;}
-.status-surgery    {background:#fff5f5;}
-.status-recovery   {background:#faf5ff;}
-.status-ready      {background:#fffff0;}
-.status-done       {background:#f0fff4;}
-.status-cancel     {background:#f7fafc;opacity:0.65;}
+/* SERVICE CHECKBOXES */
+.service-line{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;text-align:left;}
+.service-line label{
+  display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;
+  background:#f8f9fa;padding:7px 10px;border:1px solid var(--border);border-radius:6px;
+  user-select:none;transition:all 0.15s;
+}
+.service-line label:hover{background:#e9ecef;border-color:#ced4da;}
+.service-line label:has(input:checked){background:#e6f6f4;border-color:#22919a;color:#1a6b72;font-weight:600;}
+.service-line input[type="checkbox"]{width:auto;margin:0;accent-color:var(--teal-light);}
 
-/* INLINE INPUTS */
-tbody input, tbody select{
-  padding:6px 8px;font-size:13px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:6px;
-  width:100%;background:#fff;outline:none;
-  transition:border-color 0.2s;
-}
-tbody input:focus, tbody select:focus{border-color:var(--teal-light);}
-tbody input[readonly], tbody select:disabled{
-  border-color:transparent;background:transparent;cursor:default;
-}
+/* HEALTH NOTE WARNING */
+.note-cell{transition:background 0.2s;}
+.note-cell.important-warning{background:#fffbeb !important;}
+.note-cell.important-warning textarea{border-color:var(--warning);background:#fffbeb;}
 
 /* BUTTONS */
 .btn{
-  padding:5px 10px;font-size:12px;font-weight:600;font-family:"Sarabun",sans-serif;
-  border:none;border-radius:6px;cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:4px;
-  margin:2px;white-space:nowrap;
+  padding:9px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  border:none;border-radius:var(--radius-sm);cursor:pointer;
+  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;
 }
-.btn:hover{opacity:0.85;transform:translateY(-1px);}
-.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-.btn-print {background:var(--navy);color:#fff;}
-.btn-edit  {background:var(--teal-light);color:#fff;}
-.btn-save  {background:var(--success);color:#fff;}
-.btn-cancel{background:var(--warning);color:#fff;}
-.btn-del   {background:var(--danger);color:#fff;}
-
-/* STATUS BADGE */
-.status-badge{
-  display:inline-block;padding:3px 10px;border-radius:20px;
-  font-size:11px;font-weight:600;
+.btn:hover{opacity:0.88;transform:translateY(-1px);}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.btn-add   {background:#edf2f7;color:var(--text);}
+.btn-paste {background:var(--success);color:#fff;}
+.btn-del   {background:var(--danger);color:#fff;padding:6px 10px;font-size:12px;}
+.btn-submit{
+  background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;
+  font-size:16px;padding:14px 36px;border-radius:10px;box-shadow:var(--shadow-md);
 }
-.badge-wait      {background:#edf2f7;color:#4a5568;}
-.badge-anesthesia{background:#bee3f8;color:#2b6cb0;}
-.badge-surgery   {background:#fed7d7;color:#c53030;}
-.badge-recovery  {background:#e9d8fd;color:#6b46c1;}
-.badge-ready     {background:#fefcbf;color:#744210;}
-.badge-done      {background:#c6f6d5;color:#276749;}
-.badge-cancel    {background:#edf2f7;color:#718096;}
 
-/* FOOTER ACTIONS */
-.footer-actions{
-  padding:16px 20px;border-top:1px solid var(--border);
-  display:flex;justify-content:flex-end;background:#fafbfc;
+.card-footer{
+  padding:16px 22px;border-top:1px solid var(--border);background:#fafbfc;
+}
+.submit-wrap{
+  padding:0;margin-top:4px;display:flex;justify-content:center;
+  animation:fadeUp 0.4s 0.15s ease both;
+}
+
+/* PRINT */
+#printArea{display:none;}
+@media print{
+  body > :not(#printArea){display:none!important;}
+  #printArea{display:block!important;}
+  .sticker-page{position:relative;width:80mm;height:50mm;page-break-after:always;overflow:hidden;background:#fff;}
+  .line{position:absolute;white-space:pre-wrap;word-break:break-word;box-sizing:border-box;padding-right:5px;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @page{size:80mm 50mm;margin:0;}
 }
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
@@ -129,11 +150,17 @@ tbody input[readonly], tbody select:disabled{
 </head>
 <body>
 
+<div class="font-preload">
+  <span style="font-family:'Kanit',sans-serif;">โหลด</span>
+  <span style="font-family:'Prompt',sans-serif;">โหลด</span>
+  <span style="font-family:'Sarabun',sans-serif;">โหลด</span>
+</div>
+
 <header>
   <div class="header-brand">
-    <div class="brand-icon">🐾</div>
+    <div class="brand-icon">📝</div>
     <div class="brand-text">
-      <h1>สัตว์ทั้งหมดวันนี้</h1>
+      <h1>ลงทะเบียนสัตว์</h1>
       <span>RMUTTO – Veterinary Academic Service Division</span>
     </div>
   </div>
@@ -142,190 +169,210 @@ tbody input[readonly], tbody select:disabled{
 
 <div class="container">
 
-  <div class="page-header">
-    <h2>รายชื่อสัตว์ประจำวันนี้</h2>
+  <!-- OWNER CARD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">👤</div>
+      <h4>ข้อมูลเจ้าของสัตว์</h4>
+    </div>
+    <div class="card-body">
+      <div class="owner-grid">
+        <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์ (บังคับ)" required>
+        <input id="phone" type="tel" placeholder="เบอร์โทร (ไม่บังคับ)">
+        <button type="button" class="btn btn-paste" onclick="window.pasteOwnerName()">📋 ดึงชื่อจากบัตร</button>
+      </div>
+    </div>
   </div>
 
-  <div class="table-wrap">
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th>คิว</th>
-            <th>ชื่อสัตว์</th>
-            <th>ชนิด</th>
-            <th>เพศ</th>
-            <th>น้ำหนัก (กก.)</th>
-            <th>สถานะ</th>
-            <th>เจ้าของ</th>
-            <th>โทร</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="animalTable"></tbody>
-      </table>
+  <!-- ANIMALS CARD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">🐾</div>
+      <h4>ข้อมูลสัตว์</h4>
     </div>
-    <div class="footer-actions">
-      <button class="btn btn-del" onclick="deleteAll()">🗑 ลบข้อมูลทั้งหมดวันนี้</button>
+    <div class="card-body" style="padding-bottom:0;">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:14%">ชื่อสัตว์</th>
+              <th style="width:8%">ชนิด</th>
+              <th style="width:8%">เพศ</th>
+              <th style="width:8%">นน. (กก.)</th>
+              <th style="width:36%">บริการ</th>
+              <th style="width:16%">บันทึกสุขภาพ</th>
+              <th style="width:10%">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="animalBody"></tbody>
+        </table>
+      </div>
     </div>
+    <div class="card-footer">
+      <button type="button" class="btn btn-add" onclick="window.addAnimal()">➕ เพิ่มรายการสัตว์</button>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-wrap">
+    <button type="button" id="btnSaveAll" class="btn btn-submit" onclick="window.saveAll()">
+      💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว
+    </button>
   </div>
 
 </div>
 
+<div id="printArea"></div>
+
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-const ADMIN_PASSWORD = "2500";
-
-const statusMap = {
-  waiting:          { text:"รอผ่าตัด",         cls:"status-wait",       badge:"badge-wait" },
-  anesthesia:       { text:"กำลังวางยาสลบ",    cls:"status-anesthesia", badge:"badge-anesthesia" },
-  surgery:          { text:"กำลังผ่าตัด",      cls:"status-surgery",    badge:"badge-surgery" },
-  recovery:         { text:"กำลังพักฟื้น",     cls:"status-recovery",   badge:"badge-recovery" },
-  ready_to_go_home: { text:"ฟื้นแล้ว/รอรับกลับ",cls:"status-ready",    badge:"badge-ready" },
-  done:             { text:"รับกลับแล้ว",       cls:"status-done",       badge:"badge-done" },
-  cancel:           { text:"ยกเลิก",            cls:"status-cancel",     badge:"badge-cancel" }
+/* ─── Paste owner name ─── */
+window.pasteOwnerName = async function () {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) return alert("⚠️ ยังไม่มีข้อมูลใน Clipboard");
+    document.getElementById("ownerName").value = text.trim();
+    document.getElementById("phone").focus();
+  } catch { alert("⚠️ ไม่สามารถอ่าน Clipboard ได้"); }
 };
 
-async function loadAnimals() {
-  const { data:eventId } = await supabase.rpc("get_today_event");
-  const { data, error } = await supabase
-    .from("vasd_animal")
-    .select(`id,queue_number,animal_name,species,sex,est_weight,vasd_owner(owner_name,phone),vasd_queue(status)`)
-    .eq("event_id", eventId)
-    .order("queue_number");
+/* ─── Phone format ─── */
+document.getElementById("phone").addEventListener("input", function() {
+  let v = this.value.replace(/\D/g,"").slice(0,10);
+  if (v.length>6) v=v.replace(/(\d{3})(\d{3})(\d+)/,"$1-$2-$3");
+  else if (v.length>3) v=v.replace(/(\d{3})(\d+)/,"$1-$2");
+  this.value=v;
+});
 
-  if (error) { console.error(error); return; }
+/* ─── Services ─── */
+window.serviceHTML = function(sex, species) {
+  const nt = sex==="ผู้"?"ทำหมันเพศผู้":"ทำหมันเพศเมีย";
+  return `<div class="service-line">
+    <label><input type="checkbox" class="svc" checked value="${nt}"> ${nt}</label>
+    <label><input type="checkbox" class="svc" value="ฉีดวัคซีนพิษสุนัขบ้า"> ฉีดวัคซีนพิษสุนัขบ้า</label>
+    ${species==="ส"?`<label><input type="checkbox" class="svc" value="ฉีดยาป้องกันเห็บ"> ฉีดยาป้องกันเห็บ</label>`:""}
+    <label><input type="checkbox" class="svc" value="ตรวจเลือด"> ตรวจเลือด</label>
+    <label><input type="checkbox" class="svc" value="ฝังไมโครชิฟ"> ฝังไมโครชิฟ</label>
+  </div>`;
+};
 
-  const tbody = document.getElementById("animalTable");
-  tbody.innerHTML = "";
+/* ─── Add animal row ─── */
+window.addAnimal = function () {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><input class="animalName" placeholder="ระบุชื่อ..." required></td>
+    <td><select class="species"><option value="ม">แมว</option><option value="ส">สุนัข</option></select></td>
+    <td><select class="sex"><option value="เมีย">เมีย</option><option value="ผู้">ผู้</option></select></td>
+    <td><input type="number" class="estWeight" value="3" min="0" step="0.1"></td>
+    <td class="svcCell" style="text-align:left;"></td>
+    <td class="noteCell" style="text-align:left;"><textarea class="healthNote" placeholder="โรคประจำตัว, ข้อควรระวัง..."></textarea></td>
+    <td><button type="button" class="btn btn-del" onclick="this.closest('tr').remove()">🗑</button></td>
+  `;
 
-  data.forEach(a => {
-    const statusKey = a.vasd_queue?.status || "waiting";
-    const s = statusMap[statusKey] || statusMap.waiting;
+  const species  = tr.querySelector(".species");
+  const sex      = tr.querySelector(".sex");
+  const svcCell  = tr.querySelector(".svcCell");
+  const note     = tr.querySelector(".healthNote");
+  const noteCell = tr.querySelector(".noteCell");
+  const nameInput= tr.querySelector(".animalName");
 
-    const tr = document.createElement("tr");
-    tr.dataset.id = a.id;
-    tr.className = s.cls;
+  nameInput.oninput = () => { nameInput.style.borderColor = ""; };
+  function refreshSvc() { svcCell.innerHTML = window.serviceHTML(sex.value, species.value); }
+  refreshSvc();
+  species.onchange = refreshSvc;
+  sex.onchange     = refreshSvc;
+  note.oninput     = () => noteCell.classList.toggle("important-warning", note.value.trim()!=="");
 
-    tr.innerHTML = `
-      <td><strong>#${a.queue_number}</strong></td>
-      <td><input class="f" value="${a.animal_name}" readonly></td>
-      <td>
-        <select class="f" disabled>
-          <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
-          <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
-        </select>
-      </td>
-      <td>
-        <select class="f" disabled>
-          <option value="เมีย" ${a.sex==="เมีย"?"selected":""}>เมีย</option>
-          <option value="ผู้"  ${a.sex==="ผู้" ?"selected":""}>ผู้</option>
-        </select>
-      </td>
-      <td><input class="f" type="number" value="${a.est_weight??""}" readonly style="max-width:80px;margin:auto;"></td>
-      <td>
-        <select class="status" disabled>
-          ${Object.entries(statusMap).map(([k,v])=>
-            `<option value="${k}" ${k===statusKey?"selected":""}>${v.text}</option>`
-          ).join("")}
-        </select>
-      </td>
-      <td>${a.vasd_owner?.owner_name??""}</td>
-      <td>${a.vasd_owner?.phone??""}</td>
-      <td>
-        <button class="btn btn-print" onclick="printQueue('${a.id}')">🖨</button>
-        <button class="btn btn-edit"  onclick="enableEdit(this)">✏️ แก้ไข</button>
-        <button class="btn btn-save"  onclick="saveRow(this)" disabled>💾</button>
-        <button class="btn btn-cancel" onclick="cancelRow('${a.id}')">🚫</button>
-        <button class="btn btn-del"   onclick="deleteRow('${a.id}')">🗑</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
+  document.getElementById("animalBody").appendChild(tr);
+};
+
+window.addAnimal();
+
+/* ─── Save & Print ─── */
+window.saveAll = async function () {
+  const btnSave = document.getElementById("btnSaveAll");
+  const ownerNameInput = document.getElementById("ownerName");
+  const ownerName = ownerNameInput.value.trim();
+  const phone = document.getElementById("phone").value.trim();
+
+  if (!ownerName) { alert("❌ กรุณาระบุชื่อเจ้าของสัตว์"); ownerNameInput.focus(); return; }
+  const rows = document.querySelectorAll("#animalBody tr");
+  if (rows.length===0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
+
+  let hasError=false;
+  rows.forEach((row,i)=>{
+    const ni=row.querySelector(".animalName");
+    if (!ni.value.trim()) { alert(`❌ กรุณาระบุชื่อสัตว์รายการที่ ${i+1}`); ni.focus(); ni.style.borderColor="var(--danger)"; hasError=true; }
   });
-}
+  if (hasError) return;
 
-loadAnimals();
+  btnSave.disabled=true; btnSave.textContent="⏳ กำลังบันทึก...";
 
-window.printQueue = async function(animalId) {
-  const { data:a } = await supabase
-    .from("vasd_animal")
-    .select(`queue_number,animal_name,species,sex,vasd_owner(owner_name,phone),vasd_service(service_type)`)
-    .eq("id", animalId).single();
-  if (!a) return alert("ไม่พบข้อมูล");
+  try {
+    const { data:eventId, error:evtErr } = await supabase.rpc("get_today_event");
+    if (evtErr) throw evtErr;
 
-  const spcText  = a.species==="ส"?"สุนัข":"แมว";
-  const services = a.vasd_service?.map(s=>s.service_type).join(", ") || "-";
-  const phone    = a.vasd_owner?.phone || "ไม่ระบุ";
-  const ownerName= a.vasd_owner?.owner_name || "";
+    const { data:owner, error:ownerErr } = await supabase.from("vasd_owner")
+      .insert({ event_id:eventId, owner_name:ownerName, phone }).select().single();
+    if (ownerErr) throw ownerErr;
 
-  const { data:tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
-  if (!tmplData?.config) return alert("⚠️ ยังไม่ได้บันทึก Template สติ๊กเกอร์คิว กรุณาตั้งค่าเครื่องพิมพ์ก่อน");
+    const { count, error:cntErr } = await supabase.from("vasd_animal").select("*",{count:"exact",head:true}).eq("event_id",eventId);
+    if (cntErr) throw cntErr;
 
-  let printContents = "";
-  tmplData.config.forEach(l => {
-    let text = l.text
-      .replace("{{queue_number}}",a.queue_number)
-      .replace("{{animal_name}}",a.animal_name)
-      .replace("{{species}}",spcText)
-      .replace("{{sex}}",a.sex)
-      .replace("{{owner_name}}",ownerName)
-      .replace("{{phone}}",phone)
-      .replace("{{services}}",services);
-    printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
-  });
+    let q=( count||0)+1, svcs=[], queues=[], forPrint=[];
 
-  const pw = window.open("","_blank","width=800,height=600");
-  pw.document.write(`<html><head><title>Print</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;color:#000!important}@page{size:80mm 50mm;margin:0}</style>
-    </head><body><div class="sticker">${printContents}</div>
-    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},200);});}<\/script></body></html>`);
-  pw.document.close();
+    for (const r of rows) {
+      const spVal=r.querySelector(".species").value;
+      const { data:animal, error:animalErr } = await supabase.from("vasd_animal").insert({
+        event_id:eventId, owner_id:owner.id, queue_number:q++,
+        species:spVal, animal_name:r.querySelector(".animalName").value.trim(),
+        sex:r.querySelector(".sex").value, est_weight:r.querySelector(".estWeight").value||0,
+        health_note:r.querySelector(".healthNote").value.trim()
+      }).select().single();
+      if (animalErr) throw animalErr;
+
+      let sNames=[];
+      r.querySelectorAll(".svc:checked").forEach(s=>{ svcs.push({animal_id:animal.id,service_type:s.value}); sNames.push(s.value); });
+      queues.push({ animal_id:animal.id, status:"waiting" });
+      forPrint.push({ q:animal.queue_number, name:animal.animal_name, spc:spVal==="ม"?"แมว":"สุนัข", sex:animal.sex, svc:sNames.join(", ") });
+    }
+
+    if (svcs.length)   await supabase.from("vasd_service").insert(svcs);
+    if (queues.length) await supabase.from("vasd_queue").insert(queues);
+
+    const { data:tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
+    if (tmplData?.config) {
+      let html="";
+      forPrint.forEach(a=>{
+        let page="<div class='sticker-page'>";
+        tmplData.config.forEach(l=>{
+          let txt=l.text
+            .replace("{{queue_number}}",a.q).replace("{{animal_name}}",a.name)
+            .replace("{{species}}",a.spc).replace("{{sex}}",a.sex)
+            .replace("{{owner_name}}",ownerName).replace("{{phone}}",phone||"ไม่ระบุ")
+            .replace("{{services}}",a.svc);
+          let fnt=(l.font||"'Segoe UI'").replace(/"/g,"'");
+          page+=`<div class="line" style="left:${l.x||0}px;width:calc(100% - ${l.x||0}px);top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${fnt};text-align:${l.align||"left"};">${txt}</div>`;
+        });
+        html+=page+"</div>";
+      });
+      document.getElementById("printArea").innerHTML=html;
+      try{await document.fonts.load("16px 'Kanit'");await document.fonts.load("16px 'Prompt'");await document.fonts.load("16px 'Sarabun'");}catch(e){}
+      await document.fonts.ready;
+      await new Promise(r=>setTimeout(r,300));
+      window.print();
+    }
+
+    setTimeout(()=>{ location.href="index.html"; },1000);
+
+  } catch(err) {
+    console.error(err);
+    alert("❌ เกิดข้อผิดพลาด: "+(err.message||"โปรดลองใหม่"));
+    btnSave.disabled=false;
+    btnSave.innerHTML="💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว";
+  }
 };
-
-window.enableEdit = function(btn) {
-  const pass = prompt("กรอกรหัส admin");
-  if (pass !== ADMIN_PASSWORD) return;
-  const tr = btn.closest("tr");
-  tr.querySelectorAll(".f,.status").forEach(el=>{ el.readOnly=false; el.disabled=false; });
-  tr.querySelector(".btn-save").disabled = false;
-};
-
-window.saveRow = async function(btn) {
-  const tr = btn.closest("tr"), id = tr.dataset.id;
-  const f  = tr.querySelectorAll(".f");
-  const status = tr.querySelector(".status").value;
-  await supabase.from("vasd_animal").update({ animal_name:f[0].value, species:f[1].value, sex:f[2].value, est_weight:f[3].value }).eq("id",id);
-  await supabase.from("vasd_queue").update({ status, updated_at:new Date() }).eq("animal_id",id);
-  loadAnimals();
-};
-
-window.cancelRow = async function(id) {
-  await supabase.from("vasd_queue").update({ status:"cancel", updated_at:new Date() }).eq("animal_id",id);
-  loadAnimals();
-};
-
-window.deleteRow = async function(id) {
-  const pwd = prompt("กรอกรหัส admin เพื่อยืนยันการลบ");
-  if (!pwd) return;
-  const { error } = await supabase.rpc("admin_delete_animal",{ p_animal_id:id, p_admin_password:pwd });
-  if (error) alert("❌ ลบไม่สำเร็จ"); else loadAnimals();
-};
-
-window.deleteAll = async function() {
-  if (!confirm("⚠️ ต้องการลบสัตว์ทั้งหมดของวันนี้หรือไม่?")) return;
-  const pwd = prompt("กรอกรหัส admin");
-  if (!pwd) return;
-  const { error } = await supabase.rpc("admin_delete_all_today",{ p_admin_password:pwd });
-  if (error) alert("❌ ลบไม่สำเร็จ");
-  else { alert("✅ ลบข้อมูลทั้งหมดแล้ว"); loadAnimals(); }
-};
-
-supabase.channel("vasd-live")
-  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"},loadAnimals)
-  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_animal"},loadAnimals)
-  .subscribe();
 </script>
 </body>
 </html>
