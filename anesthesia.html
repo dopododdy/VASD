@@ -2,284 +2,672 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>RMUTTO - VASD | วิสัญญี</title>
+<title>RMUTTO - VASD | เรียกคิวผ่าตัด</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
 :root {
   --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
-  --bg:#f0f4f8; --surface:#ffffff; --text:#1a202c; --text-muted:#718096;
+  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
   --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
+  --orange:#dd6b20; --purple:#6b46c1;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
   --radius:14px; --radius-sm:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;}
 
-/* HEADER */
+/* ─── HEADER ─── */
 header{
-  background:var(--navy);padding:0 32px;display:flex;
-  justify-content:space-between;align-items:center;height:68px;
-  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
+  background:var(--navy);padding:0 28px;display:flex;
+  justify-content:space-between;align-items:center;height:64px;
+  flex-shrink:0;box-shadow:0 2px 20px rgba(0,0,0,0.25);z-index:200;
 }
-.header-brand{display:flex;align-items:center;gap:14px;}
+.header-brand{display:flex;align-items:center;gap:12px;}
 .brand-icon{
-  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
-  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
+  width:38px;height:38px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
+  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
 }
-.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
+.brand-text h1{font-size:16px;font-weight:700;color:#fff;line-height:1.2;}
 .brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
 .btn-home{
-  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-  cursor:pointer;transition:background 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);
+  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);cursor:pointer;
 }
 .btn-home:hover{background:rgba(255,255,255,0.18);}
 
-/* MAIN */
-.container{max-width:1100px;margin:0 auto;padding:32px 24px;}
-
-/* PAGE TITLE */
-.page-title{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:28px;animation:fadeUp 0.4s ease both;
+/* ─── TAB BAR ─── */
+.tab-bar{
+  background:var(--surface);border-bottom:2px solid var(--border);
+  display:flex;flex-shrink:0;padding:0 28px;
 }
-.page-title h2{font-size:22px;font-weight:700;color:var(--navy);}
-.page-subtitle{font-size:13px;color:var(--text-muted);}
-
-/* EMPTY STATE */
-.empty-state{
-  text-align:center;padding:60px 20px;background:var(--surface);
-  border-radius:var(--radius);border:1px solid var(--border);
-  color:var(--text-muted);animation:fadeUp 0.4s ease both;
+.tab-btn{
+  padding:14px 20px;font-size:14px;font-weight:600;font-family:"Sarabun",sans-serif;
+  background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;
+  cursor:pointer;color:var(--text-muted);transition:all 0.2s;display:flex;align-items:center;gap:7px;
 }
-.empty-state .icon{font-size:48px;margin-bottom:12px;}
-.empty-state p{font-size:15px;}
-
-/* CASE CARD */
-.case-card{
-  background:var(--surface);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  margin-bottom:20px;overflow:hidden;
-  animation:fadeUp 0.4s ease both;transition:box-shadow 0.2s;
-}
-.case-card:hover{box-shadow:var(--shadow-md);}
-
-.case-header{
-  background:linear-gradient(135deg,var(--navy),#1a2f47);
-  padding:16px 24px;display:flex;justify-content:space-between;align-items:center;
-}
-.case-header-left h3{font-size:17px;font-weight:700;color:#fff;margin-bottom:4px;}
-.case-meta{display:flex;gap:12px;}
-.meta-badge{
-  font-size:12px;color:rgba(255,255,255,0.7);
-  background:rgba(255,255,255,0.1);border-radius:20px;
-  padding:3px 10px;border:1px solid rgba(255,255,255,0.15);
+.tab-btn:hover{color:var(--navy);}
+.tab-btn.active{color:var(--teal-light);border-bottom-color:var(--teal-light);}
+.tab-badge{
+  background:var(--danger);color:#fff;font-size:11px;font-weight:700;
+  padding:1px 7px;border-radius:20px;min-width:20px;text-align:center;
 }
 
-.case-body{padding:20px 24px;}
-
-/* SECTION LABEL */
+/* ─── TAB PANE ─── */
+.tab-pane{display:none;flex:1;overflow-y:auto;padding:24px 28px;}
+.tab-pane.active{display:block;}
 .section-label{
   font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:12px;margin-top:20px;
+  color:var(--text-muted);margin-bottom:12px;
 }
-.section-label:first-child{margin-top:0;}
+.empty{text-align:center;padding:56px 20px;color:var(--text-muted);
+  background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);}
+.empty-icon{font-size:44px;margin-bottom:10px;}
 
-/* GRID FIELDS */
-.fields-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;
+/* ─── QUEUE CARD ─── */
+.queue-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);margin-bottom:16px;overflow:hidden;transition:box-shadow 0.2s;
 }
-.field{display:flex;flex-direction:column;gap:4px;}
-.field label{font-size:12px;font-weight:600;color:var(--text-muted);}
-.field input{
-  padding:9px 12px;font-size:14px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:var(--radius-sm);
-  background:#fff;color:var(--text);outline:none;
-  transition:border-color 0.2s,box-shadow 0.2s;width:100%;
+.queue-card:hover{box-shadow:var(--shadow-md);}
+.qcard-header{
+  background:linear-gradient(135deg,var(--navy),#1a2f47);
+  padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
 }
-.field input:focus{
-  border-color:var(--teal-light);
-  box-shadow:0 0 0 3px rgba(34,145,154,0.15);
-}
+.qcard-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;}
+.qcard-meta{display:flex;gap:6px;flex-wrap:wrap;}
+.meta-tag{font-size:11px;color:rgba(255,255,255,0.75);background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:2px 9px;}
+.qcard-body{padding:18px 20px;}
 
-/* VITAL SIGNS STRIP */
-.vitals-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+/* ─── WEIGHT & DRUG ─── */
+.weight-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.weight-row label{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
+.weight-input{
+  width:100px;padding:8px 10px;font-size:15px;font-weight:700;font-family:"Sarabun",sans-serif;
+  border:2px solid var(--teal-light);border-radius:var(--radius-sm);color:var(--navy);
+  text-align:center;outline:none;
 }
-.vital-field{
-  background:linear-gradient(135deg,#f8fafc,#f0f4f8);
-  border:1px solid var(--border);border-radius:var(--radius-sm);
-  padding:12px;text-align:center;
-}
-.vital-field label{
-  font-size:11px;font-weight:700;letter-spacing:0.5px;
-  text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;
-}
-.vital-field input{
-  width:100%;text-align:center;padding:8px;font-size:18px;font-weight:700;
-  color:var(--navy);border:1px solid var(--border);border-radius:6px;
-  font-family:"Sarabun",sans-serif;outline:none;background:#fff;
-  transition:border-color 0.2s;
-}
-.vital-field input:focus{border-color:var(--teal-light);}
+.weight-input:focus{box-shadow:0 0 0 3px rgba(34,145,154,0.15);}
+.species-tag{font-size:12px;background:#edf2f7;color:var(--text-muted);border-radius:6px;padding:4px 10px;font-weight:600;}
 
-/* CARD FOOTER */
-.case-footer{
-  padding:16px 24px;background:#fafbfc;border-top:1px solid var(--border);
-  display:flex;gap:10px;justify-content:flex-end;align-items:center;
-}
+.drug-section-title{font-size:12px;font-weight:700;letter-spacing:0.5px;color:var(--text-muted);
+  margin-bottom:8px;text-transform:uppercase;}
+.drug-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
+.drug-card{background:linear-gradient(135deg,#f8fafc,#f0f4f8);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 14px;}
+.drug-name{font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:2px;}
+.drug-conc{font-size:10px;color:var(--text-muted);}
+.drug-dose{font-size:22px;font-weight:700;color:var(--navy);line-height:1;margin:6px 0 2px;}
+.drug-unit{font-size:12px;color:var(--teal-light);font-weight:600;}
 
-/* BUTTONS */
-.btn{
-  padding:9px 20px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+.assign-row{display:flex;align-items:center;gap:10px;padding-top:14px;
+  border-top:1px solid var(--border);flex-wrap:wrap;}
+.assign-row label{font-size:13px;font-weight:600;color:var(--text);}
+.assign-select{padding:8px 12px;font-size:13px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;min-width:130px;}
+.assign-select:focus{border-color:var(--teal-light);}
+
+/* ─── BUTTONS ─── */
+.btn{padding:8px 18px;font-size:13px;font-weight:700;font-family:"Sarabun",sans-serif;
   border:none;border-radius:var(--radius-sm);cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;
-}
-.btn:hover{opacity:0.88;transform:translateY(-1px);}
-.btn-start{background:linear-gradient(135deg,#d69e2e,#f0a500);color:#fff;}
-.btn-save{background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;}
-.btn-secondary{background:var(--border);color:var(--text-muted);}
+  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{opacity:0.87;transform:translateY(-1px);}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.btn-assign{background:linear-gradient(135deg,var(--orange),#f6ad55);color:#fff;}
+.btn-start{background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;}
+.btn-danger{background:linear-gradient(135deg,var(--danger),#fc8181);color:#fff;}
+.btn-secondary{background:#edf2f7;color:var(--text);}
+.btn-sm{padding:5px 12px;font-size:12px;}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+/* ─── TABLE GRID (tab2) ─── */
+.tables-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.tables-header h2{font-size:20px;font-weight:700;color:var(--navy);}
+.table-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:22px;}
+.table-tile{
+  background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.2s;
+}
+.table-tile:hover{border-color:var(--teal-light);box-shadow:var(--shadow-md);}
+.table-tile.occupied{border-color:#feb2b2;background:#fff5f5;}
+.table-tile.selected-tile{border-color:var(--teal-light);background:#e6f6f4;
+  box-shadow:0 0 0 3px rgba(34,145,154,0.2);}
+.table-num{font-size:18px;font-weight:800;color:var(--navy);margin-bottom:3px;}
+.table-animal-name{font-size:11px;font-weight:600;color:var(--danger);line-height:1.3;}
+.table-empty-lbl{font-size:11px;color:var(--text-muted);}
+
+/* ─── SURGERY PANEL ─── */
+.surgery-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-md);overflow:hidden;}
+.spanel-header{background:linear-gradient(135deg,var(--navy),#1a2f47);
+  padding:16px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.spanel-title{color:#fff;font-size:17px;font-weight:700;}
+.spanel-sub{color:rgba(255,255,255,0.6);font-size:12px;margin-top:3px;}
+.spanel-body{padding:20px 22px;}
+
+.surgeon-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+@media(max-width:600px){.surgeon-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.field input,.field textarea{padding:9px 12px;font-size:13px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);
+  background:#fff;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.field input:focus,.field textarea:focus{border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(34,145,154,0.12);}
+.field textarea{resize:vertical;min-height:58px;}
+
+/* ─── VITALS ─── */
+.vitals-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.vitals-log{background:#fafbfc;border:1px solid var(--border);border-radius:var(--radius-sm);
+  max-height:240px;overflow-y:auto;margin-bottom:14px;}
+.vital-row{display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 80px;
+  gap:4px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;}
+.vital-row:last-child{border-bottom:none;}
+.vital-row.is-form{background:#f0fdf9;}
+.vital-header-row{background:#f0f4f8;}
+.vital-time{font-size:11px;font-weight:700;color:var(--text-muted);}
+.vital-val{text-align:center;font-weight:600;color:var(--navy);}
+.vital-hdr{font-size:11px;font-weight:700;color:var(--text-muted);text-align:center;letter-spacing:0.3px;}
+.vital-hdr:first-child{text-align:left;}
+.vi{width:100%;padding:5px 6px;font-size:13px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:5px;text-align:center;outline:none;}
+.vi:focus{border-color:var(--teal-light);}
+
+/* ─── PRESCRIPTION ─── */
+.rx-section{border-top:1px solid var(--border);padding-top:16px;margin-top:16px;}
+.rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+@media(max-width:560px){.rx-grid{grid-template-columns:1fr;}}
+.rx-card{border:2px solid var(--border);border-radius:var(--radius-sm);padding:12px;
+  cursor:pointer;transition:all 0.2s;user-select:none;}
+.rx-card.selected{border-color:var(--teal-light);background:#e6f6f4;}
+.rx-card label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.rx-card input[type="checkbox"]{width:16px;height:16px;accent-color:var(--teal-light);flex-shrink:0;margin-top:2px;}
+.rx-cat{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:3px;}
+.rx-name{font-size:13px;font-weight:700;color:var(--navy);}
+.rx-detail{font-size:12px;color:var(--teal);font-weight:600;margin-top:2px;}
+.rx-freq{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.days-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.days-row label{font-size:13px;font-weight:600;color:var(--text);}
+.days-input{width:65px;padding:7px 10px;font-size:14px;font-weight:700;
+  font-family:"Sarabun",sans-serif;border:1px solid var(--border);
+  border-radius:var(--radius-sm);text-align:center;outline:none;}
+
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.animate{animation:fadeUp 0.3s ease both;}
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-brand">
-    <div class="brand-icon">💉</div>
+    <div class="brand-icon">🩺</div>
     <div class="brand-text">
-      <h1>วิสัญญี – โต๊ะกลาง</h1>
+      <h1>เรียกคิวผ่าตัด</h1>
       <span>RMUTTO – Veterinary Academic Service Division</span>
     </div>
   </div>
   <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
 </header>
 
-<div class="container">
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-btn-central" onclick="switchTab('central')">
+    💉 โต๊ะกลาง (วางยาสลบ)
+    <span class="tab-badge" id="badge-central">0</span>
+  </button>
+  <button class="tab-btn" id="tab-btn-tables" onclick="switchTab('tables')">
+    🔪 โต๊ะผ่าตัด (20 โต๊ะ)
+    <span class="tab-badge" id="badge-tables" style="background:var(--orange);">0</span>
+  </button>
+</div>
 
-  <div class="page-title">
-    <div>
-      <h2>เคสรอวางยาสลบ</h2>
-      <p class="page-subtitle">แสดงเฉพาะสัตว์ที่มีสถานะ "รอผ่าตัด"</p>
-    </div>
+<!-- TAB 1 : โต๊ะกลาง -->
+<div class="tab-pane active" id="tab-central">
+  <div class="section-label">สัตว์รอผ่าตัด — คำนวณยาวางสลบอัตโนมัติจากน้ำหนัก</div>
+  <div id="central-list"></div>
+</div>
+
+<!-- TAB 2 : โต๊ะผ่าตัด -->
+<div class="tab-pane" id="tab-tables">
+  <div class="tables-header">
+    <h2>โต๊ะผ่าตัด</h2>
+    <span style="font-size:13px;color:var(--text-muted);">คลิกโต๊ะเพื่อดูรายละเอียด</span>
   </div>
-
-  <div id="list"></div>
-
+  <div class="table-grid" id="table-grid"></div>
+  <div id="surgery-detail"></div>
 </div>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-async function loadWaiting() {
-  const { data: eventId, error: e0 } = await supabase.rpc("get_today_event");
-  if (e0) { console.error(e0); return; }
+/* ── HELPERS ── */
+const nowStr = () => new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+const fmt2   = v  => (isNaN(v)||v<=0) ? "–" : v.toFixed(2);
 
-  const { data, error } = await supabase
+function calcDrugs(w, species) {
+  const isdog   = species === "ส";
+  const zol_rate = isdog ? 7 : 10;
+  return {
+    xyl_ml:   (w * 1)        / 20,
+    zol_ml:   (w * zol_rate) / 100,
+    pen_ml:    w / 10,
+    tolf_ml:  (w * 4)        / 40,
+    zol_rate
+  };
+}
+
+function calcRx(w) {
+  const norflox_str = w < 10 ? 100 : 200;
+  const tolf_str    = w < 15 ? 6   : 60;
+  return {
+    doxy_tabs:    Math.max(1, Math.round(w * 10  / 100)),
+    norflox_str,
+    norflox_tabs: Math.max(1, Math.round(w * 10  / norflox_str)),
+    tolf_str,
+    tolf_tabs:    Math.max(1, Math.round(w * 4   / tolf_str)),
+    fbc_tabs:     1
+  };
+}
+
+/* ── TABS ── */
+window.switchTab = function(name) {
+  ["central","tables"].forEach(n => {
+    document.getElementById("tab-"+n).classList.toggle("active", n===name);
+    document.getElementById("tab-btn-"+n).classList.toggle("active", n===name);
+  });
+};
+
+/* ══════════════
+   TAB 1 : โต๊ะกลาง
+══════════════ */
+let centralData = [];
+
+async function loadCentral() {
+  const { data:eventId } = await supabase.rpc("get_today_event");
+  const { data } = await supabase
     .from("vasd_queue")
-    .select(`animal_id, status, vasd_animal!inner(id,event_id,animal_name,species,sex,est_weight)`)
+    .select(`animal_id, status,
+             vasd_animal!inner(id,event_id,animal_name,species,sex,est_weight,actual_weight)`)
     .eq("status","รอผ่าตัด")
     .eq("vasd_animal.event_id", eventId)
     .order("animal_id");
 
-  const box = document.getElementById("list");
+  centralData = data || [];
+  document.getElementById("badge-central").textContent = centralData.length;
+  renderCentral();
+}
+
+function drugCardsHTML(d) {
+  return [
+    {name:"Xylazine",    conc:"20 mg/ml · 1 mg/kg",          val:d.xyl_ml},
+    {name:"Zoletil",     conc:`100 mg/ml · ${d.zol_rate} mg/kg`, val:d.zol_ml},
+    {name:"Pen-Strep",   conc:"1 ml / 10 กก.",               val:d.pen_ml},
+    {name:"Tolfedine",   conc:"40 mg/ml · 4 mg/kg",          val:d.tolf_ml},
+  ].map(({name,conc,val})=>`
+    <div class="drug-card">
+      <div class="drug-name">${name}</div>
+      <div class="drug-conc">${conc}</div>
+      <div class="drug-dose">${fmt2(val)}</div>
+      <div class="drug-unit">ml</div>
+    </div>`).join("");
+}
+
+function renderCentral() {
+  const box = document.getElementById("central-list");
   box.innerHTML = "";
-
-  if (error) { console.error(error); return; }
-
-  if (!data || data.length === 0) {
-    box.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">✅</div>
-        <p>ไม่มีเคสรอวางยาสลบในขณะนี้</p>
-      </div>`;
+  if (!centralData.length) {
+    box.innerHTML = `<div class="empty animate">
+      <div class="empty-icon">✅</div>
+      <p>ไม่มีสัตว์รอผ่าตัดในขณะนี้</p></div>`;
     return;
   }
+  centralData.forEach((row, i) => {
+    const a   = row.vasd_animal;
+    const w   = parseFloat(a.actual_weight || a.est_weight || 0);
+    const d   = calcDrugs(w, a.species);
+    const spc = a.species==="ส"?"สุนัข":"แมว";
 
-  data.forEach((row, idx) => {
-    const a = row.vasd_animal;
-    const spcText = a.species === "ส" ? "สุนัข" : "แมว";
-    const div = document.createElement("div");
-    div.className = "case-card";
-    div.style.animationDelay = `${idx * 0.07}s`;
-    div.innerHTML = `
-      <div class="case-header">
-        <div class="case-header-left">
-          <h3>🐾 ${a.animal_name || "(ไม่ระบุชื่อ)"}</h3>
-          <div class="case-meta">
-            <span class="meta-badge">${spcText}</span>
-            <span class="meta-badge">${a.sex}</span>
-            <span class="meta-badge">น้ำหนักโดยประมาณ ${a.est_weight ?? "–"} กก.</span>
+    const card = document.createElement("div");
+    card.className="queue-card animate";
+    card.style.animationDelay=`${i*0.06}s`;
+    card.dataset.animalId=a.id;
+    card.innerHTML=`
+      <div class="qcard-header">
+        <div>
+          <div class="qcard-title">🐾 ${a.animal_name||"(ไม่ระบุ)"}</div>
+          <div class="qcard-meta">
+            <span class="meta-tag">${spc}</span>
+            <span class="meta-tag">${a.sex}</span>
           </div>
         </div>
-        <button class="btn btn-start" onclick="startAnes('${row.animal_id}')">▶ เริ่มวางยา</button>
       </div>
-
-      <div class="case-body">
-        <div class="section-label">ยาและปริมาณ</div>
-        <div class="fields-grid">
-          <div class="field"><label>น้ำหนักจริง (กก.)</label><input type="number" step="0.1" class="actualWeight" value="${a.est_weight ?? ""}"></div>
-          <div class="field"><label>Xylazine (mg)</label><input type="number" step="0.1" class="xylazine"></div>
-          <div class="field"><label>Zoletil Induction (mg)</label><input type="number" step="0.1" class="zoletil"></div>
-          <div class="field"><label>Zoletil เติม (mg)</label><input type="number" step="0.1" class="zoletilAdd"></div>
-          <div class="field"><label>Pen-Strep (ml)</label><input type="number" step="0.1" class="penstrep"></div>
-          <div class="field"><label>Tolfedine (mg)</label><input type="number" step="0.1" class="tolfedine"></div>
+      <div class="qcard-body">
+        <div class="weight-row">
+          <label>น้ำหนักจริง (กก.)</label>
+          <input type="number" step="0.1" class="weight-input" value="${w}"
+                 onchange="recalcCard(this,'${a.id}','${a.species}')">
+          <span class="species-tag">${spc} · Zoletil ${d.zol_rate} mg/kg</span>
         </div>
-
-        <div class="section-label">Vital Signs</div>
-        <div class="vitals-grid">
-          <div class="vital-field"><label>HR</label><input class="hr" placeholder="–"></div>
-          <div class="vital-field"><label>RR</label><input class="rr" placeholder="–"></div>
-          <div class="vital-field"><label>O₂ Sat</label><input class="spo2" placeholder="–"></div>
-          <div class="vital-field"><label>Fluid (ml)</label><input class="fluid" placeholder="–"></div>
+        <div class="drug-section-title">ปริมาณยา (ml) ที่ต้องฉีด</div>
+        <div class="drug-grid" id="drugs-${a.id}">${drugCardsHTML(d)}</div>
+        <div class="assign-row">
+          <label>กำหนดโต๊ะผ่าตัด</label>
+          <select class="assign-select" id="tbl-${a.id}">
+            ${Array.from({length:20},(_,k)=>`<option value="${k+1}">โต๊ะ ${k+1}</option>`).join("")}
+          </select>
+          <button class="btn btn-assign" onclick="assignTable('${a.id}','${row.animal_id}')">
+            📋 บันทึกและส่งโต๊ะผ่าตัด
+          </button>
         </div>
-      </div>
-
-      <div class="case-footer">
-        <button class="btn btn-save" onclick="saveAnes(this,'${row.animal_id}')">
-          💾 บันทึก → ส่งเข้าผ่าตัด
-        </button>
-      </div>
-    `;
-    box.appendChild(div);
+      </div>`;
+    box.appendChild(card);
   });
 }
 
-loadWaiting();
-
-window.startAnes = async function (animalId) {
-  await supabase.from("vasd_queue").update({ status:"กำลังวางยาสลบ", updated_at:new Date() }).eq("animal_id", animalId);
+window.recalcCard = function(input, aid, species) {
+  const d = calcDrugs(parseFloat(input.value)||0, species);
+  document.getElementById("drugs-"+aid).innerHTML = drugCardsHTML(d);
 };
 
-window.saveAnes = async function (btn, animalId) {
-  const card = btn.closest(".case-card");
-  const w  = card.querySelector(".actualWeight").value;
-  const x  = card.querySelector(".xylazine").value;
-  const z  = card.querySelector(".zoletil").value;
-  const za = card.querySelector(".zoletilAdd").value;
-  const p  = card.querySelector(".penstrep").value;
-  const t  = card.querySelector(".tolfedine").value;
+window.assignTable = async function(animalId, queueAnimalId) {
+  const card   = document.querySelector(`[data-animal-id="${animalId}"]`);
+  const w      = parseFloat(card.querySelector(".weight-input").value) || 0;
+  const tblNum = parseInt(document.getElementById("tbl-"+animalId).value);
 
-  const services = [];
-  if (x)  services.push({ animal_id:animalId, service_type:`Xylazine ${x} mg` });
-  if (z)  services.push({ animal_id:animalId, service_type:`Zoletil induction ${z} mg` });
-  if (za) services.push({ animal_id:animalId, service_type:`Zoletil เติม ${za} mg` });
-  if (p)  services.push({ animal_id:animalId, service_type:`Pen-Strep ${p} ml` });
-  if (t)  services.push({ animal_id:animalId, service_type:`Tolfedine ${t} mg` });
-
-  if (services.length) await supabase.from("vasd_service").insert(services);
   await supabase.from("vasd_animal").update({ actual_weight:w }).eq("id", animalId);
-  await supabase.from("vasd_queue").update({ status:"กำลังผ่าตัด", updated_at:new Date() }).eq("animal_id", animalId);
-  loadWaiting();
+  await supabase.from("vasd_queue").update({
+    status:"กำลังผ่าตัด", table_number:tblNum, updated_at:new Date()
+  }).eq("animal_id", queueAnimalId);
+
+  loadCentral();
+  loadTables();
 };
 
-supabase.channel("vasd-anes")
-  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_queue" }, () => loadWaiting())
-  .subscribe();
+/* ══════════════
+   TAB 2 : โต๊ะผ่าตัด
+══════════════ */
+let tableData  = {};
+let selectedTbl= null;
+let vitalsCache= {};   // animalId → [{time,hr,rr,spo2,bt,zol}]
+
+async function loadTables() {
+  const { data:eventId } = await supabase.rpc("get_today_event");
+  const { data } = await supabase
+    .from("vasd_queue")
+    .select(`animal_id, table_number, surgeon_name, anesthesiologist_name, notes,
+             vasd_animal!inner(id,event_id,animal_name,species,sex,actual_weight,est_weight)`)
+    .eq("status","กำลังผ่าตัด")
+    .eq("vasd_animal.event_id", eventId);
+
+  tableData = {};
+  (data||[]).forEach(r=>{ if(r.table_number) tableData[r.table_number]=r; });
+  document.getElementById("badge-tables").textContent=Object.keys(tableData).length;
+  renderGrid();
+  if (selectedTbl) renderDetail(selectedTbl);
+}
+
+function renderGrid() {
+  const grid=document.getElementById("table-grid");
+  grid.innerHTML="";
+  for(let i=1;i<=20;i++){
+    const r=tableData[i];
+    const tile=document.createElement("div");
+    tile.className="table-tile"+(r?" occupied":"")+(selectedTbl===i?" selected-tile":"");
+    tile.onclick=()=>{ selectedTbl=i; renderGrid(); renderDetail(i); };
+    tile.innerHTML=`<div class="table-num">${i}</div>
+      ${r?`<div class="table-animal-name">${r.vasd_animal.animal_name||"(ไม่ระบุ)"}</div>`
+         :`<div class="table-empty-lbl">ว่าง</div>`}`;
+    grid.appendChild(tile);
+  }
+}
+
+function renderDetail(tblNum) {
+  const detail=document.getElementById("surgery-detail");
+  const r=tableData[tblNum];
+  if(!r){
+    detail.innerHTML=`<div class="surgery-panel animate"><div class="spanel-body">
+      <div class="empty"><div class="empty-icon">🪑</div><p>โต๊ะ ${tblNum} ว่างอยู่</p></div>
+    </div></div>`;
+    return;
+  }
+  const a   = r.vasd_animal;
+  const w   = parseFloat(a.actual_weight||a.est_weight||0);
+  const spc = a.species==="ส"?"สุนัข":"แมว";
+  const rx  = calcRx(w);
+  if(!vitalsCache[a.id]) vitalsCache[a.id]=[];
+
+  detail.innerHTML=`
+  <div class="surgery-panel animate">
+    <div class="spanel-header">
+      <div>
+        <div class="spanel-title">โต๊ะ ${tblNum} · 🐾 ${a.animal_name||"(ไม่ระบุ)"}</div>
+        <div class="spanel-sub">${spc} · ${a.sex} · ${w} กก.</div>
+      </div>
+      <button class="btn btn-danger btn-sm"
+              onclick="endSurgery('${a.id}','${r.animal_id}',${w})">
+        ✅ ผ่าตัดเสร็จ → พักฟื้น
+      </button>
+    </div>
+
+    <div class="spanel-body">
+
+      <!-- ทีมผ่าตัด -->
+      <div class="section-label">ทีมผ่าตัด</div>
+      <div class="surgeon-grid">
+        <div class="field">
+          <label>ศัลยแพทย์</label>
+          <input id="s-surg"  placeholder="ชื่อศัลยแพทย์..." value="${r.surgeon_name||""}">
+        </div>
+        <div class="field">
+          <label>วิสัญญีแพทย์</label>
+          <input id="s-anes"  placeholder="ชื่อวิสัญญีแพทย์..." value="${r.anesthesiologist_name||""}">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>บันทึกอื่นๆ (เช่น มดลูกอักเสบ, เลือดออก ฯลฯ)</label>
+          <textarea id="s-notes" placeholder="ข้อสังเกต...">${r.notes||""}</textarea>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" style="margin-bottom:16px;"
+              onclick="saveTeam('${r.animal_id}')">💾 บันทึกทีม</button>
+
+      <hr class="divider">
+
+      <!-- Vital Signs -->
+      <div class="vitals-toolbar">
+        <div class="section-label" style="margin:0;">Vital Signs (บันทึกตามเวลาจริง)</div>
+        <button class="btn btn-start btn-sm" onclick="addVitalRow('${a.id}')">
+          ➕ บันทึก Vitals
+        </button>
+      </div>
+      <div class="vitals-log" id="vitals-${a.id}">
+        <div class="vital-row vital-header-row">
+          <div class="vital-hdr" style="text-align:left;">เวลา</div>
+          <div class="vital-hdr">HR</div>
+          <div class="vital-hdr">RR</div>
+          <div class="vital-hdr">O₂ (%)</div>
+          <div class="vital-hdr">BT (°C)</div>
+          <div class="vital-hdr">Zoletil (ml)</div>
+        </div>
+        ${vitalsRowsHTML(a.id)}
+      </div>
+
+      <hr class="divider">
+
+      <!-- Prescription -->
+      <div class="rx-section" style="border:none;padding:0;margin:0;">
+        <div class="section-label">สั่งจ่ายยา (เมื่อผ่าตัดเสร็จ)</div>
+        <div class="days-row">
+          <label>จำนวนวัน</label>
+          <input type="number" class="days-input" id="rx-days" value="5" min="1" max="30">
+          <span style="font-size:13px;color:var(--text-muted);">วัน</span>
+        </div>
+        <div class="rx-grid">${rxHTML(a.id, rx)}</div>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+function vitalsRowsHTML(aid) {
+  const rows=vitalsCache[aid]||[];
+  if(!rows.length) return `<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:13px;">ยังไม่มีบันทึก</div>`;
+  return rows.map(v=>`
+    <div class="vital-row">
+      <div class="vital-time">${v.time}</div>
+      <div class="vital-val">${v.hr||"–"}</div>
+      <div class="vital-val">${v.rr||"–"}</div>
+      <div class="vital-val">${v.spo2||"–"}</div>
+      <div class="vital-val">${v.bt||"–"}</div>
+      <div class="vital-val">${v.zol||"–"}</div>
+    </div>`).join("");
+}
+
+window.addVitalRow = function(aid) {
+  const box=document.getElementById("vitals-"+aid);
+  box.querySelector(".is-form")?.remove();
+  const t=nowStr();
+  const fr=document.createElement("div");
+  fr.className="vital-row is-form";
+  fr.innerHTML=`
+    <div class="vital-time">${t}</div>
+    <input class="vi" id="vi-hr"   placeholder="HR">
+    <input class="vi" id="vi-rr"   placeholder="RR">
+    <input class="vi" id="vi-spo2" placeholder="O₂">
+    <input class="vi" id="vi-bt"   placeholder="BT">
+    <input class="vi" id="vi-zol"  placeholder="ml">`;
+  box.appendChild(fr);
+  fr.querySelector("#vi-hr").focus();
+  const save=()=>{ if(!fr.parentNode) return; saveVital(aid,t,fr); };
+  fr.addEventListener("keydown", e=>{ if(e.key==="Enter") save(); });
+  fr.querySelector("#vi-zol").addEventListener("blur",()=>setTimeout(()=>{
+    if(!fr.contains(document.activeElement)) save();
+  },150));
+};
+
+function saveVital(aid, time, fr) {
+  const entry={
+    time,
+    hr:  fr.querySelector("#vi-hr").value,
+    rr:  fr.querySelector("#vi-rr").value,
+    spo2:fr.querySelector("#vi-spo2").value,
+    bt:  fr.querySelector("#vi-bt").value,
+    zol: fr.querySelector("#vi-zol").value,
+  };
+  if(!vitalsCache[aid]) vitalsCache[aid]=[];
+  vitalsCache[aid].push(entry);
+
+  supabase.from("vasd_vital_signs").insert({
+    animal_id:aid, recorded_at:new Date(),
+    hr:entry.hr||null, rr:entry.rr||null, spo2:entry.spo2||null,
+    bt:entry.bt||null, zoletil_top:entry.zol||null
+  }).then(({error})=>{ if(error) console.warn("vitals:",error); });
+
+  const box=document.getElementById("vitals-"+aid);
+  fr.remove();
+  const row=document.createElement("div");
+  row.className="vital-row";
+  row.innerHTML=`
+    <div class="vital-time">${time}</div>
+    <div class="vital-val">${entry.hr||"–"}</div>
+    <div class="vital-val">${entry.rr||"–"}</div>
+    <div class="vital-val">${entry.spo2||"–"}</div>
+    <div class="vital-val">${entry.bt||"–"}</div>
+    <div class="vital-val">${entry.zol||"–"}</div>`;
+  box.appendChild(row);
+  box.scrollTop=box.scrollHeight;
+}
+
+window.saveTeam = async function(qAnimalId) {
+  await supabase.from("vasd_queue").update({
+    surgeon_name:        document.getElementById("s-surg")?.value||"",
+    anesthesiologist_name:document.getElementById("s-anes")?.value||"",
+    notes:               document.getElementById("s-notes")?.value||"",
+    updated_at:new Date()
+  }).eq("animal_id",qAnimalId);
+  alert("✅ บันทึกทีมผ่าตัดแล้ว");
+};
+
+/* ─── RX CARDS ─── */
+function rxHTML(aid, rx) {
+  const drugs=[
+    {id:"doxy",   cat:"ยาปฏิชีวนะ",      name:`Doxycycline (100 mg/tab)`,
+     detail:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+    {id:"norflox",cat:"ยาปฏิชีวนะ",      name:`Norfloxacin (${rx.norflox_str} mg/tab)`,
+     detail:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
+    {id:"tolf",   cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine (${rx.tolf_str} mg/tab)`,
+     detail:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+    {id:"fbc",    cat:"ยาบำรุงเลือด",    name:"FBC",
+     detail:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า"},
+  ];
+  return drugs.map(d=>`
+    <div class="rx-card" id="rxcard-${aid}-${d.id}" onclick="toggleRx(this)">
+      <label>
+        <input type="checkbox" id="rxchk-${aid}-${d.id}"
+               data-name="${d.name}" data-cat="${d.cat}"
+               data-detail="${d.detail}" data-freq="${d.freq}">
+        <div>
+          <div class="rx-cat">${d.cat}</div>
+          <div class="rx-name">${d.name}</div>
+          <div class="rx-detail">${d.detail}</div>
+          <div class="rx-freq">${d.freq}</div>
+        </div>
+      </label>
+    </div>`).join("");
+}
+
+window.toggleRx = function(card) {
+  const chk=card.querySelector("input[type='checkbox']");
+  chk.checked=!chk.checked;
+  card.classList.toggle("selected",chk.checked);
+};
+
+/* ─── END SURGERY ─── */
+window.endSurgery = async function(animalId, queueAnimalId, weight) {
+  const days=parseInt(document.getElementById("rx-days")?.value)||5;
+  const chks=document.querySelectorAll(`[id^="rxchk-${animalId}-"]:checked`);
+
+  const rxInserts=[];
+  chks.forEach(chk=>rxInserts.push({
+    animal_id:animalId,
+    drug_name:    chk.dataset.name,
+    drug_category:chk.dataset.cat,
+    dose_detail:  chk.dataset.detail,
+    frequency:    chk.dataset.freq,
+    days
+  }));
+
+  if(rxInserts.length){
+    const {error}=await supabase.from("vasd_prescription").insert(rxInserts);
+    if(error) console.warn("rx:",error);
+  }
+
+  await supabase.from("vasd_queue").update({
+    status:"กำลังพักฟื้น",
+    surgeon_name:        document.getElementById("s-surg")?.value||"",
+    anesthesiologist_name:document.getElementById("s-anes")?.value||"",
+    notes:               document.getElementById("s-notes")?.value||"",
+    table_number:null,
+    updated_at:new Date()
+  }).eq("animal_id",queueAnimalId);
+
+  selectedTbl=null;
+  document.getElementById("surgery-detail").innerHTML="";
+  loadTables();
+  alert(`✅ บันทึกเรียบร้อย — ย้ายไปพักฟื้นแล้ว${rxInserts.length?" พร้อมสั่งจ่ายยา "+rxInserts.length+" รายการ":""}`);
+};
+
+/* ─── REALTIME ─── */
+supabase.channel("vasd-main-rt")
+  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"},()=>{
+    loadCentral(); loadTables();
+  }).subscribe();
+
+/* ─── INIT ─── */
+loadCentral();
+loadTables();
 </script>
 </body>
 </html>
