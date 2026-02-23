@@ -386,9 +386,14 @@ function renderCentral() {
   });
 }
 
-window.recalcCard = function(input, aid, species) {
-  const d = calcDrugs(parseFloat(input.value)||0, species);
+window.recalcCard = async function(input, aid, species) {
+  const w = parseFloat(input.value) || 0;
+  const d = calcDrugs(w, species);
+  // 1. อัปเดตปริมาณยาวางยาสลบบนหน้าจอ
   document.getElementById("drugs-"+aid).innerHTML = drugCardsHTML(d);
+  
+  // 2. ✅ อัปเดตน้ำหนักลงฐานข้อมูลทันที (ทริกเกอร์ Realtime ให้โต๊ะอื่นรับรู้)
+  await supabase.from("vasd_animal").update({ actual_weight: w }).eq("id", aid);
 };
 
 window.assignTable = async function(animalId, queueAnimalId) {
