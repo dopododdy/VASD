@@ -10,7 +10,7 @@
   --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
   --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
   --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
-  --orange:#dd6b20; --purple:#6b46c1;
+  --orange:#dd6b20; --purple:#6b46c1; --blue:#3182ce;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
   --radius:14px; --radius-sm:8px;
 }
@@ -193,12 +193,6 @@ header{
 .rx-input-group input { flex: 1; padding: 6px 10px; font-size: 12px; font-family:"Sarabun",sans-serif; border: 1px solid var(--border); border-radius: 4px; outline:none; }
 .rx-input-group input:focus{border-color:var(--teal-light);}
 
-.days-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.days-row label{font-size:13px;font-weight:600;color:var(--text);}
-.days-input{width:65px;padding:7px 10px;font-size:14px;font-weight:700;
-  font-family:"Sarabun",sans-serif;border:1px solid var(--border);
-  border-radius:var(--radius-sm);text-align:center;outline:none;}
-
 .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 .animate{animation:fadeUp 0.3s ease both;}
@@ -245,6 +239,27 @@ header{
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
+/* ── REFERENCE RANGES สำหรับ VITALS (สามารถแก้ไขค่าเริ่มต้นที่นี่) ── */
+const VITAL_REFS = {
+  hr:   { min: 70, max: 160 },   // Heart Rate (bpm)
+  rr:   { min: 10, max: 40 },    // Respiratory Rate (bpm)
+  spo2: { min: 95, max: 100 },   // SpO2 (%)
+  bt:   { min: 98, max: 102.5 }  // Body Temp (°F)
+};
+
+function getVitalColor(type, valStr) {
+  if(!valStr || valStr==="–") return "var(--navy)";
+  const val = parseFloat(valStr);
+  if(isNaN(val)) return "var(--navy)";
+  
+  const ref = VITAL_REFS[type];
+  if(!ref) return "var(--navy)";
+  
+  if(val < ref.min) return "var(--blue)";     // สีน้ำเงิน (ต่ำกว่าเกณฑ์)
+  if(val > ref.max) return "var(--danger)";   // สีแดง (สูงกว่าเกณฑ์)
+  return "var(--navy)";                       // สีดำ/กรม (ปกติ)
+}
+
 /* ── HELPERS ── */
 const nowStr = () => new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
 const fmt2   = v  => (isNaN(v)||v<=0) ? "–" : v.toFixed(2);
@@ -261,17 +276,18 @@ function calcDrugs(w, species) {
   };
 }
 
+// อัปเดตการคำนวณโดสยา (Doxy 10, Norflox 5, Tolfedine 4 mg/kg)
 function calcRx(w) {
   const norflox_str = w < 10 ? 100 : 200;
   const tolf_str    = w < 15 ? 6   : 60;
   return {
-    doxy_tabs:        Math.max(1, Math.round(w * 10  / 100)),
+    doxy_tabs:        Math.max(1, Math.round(w * 10 / 100)),        // 10 mg/kg
     norflox_str,
-    norflox_tabs:     Math.max(1, Math.round(w * 10  / norflox_str)),
-    norflox_100_tabs: Math.max(1, Math.round(w * 10 / 100)),
+    norflox_tabs:     Math.max(1, Math.round(w * 5  / norflox_str)),// 5 mg/kg
+    norflox_100_tabs: Math.max(1, Math.round(w * 5  / 100)),        // 5 mg/kg
     tolf_str,
-    tolf_tabs:        Math.max(1, Math.round(w * 4   / tolf_str)),
-    tolf_60_tabs:     Math.max(1, Math.round(w * 4 / 60)),
+    tolf_tabs:        Math.max(1, Math.round(w * 4  / tolf_str)),   // 4 mg/kg
+    tolf_60_tabs:     Math.max(1, Math.round(w * 4  / 60)),         // 4 mg/kg
     fbc_tabs:         1
   };
 }
@@ -408,7 +424,6 @@ let vitalsCache= {};   // animalId → [{time,hr,rr,spo2,bt,zol,note}]
 async function loadTables() {
   const { data:eventId } = await supabase.rpc("get_today_event");
 
-  // โหลด Health Note มาด้วย
   const { data } = await supabase
     .from("vasd_queue")
     .select(`animal_id, table_number, surgeon_name, anesthesiologist_name, notes,
@@ -534,12 +549,7 @@ function renderDetail(tblNum) {
       <hr class="divider">
 
       <div class="rx-section" style="border:none;padding:0;margin:0;">
-        <div class="section-label">สั่งจ่ายยา (เมื่อผ่าตัดเสร็จ)</div>
-        <div class="days-row">
-          <label>จำนวนวัน</label>
-          <input type="number" class="days-input" id="rx-days" value="5" min="1" max="30">
-          <span style="font-size:13px;color:var(--text-muted);">วัน</span>
-        </div>
+        <div class="section-label">สั่งจ่ายยา (ปรับแก้จำนวนวันได้รายตัว)</div>
         <div class="rx-grid">${rxHTML(a.id, rx)}</div>
       </div>
 
@@ -547,6 +557,7 @@ function renderDetail(tblNum) {
   </div>`;
 }
 
+// อัปเดตตารางแสดงค่า Vital (เปลี่ยนสีตามช่วงที่ตั้งไว้)
 function vitalsRowsHTML(aid) {
   const rows = vitalsCache[aid] || [];
   if(!rows.length) return `<tr><td colspan="8" style="padding:16px;text-align:center;color:var(--text-muted);font-weight:normal;">ยังไม่มีบันทึก กด + เพื่อเริ่มบันทึก</td></tr>`;
@@ -554,10 +565,10 @@ function vitalsRowsHTML(aid) {
   return rows.map(v => `
     <tr>
       <td>${v.time}</td>
-      <td>${v.hr || "–"}</td>
-      <td>${v.rr || "–"}</td>
-      <td>${v.spo2 || "–"}</td>
-      <td>${v.bt || "–"}</td>
+      <td><span style="color:${getVitalColor('hr', v.hr)}; font-weight:bold;">${v.hr || "–"}</span></td>
+      <td><span style="color:${getVitalColor('rr', v.rr)}; font-weight:bold;">${v.rr || "–"}</span></td>
+      <td><span style="color:${getVitalColor('spo2', v.spo2)}; font-weight:bold;">${v.spo2 || "–"}</span></td>
+      <td><span style="color:${getVitalColor('bt', v.bt)}; font-weight:bold;">${v.bt || "–"}</span></td>
       <td>${v.zol || "–"}</td>
       <td style="text-align:left; font-size:12px; color:#555;">${v.note || "–"}</td>
       <td></td>
@@ -584,12 +595,11 @@ window.addVitalRow = function(aid) {
   tbody.appendChild(tr);
   tr.querySelector("#vi-hr").focus();
   
-  // กด Enter เพื่อบันทึกได้ด้วย
   tr.addEventListener("keydown", e => { if(e.key === "Enter") saveVital(aid, t, tr); });
 };
 
 window.saveVital = function(aid, time, tr) {
-  if (!tr.parentNode) return; // กันการกดซ้ำ
+  if (!tr.parentNode) return;
   const entry = {
     time,
     hr:   tr.querySelector("#vi-hr").value.trim(),
@@ -603,7 +613,6 @@ window.saveVital = function(aid, time, tr) {
   if(!vitalsCache[aid]) vitalsCache[aid] = [];
   vitalsCache[aid].push(entry);
 
-  // ส่งบันทึกลง DB (กรณี DB ยังไม่มี column 'note' supabase จะ ignore หรือ error แนะนำให้เพิ่ม column 'note' ด้วยครับ)
   supabase.from("vasd_vital_signs").insert({
     animal_id: aid, recorded_at: new Date(),
     hr: entry.hr || null, rr: entry.rr || null, spo2: entry.spo2 || null,
@@ -616,10 +625,10 @@ window.saveVital = function(aid, time, tr) {
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>${time}</td>
-    <td>${entry.hr || "–"}</td>
-    <td>${entry.rr || "–"}</td>
-    <td>${entry.spo2 || "–"}</td>
-    <td>${entry.bt || "–"}</td>
+    <td><span style="color:${getVitalColor('hr', entry.hr)}; font-weight:bold;">${entry.hr || "–"}</span></td>
+    <td><span style="color:${getVitalColor('rr', entry.rr)}; font-weight:bold;">${entry.rr || "–"}</span></td>
+    <td><span style="color:${getVitalColor('spo2', entry.spo2)}; font-weight:bold;">${entry.spo2 || "–"}</span></td>
+    <td><span style="color:${getVitalColor('bt', entry.bt)}; font-weight:bold;">${entry.bt || "–"}</span></td>
     <td>${entry.zol || "–"}</td>
     <td style="text-align:left; font-size:12px; color:#555;">${entry.note || "–"}</td>
     <td></td>`;
@@ -642,17 +651,17 @@ window.saveTeam = async function(qAnimalId) {
 function rxHTML(aid, rx) {
   const drugs=[
     {id:"doxy",       cat:"ยาปฏิชีวนะ",      name:`Doxycycline (100 mg/tab)`,
-     dose:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+     dose:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:7},
     {id:"norflox",    cat:"ยาปฏิชีวนะ",      name:`Norfloxacin (${rx.norflox_str} mg/tab)`,
-     dose:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
+     dose:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น", days:7},
     {id:"norflox100", cat:"ยาปฏิชีวนะ",      name:`Norfloxacin 100 mg/tab`,
-     dose:`${rx.norflox_100_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
+     dose:`${rx.norflox_100_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น", days:7},
     {id:"tolf",       cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine (${rx.tolf_str} mg/tab)`,
-     dose:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+     dose:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:3},
     {id:"tolf60",     cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine 60 mg/tab`,
-     dose:`${rx.tolf_60_tabs} เม็ด / ครั้ง`, freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+     dose:`${rx.tolf_60_tabs} เม็ด / ครั้ง`, freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:3},
     {id:"fbc",        cat:"ยาบำรุงเลือด",    name:"FBC",
-     dose:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า"},
+     dose:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า", days:7},
   ];
   return drugs.map(d=>`
     <div class="rx-card" id="rxcard-${aid}-${d.id}">
@@ -674,6 +683,10 @@ function rxHTML(aid, rx) {
           <label>ความถี่</label>
           <input type="text" id="rxfreq-${aid}-${d.id}" value="${d.freq}" placeholder="ความถี่">
         </div>
+        <div class="rx-input-group">
+          <label>จน.วัน</label>
+          <input type="number" id="rxdays-${aid}-${d.id}" value="${d.days}" placeholder="วัน" style="width:60px;">
+        </div>
       </div>
     </div>`).join("");
 }
@@ -685,12 +698,10 @@ window.toggleRx = function(chk, aid, did) {
 
 /* ─── END SURGERY ─── */
 window.endSurgery = async function(animalId, queueAnimalId) {
-  const days=parseInt(document.getElementById("rx-days")?.value)||5;
   const chks=document.querySelectorAll(`[id^="rxchk-${animalId}-"]:checked`);
 
   const rxInserts=[];
   chks.forEach(chk=>{
-    // ตัดเอา id ยา ออกมาจาก string rxchk-UUID-drugId
     const did = chk.id.replace(`rxchk-${animalId}-`, '');
     rxInserts.push({
       animal_id: animalId,
@@ -698,7 +709,7 @@ window.endSurgery = async function(animalId, queueAnimalId) {
       drug_category:chk.dataset.cat,
       dose_detail:  document.getElementById(`rxdose-${animalId}-${did}`).value,
       frequency:    document.getElementById(`rxfreq-${animalId}-${did}`).value,
-      days
+      days:         parseInt(document.getElementById(`rxdays-${animalId}-${did}`).value) || 5
     });
   });
 
