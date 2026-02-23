@@ -18,7 +18,7 @@
 body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);
   min-height:100vh;display:flex;flex-direction:column;}
 
-/* ─── HEADER ─── */
+/* ─── HEADER & TAB ─── */
 header{
   background:var(--navy);padding:0 28px;display:flex;
   justify-content:space-between;align-items:center;height:64px;
@@ -38,7 +38,6 @@ header{
 }
 .btn-home:hover{background:rgba(255,255,255,0.18);}
 
-/* ─── TAB BAR ─── */
 .tab-bar{
   background:var(--surface);border-bottom:2px solid var(--border);
   display:flex;flex-shrink:0;padding:0 28px;
@@ -55,7 +54,6 @@ header{
   padding:1px 7px;border-radius:20px;min-width:20px;text-align:center;
 }
 
-/* ─── TAB PANE ─── */
 .tab-pane{display:none;flex:1;overflow-y:auto;padding:24px 28px;}
 .tab-pane.active{display:block;}
 .section-label{
@@ -82,13 +80,11 @@ header{
   border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:2px 9px;}
 .qcard-body{padding:18px 20px;}
 
-/* ─── WEIGHT & DRUG ─── */
 .weight-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .weight-row label{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
 .weight-input{
   width:100px;padding:8px 10px;font-size:15px;font-weight:700;font-family:"Sarabun",sans-serif;
-  border:2px solid var(--teal-light);border-radius:var(--radius-sm);color:var(--navy);
-  text-align:center;outline:none;
+  border:2px solid var(--teal-light);border-radius:var(--radius-sm);color:var(--navy);text-align:center;outline:none;
 }
 .weight-input:focus{box-shadow:0 0 0 3px rgba(34,145,154,0.15);}
 .species-tag{font-size:12px;background:#edf2f7;color:var(--text-muted);border-radius:6px;padding:4px 10px;font-weight:600;}
@@ -108,14 +104,11 @@ header{
 .assign-row label{font-size:13px;font-weight:600;color:var(--text);}
 .assign-select{padding:8px 12px;font-size:13px;font-family:"Sarabun",sans-serif;
   border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;min-width:130px;}
-.assign-select:focus{border-color:var(--teal-light);}
 
-/* ─── BUTTONS ─── */
 .btn{padding:8px 18px;font-size:13px;font-weight:700;font-family:"Sarabun",sans-serif;
   border:none;border-radius:var(--radius-sm);cursor:pointer;
   transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;}
 .btn:hover{opacity:0.87;transform:translateY(-1px);}
-.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
 .btn-assign{background:linear-gradient(135deg,var(--orange),#f6ad55);color:#fff;}
 .btn-start{background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;}
 .btn-danger{background:linear-gradient(135deg,var(--danger),#fc8181);color:#fff;}
@@ -132,8 +125,7 @@ header{
 }
 .table-tile:hover{border-color:var(--teal-light);box-shadow:var(--shadow-md);}
 .table-tile.occupied{border-color:#feb2b2;background:#fff5f5;}
-.table-tile.selected-tile{border-color:var(--teal-light);background:#e6f6f4;
-  box-shadow:0 0 0 3px rgba(34,145,154,0.2);}
+.table-tile.selected-tile{border-color:var(--teal-light);background:#e6f6f4;box-shadow:0 0 0 3px rgba(34,145,154,0.2);}
 .table-num{font-size:18px;font-weight:800;color:var(--navy);margin-bottom:3px;}
 .table-animal-name{font-size:11px;font-weight:600;color:var(--danger);line-height:1.3;}
 .table-empty-lbl{font-size:11px;color:var(--text-muted);}
@@ -147,47 +139,60 @@ header{
 .spanel-sub{color:rgba(255,255,255,0.6);font-size:12px;margin-top:3px;}
 .spanel-body{padding:20px 22px;}
 
+.health-alert {
+  background-color: #fef2f2; border-left: 4px solid var(--danger); padding: 12px 16px; 
+  margin-bottom: 16px; border-radius: 4px; display:flex; flex-direction: column; gap: 4px;
+}
+.health-alert strong { color: var(--danger); font-size: 13px; }
+.health-alert p { color: #7f1d1d; font-size: 13px; margin: 0; }
+
 .surgeon-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
 @media(max-width:600px){.surgeon-grid{grid-template-columns:1fr;}}
 .field{display:flex;flex-direction:column;gap:4px;}
 .field label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
-.field input,.field textarea{padding:9px 12px;font-size:13px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);
-  background:#fff;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
-.field input:focus,.field textarea:focus{border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(34,145,154,0.12);}
-.field textarea{resize:vertical;min-height:58px;}
+.field input{padding:9px 12px;font-size:13px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);outline:none;}
+.field input:focus{border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(34,145,154,0.12);}
 
-/* ─── VITALS ─── */
+/* ─── VITALS TABLE ─── */
 .vitals-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .vitals-log{background:#fafbfc;border:1px solid var(--border);border-radius:var(--radius-sm);
-  max-height:240px;overflow-y:auto;margin-bottom:14px;}
+  max-height:260px;overflow-y:auto;margin-bottom:14px;}
 
 .vitals-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
-.vitals-table th { background: #f0f4f8; padding: 10px; color: var(--text-muted); font-weight: 700; border-bottom: 2px solid var(--border); letter-spacing: 0.3px; }
+.vitals-table th { background: #f0f4f8; padding: 10px 8px; color: var(--text-muted); font-weight: 700; border-bottom: 2px solid var(--border); letter-spacing: 0.3px; }
 .vitals-table th:first-child { text-align: left; }
-.vitals-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--navy); font-weight: 600; vertical-align: middle; }
+.vitals-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--navy); font-weight: 600; vertical-align: middle; }
 .vitals-table td:first-child { text-align: left; color: var(--text-muted); font-size: 11px; font-weight: 700; }
 .vitals-table tr:last-child td { border-bottom: none; }
 .vitals-table tr.is-form { background: #f0fdf9; }
 
-.vi{width:100%; padding:5px 6px; font-size:13px; font-family:"Sarabun",sans-serif;
+.vi{width:100%; padding:5px; font-size:12px; font-family:"Sarabun",sans-serif;
   border:1px solid var(--border); border-radius:5px; text-align:center; outline:none; box-sizing:border-box;}
+.vi-note { text-align: left; }
 .vi:focus{border-color:var(--teal-light);}
+.btn-vi-save { background: var(--teal); color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family:"Sarabun",sans-serif; font-size: 12px; font-weight: bold; }
+.btn-vi-save:hover { background: var(--teal-light); }
 
 /* ─── PRESCRIPTION ─── */
 .rx-section{border-top:1px solid var(--border);padding-top:16px;margin-top:16px;}
 .rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 @media(max-width:560px){.rx-grid{grid-template-columns:1fr;}}
 .rx-card{border:2px solid var(--border);border-radius:var(--radius-sm);padding:12px;
-  cursor:pointer;transition:all 0.2s;user-select:none;}
+  cursor:pointer;transition:all 0.2s;}
 .rx-card.selected{border-color:var(--teal-light);background:#e6f6f4;}
 .rx-card label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
 .rx-card input[type="checkbox"]{width:16px;height:16px;accent-color:var(--teal-light);flex-shrink:0;margin-top:2px;}
-.rx-cat{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:3px;}
+.rx-cat{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;}
 .rx-name{font-size:13px;font-weight:700;color:var(--navy);}
-.rx-detail{font-size:12px;color:var(--teal);font-weight:600;margin-top:2px;}
-.rx-freq{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+.rx-custom-inputs { display: none; flex-direction: column; gap: 8px; margin-top: 10px; padding-left: 26px; }
+.rx-card.selected .rx-custom-inputs { display: flex; }
+.rx-input-group { display: flex; align-items: center; gap: 8px; }
+.rx-input-group label { font-size: 11px; color: var(--teal); font-weight:600; width: 45px; flex-shrink: 0; }
+.rx-input-group input { flex: 1; padding: 6px 10px; font-size: 12px; font-family:"Sarabun",sans-serif; border: 1px solid var(--border); border-radius: 4px; outline:none; }
+.rx-input-group input:focus{border-color:var(--teal-light);}
+
 .days-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .days-row label{font-size:13px;font-weight:600;color:var(--text);}
 .days-input{width:65px;padding:7px 10px;font-size:14px;font-weight:700;
@@ -195,7 +200,6 @@ header{
   border-radius:var(--radius-sm);text-align:center;outline:none;}
 
 .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
-
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 .animate{animation:fadeUp 0.3s ease both;}
 </style>
@@ -286,10 +290,7 @@ window.switchTab = function(name) {
 let centralData = [];
 
 async function loadCentral() {
-  console.log("🔄 loadCentral() called");
   const { data:eventId } = await supabase.rpc("get_today_event");
-  console.log("📅 Event ID for central:", eventId);
-  
   const { data } = await supabase
     .from("vasd_queue")
     .select(`animal_id, status,
@@ -299,7 +300,6 @@ async function loadCentral() {
     .order("animal_id");
 
   centralData = data || [];
-  console.log("📊 Central data (waiting):", centralData);
   document.getElementById("badge-central").textContent = centralData.length;
   renderCentral();
 }
@@ -324,8 +324,7 @@ function renderCentral() {
   box.innerHTML = "";
   if (!centralData.length) {
     box.innerHTML = `<div class="empty animate">
-      <div class="empty-icon">✅</div>
-      <p>ไม่มีสัตว์รอผ่าตัดในขณะนี้</p></div>`;
+      <div class="empty-icon">✅</div><p>ไม่มีสัตว์รอผ่าตัดในขณะนี้</p></div>`;
     return;
   }
   centralData.forEach((row, i) => {
@@ -377,66 +376,26 @@ window.recalcCard = function(input, aid, species) {
 };
 
 window.assignTable = async function(animalId, queueAnimalId) {
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("🎯 assignTable() called");
-  console.log("   animalId (vasd_animal.id):", animalId);
-  console.log("   queueAnimalId (vasd_queue.animal_id):", queueAnimalId);
-  
   const card   = document.querySelector(`[data-animal-id="${animalId}"]`);
   const w      = parseFloat(card.querySelector(".weight-input").value) || 0;
   const tblNum = parseInt(document.getElementById("tbl-"+animalId).value);
   
-  console.log("   Weight:", w);
-  console.log("   Table number selected:", tblNum);
+  await supabase.from("vasd_animal").update({ actual_weight: w }).eq("id", animalId);
 
-  // อัพเดทน้ำหนักจริง
-  console.log("📝 Updating animal weight...");
-  const { error: wErr } = await supabase.from("vasd_animal")
-    .update({ actual_weight: w }).eq("id", animalId);
-  if (wErr) {
-    console.warn("⚠️ weight update error:", wErr.message);
-  } else {
-    console.log("✅ Weight updated successfully");
-  }
-
-  // ลอง update พร้อม table_number ก่อน ถ้า column ไม่มีใน DB จะ fallback
-  console.log("📝 Updating queue status to 'surgery' with table_number...");
-  let qErr = null;
   const r1 = await supabase.from("vasd_queue")
-    .update({ status:"surgery", table_number:tblNum, updated_at:new Date() })
-    .eq("animal_id", queueAnimalId);
-  qErr = r1.error;
+    .update({ status:"surgery", table_number:tblNum, updated_at:new Date() }).eq("animal_id", queueAnimalId);
 
-  if (qErr) {
-    console.warn("⚠️ table_number column อาจยังไม่มีใน DB:", qErr.message);
-    console.log("🔄 Retrying without table_number...");
-    const r2 = await supabase.from("vasd_queue")
-      .update({ status:"surgery", updated_at:new Date() })
-      .eq("animal_id", queueAnimalId);
-    if (r2.error) { 
-      console.error("❌ Update failed:", r2.error.message);
-      alert("❌ บันทึกไม่สำเร็จ: " + r2.error.message); 
-      return; 
-    }
-    console.log("✅ Queue updated (without table_number in DB)");
-  } else {
-    console.log("✅ Queue updated successfully with table_number");
+  if (r1.error) {
+    await supabase.from("vasd_queue")
+      .update({ status:"surgery", updated_at:new Date() }).eq("animal_id", queueAnimalId);
   }
 
-  // เก็บ table assignment ใน localStorage เป็น fallback
   const tableMap = JSON.parse(localStorage.getItem("vasd_table_map") || "{}");
-  console.log("💾 Current localStorage tableMap:", tableMap);
-  
   tableMap[queueAnimalId] = tblNum;
   localStorage.setItem("vasd_table_map", JSON.stringify(tableMap));
   
-  console.log("💾 Updated localStorage tableMap:", tableMap);
-  console.log("   Saved: queueAnimalId", queueAnimalId, "→ table", tblNum);
-
-  console.log("🔄 Calling loadCentral() and loadTables()...");
   await loadCentral();
   await loadTables();
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 };
 
 /* ══════════════
@@ -444,82 +403,33 @@ window.assignTable = async function(animalId, queueAnimalId) {
 ══════════════ */
 let tableData  = {};
 let selectedTbl= null;
-let vitalsCache= {};   // animalId → [{time,hr,rr,spo2,bt,zol}]
+let vitalsCache= {};   // animalId → [{time,hr,rr,spo2,bt,zol,note}]
 
 async function loadTables() {
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("🔄 loadTables() called");
-  
-  const { data:eventId, error: eventErr } = await supabase.rpc("get_today_event");
-  if (eventErr) {
-    console.error("❌ get_today_event error:", eventErr.message);
-    return;
-  }
-  console.log("📅 Event ID:", eventId);
+  const { data:eventId } = await supabase.rpc("get_today_event");
 
-  // ดึงเฉพาะ status="surgery" ไม่ filter event_id บน join (เพื่อความเสถียร)
-  console.log("📡 Fetching queue data with status='surgery'...");
-  const { data, error } = await supabase
+  // โหลด Health Note มาด้วย
+  const { data } = await supabase
     .from("vasd_queue")
     .select(`animal_id, table_number, surgeon_name, anesthesiologist_name, notes,
-             vasd_animal(id,event_id,animal_name,species,sex,actual_weight,est_weight)`)
+             vasd_animal(id,event_id,animal_name,species,sex,actual_weight,est_weight,health_note)`)
     .eq("status","surgery");
 
-  if (error) { 
-    console.error("❌ loadTables query error:", error.message); 
-    return;
-  }
-
-  console.log("📊 Raw data from DB (status='surgery'):", data);
-  console.log("   Total records with status='surgery':", (data||[]).length);
-
-  // กรอง event_id ฝั่ง JS แทน เพื่อหลีกเลี่ยงปัญหา filter บน join
-  const todayRows = (data||[]).filter(r => {
-    const hasAnimal = r.vasd_animal && r.vasd_animal.event_id === eventId;
-    if (!hasAnimal) {
-      console.log(`   ⚠️ Filtered out animal_id ${r.animal_id}: ${!r.vasd_animal ? "no animal data" : "event_id mismatch ("+r.vasd_animal.event_id+" vs "+eventId+")"}`);
-    }
-    return hasAnimal;
-  });
-
-  console.log("✅ Today's rows after filtering:", todayRows);
-  console.log("   Records matching today's event:", todayRows.length);
-
-  // อ่าน table map จาก localStorage เป็น fallback ถ้า DB column ยังไม่มี
+  const todayRows = (data||[]).filter(r => r.vasd_animal && r.vasd_animal.event_id === eventId);
   const tableMap = JSON.parse(localStorage.getItem("vasd_table_map") || "{}");
-  console.log("💾 Table map from localStorage:", tableMap);
 
   tableData = {};
   todayRows.forEach(r => {
-    const dbTableNum = r.table_number;
-    const lsTableNum = tableMap[r.animal_id];
-    const tbl = dbTableNum || lsTableNum;
-    
-    console.log(`🔢 Processing animal_id: ${r.animal_id}`);
-    console.log(`   Animal name: ${r.vasd_animal?.animal_name}`);
-    console.log(`   DB table_number: ${dbTableNum}`);
-    console.log(`   localStorage table_number: ${lsTableNum}`);
-    console.log(`   Final table number: ${tbl}`);
-    
-    if (tbl) {
-      tableData[tbl] = r;
-      console.log(`   ✓ Assigned to table ${tbl}`);
-    } else {
-      console.warn(`   ⚠️ No table number found for animal ${r.animal_id}`);
-    }
+    const tbl = r.table_number || tableMap[r.animal_id];
+    if (tbl) tableData[tbl] = r;
   });
-
-  console.log("📋 Final tableData object:", tableData);
-  console.log("📊 Total occupied tables:", Object.keys(tableData).length);
 
   document.getElementById("badge-tables").textContent = Object.keys(tableData).length;
   renderGrid();
   if (selectedTbl) renderDetail(selectedTbl);
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 }
 
 function renderGrid() {
-  console.log("🎨 renderGrid() called, tableData:", tableData);
   const grid=document.getElementById("table-grid");
   grid.innerHTML="";
   for(let i=1;i<=20;i++){
@@ -527,41 +437,39 @@ function renderGrid() {
     const tile=document.createElement("div");
     tile.className="table-tile"+(r?" occupied":"")+(selectedTbl===i?" selected-tile":"");
     tile.onclick=()=>{ 
-      console.log(`🖱️ Clicked table ${i}`);
       selectedTbl=i; 
       renderGrid(); 
       renderDetail(i); 
     };
     tile.innerHTML=`<div class="table-num">${i}</div>
-      ${r?`<div class="table-animal-name">${r.vasd_animal.animal_name||"(ไม่ระบุ)"}</div>`
-         :`<div class="table-empty-lbl">ว่าง</div>`}`;
+      ${r?`<div class="table-animal-name">${r.vasd_animal.animal_name||"(ไม่ระบุ)"}</div>`:`<div class="table-empty-lbl">ว่าง</div>`}`;
     grid.appendChild(tile);
-    
-    if (r) {
-      console.log(`   Table ${i}: OCCUPIED by ${r.vasd_animal.animal_name}`);
-    }
   }
 }
 
 function renderDetail(tblNum) {
-  console.log(`📄 renderDetail() called for table ${tblNum}`);
   const detail=document.getElementById("surgery-detail");
   const r=tableData[tblNum];
   
   if(!r){
-    console.log(`   Table ${tblNum} is EMPTY`);
     detail.innerHTML=`<div class="surgery-panel animate"><div class="spanel-body">
       <div class="empty"><div class="empty-icon">🪑</div><p>โต๊ะ ${tblNum} ว่างอยู่</p></div>
     </div></div>`;
     return;
   }
   
-  console.log(`   Table ${tblNum} is OCCUPIED, rendering details...`);
   const a   = r.vasd_animal;
   const w   = parseFloat(a.actual_weight||a.est_weight||0);
   const spc = a.species==="ส"?"สุนัข":"แมว";
   const rx  = calcRx(w);
   if(!vitalsCache[a.id]) vitalsCache[a.id]=[];
+
+  // กล่องเตือนสุขภาพ
+  const healthHtml = a.health_note ? `
+    <div class="health-alert">
+      <strong>⚠️ บันทึกสุขภาพ / ข้อควรระวัง:</strong>
+      <p>${a.health_note}</p>
+    </div>` : "";
 
   detail.innerHTML=`
   <div class="surgery-panel animate">
@@ -571,12 +479,14 @@ function renderDetail(tblNum) {
         <div class="spanel-sub">${spc} · ${a.sex} · ${w} กก.</div>
       </div>
       <button class="btn btn-danger btn-sm"
-              onclick="endSurgery('${a.id}','${r.animal_id}',${w})">
+              onclick="endSurgery('${a.id}','${r.animal_id}')">
         ✅ ผ่าตัดเสร็จ → พักฟื้น
       </button>
     </div>
 
     <div class="spanel-body">
+      
+      ${healthHtml}
 
       <div class="section-label">ทีมผ่าตัด</div>
       <div class="surgeon-grid">
@@ -605,23 +515,20 @@ function renderDetail(tblNum) {
         <table class="vitals-table">
           <thead>
             <tr>
-              <th>เวลา</th>
-              <th>HR</th>
-              <th>RR</th>
-              <th>O₂ (%)</th>
-              <th>BT (°C)</th>
-              <th>Zoletil (ml)</th>
+              <th style="width:10%;">เวลา</th>
+              <th style="width:10%;">HR</th>
+              <th style="width:10%;">RR</th>
+              <th style="width:12%;">O₂ (%)</th>
+              <th style="width:12%;">BT (°F)</th>
+              <th style="width:14%;">Zoletil (ml)</th>
+              <th style="width:24%;">ข้อสังเกต</th>
+              <th style="width:8%;"></th>
             </tr>
           </thead>
           <tbody id="vitals-${a.id}">
             ${vitalsRowsHTML(a.id)}
           </tbody>
         </table>
-      </div>
-
-      <div class="field" style="margin-top:14px; margin-bottom:16px;">
-        <label>บันทึกอื่นๆ (เช่น มดลูกอักเสบ, เลือดออก ฯลฯ)</label>
-        <textarea id="s-notes" placeholder="ข้อสังเกต...">${r.notes||""}</textarea>
       </div>
 
       <hr class="divider">
@@ -642,7 +549,7 @@ function renderDetail(tblNum) {
 
 function vitalsRowsHTML(aid) {
   const rows = vitalsCache[aid] || [];
-  if(!rows.length) return `<tr><td colspan="6" style="padding:14px;text-align:center;color:var(--text-muted);font-weight:normal;">ยังไม่มีบันทึก</td></tr>`;
+  if(!rows.length) return `<tr><td colspan="8" style="padding:16px;text-align:center;color:var(--text-muted);font-weight:normal;">ยังไม่มีบันทึก กด + เพื่อเริ่มบันทึก</td></tr>`;
   
   return rows.map(v => `
     <tr>
@@ -652,13 +559,14 @@ function vitalsRowsHTML(aid) {
       <td>${v.spo2 || "–"}</td>
       <td>${v.bt || "–"}</td>
       <td>${v.zol || "–"}</td>
+      <td style="text-align:left; font-size:12px; color:#555;">${v.note || "–"}</td>
+      <td></td>
     </tr>`).join("");
 }
 
 window.addVitalRow = function(aid) {
   const tbody = document.getElementById("vitals-" + aid);
   if(tbody.querySelector("td[colspan]")) tbody.innerHTML = "";
-  tbody.querySelector(".is-form")?.remove();
   
   const t = nowStr();
   const tr = document.createElement("tr");
@@ -668,36 +576,38 @@ window.addVitalRow = function(aid) {
     <td><input class="vi" id="vi-hr" placeholder="HR"></td>
     <td><input class="vi" id="vi-rr" placeholder="RR"></td>
     <td><input class="vi" id="vi-spo2" placeholder="O₂"></td>
-    <td><input class="vi" id="vi-bt" placeholder="BT"></td>
-    <td><input class="vi" id="vi-zol" placeholder="ml"></td>`;
+    <td><input class="vi" id="vi-bt" placeholder="°F"></td>
+    <td><input class="vi" id="vi-zol" placeholder="ml"></td>
+    <td><input class="vi vi-note" id="vi-note" placeholder="ข้อสังเกต..."></td>
+    <td><button class="btn-vi-save" onclick="saveVital('${aid}', '${t}', this.closest('tr'))">💾</button></td>`;
     
   tbody.appendChild(tr);
   tr.querySelector("#vi-hr").focus();
   
-  const save = () => { if(!tr.parentNode) return; saveVital(aid, t, tr); };
-  tr.addEventListener("keydown", e => { if(e.key === "Enter") save(); });
-  tr.querySelector("#vi-zol").addEventListener("blur", () => setTimeout(() => {
-    if(!tr.contains(document.activeElement)) save();
-  }, 150));
+  // กด Enter เพื่อบันทึกได้ด้วย
+  tr.addEventListener("keydown", e => { if(e.key === "Enter") saveVital(aid, t, tr); });
 };
 
-function saveVital(aid, time, tr) {
+window.saveVital = function(aid, time, tr) {
+  if (!tr.parentNode) return; // กันการกดซ้ำ
   const entry = {
     time,
-    hr:   tr.querySelector("#vi-hr").value,
-    rr:   tr.querySelector("#vi-rr").value,
-    spo2: tr.querySelector("#vi-spo2").value,
-    bt:   tr.querySelector("#vi-bt").value,
-    zol:  tr.querySelector("#vi-zol").value,
+    hr:   tr.querySelector("#vi-hr").value.trim(),
+    rr:   tr.querySelector("#vi-rr").value.trim(),
+    spo2: tr.querySelector("#vi-spo2").value.trim(),
+    bt:   tr.querySelector("#vi-bt").value.trim(),
+    zol:  tr.querySelector("#vi-zol").value.trim(),
+    note: tr.querySelector("#vi-note").value.trim()
   };
   
   if(!vitalsCache[aid]) vitalsCache[aid] = [];
   vitalsCache[aid].push(entry);
 
+  // ส่งบันทึกลง DB (กรณี DB ยังไม่มี column 'note' supabase จะ ignore หรือ error แนะนำให้เพิ่ม column 'note' ด้วยครับ)
   supabase.from("vasd_vital_signs").insert({
     animal_id: aid, recorded_at: new Date(),
     hr: entry.hr || null, rr: entry.rr || null, spo2: entry.spo2 || null,
-    bt: entry.bt || null, zoletil_top: entry.zol || null
+    bt: entry.bt || null, zoletil_top: entry.zol || null, note: entry.note || null
   }).then(({error}) => { if(error) console.warn("vitals:", error); });
 
   const tbody = document.getElementById("vitals-" + aid);
@@ -710,7 +620,9 @@ function saveVital(aid, time, tr) {
     <td>${entry.rr || "–"}</td>
     <td>${entry.spo2 || "–"}</td>
     <td>${entry.bt || "–"}</td>
-    <td>${entry.zol || "–"}</td>`;
+    <td>${entry.zol || "–"}</td>
+    <td style="text-align:left; font-size:12px; color:#555;">${entry.note || "–"}</td>
+    <td></td>`;
     
   tbody.appendChild(row);
   const box = tbody.closest(".vitals-log");
@@ -719,11 +631,10 @@ function saveVital(aid, time, tr) {
 
 window.saveTeam = async function(qAnimalId) {
   await supabase.from("vasd_queue").update({
-    surgeon_name:        document.getElementById("s-surg")?.value||"",
-    anesthesiologist_name:document.getElementById("s-anes")?.value||"",
-    notes:               document.getElementById("s-notes")?.value||"",
-    updated_at:new Date()
-  }).eq("animal_id",qAnimalId);
+    surgeon_name: document.getElementById("s-surg")?.value||"",
+    anesthesiologist_name: document.getElementById("s-anes")?.value||"",
+    updated_at: new Date()
+  }).eq("animal_id", qAnimalId);
   alert("✅ บันทึกทีมผ่าตัดแล้ว");
 };
 
@@ -731,54 +642,65 @@ window.saveTeam = async function(qAnimalId) {
 function rxHTML(aid, rx) {
   const drugs=[
     {id:"doxy",       cat:"ยาปฏิชีวนะ",      name:`Doxycycline (100 mg/tab)`,
-     detail:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+     dose:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
     {id:"norflox",    cat:"ยาปฏิชีวนะ",      name:`Norfloxacin (${rx.norflox_str} mg/tab)`,
-     detail:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
+     dose:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
     {id:"norflox100", cat:"ยาปฏิชีวนะ",      name:`Norfloxacin 100 mg/tab`,
-     detail:`${rx.norflox_100_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
+     dose:`${rx.norflox_100_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
     {id:"tolf",       cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine (${rx.tolf_str} mg/tab)`,
-     detail:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+     dose:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
     {id:"tolf60",     cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine 60 mg/tab`,
-     detail:`${rx.tolf_60_tabs} เม็ด / ครั้ง`, freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+     dose:`${rx.tolf_60_tabs} เม็ด / ครั้ง`, freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
     {id:"fbc",        cat:"ยาบำรุงเลือด",    name:"FBC",
-     detail:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า"},
+     dose:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า"},
   ];
   return drugs.map(d=>`
-    <div class="rx-card" id="rxcard-${aid}-${d.id}" onclick="toggleRx(this)">
+    <div class="rx-card" id="rxcard-${aid}-${d.id}">
       <label>
         <input type="checkbox" id="rxchk-${aid}-${d.id}"
                data-name="${d.name}" data-cat="${d.cat}"
-               data-detail="${d.detail}" data-freq="${d.freq}">
+               onchange="toggleRx(this, '${aid}', '${d.id}')">
         <div>
           <div class="rx-cat">${d.cat}</div>
           <div class="rx-name">${d.name}</div>
-          <div class="rx-detail">${d.detail}</div>
-          <div class="rx-freq">${d.freq}</div>
         </div>
       </label>
+      <div class="rx-custom-inputs" id="rxcustom-${aid}-${d.id}">
+        <div class="rx-input-group">
+          <label>ปริมาณ</label>
+          <input type="text" id="rxdose-${aid}-${d.id}" value="${d.dose}" placeholder="จำนวนยา">
+        </div>
+        <div class="rx-input-group">
+          <label>ความถี่</label>
+          <input type="text" id="rxfreq-${aid}-${d.id}" value="${d.freq}" placeholder="ความถี่">
+        </div>
+      </div>
     </div>`).join("");
 }
 
-window.toggleRx = function(card) {
-  const chk=card.querySelector("input[type='checkbox']");
-  chk.checked=!chk.checked;
-  card.classList.toggle("selected",chk.checked);
+window.toggleRx = function(chk, aid, did) {
+  const card = document.getElementById(`rxcard-${aid}-${did}`);
+  card.classList.toggle("selected", chk.checked);
 };
 
 /* ─── END SURGERY ─── */
-window.endSurgery = async function(animalId, queueAnimalId, weight) {
+window.endSurgery = async function(animalId, queueAnimalId) {
   const days=parseInt(document.getElementById("rx-days")?.value)||5;
   const chks=document.querySelectorAll(`[id^="rxchk-${animalId}-"]:checked`);
 
   const rxInserts=[];
-  chks.forEach(chk=>rxInserts.push({
-    animal_id:animalId,
-    drug_name:    chk.dataset.name,
-    drug_category:chk.dataset.cat,
-    dose_detail:  chk.dataset.detail,
-    frequency:    chk.dataset.freq,
-    days
-  }));
+  chks.forEach(chk=>{
+    // ตัดเอา id ยา ออกมาจาก string rxchk-UUID-drugId
+    const did = chk.id.replace(`rxchk-${animalId}-`, '');
+    rxInserts.push({
+      animal_id: animalId,
+      drug_name:    chk.dataset.name,
+      drug_category:chk.dataset.cat,
+      dose_detail:  document.getElementById(`rxdose-${animalId}-${did}`).value,
+      frequency:    document.getElementById(`rxfreq-${animalId}-${did}`).value,
+      days
+    });
+  });
 
   if(rxInserts.length){
     const {error}=await supabase.from("vasd_prescription").insert(rxInserts);
@@ -789,7 +711,6 @@ window.endSurgery = async function(animalId, queueAnimalId, weight) {
     status:"recovery",
     surgeon_name:        document.getElementById("s-surg")?.value||"",
     anesthesiologist_name:document.getElementById("s-anes")?.value||"",
-    notes:               document.getElementById("s-notes")?.value||"",
     table_number:null,
     updated_at:new Date()
   }).eq("animal_id",queueAnimalId);
