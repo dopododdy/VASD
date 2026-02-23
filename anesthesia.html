@@ -206,7 +206,7 @@ header{
   <div class="header-brand">
     <div class="brand-icon">🩺</div>
     <div class="brand-text">
-      <h1>เรียกคิวผ่าตัด</h1>
+      <h1>เรียกคิวผ่าตัด (DEBUG VERSION)</h1>
       <span>RMUTTO – Veterinary Academic Service Division</span>
     </div>
   </div>
@@ -234,7 +234,7 @@ header{
 <div class="tab-pane" id="tab-tables">
   <div class="tables-header">
     <h2>โต๊ะผ่าตัด</h2>
-    <span style="font-size:13px;color:var(--text-muted);">คลิกโต๊ะเพื่อดูรายละเอียด</span>
+    <span style="font-size:13px;color:var(--text-muted);">คลิกโต๊ะเพื่อดูรายละเอียด · เปิด Console (F12) เพื่อดู debug log</span>
   </div>
   <div class="table-grid" id="table-grid"></div>
   <div id="surgery-detail"></div>
@@ -286,7 +286,10 @@ window.switchTab = function(name) {
 let centralData = [];
 
 async function loadCentral() {
+  console.log("🔄 loadCentral() called");
   const { data:eventId } = await supabase.rpc("get_today_event");
+  console.log("📅 Event ID for central:", eventId);
+  
   const { data } = await supabase
     .from("vasd_queue")
     .select(`animal_id, status,
@@ -296,6 +299,7 @@ async function loadCentral() {
     .order("animal_id");
 
   centralData = data || [];
+  console.log("📊 Central data (waiting):", centralData);
   document.getElementById("badge-central").textContent = centralData.length;
   renderCentral();
 }
@@ -373,16 +377,30 @@ window.recalcCard = function(input, aid, species) {
 };
 
 window.assignTable = async function(animalId, queueAnimalId) {
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log("🎯 assignTable() called");
+  console.log("   animalId (vasd_animal.id):", animalId);
+  console.log("   queueAnimalId (vasd_queue.animal_id):", queueAnimalId);
+  
   const card   = document.querySelector(`[data-animal-id="${animalId}"]`);
   const w      = parseFloat(card.querySelector(".weight-input").value) || 0;
   const tblNum = parseInt(document.getElementById("tbl-"+animalId).value);
+  
+  console.log("   Weight:", w);
+  console.log("   Table number selected:", tblNum);
 
   // อัพเดทน้ำหนักจริง
+  console.log("📝 Updating animal weight...");
   const { error: wErr } = await supabase.from("vasd_animal")
     .update({ actual_weight: w }).eq("id", animalId);
-  if (wErr) console.warn("weight err:", wErr.message);
+  if (wErr) {
+    console.warn("⚠️ weight update error:", wErr.message);
+  } else {
+    console.log("✅ Weight updated successfully");
+  }
 
   // ลอง update พร้อม table_number ก่อน ถ้า column ไม่มีใน DB จะ fallback
+  console.log("📝 Updating queue status to 'surgery' with table_number...");
   let qErr = null;
   const r1 = await supabase.from("vasd_queue")
     .update({ status:"surgery", table_number:tblNum, updated_at:new Date() })
@@ -390,20 +408,35 @@ window.assignTable = async function(animalId, queueAnimalId) {
   qErr = r1.error;
 
   if (qErr) {
-    console.warn("table_number column อาจยังไม่มีใน DB, retry โดยไม่ส่ง:", qErr.message);
+    console.warn("⚠️ table_number column อาจยังไม่มีใน DB:", qErr.message);
+    console.log("🔄 Retrying without table_number...");
     const r2 = await supabase.from("vasd_queue")
       .update({ status:"surgery", updated_at:new Date() })
       .eq("animal_id", queueAnimalId);
-    if (r2.error) { alert("❌ บันทึกไม่สำเร็จ: " + r2.error.message); return; }
+    if (r2.error) { 
+      console.error("❌ Update failed:", r2.error.message);
+      alert("❌ บันทึกไม่สำเร็จ: " + r2.error.message); 
+      return; 
+    }
+    console.log("✅ Queue updated (without table_number in DB)");
+  } else {
+    console.log("✅ Queue updated successfully with table_number");
   }
 
   // เก็บ table assignment ใน localStorage เป็น fallback
   const tableMap = JSON.parse(localStorage.getItem("vasd_table_map") || "{}");
+  console.log("💾 Current localStorage tableMap:", tableMap);
+  
   tableMap[queueAnimalId] = tblNum;
   localStorage.setItem("vasd_table_map", JSON.stringify(tableMap));
+  
+  console.log("💾 Updated localStorage tableMap:", tableMap);
+  console.log("   Saved: queueAnimalId", queueAnimalId, "→ table", tblNum);
 
-  loadCentral();
-  loadTables();
+  console.log("🔄 Calling loadCentral() and loadTables()...");
+  await loadCentral();
+  await loadTables();
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 };
 
 /* ══════════════
@@ -414,58 +447,116 @@ let selectedTbl= null;
 let vitalsCache= {};   // animalId → [{time,hr,rr,spo2,bt,zol}]
 
 async function loadTables() {
-  const { data:eventId } = await supabase.rpc("get_today_event");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log("🔄 loadTables() called");
+  
+  const { data:eventId, error: eventErr } = await supabase.rpc("get_today_event");
+  if (eventErr) {
+    console.error("❌ get_today_event error:", eventErr.message);
+    return;
+  }
+  console.log("📅 Event ID:", eventId);
 
   // ดึงเฉพาะ status="surgery" ไม่ filter event_id บน join (เพื่อความเสถียร)
+  console.log("📡 Fetching queue data with status='surgery'...");
   const { data, error } = await supabase
     .from("vasd_queue")
     .select(`animal_id, table_number, surgeon_name, anesthesiologist_name, notes,
              vasd_animal(id,event_id,animal_name,species,sex,actual_weight,est_weight)`)
     .eq("status","surgery");
 
-  if (error) { console.error("loadTables error:", error.message); }
+  if (error) { 
+    console.error("❌ loadTables query error:", error.message); 
+    return;
+  }
+
+  console.log("📊 Raw data from DB (status='surgery'):", data);
+  console.log("   Total records with status='surgery':", (data||[]).length);
 
   // กรอง event_id ฝั่ง JS แทน เพื่อหลีกเลี่ยงปัญหา filter บน join
-  const todayRows = (data||[]).filter(r => r.vasd_animal?.event_id === eventId);
+  const todayRows = (data||[]).filter(r => {
+    const hasAnimal = r.vasd_animal && r.vasd_animal.event_id === eventId;
+    if (!hasAnimal) {
+      console.log(`   ⚠️ Filtered out animal_id ${r.animal_id}: ${!r.vasd_animal ? "no animal data" : "event_id mismatch ("+r.vasd_animal.event_id+" vs "+eventId+")"}`);
+    }
+    return hasAnimal;
+  });
+
+  console.log("✅ Today's rows after filtering:", todayRows);
+  console.log("   Records matching today's event:", todayRows.length);
 
   // อ่าน table map จาก localStorage เป็น fallback ถ้า DB column ยังไม่มี
   const tableMap = JSON.parse(localStorage.getItem("vasd_table_map") || "{}");
+  console.log("💾 Table map from localStorage:", tableMap);
 
   tableData = {};
   todayRows.forEach(r => {
-    const tbl = r.table_number || tableMap[r.animal_id];
-    if (tbl) tableData[tbl] = r;
+    const dbTableNum = r.table_number;
+    const lsTableNum = tableMap[r.animal_id];
+    const tbl = dbTableNum || lsTableNum;
+    
+    console.log(`🔢 Processing animal_id: ${r.animal_id}`);
+    console.log(`   Animal name: ${r.vasd_animal?.animal_name}`);
+    console.log(`   DB table_number: ${dbTableNum}`);
+    console.log(`   localStorage table_number: ${lsTableNum}`);
+    console.log(`   Final table number: ${tbl}`);
+    
+    if (tbl) {
+      tableData[tbl] = r;
+      console.log(`   ✓ Assigned to table ${tbl}`);
+    } else {
+      console.warn(`   ⚠️ No table number found for animal ${r.animal_id}`);
+    }
   });
+
+  console.log("📋 Final tableData object:", tableData);
+  console.log("📊 Total occupied tables:", Object.keys(tableData).length);
 
   document.getElementById("badge-tables").textContent = Object.keys(tableData).length;
   renderGrid();
   if (selectedTbl) renderDetail(selectedTbl);
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 }
 
 function renderGrid() {
+  console.log("🎨 renderGrid() called, tableData:", tableData);
   const grid=document.getElementById("table-grid");
   grid.innerHTML="";
   for(let i=1;i<=20;i++){
     const r=tableData[i];
     const tile=document.createElement("div");
     tile.className="table-tile"+(r?" occupied":"")+(selectedTbl===i?" selected-tile":"");
-    tile.onclick=()=>{ selectedTbl=i; renderGrid(); renderDetail(i); };
+    tile.onclick=()=>{ 
+      console.log(`🖱️ Clicked table ${i}`);
+      selectedTbl=i; 
+      renderGrid(); 
+      renderDetail(i); 
+    };
     tile.innerHTML=`<div class="table-num">${i}</div>
       ${r?`<div class="table-animal-name">${r.vasd_animal.animal_name||"(ไม่ระบุ)"}</div>`
          :`<div class="table-empty-lbl">ว่าง</div>`}`;
     grid.appendChild(tile);
+    
+    if (r) {
+      console.log(`   Table ${i}: OCCUPIED by ${r.vasd_animal.animal_name}`);
+    }
   }
 }
 
 function renderDetail(tblNum) {
+  console.log(`📄 renderDetail() called for table ${tblNum}`);
   const detail=document.getElementById("surgery-detail");
   const r=tableData[tblNum];
+  
   if(!r){
+    console.log(`   Table ${tblNum} is EMPTY`);
     detail.innerHTML=`<div class="surgery-panel animate"><div class="spanel-body">
       <div class="empty"><div class="empty-icon">🪑</div><p>โต๊ะ ${tblNum} ว่างอยู่</p></div>
     </div></div>`;
     return;
   }
+  
+  console.log(`   Table ${tblNum} is OCCUPIED, rendering details...`);
   const a   = r.vasd_animal;
   const w   = parseFloat(a.actual_weight||a.est_weight||0);
   const spc = a.species==="ส"?"สุนัข":"แมว";
@@ -695,10 +786,13 @@ window.endSurgery = async function(animalId, queueAnimalId, weight) {
 /* ─── REALTIME ─── */
 supabase.channel("vasd-main-rt")
   .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"},()=>{
-    loadCentral(); loadTables();
+    console.log("🔔 Realtime update detected on vasd_queue");
+    loadCentral(); 
+    loadTables();
   }).subscribe();
 
 /* ─── INIT ─── */
+console.log("🚀 Initializing application...");
 loadCentral();
 loadTables();
 </script>
