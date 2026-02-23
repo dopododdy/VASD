@@ -161,17 +161,17 @@ header{
 .vitals-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .vitals-log{background:#fafbfc;border:1px solid var(--border);border-radius:var(--radius-sm);
   max-height:240px;overflow-y:auto;margin-bottom:14px;}
-.vital-row{display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 80px;
-  gap:4px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;}
-.vital-row:last-child{border-bottom:none;}
-.vital-row.is-form{background:#f0fdf9;}
-.vital-header-row{background:#f0f4f8;}
-.vital-time{font-size:11px;font-weight:700;color:var(--text-muted);}
-.vital-val{text-align:center;font-weight:600;color:var(--navy);}
-.vital-hdr{font-size:11px;font-weight:700;color:var(--text-muted);text-align:center;letter-spacing:0.3px;}
-.vital-hdr:first-child{text-align:left;}
-.vi{width:100%;padding:5px 6px;font-size:13px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:5px;text-align:center;outline:none;}
+
+.vitals-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+.vitals-table th { background: #f0f4f8; padding: 10px; color: var(--text-muted); font-weight: 700; border-bottom: 2px solid var(--border); letter-spacing: 0.3px; }
+.vitals-table th:first-child { text-align: left; }
+.vitals-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--navy); font-weight: 600; vertical-align: middle; }
+.vitals-table td:first-child { text-align: left; color: var(--text-muted); font-size: 11px; font-weight: 700; }
+.vitals-table tr:last-child td { border-bottom: none; }
+.vitals-table tr.is-form { background: #f0fdf9; }
+
+.vi{width:100%; padding:5px 6px; font-size:13px; font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border); border-radius:5px; text-align:center; outline:none; box-sizing:border-box;}
 .vi:focus{border-color:var(--teal-light);}
 
 /* ─── PRESCRIPTION ─── */
@@ -224,13 +224,11 @@ header{
   </button>
 </div>
 
-<!-- TAB 1 : โต๊ะกลาง -->
 <div class="tab-pane active" id="tab-central">
   <div class="section-label">สัตว์รอผ่าตัด — คำนวณยาวางสลบอัตโนมัติจากน้ำหนัก</div>
   <div id="central-list"></div>
 </div>
 
-<!-- TAB 2 : โต๊ะผ่าตัด -->
 <div class="tab-pane" id="tab-tables">
   <div class="tables-header">
     <h2>โต๊ะผ่าตัด</h2>
@@ -263,12 +261,14 @@ function calcRx(w) {
   const norflox_str = w < 10 ? 100 : 200;
   const tolf_str    = w < 15 ? 6   : 60;
   return {
-    doxy_tabs:    Math.max(1, Math.round(w * 10  / 100)),
+    doxy_tabs:        Math.max(1, Math.round(w * 10  / 100)),
     norflox_str,
-    norflox_tabs: Math.max(1, Math.round(w * 10  / norflox_str)),
+    norflox_tabs:     Math.max(1, Math.round(w * 10  / norflox_str)),
+    norflox_100_tabs: Math.max(1, Math.round(w * 10 / 100)),
     tolf_str,
-    tolf_tabs:    Math.max(1, Math.round(w * 4   / tolf_str)),
-    fbc_tabs:     1
+    tolf_tabs:        Math.max(1, Math.round(w * 4   / tolf_str)),
+    tolf_60_tabs:     Math.max(1, Math.round(w * 4 / 60)),
+    fbc_tabs:         1
   };
 }
 
@@ -578,7 +578,6 @@ function renderDetail(tblNum) {
 
     <div class="spanel-body">
 
-      <!-- ทีมผ่าตัด -->
       <div class="section-label">ทีมผ่าตัด</div>
       <div class="surgeon-grid">
         <div class="field">
@@ -589,38 +588,44 @@ function renderDetail(tblNum) {
           <label>วิสัญญีแพทย์</label>
           <input id="s-anes"  placeholder="ชื่อวิสัญญีแพทย์..." value="${r.anesthesiologist_name||""}">
         </div>
-        <div class="field" style="grid-column:1/-1;">
-          <label>บันทึกอื่นๆ (เช่น มดลูกอักเสบ, เลือดออก ฯลฯ)</label>
-          <textarea id="s-notes" placeholder="ข้อสังเกต...">${r.notes||""}</textarea>
-        </div>
       </div>
       <button class="btn btn-secondary btn-sm" style="margin-bottom:16px;"
               onclick="saveTeam('${r.animal_id}')">💾 บันทึกทีม</button>
 
       <hr class="divider">
 
-      <!-- Vital Signs -->
       <div class="vitals-toolbar">
         <div class="section-label" style="margin:0;">Vital Signs (บันทึกตามเวลาจริง)</div>
         <button class="btn btn-start btn-sm" onclick="addVitalRow('${a.id}')">
           ➕ บันทึก Vitals
         </button>
       </div>
-      <div class="vitals-log" id="vitals-${a.id}">
-        <div class="vital-row vital-header-row">
-          <div class="vital-hdr" style="text-align:left;">เวลา</div>
-          <div class="vital-hdr">HR</div>
-          <div class="vital-hdr">RR</div>
-          <div class="vital-hdr">O₂ (%)</div>
-          <div class="vital-hdr">BT (°C)</div>
-          <div class="vital-hdr">Zoletil (ml)</div>
-        </div>
-        ${vitalsRowsHTML(a.id)}
+      
+      <div class="vitals-log">
+        <table class="vitals-table">
+          <thead>
+            <tr>
+              <th>เวลา</th>
+              <th>HR</th>
+              <th>RR</th>
+              <th>O₂ (%)</th>
+              <th>BT (°C)</th>
+              <th>Zoletil (ml)</th>
+            </tr>
+          </thead>
+          <tbody id="vitals-${a.id}">
+            ${vitalsRowsHTML(a.id)}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="field" style="margin-top:14px; margin-bottom:16px;">
+        <label>บันทึกอื่นๆ (เช่น มดลูกอักเสบ, เลือดออก ฯลฯ)</label>
+        <textarea id="s-notes" placeholder="ข้อสังเกต...">${r.notes||""}</textarea>
       </div>
 
       <hr class="divider">
 
-      <!-- Prescription -->
       <div class="rx-section" style="border:none;padding:0;margin:0;">
         <div class="section-label">สั่งจ่ายยา (เมื่อผ่าตัดเสร็จ)</div>
         <div class="days-row">
@@ -636,72 +641,80 @@ function renderDetail(tblNum) {
 }
 
 function vitalsRowsHTML(aid) {
-  const rows=vitalsCache[aid]||[];
-  if(!rows.length) return `<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:13px;">ยังไม่มีบันทึก</div>`;
-  return rows.map(v=>`
-    <div class="vital-row">
-      <div class="vital-time">${v.time}</div>
-      <div class="vital-val">${v.hr||"–"}</div>
-      <div class="vital-val">${v.rr||"–"}</div>
-      <div class="vital-val">${v.spo2||"–"}</div>
-      <div class="vital-val">${v.bt||"–"}</div>
-      <div class="vital-val">${v.zol||"–"}</div>
-    </div>`).join("");
+  const rows = vitalsCache[aid] || [];
+  if(!rows.length) return `<tr><td colspan="6" style="padding:14px;text-align:center;color:var(--text-muted);font-weight:normal;">ยังไม่มีบันทึก</td></tr>`;
+  
+  return rows.map(v => `
+    <tr>
+      <td>${v.time}</td>
+      <td>${v.hr || "–"}</td>
+      <td>${v.rr || "–"}</td>
+      <td>${v.spo2 || "–"}</td>
+      <td>${v.bt || "–"}</td>
+      <td>${v.zol || "–"}</td>
+    </tr>`).join("");
 }
 
 window.addVitalRow = function(aid) {
-  const box=document.getElementById("vitals-"+aid);
-  box.querySelector(".is-form")?.remove();
-  const t=nowStr();
-  const fr=document.createElement("div");
-  fr.className="vital-row is-form";
-  fr.innerHTML=`
-    <div class="vital-time">${t}</div>
-    <input class="vi" id="vi-hr"   placeholder="HR">
-    <input class="vi" id="vi-rr"   placeholder="RR">
-    <input class="vi" id="vi-spo2" placeholder="O₂">
-    <input class="vi" id="vi-bt"   placeholder="BT">
-    <input class="vi" id="vi-zol"  placeholder="ml">`;
-  box.appendChild(fr);
-  fr.querySelector("#vi-hr").focus();
-  const save=()=>{ if(!fr.parentNode) return; saveVital(aid,t,fr); };
-  fr.addEventListener("keydown", e=>{ if(e.key==="Enter") save(); });
-  fr.querySelector("#vi-zol").addEventListener("blur",()=>setTimeout(()=>{
-    if(!fr.contains(document.activeElement)) save();
-  },150));
+  const tbody = document.getElementById("vitals-" + aid);
+  if(tbody.querySelector("td[colspan]")) tbody.innerHTML = "";
+  tbody.querySelector(".is-form")?.remove();
+  
+  const t = nowStr();
+  const tr = document.createElement("tr");
+  tr.className = "is-form";
+  tr.innerHTML = `
+    <td>${t}</td>
+    <td><input class="vi" id="vi-hr" placeholder="HR"></td>
+    <td><input class="vi" id="vi-rr" placeholder="RR"></td>
+    <td><input class="vi" id="vi-spo2" placeholder="O₂"></td>
+    <td><input class="vi" id="vi-bt" placeholder="BT"></td>
+    <td><input class="vi" id="vi-zol" placeholder="ml"></td>`;
+    
+  tbody.appendChild(tr);
+  tr.querySelector("#vi-hr").focus();
+  
+  const save = () => { if(!tr.parentNode) return; saveVital(aid, t, tr); };
+  tr.addEventListener("keydown", e => { if(e.key === "Enter") save(); });
+  tr.querySelector("#vi-zol").addEventListener("blur", () => setTimeout(() => {
+    if(!tr.contains(document.activeElement)) save();
+  }, 150));
 };
 
-function saveVital(aid, time, fr) {
-  const entry={
+function saveVital(aid, time, tr) {
+  const entry = {
     time,
-    hr:  fr.querySelector("#vi-hr").value,
-    rr:  fr.querySelector("#vi-rr").value,
-    spo2:fr.querySelector("#vi-spo2").value,
-    bt:  fr.querySelector("#vi-bt").value,
-    zol: fr.querySelector("#vi-zol").value,
+    hr:   tr.querySelector("#vi-hr").value,
+    rr:   tr.querySelector("#vi-rr").value,
+    spo2: tr.querySelector("#vi-spo2").value,
+    bt:   tr.querySelector("#vi-bt").value,
+    zol:  tr.querySelector("#vi-zol").value,
   };
-  if(!vitalsCache[aid]) vitalsCache[aid]=[];
+  
+  if(!vitalsCache[aid]) vitalsCache[aid] = [];
   vitalsCache[aid].push(entry);
 
   supabase.from("vasd_vital_signs").insert({
-    animal_id:aid, recorded_at:new Date(),
-    hr:entry.hr||null, rr:entry.rr||null, spo2:entry.spo2||null,
-    bt:entry.bt||null, zoletil_top:entry.zol||null
-  }).then(({error})=>{ if(error) console.warn("vitals:",error); });
+    animal_id: aid, recorded_at: new Date(),
+    hr: entry.hr || null, rr: entry.rr || null, spo2: entry.spo2 || null,
+    bt: entry.bt || null, zoletil_top: entry.zol || null
+  }).then(({error}) => { if(error) console.warn("vitals:", error); });
 
-  const box=document.getElementById("vitals-"+aid);
-  fr.remove();
-  const row=document.createElement("div");
-  row.className="vital-row";
-  row.innerHTML=`
-    <div class="vital-time">${time}</div>
-    <div class="vital-val">${entry.hr||"–"}</div>
-    <div class="vital-val">${entry.rr||"–"}</div>
-    <div class="vital-val">${entry.spo2||"–"}</div>
-    <div class="vital-val">${entry.bt||"–"}</div>
-    <div class="vital-val">${entry.zol||"–"}</div>`;
-  box.appendChild(row);
-  box.scrollTop=box.scrollHeight;
+  const tbody = document.getElementById("vitals-" + aid);
+  tr.remove();
+  
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${time}</td>
+    <td>${entry.hr || "–"}</td>
+    <td>${entry.rr || "–"}</td>
+    <td>${entry.spo2 || "–"}</td>
+    <td>${entry.bt || "–"}</td>
+    <td>${entry.zol || "–"}</td>`;
+    
+  tbody.appendChild(row);
+  const box = tbody.closest(".vitals-log");
+  if(box) box.scrollTop = box.scrollHeight;
 }
 
 window.saveTeam = async function(qAnimalId) {
@@ -717,13 +730,17 @@ window.saveTeam = async function(qAnimalId) {
 /* ─── RX CARDS ─── */
 function rxHTML(aid, rx) {
   const drugs=[
-    {id:"doxy",   cat:"ยาปฏิชีวนะ",      name:`Doxycycline (100 mg/tab)`,
+    {id:"doxy",       cat:"ยาปฏิชีวนะ",      name:`Doxycycline (100 mg/tab)`,
      detail:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
-    {id:"norflox",cat:"ยาปฏิชีวนะ",      name:`Norfloxacin (${rx.norflox_str} mg/tab)`,
+    {id:"norflox",    cat:"ยาปฏิชีวนะ",      name:`Norfloxacin (${rx.norflox_str} mg/tab)`,
      detail:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
-    {id:"tolf",   cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine (${rx.tolf_str} mg/tab)`,
+    {id:"norflox100", cat:"ยาปฏิชีวนะ",      name:`Norfloxacin 100 mg/tab`,
+     detail:`${rx.norflox_100_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น"},
+    {id:"tolf",       cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine (${rx.tolf_str} mg/tab)`,
      detail:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
-    {id:"fbc",    cat:"ยาบำรุงเลือด",    name:"FBC",
+    {id:"tolf60",     cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine 60 mg/tab`,
+     detail:`${rx.tolf_60_tabs} เม็ด / ครั้ง`, freq:"วันละ 1 ครั้ง · หลังอาหารเย็น"},
+    {id:"fbc",        cat:"ยาบำรุงเลือด",    name:"FBC",
      detail:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า"},
   ];
   return drugs.map(d=>`
