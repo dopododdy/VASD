@@ -656,17 +656,17 @@ window.saveTeam = async function(qAnimalId) {
 function rxHTML(aid, rx) {
   const drugs=[
     {id:"doxy",       cat:"ยาปฏิชีวนะ",      name:`Doxycycline (100 mg/tab)`,
-     dose:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:7},
+     dose:`${rx.doxy_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:7, total: rx.doxy_tabs * 1 * 7},
     {id:"norflox",    cat:"ยาปฏิชีวนะ",      name:`Norfloxacin (${rx.norflox_str} mg/tab)`,
-     dose:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น", days:7},
+     dose:`${rx.norflox_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น", days:7, total: rx.norflox_tabs * 2 * 7},
     {id:"norflox100", cat:"ยาปฏิชีวนะ",      name:`Norfloxacin 100 mg/tab`,
-     dose:`${rx.norflox_100_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น", days:7},
+     dose:`${rx.norflox_100_tabs} เม็ด / ครั้ง`, freq:"วันละ 2 ครั้ง · หลังอาหาร เช้า–เย็น", days:7, total: rx.norflox_100_tabs * 2 * 7},
     {id:"tolf",       cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine (${rx.tolf_str} mg/tab)`,
-     dose:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:3},
+     dose:`${rx.tolf_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:3, total: rx.tolf_tabs * 1 * 3},
     {id:"tolf60",     cat:"ยาแก้ปวด ลดไข้",  name:`Tolfedine 60 mg/tab`,
-     dose:`${rx.tolf_60_tabs} เม็ด / ครั้ง`, freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:3},
+     dose:`${rx.tolf_60_tabs} เม็ด / ครั้ง`, freq:"วันละ 1 ครั้ง · หลังอาหารเย็น", days:3, total: rx.tolf_60_tabs * 1 * 3},
     {id:"fbc",        cat:"ยาบำรุงเลือด",    name:"FBC",
-     dose:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า", days:7},
+     dose:`${rx.fbc_tabs} เม็ด / ครั้ง`,    freq:"วันละ 1 ครั้ง · หลังอาหารเช้า", days:7, total: rx.fbc_tabs * 1 * 7},
   ];
   return drugs.map(d=>`
     <div class="rx-card" id="rxcard-${aid}-${d.id}">
@@ -688,9 +688,15 @@ function rxHTML(aid, rx) {
           <label>ความถี่</label>
           <input type="text" id="rxfreq-${aid}-${d.id}" value="${d.freq}" placeholder="ความถี่">
         </div>
-        <div class="rx-input-group">
-          <label>จน.วัน</label>
-          <input type="number" id="rxdays-${aid}-${d.id}" value="${d.days}" placeholder="วัน" style="width:60px;">
+        <div class="rx-input-group" style="display:flex; gap:10px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label>จน.วัน</label>
+            <input type="number" id="rxdays-${aid}-${d.id}" value="${d.days}" placeholder="วัน" style="width:60px;">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="color:var(--danger);">รวม(เม็ด)</label>
+            <input type="number" id="rxtotal-${aid}-${d.id}" value="${d.total}" placeholder="เม็ด" style="width:60px; font-weight:bold; color:var(--danger);">
+          </div>
         </div>
       </div>
     </div>`).join("");
@@ -714,7 +720,8 @@ window.endSurgery = async function(animalId, queueAnimalId) {
       drug_category:chk.dataset.cat,
       dose_detail:  document.getElementById(`rxdose-${animalId}-${did}`).value,
       frequency:    document.getElementById(`rxfreq-${animalId}-${did}`).value,
-      days:         parseInt(document.getElementById(`rxdays-${animalId}-${did}`).value) || 5
+      days:         parseInt(document.getElementById(`rxdays-${animalId}-${did}`).value) || 5,
+      total_pills:  parseInt(document.getElementById(`rxtotal-${animalId}-${did}`).value) || 0 // ✅ เพิ่มบรรทัดนี้เพื่อบันทึกจำนวนเม็ดยารวม
     });
   });
 
