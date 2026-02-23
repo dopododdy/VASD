@@ -296,7 +296,13 @@ window.saveRow = async function(btn) {
   const tr = btn.closest("tr"), id = tr.dataset.id;
   const f  = tr.querySelectorAll(".f");
   const status = tr.querySelector(".status").value;
-  await supabase.from("vasd_animal").update({ animal_name:f[0].value, species:f[1].value, sex:f[2].value, est_weight:f[3].value }).eq("id",id);
+await supabase.from("vasd_animal").update({ 
+  animal_name: f[0].value, 
+  species: f[1].value, 
+  sex: f[2].value, 
+  est_weight: f[3].value, 
+  actual_weight: f[3].value // ✅ เพิ่มบรรทัดนี้เพื่อบังคับอัปเดตน้ำหนักจริง
+}).eq("id",id);
   await supabase.from("vasd_queue").update({ status, updated_at:new Date() }).eq("animal_id",id);
   loadAnimals();
 };
