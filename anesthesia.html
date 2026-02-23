@@ -734,11 +734,17 @@ window.endSurgery = async function(animalId, queueAnimalId) {
 
 /* ─── REALTIME ─── */
 supabase.channel("vasd-main-rt")
-  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"},()=>{
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, () => {
     console.log("🔔 Realtime update detected on vasd_queue");
     loadCentral(); 
     loadTables();
-  }).subscribe();
+  })
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_animal" }, () => {
+    console.log("🔔 Realtime update detected on vasd_animal (ข้อมูลสัตว์/น้ำหนักเปลี่ยน)");
+    loadCentral(); 
+    loadTables();
+  })
+  .subscribe();
 
 /* ─── INIT ─── */
 console.log("🚀 Initializing application...");
