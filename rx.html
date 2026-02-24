@@ -4,128 +4,253 @@
 <meta charset="UTF-8">
 <title>RMUTTO - VASD | ห้องจ่ายยา (Rx)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+
 <style>
-  :root { --navy:#0d1b2a; --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --border:#e2e8f0; --accent:#00d4aa; }
-  body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .rx-card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-  .rx-card h3 { margin-top: 0; color: var(--navy); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
-  th { background: #f8fafc; }
-  .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: bold; }
-  .btn-print { background: var(--navy); color: white; }
-  
-  /* สำหรับตอนพิมพ์หน้าจอ */
-  @media print {
-    body { background: white; padding: 0; }
-    .no-print { display: none !important; }
-    .rx-card { box-shadow: none; border: 1px solid #000; break-inside: avoid; }
-  }
+:root {
+  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
+  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
+  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
+  --radius:14px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* HEADER */
+header{
+  background:var(--navy);padding:0 32px;display:flex;
+  justify-content:space-between;align-items:center;height:68px;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
+}
+.header-brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{
+  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
+.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
+
+.btn-home{
+  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
+  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
+  cursor:pointer;transition:background 0.2s;
+}
+.btn-home:hover{background:rgba(255,255,255,0.18);}
+
+/* MAIN */
+.container{max-width:1200px;margin:0 auto;padding:28px 24px;}
+
+.page-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:24px;animation:fadeUp 0.4s ease both;
+}
+.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
+
+/* RX CARD (แทน Table Wrap เดิม ให้เหมาะกับการแสดงผลทีละเคส) */
+.rx-card {
+  background:var(--surface);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  margin-bottom:24px;overflow:hidden;animation:fadeUp 0.4s 0.05s ease both;
+  transition:box-shadow 0.2s;
+}
+.rx-card:hover { box-shadow:var(--shadow-md); }
+
+.rx-header {
+  padding:16px 20px; background:#fafbfc; border-bottom:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.rx-header h3 { font-size:16px; color:var(--navy); font-weight:700; }
+.rx-header span { color:var(--text-muted); font-size:14px; font-weight:400; }
+
+/* TABLE INSIDE CARD */
+.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:600px;}
+thead tr{background:linear-gradient(135deg,var(--navy),#1a2f47);}
+thead th{
+  padding:12px 16px;text-align:left;font-size:12px;font-weight:700;
+  letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.8);
+  border:none;white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
+tbody td{padding:12px 16px;text-align:left;font-size:14px;border:none;vertical-align:middle;}
+tbody tr:last-child{border-bottom:none;}
+
+/* BUTTONS */
+.btn{
+  padding:8px 16px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  border:none;border-radius:6px;cursor:pointer;
+  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-print {background:var(--navy);color:#fff;}
+.btn-dispense {background:var(--success);color:#fff;}
+
+/* UTILS */
+.text-danger { color:var(--danger); font-weight:700; }
+.text-muted { color:var(--text-muted); font-size:12px; }
+.empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:16px; }
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* สำหรับการพิมพ์ (PRINT) */
+@media print {
+  body { background: white; padding: 0; }
+  header, .btn-home, .page-header button, .btn-dispense { display: none !important; }
+  .container { padding: 0; max-width: 100%; }
+  .rx-card { box-shadow: none; border: 1px solid #000; break-inside: avoid; margin-bottom: 20px; }
+  .rx-header { background: #f0f0f0 !important; border-bottom: 1px solid #000; }
+  table { border: 1px solid #000; }
+  thead tr { background: #e0e0e0 !important; }
+  thead th { color: #000 !important; border-bottom: 1px solid #000; }
+  tbody td { border-bottom: 1px solid #ccc; color: #000; }
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h2>💊 รายการรอจ่ายยา (Rx)</h2>
-  <button class="btn btn-print no-print" onclick="window.print()">🖨️ พิมพ์รายการทั้งหมด</button>
+<header>
+  <div class="header-brand">
+    <div class="brand-icon">💊</div>
+    <div class="brand-text">
+      <h1>ห้องจ่ายยา (Rx)</h1>
+      <span>RMUTTO – Veterinary Academic Service Division</span>
+    </div>
+  </div>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+</header>
+
+<div class="container">
+
+  <div class="page-header">
+    <h2>รายการรอจัดยา / จ่ายยา</h2>
+    <button class="btn btn-print" onclick="window.print()">🖨️ พิมพ์ใบสั่งยาทั้งหมด</button>
+  </div>
+
+  <div id="rx-container">
+    <div class="empty-state">กำลังโหลดข้อมูล...</div>
+  </div>
+
 </div>
 
-<div id="rx-container">
-  <p>กำลังโหลดข้อมูล...</p>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module">
-  // 🔴 อย่าลืมเปลี่ยนเป็น URL และ Key ของคุณ
-  const SUPABASE_URL = "YOUR_SUPABASE_URL"; 
-  const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+import { supabase } from "./js/supabase.js";
 
-  async function loadPrescriptions() {
-    // ดึงคิวที่อยู่ในสถานะพักฟื้น (recovery) หรือสถานะอื่นๆ ที่รอรับยา
-    const { data: queueData, error } = await supabase
-      .from("vasd_queue")
-      .select(`
-        id, animal_id, status,
-        vasd_animal ( animal_name, species, owner_name ),
-        vasd_prescription ( id, drug_id, dose, freq, days, total_pills )
-      `)
-      .in("status", ["recovery", "discharged"]) // ดึงเฉพาะคิวที่ผ่าตัดเสร็จแล้ว
-      .order("updated_at", { ascending: false });
+async function loadPrescriptions() {
+  // ดึง Event ID ของวันนี้ เพื่อแสดงเฉพาะเคสของวันนี้
+  const { data: eventId } = await supabase.rpc("get_today_event");
 
-    if (error) {
-      console.error("Error fetching Rx:", error);
-      document.getElementById("rx-container").innerHTML = `<p style="color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>`;
-      return;
-    }
+  // ดึงคิวที่อยู่ในสถานะพักฟื้น (recovery), รอรับกลับ (ready_to_go_home) หรือสถานะอื่นๆ ที่ยังไม่ได้จ่ายยา
+  const { data: queueData, error } = await supabase
+    .from("vasd_queue")
+    .select(`
+      id, animal_id, status,
+      vasd_animal ( event_id, animal_name, species, vasd_owner(owner_name) ),
+      vasd_prescription ( id, drug_id, dose, freq, days, total_pills )
+    `)
+    .in("status", ["recovery", "ready_to_go_home"])
+    .order("updated_at", { ascending: false });
 
-    // กรองเฉพาะเคสที่มีการสั่งยา (มีข้อมูลใน vasd_prescription)
-    const animalsWithRx = queueData.filter(q => q.vasd_prescription && q.vasd_prescription.length > 0);
+  if (error) {
+    console.error("Error fetching Rx:", error);
+    document.getElementById("rx-container").innerHTML = `<div class="empty-state text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+    return;
+  }
 
-    const container = document.getElementById("rx-container");
-    container.innerHTML = "";
+  // กรองเฉพาะเคสของวันนี้ และมีรายการสั่งยา (vasd_prescription มีข้อมูล)
+  const animalsWithRx = queueData.filter(q => 
+    q.vasd_animal && 
+    q.vasd_animal.event_id === eventId && 
+    q.vasd_prescription && 
+    q.vasd_prescription.length > 0
+  );
 
-    if (animalsWithRx.length === 0) {
-      container.innerHTML = `<p>✅ ไม่มีรายการรอจ่ายยาในขณะนี้</p>`;
-      return;
-    }
+  const container = document.getElementById("rx-container");
+  container.innerHTML = "";
 
-    // สร้างการ์ดแสดงรายการยาของสัตว์แต่ละตัว
-    animalsWithRx.forEach(q => {
-      const animal = q.vasd_animal;
-      const rxList = q.vasd_prescription;
+  if (animalsWithRx.length === 0) {
+    container.innerHTML = `<div class="empty-state">✅ ไม่มีรายการรอจัดยาในขณะนี้</div>`;
+    return;
+  }
 
-      let rxRows = rxList.map((rx, index) => `
-        <tr>
-          <td>${index + 1}</td>
-          <td><strong>ยา ID: ${rx.drug_id}</strong> <br><small class="text-muted">ดึงชื่อยาจากตาราง drug catalog ทีหลังได้</small></td>
-          <td>${rx.dose}</td>
-          <td>${rx.freq}</td>
-          <td>${rx.days} วัน</td>
-          <td style="font-weight:bold; color:#e53e3e;">${rx.total_pills} เม็ด/ขวด</td>
-        </tr>
-      `).join("");
+  // วนลูปสร้างการ์ดรายการยา
+  animalsWithRx.forEach((q, index) => {
+    const animal = q.vasd_animal;
+    const ownerName = animal.vasd_owner ? animal.vasd_owner.owner_name : 'ไม่ระบุ';
+    const species = animal.species === "ส" ? "สุนัข" : (animal.species === "ม" ? "แมว" : animal.species);
+    const rxList = q.vasd_prescription;
 
-      const card = document.createElement("div");
-      card.className = "rx-card";
-      card.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3>🐾 ชื่อสัตว์: ${animal.animal_name} (${animal.species}) | เจ้าของ: ${animal.owner_name || 'ไม่ระบุ'}</h3>
-          <button class="btn no-print" style="background:#00d4aa; color:#fff;" onclick="markAsDispensed('${q.animal_id}')">✔️ จ่ายยาแล้ว</button>
-        </div>
+    let rxRows = rxList.map((rx, idx) => `
+      <tr>
+        <td style="width:5%;">${idx + 1}</td>
+        <td style="width:35%;"><strong>รหัสยา: ${rx.drug_id}</strong> <br><span class="text-muted">ดึงชื่อยาจาก Catalog ภายหลัง</span></td>
+        <td style="width:20%;">${rx.dose || '-'}</td>
+        <td style="width:20%;">${rx.freq || '-'}</td>
+        <td style="width:10%;">${rx.days ? rx.days + ' วัน' : '-'}</td>
+        <td style="width:10%;" class="text-danger">${rx.total_pills || 0} เม็ด</td>
+      </tr>
+    `).join("");
+
+    const card = document.createElement("div");
+    card.className = "rx-card";
+    // เพิ่ม delay แอนิเมชันให้ไล่ลำดับลงมาสวยงาม
+    card.style.animationDelay = `${(index * 0.1) + 0.1}s`; 
+    
+    card.innerHTML = `
+      <div class="rx-header">
+        <h3>🐾 ${animal.animal_name} <span style="font-weight:normal;">(${species})</span> <span>| เจ้าของ: ${ownerName}</span></h3>
+        <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ จัดยาเสร็จสิ้น</button>
+      </div>
+      <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th width="5%">#</th>
-              <th width="30%">ชื่อยา (Drug ID)</th>
-              <th width="20%">ปริมาณ/ครั้ง</th>
-              <th width="20%">ความถี่</th>
-              <th width="10%">จำนวนวัน</th>
-              <th width="15%">รวม</th>
+              <th>#</th>
+              <th>รายการยา (Drug ID)</th>
+              <th>ปริมาณ/ครั้ง</th>
+              <th>ความถี่</th>
+              <th>จำนวนวัน</th>
+              <th>รวม</th>
             </tr>
           </thead>
           <tbody>
             ${rxRows}
           </tbody>
         </table>
-      `;
-      container.appendChild(card);
-    });
-  }
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
 
-  // ฟังก์ชันจำลองเมื่อกด "จ่ายยาแล้ว" (อาจจะอัปเดตสถานะคิวเป็น done หรือลบออกจากรายการรอ)
-  window.markAsDispensed = async function(animalId) {
-    if(confirm("ยืนยันว่าทำการจ่ายยานี้เรียบร้อยแล้ว?")) {
-      // โค้ดอัปเดตสถานะ เช่น ให้คิวเป็น "done" หรือทำเครื่องหมายในตาราง rx
-      alert("บันทึกการจ่ายยาสำเร็จ! (ต้องเขียนโค้ดอัปเดต DB เพิ่ม)");
-      loadPrescriptions(); // รีโหลดข้อมูลใหม่
+window.markAsDispensed = async function(animalId) {
+  if(confirm("ยืนยันว่าทำการจัดยาและจ่ายยานี้เรียบร้อยแล้ว?\n(ระบบจะเปลี่ยนสถานะเป็น 'รับกลับแล้ว')")) {
+    
+    // อัปเดตสถานะคิวให้เป็น done (หรือ ready_to_go_home ตาม Workflow ของคลินิก)
+    const { error } = await supabase
+      .from("vasd_queue")
+      .update({ status: "done", updated_at: new Date() })
+      .eq("animal_id", animalId);
+      
+    if (error) {
+      alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      console.error(error);
+    } else {
+      loadPrescriptions(); // โหลดหน้าจอใหม่เพื่อให้รายการที่จ่ายแล้วหายไป
     }
-  };
+  }
+};
 
-  // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
-  loadPrescriptions();
+// สั่งทำงานเมื่อเปิดหน้า
+loadPrescriptions();
+
+// เปิด Realtime เผื่อกรณีหมอผ่าตัดเพิ่งกดยืนยันสั่งยาเข้ามา
+supabase.channel("vasd-rx-live")
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, () => {
+    loadPrescriptions();
+  })
+  .subscribe();
 </script>
 </body>
 </html>
