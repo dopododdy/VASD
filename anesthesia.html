@@ -463,6 +463,39 @@ async function loadTables() {
     if (tbl) tableData[tbl] = r;
   });
 
+  // 👇 --- 🟢 เพิ่มโค้ดส่วนนี้เพื่อดึงข้อมูล Vitals จากฐานข้อมูลกลับมา --- 👇
+  const animalIds = Object.values(tableData).map(r => r.vasd_animal.id);
+  if (animalIds.length > 0) {
+    const { data: vData } = await supabase
+      .from("vasd_vital_signs")
+      .select("*")
+      .in("animal_id", animalIds)
+      .order("recorded_at", { ascending: true });
+      
+    vitalsCache = {}; // ล้างข้อมูล cache ในแรมทิ้ง
+    if (vData) {
+      vData.forEach(v => {
+        if (!vitalsCache[v.animal_id]) vitalsCache[v.animal_id] = [];
+        
+        // จัดรูปแบบเวลาให้เป็น HH:MM
+        const timeStr = new Date(v.recorded_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+        
+        vitalsCache[v.animal_id].push({
+          time: timeStr, 
+          hr: v.hr, 
+          rr: v.rr, 
+          spo2: v.spo2, 
+          bt: v.bt, 
+          zol: v.zoletil_top, 
+          note: v.note
+        });
+      });
+    }
+  } else {
+    vitalsCache = {};
+  }
+  // 👆 -------------------------------------------------------- 👆
+
   document.getElementById("badge-tables").textContent = Object.keys(tableData).length;
   renderGrid();
   if (selectedTbl) renderDetail(selectedTbl);
