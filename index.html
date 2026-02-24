@@ -308,6 +308,7 @@
   .card:nth-child(5) { animation-delay: 0.45s; }
   .card:nth-child(6) { animation-delay: 0.5s; }
   .card:nth-child(7) { animation-delay: 0.55s; }
+  .card:nth-child(8) { animation-delay: 0.60s; } /* เพิ่ม delay สำหรับการ์ดใบที่ 8 */
 
   .card:hover {
     box-shadow: var(--shadow-md);
@@ -383,7 +384,6 @@
 
 <body>
 
-<!-- ─── HEADER ─── -->
 <header>
   <div class="header-brand">
     <div class="brand-icon">🐾</div>
@@ -393,7 +393,6 @@
     </div>
   </div>
 
-  <!-- Login Panel -->
   <div class="user-panel" id="loginPanel">
     <input id="userName" placeholder="ชื่อผู้ใช้" style="width:120px">
     <select id="userRole">
@@ -413,7 +412,6 @@
     <button class="btn-ok" onclick="login()">เข้าสู่ระบบ</button>
   </div>
 
-  <!-- User Info -->
   <div class="user-panel" id="userInfo" style="display:none">
     <div class="user-badge">
       <div class="user-avatar">👤</div>
@@ -423,16 +421,13 @@
   </div>
 </header>
 
-<!-- ─── MAIN ─── -->
 <div class="container">
 
-  <!-- Date Bar -->
   <div class="date-bar">
     <h2>ภาพรวมวันนี้</h2>
     <div class="date-chip" id="todayDate">–</div>
   </div>
 
-  <!-- Summary -->
   <div class="summary">
     <div class="summary-card">
       <span class="card-icon">🐾</span>
@@ -456,7 +451,6 @@
     </div>
   </div>
 
-  <!-- Menu -->
   <div class="section-label">เมนูหลัก</div>
   <div class="menu">
 
@@ -491,6 +485,13 @@
       <span class="card-emoji">🟣</span>
       <h3>พักฟื้น</h3>
       <p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
+    </div>
+
+    <div class="card" onclick="location.href='rx.html'">
+      <span class="card-emoji">💊</span>
+      <h3>ห้องจ่ายยา (Rx)</h3>
+      <p>จัดการและพิมพ์ใบสั่งยา</p>
+      <div class="card-arrow">›</div>
     </div>
 
     <div class="card disabled">
@@ -576,6 +577,7 @@ async function loadSummary() {
   document.getElementById("done").innerText        = done     ?? 0;
 }
 
+// โหลดข้อมูล Dashboard
 loadSummary();
 </script>
 </body>
