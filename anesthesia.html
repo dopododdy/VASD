@@ -780,17 +780,16 @@ window.recalcTotalRx = function(aid, did) {
 window.endSurgery = async function(animalId, queueAnimalId) {
   const chks=document.querySelectorAll(`[id^="rxchk-${animalId}-"]:checked`);
 
-  const rxInserts=[];
-  chks.forEach(chk=>{
-    const did = chk.id.replace(`rxchk-${animalId}-`, '');
+const rxInserts = [];
+  Array.from(document.querySelectorAll(`input[id^="rxchk-${animalId}-"]:checked`)).forEach(el => {
+    const did = el.id.split("-").pop();
     rxInserts.push({
-      animal_id: animalId,
-      drug_name:    chk.dataset.name,
-      drug_category:chk.dataset.cat,
-      dose_detail:  document.getElementById(`rxdose-${animalId}-${did}`).value,
-      frequency:    document.getElementById(`rxfreq-${animalId}-${did}`).value,
-      days:         parseInt(document.getElementById(`rxdays-${animalId}-${did}`).value) || 5, // days ให้เป็นจำนวนเต็ม(parseInt) ถูกแล้ว
-      total_pills:  parseFloat(document.getElementById(`rxtotal-${animalId}-${did}`).value) || 0 // total_pills เปลี่ยนเป็น parseFloat เพื่อรองรับทศนิยม
+      animal_id:    animalId,
+      drug_id:      el.dataset.name,  // ✅ เปลี่ยนจาก drug_name เป็น drug_id
+      dose:         document.getElementById(`rxdose-${animalId}-${did}`).value, // ✅ เปลี่ยนเป็น dose
+      freq:         document.getElementById(`rxfreq-${animalId}-${did}`).value, // ✅ เปลี่ยนเป็น freq
+      days:         parseInt(document.getElementById(`rxdays-${animalId}-${did}`).value) || 5,
+      total_pills:  parseFloat(document.getElementById(`rxtotal-${animalId}-${did}`).value) || 0 
     });
   });
 
