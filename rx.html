@@ -63,6 +63,7 @@ header{
 }
 .rx-header h3 { font-size:16px; color:var(--navy); font-weight:700; }
 .rx-header span { color:var(--text-muted); font-size:14px; font-weight:400; }
+.rx-header-actions { display: flex; gap: 10px; }
 
 /* TABLE INSIDE CARD */
 .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
@@ -100,9 +101,12 @@ tbody tr:last-child{border-bottom:none;}
 .btn-sm{padding:5px 8px; font-size:12px; gap:4px; border-radius:4px; margin-right:2px;}
 
 .btn-dispense {background:var(--success);color:#fff;}
+.btn-print-all {background:var(--navy);color:#fff;}
 .btn-print {background:var(--navy);color:#fff;}
 .btn-edit {background:var(--teal-light);color:#fff;}
 .btn-save {background:var(--success);color:#fff;}
+.btn-delete {background:#e2e8f0;color:var(--danger);}
+.btn-delete:hover {background:var(--danger);color:#fff;}
 
 /* UTILS */
 .text-danger { color:var(--danger); font-weight:700; }
@@ -114,7 +118,7 @@ tbody tr:last-child{border-bottom:none;}
 /* สำหรับการพิมพ์แบบกด Ctrl+P (ถ้าต้องการพิมพ์ทั้งหน้าจอ) */
 @media print {
   body { background: white; padding: 0; }
-  header, .btn-home, .page-header button, .btn-dispense, .btn-sm { display: none !important; }
+  header, .btn-home, .page-header button, .btn-dispense, .btn-print-all, .btn-sm { display: none !important; }
   .container { padding: 0; max-width: 100%; }
   .rx-card { box-shadow: none; border: 1px solid #000; break-inside: avoid; margin-bottom: 20px; }
   .rx-header { background: #f0f0f0 !important; border-bottom: 1px solid #000; }
@@ -140,15 +144,12 @@ tbody tr:last-child{border-bottom:none;}
 </header>
 
 <div class="container">
-
   <div class="page-header">
     <h2>รายการรอจัดยา / จ่ายยา</h2>
-    </div>
-
+  </div>
   <div id="rx-container">
     <div class="empty-state">กำลังโหลดข้อมูล...</div>
   </div>
-
 </div>
 
 <script type="module">
@@ -156,7 +157,6 @@ import { supabase } from "./js/supabase.js";
 
 async function loadPrescriptions() {
   try {
-    // ดึง Event ID ของวันนี้
     const { data: eventId } = await supabase.rpc("get_today_event");
 
     const { data: queueData, error } = await supabase
@@ -164,8 +164,9 @@ async function loadPrescriptions() {
       .select(`
         id, animal_id, status,
         vasd_animal ( 
-          event_id, animal_name, species, 
-          vasd_owner(owner_name),
+          event_id, queue_number, animal_name, species, sex,
+          vasd_owner(owner_name, phone),
+          vasd_service(service_type),
           vasd_prescription ( id, drug_id, dose, freq, days, total_pills )
         )
       `)
@@ -178,7 +179,6 @@ async function loadPrescriptions() {
       return;
     }
 
-    // กรองเฉพาะเคสของวันนี้ และมีรายการสั่งยา
     const animalsWithRx = (queueData || []).filter(q => 
       q.vasd_animal && 
       q.vasd_animal.event_id === eventId && 
@@ -194,16 +194,17 @@ async function loadPrescriptions() {
       return;
     }
 
-    // วนลูปสร้างการ์ดรายการยา
     animalsWithRx.forEach((q, index) => {
       const animal = q.vasd_animal;
       const ownerName = animal.vasd_owner ? animal.vasd_owner.owner_name : 'ไม่ระบุ';
       const species = animal.species === "ส" ? "สุนัข" : (animal.species === "ม" ? "แมว" : animal.species);
       const rxList = animal.vasd_prescription; 
 
-      // สร้างตารางแต่ละแถว พร้อมช่อง Input สำหรับการแก้ไข
+      // เก็บ rx_id ทั้งหมดไว้เพื่อใช้ตอนพิมพ์ทั้งหมด
+      const allRxIds = rxList.map(rx => rx.id).join(",");
+
       let rxRows = rxList.map((rx, idx) => `
-        <tr data-rx-id="${rx.id}">
+        <tr id="rx-row-${rx.id}">
           <td style="width:5%; text-align:center;">${idx + 1}</td>
           <td style="width:25%;">
             <input type="text" class="rx-input rx-drug" value="${rx.drug_id || ''}" readonly placeholder="ชื่อยา">
@@ -224,6 +225,7 @@ async function loadPrescriptions() {
             <button class="btn btn-print btn-sm" onclick="printRx('${rx.id}')" title="พิมพ์ฉลากยา">🖨️</button>
             <button class="btn btn-edit btn-sm btn-action-edit" onclick="editRx(this)" title="แก้ไข">✏️</button>
             <button class="btn btn-save btn-sm btn-action-save" onclick="saveRx(this, '${rx.id}')" style="display:none;" title="บันทึก">💾</button>
+            <button class="btn btn-delete btn-sm" onclick="deleteRx('${rx.id}')" title="ลบรายการ">🗑️</button>
           </td>
         </tr>
       `).join("");
@@ -235,7 +237,10 @@ async function loadPrescriptions() {
       card.innerHTML = `
         <div class="rx-header">
           <h3>🐾 ${animal.animal_name} <span style="font-weight:normal;">(${species})</span> <span>| เจ้าของ: ${ownerName}</span></h3>
-          <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ จัดยาเสร็จสิ้น</button>
+          <div class="rx-header-actions">
+            <button class="btn btn-print-all" onclick="printMultipleRx('${allRxIds}')">🖨️ พิมพ์ทั้งหมด</button>
+            <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ จัดยาเสร็จสิ้น</button>
+          </div>
         </div>
         <div class="table-responsive">
           <table>
@@ -265,7 +270,7 @@ async function loadPrescriptions() {
 }
 
 // ------------------------------------
-// ฟังก์ชัน จ่ายยาเสร็จสิ้น (ยกคิวออก)
+// ฟังก์ชัน จัดยาเสร็จสิ้น (ยกคิวออก)
 // ------------------------------------
 window.markAsDispensed = async function(animalId) {
   if(confirm("ยืนยันว่าทำการจัดยาและจ่ายยานี้เรียบร้อยแล้ว?\n(ระบบจะเปลี่ยนสถานะเป็น 'รับกลับแล้ว')")) {
@@ -284,14 +289,13 @@ window.markAsDispensed = async function(animalId) {
 };
 
 // ------------------------------------
-// ฟังก์ชัน แก้ไข และ บันทึกยาแต่ละตัว
+// ฟังก์ชัน แก้ไข และ บันทึกยา
 // ------------------------------------
 window.editRx = function(btn) {
   const tr = btn.closest("tr");
   const inputs = tr.querySelectorAll(".rx-input");
   inputs.forEach(input => input.removeAttribute("readonly"));
   
-  // สลับปุ่มแก้ไข เป็นปุ่มบันทึก
   tr.querySelector(".btn-action-edit").style.display = "none";
   tr.querySelector(".btn-action-save").style.display = "inline-flex";
 };
@@ -299,14 +303,12 @@ window.editRx = function(btn) {
 window.saveRx = async function(btn, rxId) {
   const tr = btn.closest("tr");
   
-  // ดึงข้อมูลที่พิมพ์แก้ไข
   const drug_id = tr.querySelector(".rx-drug").value;
   const dose = tr.querySelector(".rx-dose").value;
   const freq = tr.querySelector(".rx-freq").value;
   const days = parseInt(tr.querySelector(".rx-days").value) || 0;
   const total_pills = parseFloat(tr.querySelector(".rx-total").value) || 0;
 
-  // บันทึกลงฐานข้อมูล
   const { error } = await supabase
     .from("vasd_prescription")
     .update({ drug_id, dose, freq, days, total_pills })
@@ -317,20 +319,35 @@ window.saveRx = async function(btn, rxId) {
     return;
   }
 
-  // ล็อคช่อง Input กลับคืน
   const inputs = tr.querySelectorAll(".rx-input");
   inputs.forEach(input => input.setAttribute("readonly", true));
 
-  // สลับปุ่มกลับ
   tr.querySelector(".btn-action-save").style.display = "none";
   tr.querySelector(".btn-action-edit").style.display = "inline-flex";
 };
 
 // ------------------------------------
-// ฟังก์ชัน พิมพ์สติ๊กเกอร์ยาแต่ละตัว
+// ฟังก์ชัน ลบรายการยา
 // ------------------------------------
-window.printRx = async function(rxId) {
-  // 1. ดึงข้อมูลยา + สัตว์ + เจ้าของ มาใหม่เพื่อความชัวร์ว่าข้อมูลอัปเดตสุด
+window.deleteRx = async function(rxId) {
+  if(!confirm("คุณต้องการลบรายการยานี้ใช่หรือไม่?")) return;
+
+  const { error } = await supabase
+    .from("vasd_prescription")
+    .delete()
+    .eq("id", rxId);
+
+  if (error) {
+    alert("❌ ลบไม่สำเร็จ: " + error.message);
+  } else {
+    document.getElementById(`rx-row-${rxId}`).remove();
+  }
+};
+
+// ------------------------------------
+// ฟังก์ชัน ดึงและแทนค่า Template ยา
+// ------------------------------------
+async function generateStickerHTML(rxId) {
   const { data: rx, error } = await supabase
     .from("vasd_prescription")
     .select(`
@@ -344,32 +361,22 @@ window.printRx = async function(rxId) {
     .eq("id", rxId)
     .single();
 
-  if (error || !rx) {
-    alert("❌ ไม่พบข้อมูลการสั่งยานี้");
-    return;
-  }
+  if (error || !rx) return null;
 
-  // 2. ดึง Template พิมพ์ (หารูปแบบ 'envelope' ซองยาก่อน ถ้าไม่มีให้ใช้ 'bag' ถุงยา)
   let { data: tmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", "envelope").single();
-  
   if (!tmpl || !tmpl.config) {
     const { data: bagTmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", "bag").single();
     tmpl = bagTmpl;
   }
+  if (!tmpl || !tmpl.config) return null;
 
-  if (!tmpl || !tmpl.config) {
-    alert("⚠️ ยังไม่ได้ตั้งค่า Template 'ซองยา (envelope)' หรือ 'ถุงยา (bag)' กรุณาไปที่เมนูตั้งค่าเครื่องพิมพ์");
-    return;
-  }
-
-  // 3. เตรียมตัวแปร (Variables) สำหรับแทนค่าใน Template
   const a = rx.vasd_animal;
   const spcText = a.species === "ส" ? "สุนัข" : (a.species === "ม" ? "แมว" : a.species);
   const ownerName = a.vasd_owner?.owner_name || "";
   const phone = a.vasd_owner?.phone || "ไม่ระบุ";
   const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
 
-  let printContents = "";
+  let html = `<div class="sticker-page">`;
   tmpl.config.forEach(l => {
     let text = l.text
       .replace("{{queue_number}}", a.queue_number || "")
@@ -385,30 +392,60 @@ window.printRx = async function(rxId) {
       .replace("{{days}}", rx.days ? rx.days + " วัน" : "")
       .replace("{{total_pills}}", rx.total_pills ? rx.total_pills + " เม็ด" : "");
 
-    printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
+    html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
   });
+  html += `</div>`;
+  
+  return html;
+}
 
-  // 4. สั่งปริ้นออกหน้าจอ (Popup หน้าต่างใหม่และสั่ง Print อัตโนมัติ)
+// ------------------------------------
+// ฟังก์ชัน พิมพ์ยา 1 รายการ
+// ------------------------------------
+window.printRx = async function(rxId) {
+  const content = await generateStickerHTML(rxId);
+  if (!content) { alert("⚠️ ไม่พบข้อมูลยา หรือยังไม่ได้ตั้งค่า Template ซองยา/ถุงยา"); return; }
+  openPrintWindow(content);
+};
+
+// ------------------------------------
+// ฟังก์ชัน พิมพ์ยาทั้งหมดของสัตว์ตัวนั้น
+// ------------------------------------
+window.printMultipleRx = async function(rxIdsStr) {
+  const rxIds = rxIdsStr.split(",");
+  let allContents = "";
+
+  for (let id of rxIds) {
+    const content = await generateStickerHTML(id);
+    if (content) allContents += content;
+  }
+
+  if (allContents === "") { alert("⚠️ ไม่พบข้อมูลให้พิมพ์"); return; }
+  openPrintWindow(allContents);
+};
+
+function openPrintWindow(htmlContent) {
   const pw = window.open("","_blank","width=800,height=600");
   pw.document.write(`<html><head><title>Print Rx</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;color:#000!important}@page{size:80mm 50mm;margin:0}</style>
-    </head><body><div class="sticker">${printContents}</div>
-    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},200);});}<\/script></body></html>`);
+    <style>
+      body { margin: 0; }
+      .sticker-page { position: relative; width: 80mm; height: 50mm; background: #fff; overflow: hidden; page-break-after: always; }
+      .line { position: absolute; white-space: pre-wrap; word-break: break-word; padding-right: 5px; box-sizing: border-box; color: #000 !important; }
+      @page { size: 80mm 50mm; margin: 0; }
+    </style>
+    </head><body>${htmlContent}
+    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},300);});}<\/script></body></html>`);
   pw.document.close();
-};
+}
 
 // สั่งทำงานเมื่อเปิดหน้า
 loadPrescriptions();
 
-// เปิด Realtime ดักฟังทั้งสถานะคิว และ การสั่งยา
+// เปิด Realtime
 supabase.channel("vasd-rx-live")
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, () => {
-    loadPrescriptions();
-  })
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_prescription" }, () => {
-    loadPrescriptions();
-  })
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadPrescriptions)
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_prescription" }, loadPrescriptions)
   .subscribe();
 </script>
 </body>
