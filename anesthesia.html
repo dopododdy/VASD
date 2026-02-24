@@ -492,20 +492,15 @@ function renderGrid() {
   }
 }
 
-// ✅ ปรับรูปแบบชื่อยา คำนำหน้า ลบ(mg/tab) และเปลี่ยนเป็น "ครั้งละ xxx เม็ด"
+// ✅ อัปเดตรายการยาให้เหลือเฉพาะ 6 ชนิด และปรับความถี่หลังอาหารตามที่กำหนด
 function rxHTML(w, species, aid) {
   const drugs = [
-    {id:"dox",     cat:"Antibiotic",      name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง", f_num:1, days:14},
-    {id:"amo",     cat:"Antibiotic",      name:"ปฏิชีวนะ Amoxicillin 250 mg",  tabs: round((w*20)/250), freq:"วันละ 2 ครั้ง", f_num:2, days:7},
-    {id:"amoclav", cat:"Antibiotic",      name:"ปฏิชีวนะ Amoxi-Clav 250 mg",   tabs: round((w*15)/250), freq:"วันละ 2 ครั้ง", f_num:2, days:7},
-    {id:"cli",     cat:"Antibiotic",      name:"ปฏิชีวนะ Clindamycin 150 mg",  tabs: round((w*11)/150), freq:"วันละ 2 ครั้ง", f_num:2, days:7},
-    {id:"car",     cat:"NSAID (ห้ามแมว)",   name:"แก้ปวด Carprofen 50 mg",      tabs: round((w*4.4)/50), freq:"วันละ 1 ครั้ง", f_num:1, days:5},
-    {id:"mel",     cat:"NSAID",           name:"แก้ปวด Meloxicam 1 mg",       tabs: round((w*0.1)/1),  freq:"วันละ 1 ครั้ง", f_num:1, days:5},
-    {id:"tolf60",  cat:"NSAID",           name:"แก้ปวด Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง", f_num:1, days:3},
-    {id:"tolf6",   cat:"NSAID",           name:"แก้ปวด Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง", f_num:1, days:3},
-    {id:"gab",     cat:"Pain killer",     name:"แก้ปวด Gabapentin 100 mg",    tabs: round((w*10)/100), freq:"วันละ 2 ครั้ง", f_num:2, days:7},
-    {id:"tra",     cat:"Pain killer",     name:"แก้ปวด Tramadol 50 mg",       tabs: round((w*5)/50),   freq:"วันละ 2 ครั้ง", f_num:2, days:7},
-    {id:"fer",     cat:"Blood support",   name:"บำรุงเลือด Ferric plus-K",      tabs: round((w*1)/10)||0.25, freq:"วันละ 1 ครั้ง", f_num:1, days:14},
+    {id:"dox",    cat:"Antibiotic",    name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง (หลังอาหารเย็น)", f_num:1, days:14},
+    {id:"nor200", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 200 mg",  tabs: round((w*10)/200), freq:"วันละ 2 ครั้ง (เช้า-เย็น หลังอาหาร)", f_num:2, days:7},
+    {id:"nor100", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 100 mg",  tabs: round((w*10)/100), freq:"วันละ 2 ครั้ง (เช้า-เย็น หลังอาหาร)", f_num:2, days:7},
+    {id:"tolf60", cat:"NSAID",         name:"แก้ปวด Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง (หลังอาหารเย็น)", f_num:1, days:3},
+    {id:"tolf6",  cat:"NSAID",         name:"แก้ปวด Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง (หลังอาหารเย็น)", f_num:1, days:3},
+    {id:"fbc",    cat:"Blood support", name:"บำรุงเลือด FBC",              tabs: round((w*1)/10)||0.25, freq:"วันละ 1 ครั้ง (หลังอาหารเช้า)", f_num:1, days:14},
   ];
 
   return drugs.map(d => `
