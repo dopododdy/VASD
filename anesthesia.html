@@ -789,8 +789,8 @@ window.endSurgery = async function(animalId, queueAnimalId) {
       drug_category:chk.dataset.cat,
       dose_detail:  document.getElementById(`rxdose-${animalId}-${did}`).value,
       frequency:    document.getElementById(`rxfreq-${animalId}-${did}`).value,
-      days:         parseInt(document.getElementById(`rxdays-${animalId}-${did}`).value) || 5,
-      total_pills:  parseInt(document.getElementById(`rxtotal-${animalId}-${did}`).value) || 0 // ✅ เพิ่มบรรทัดนี้เพื่อบันทึกจำนวนเม็ดยารวม
+      days:         parseInt(document.getElementById(`rxdays-${animalId}-${did}`).value) || 5, // days ให้เป็นจำนวนเต็ม(parseInt) ถูกแล้ว
+      total_pills:  parseFloat(document.getElementById(`rxtotal-${animalId}-${did}`).value) || 0 // total_pills เปลี่ยนเป็น parseFloat เพื่อรองรับทศนิยม
     });
   });
 
