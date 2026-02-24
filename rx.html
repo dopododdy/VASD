@@ -141,22 +141,93 @@ async function loadPrescriptions() {
   // ดึง Event ID ของวันนี้ เพื่อแสดงเฉพาะเคสของวันนี้
   const { data: eventId } = await supabase.rpc("get_today_event");
 
-  // ดึงคิวที่อยู่ในสถานะพักฟื้น (recovery), รอรับกลับ (ready_to_go_home) หรือสถานะอื่นๆ ที่ยังไม่ได้จ่ายยา
+  // 👇 แก้ไขตรง .select() ย้าย vasd_prescription เข้าไปใน vasd_animal
   const { data: queueData, error } = await supabase
     .from("vasd_queue")
     .select(`
       id, animal_id, status,
-      vasd_animal ( event_id, animal_name, species, vasd_owner(owner_name) ),
-      vasd_prescription ( id, drug_id, dose, freq, days, total_pills )
+      vasd_animal ( 
+        event_id, animal_name, species, 
+        vasd_owner(owner_name),
+        vasd_prescription ( id, drug_id, dose, freq, days, total_pills )
+      )
     `)
     .in("status", ["recovery", "ready_to_go_home"])
     .order("updated_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching Rx:", error);
-    document.getElementById("rx-container").innerHTML = `<div class="empty-state text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+    // เพิ่มการแสดงข้อความ Error เพื่อให้รู้สาเหตุที่แท้จริงบนหน้าจอ
+    document.getElementById("rx-container").innerHTML = `<div class="empty-state text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</div>`;
     return;
   }
+
+  // 👇 แก้ไขการเช็คเงื่อนไข เพราะ prescription ถูกย้ายไปอยู่ใน vasd_animal แล้ว
+  const animalsWithRx = queueData.filter(q => 
+    q.vasd_animal && 
+    q.vasd_animal.event_id === eventId && 
+    q.vasd_animal.vasd_prescription && 
+    q.vasd_animal.vasd_prescription.length > 0
+  );
+
+  const container = document.getElementById("rx-container");
+  container.innerHTML = "";
+
+  if (animalsWithRx.length === 0) {
+    container.innerHTML = `<div class="empty-state">✅ ไม่มีรายการรอจัดยาในขณะนี้</div>`;
+    return;
+  }
+
+  // วนลูปสร้างการ์ดรายการยา
+  animalsWithRx.forEach((q, index) => {
+    const animal = q.vasd_animal;
+    const ownerName = animal.vasd_owner ? animal.vasd_owner.owner_name : 'ไม่ระบุ';
+    const species = animal.species === "ส" ? "สุนัข" : (animal.species === "ม" ? "แมว" : animal.species);
+    
+    // 👇 แก้ไขการดึงข้อมูลยาให้ดึงผ่าน animal
+    const rxList = animal.vasd_prescription; 
+
+    let rxRows = rxList.map((rx, idx) => `
+      <tr>
+        <td style="width:5%;">${idx + 1}</td>
+        <td style="width:35%;"><strong>รหัสยา: ${rx.drug_id}</strong> <br><span class="text-muted">ดึงชื่อยาจาก Catalog ภายหลัง</span></td>
+        <td style="width:20%;">${rx.dose || '-'}</td>
+        <td style="width:20%;">${rx.freq || '-'}</td>
+        <td style="width:10%;">${rx.days ? rx.days + ' วัน' : '-'}</td>
+        <td style="width:10%;" class="text-danger">${rx.total_pills || 0} เม็ด</td>
+      </tr>
+    `).join("");
+
+    const card = document.createElement("div");
+    card.className = "rx-card";
+    card.style.animationDelay = `${(index * 0.1) + 0.1}s`; 
+    
+    card.innerHTML = `
+      <div class="rx-header">
+        <h3>🐾 ${animal.animal_name} <span style="font-weight:normal;">(${species})</span> <span>| เจ้าของ: ${ownerName}</span></h3>
+        <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ จัดยาเสร็จสิ้น</button>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>รายการยา (Drug ID)</th>
+              <th>ปริมาณ/ครั้ง</th>
+              <th>ความถี่</th>
+              <th>จำนวนวัน</th>
+              <th>รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rxRows}
+          </tbody>
+        </table>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
 
   // กรองเฉพาะเคสของวันนี้ และมีรายการสั่งยา (vasd_prescription มีข้อมูล)
   const animalsWithRx = queueData.filter(q => 
