@@ -238,7 +238,7 @@ header{
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ── REFERENCE RANGES สำหรับ VITALS (สามารถแก้ไขค่าเริ่มต้นที่นี่) ── */
+/* ── REFERENCE RANGES สำหรับ VITALS ── */
 const VITAL_REFS = {
   hr:   { min: 70, max: 160 },   // Heart Rate (bpm)
   rr:   { min: 10, max: 40 },    // Respiratory Rate (bpm)
@@ -317,6 +317,7 @@ async function loadCentral() {
     .from("vasd_queue")
     .select(`animal_id, status,
              vasd_animal(id, event_id, queue_number, animal_name, species, sex, est_weight, actual_weight)`)
+    // ✅ เพิ่มเงื่อนไขให้ดึงทั้งสถานะ waiting (รอผ่าตัด) และ anesthesia (กำลังวางยาสลบ)
     .in("status", ["waiting", "anesthesia"]);
 
   centralData = (data||[]).filter(r => r.vasd_animal && r.vasd_animal.event_id === eventId);
