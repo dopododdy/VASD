@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>RMUTTO - VASD | ห้องจ่ายยา (Rx)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy:#0d1b2a; --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --border:#e2e8f0; --accent:#00d4aa; }
+  body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .rx-card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+  .rx-card h3 { margin-top: 0; color: var(--navy); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #f8fafc; }
+  .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: bold; }
+  .btn-print { background: var(--navy); color: white; }
+  
+  /* สำหรับตอนพิมพ์หน้าจอ */
+  @media print {
+    body { background: white; padding: 0; }
+    .no-print { display: none !important; }
+    .rx-card { box-shadow: none; border: 1px solid #000; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h2>💊 รายการรอจ่ายยา (Rx)</h2>
+  <button class="btn btn-print no-print" onclick="window.print()">🖨️ พิมพ์รายการทั้งหมด</button>
+</div>
+
+<div id="rx-container">
+  <p>กำลังโหลดข้อมูล...</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+  // 🔴 อย่าลืมเปลี่ยนเป็น URL และ Key ของคุณ
+  const SUPABASE_URL = "YOUR_SUPABASE_URL"; 
+  const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function loadPrescriptions() {
+    // ดึงคิวที่อยู่ในสถานะพักฟื้น (recovery) หรือสถานะอื่นๆ ที่รอรับยา
+    const { data: queueData, error } = await supabase
+      .from("vasd_queue")
+      .select(`
+        id, animal_id, status,
+        vasd_animal ( animal_name, species, owner_name ),
+        vasd_prescription ( id, drug_id, dose, freq, days, total_pills )
+      `)
+      .in("status", ["recovery", "discharged"]) // ดึงเฉพาะคิวที่ผ่าตัดเสร็จแล้ว
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching Rx:", error);
+      document.getElementById("rx-container").innerHTML = `<p style="color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>`;
+      return;
+    }
+
+    // กรองเฉพาะเคสที่มีการสั่งยา (มีข้อมูลใน vasd_prescription)
+    const animalsWithRx = queueData.filter(q => q.vasd_prescription && q.vasd_prescription.length > 0);
+
+    const container = document.getElementById("rx-container");
+    container.innerHTML = "";
+
+    if (animalsWithRx.length === 0) {
+      container.innerHTML = `<p>✅ ไม่มีรายการรอจ่ายยาในขณะนี้</p>`;
+      return;
+    }
+
+    // สร้างการ์ดแสดงรายการยาของสัตว์แต่ละตัว
+    animalsWithRx.forEach(q => {
+      const animal = q.vasd_animal;
+      const rxList = q.vasd_prescription;
+
+      let rxRows = rxList.map((rx, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td><strong>ยา ID: ${rx.drug_id}</strong> <br><small class="text-muted">ดึงชื่อยาจากตาราง drug catalog ทีหลังได้</small></td>
+          <td>${rx.dose}</td>
+          <td>${rx.freq}</td>
+          <td>${rx.days} วัน</td>
+          <td style="font-weight:bold; color:#e53e3e;">${rx.total_pills} เม็ด/ขวด</td>
+        </tr>
+      `).join("");
+
+      const card = document.createElement("div");
+      card.className = "rx-card";
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>🐾 ชื่อสัตว์: ${animal.animal_name} (${animal.species}) | เจ้าของ: ${animal.owner_name || 'ไม่ระบุ'}</h3>
+          <button class="btn no-print" style="background:#00d4aa; color:#fff;" onclick="markAsDispensed('${q.animal_id}')">✔️ จ่ายยาแล้ว</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th width="5%">#</th>
+              <th width="30%">ชื่อยา (Drug ID)</th>
+              <th width="20%">ปริมาณ/ครั้ง</th>
+              <th width="20%">ความถี่</th>
+              <th width="10%">จำนวนวัน</th>
+              <th width="15%">รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rxRows}
+          </tbody>
+        </table>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // ฟังก์ชันจำลองเมื่อกด "จ่ายยาแล้ว" (อาจจะอัปเดตสถานะคิวเป็น done หรือลบออกจากรายการรอ)
+  window.markAsDispensed = async function(animalId) {
+    if(confirm("ยืนยันว่าทำการจ่ายยานี้เรียบร้อยแล้ว?")) {
+      // โค้ดอัปเดตสถานะ เช่น ให้คิวเป็น "done" หรือทำเครื่องหมายในตาราง rx
+      alert("บันทึกการจ่ายยาสำเร็จ! (ต้องเขียนโค้ดอัปเดต DB เพิ่ม)");
+      loadPrescriptions(); // รีโหลดข้อมูลใหม่
+    }
+  };
+
+  // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+  loadPrescriptions();
+</script>
+</body>
+</html>
