@@ -85,9 +85,10 @@ input:last-child,select:last-child{margin-bottom:0;}
   background:#f0fdf9;border:1px solid #a7f3d0;border-radius:var(--radius-sm);
   padding:12px;font-size:12px;line-height:1.8;color:#065f46;
 }
-.vars-hint strong{color:var(--navy);display:block;margin-bottom:4px;}
+.vars-hint strong{color:var(--navy);display:block;margin-bottom:4px;margin-top:8px;}
+.vars-hint strong:first-child{margin-top:0;}
 .vars-hint code{
-  background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-size:11px;
+  background:rgba(0,0,0,0.06);padding:2px 5px;border-radius:4px;font-size:11px;display:inline-block;margin-bottom:4px;
 }
 
 /* BUTTONS */
@@ -154,7 +155,6 @@ input:last-child,select:last-child{margin-bottom:0;}
 
 <div class="layout">
 
-  <!-- SIDEBAR -->
   <div class="sidebar">
 
     <div class="sidebar-top">
@@ -178,9 +178,13 @@ input:last-child,select:last-child{margin-bottom:0;}
 
     <div class="sidebar-section">
       <div class="vars-hint">
-        <strong>ตัวแปรที่ใช้ได้</strong>
+        <strong>ข้อมูลสัตว์ / คิว</strong>
         <code>{{queue_number}}</code> <code>{{animal_name}}</code> <code>{{species}}</code>
         <code>{{sex}}</code> <code>{{owner_name}}</code> <code>{{phone}}</code> <code>{{services}}</code>
+        
+        <strong>ข้อมูลยา (ฉลากยา)</strong>
+        <code>{{drug_id}}</code> <code>{{dose}}</code> <code>{{freq}}</code> 
+        <code>{{days}}</code> <code>{{total_pills}}</code>
       </div>
     </div>
 
@@ -190,7 +194,6 @@ input:last-child,select:last-child{margin-bottom:0;}
 
   </div>
 
-  <!-- PREVIEW -->
   <div class="preview-pane">
     <span class="preview-label">ตัวอย่างสติ๊กเกอร์ (ขนาดจริง 80×50 mm)</span>
     <div class="sticker" id="sticker"></div>
@@ -216,6 +219,8 @@ function renderPreview() {
     div.style.fontFamily = l.font;
     div.style.textAlign  = l.align || "left";
     div.style.width      = `calc(100% - ${l.x}px)`;
+    
+    // เปลี่ยนตัวแปรให้เป็นข้อความจำลอง
     div.innerText = l.text
       .replace("{{queue_number}}","1")
       .replace("{{animal_name}}","น้องถุงทอง")
@@ -223,7 +228,14 @@ function renderPreview() {
       .replace("{{sex}}","ผู้")
       .replace("{{owner_name}}","สมชาย ใจดี")
       .replace("{{phone}}","081-234-5678")
-      .replace("{{services}}","ทำหมัน, วัคซีน");
+      .replace("{{services}}","ทำหมัน, วัคซีน")
+      // จำลองตัวแปรยา
+      .replace("{{drug_id}}","Amoxicillin 250mg")
+      .replace("{{dose}}","กินครั้งละ 1 เม็ด")
+      .replace("{{freq}}","วันละ 2 ครั้ง (เช้า-เย็น) หลังอาหาร")
+      .replace("{{days}}","5 วัน")
+      .replace("{{total_pills}}","10");
+      
     box.appendChild(div);
   });
 }
