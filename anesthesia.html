@@ -701,20 +701,20 @@ function rxHTML(aid, rx) {
       <div class="rx-custom-inputs" id="rxcustom-${aid}-${d.id}">
         <div class="rx-input-group">
           <label>ปริมาณ</label>
-          <input type="text" id="rxdose-${aid}-${d.id}" value="${d.dose}" placeholder="จำนวนยา">
+          <input type="text" id="rxdose-${aid}-${d.id}" value="${d.dose}" placeholder="จำนวนยา" oninput="recalcTotalRx('${aid}', '${d.id}')">
         </div>
         <div class="rx-input-group">
           <label>ความถี่</label>
-          <input type="text" id="rxfreq-${aid}-${d.id}" value="${d.freq}" placeholder="ความถี่">
+          <input type="text" id="rxfreq-${aid}-${d.id}" value="${d.freq}" placeholder="ความถี่" oninput="recalcTotalRx('${aid}', '${d.id}')">
         </div>
         <div class="rx-input-group" style="display:flex; gap:10px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <label>จน.วัน</label>
-            <input type="number" id="rxdays-${aid}-${d.id}" value="${d.days}" placeholder="วัน" style="width:60px;">
+            <input type="number" id="rxdays-${aid}-${d.id}" value="${d.days}" placeholder="วัน" style="width:60px;" oninput="recalcTotalRx('${aid}', '${d.id}')">
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             <label style="color:var(--danger);">รวม(เม็ด)</label>
-            <input type="number" id="rxtotal-${aid}-${d.id}" value="${d.total}" placeholder="เม็ด" style="width:60px; font-weight:bold; color:var(--danger);">
+            <input type="number" step="0.25" id="rxtotal-${aid}-${d.id}" value="${d.total}" placeholder="เม็ด" style="width:60px; font-weight:bold; color:var(--danger);">
           </div>
         </div>
       </div>
@@ -726,6 +726,23 @@ window.toggleRx = function(chk, aid, did) {
   card.classList.toggle("selected", chk.checked);
 };
 
+window.recalcTotalRx = function(aid, did) {
+  const doseStr = document.getElementById(`rxdose-${aid}-${did}`).value;
+  const freqStr = document.getElementById(`rxfreq-${aid}-${did}`).value;
+  const daysStr = document.getElementById(`rxdays-${aid}-${did}`).value;
+
+  // ใช้ Regex ดึงเฉพาะตัวเลขออกมาจากข้อความ (เช่น ดึง "0.5" จาก "0.5 เม็ด / ครั้ง")
+  const dose = doseStr.match(/[\d.]+/) ? parseFloat(doseStr.match(/[\d.]+/)[0]) : 0;
+  const freq = freqStr.match(/[\d.]+/) ? parseFloat(freqStr.match(/[\d.]+/)[0]) : 0;
+  const days = parseFloat(daysStr) || 0;
+
+  // คำนวณยอดรวม: ปริมาณต่อครั้ง x จำนวนครั้งต่อวัน x จำนวนวัน
+  const total = dose * freq * days;
+  
+  // อัปเดตค่าลงช่องรวม (เม็ด)
+  document.getElementById(`rxtotal-${aid}-${did}`).value = total;
+};
+  
 /* ─── END SURGERY ─── */
 window.endSurgery = async function(animalId, queueAnimalId) {
   const chks=document.querySelectorAll(`[id^="rxchk-${animalId}-"]:checked`);
