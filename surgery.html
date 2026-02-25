@@ -126,7 +126,7 @@ async function init() {
 // โหลดเคสทั้งหมด (มาจากห้องดมยา หรือ กำลังผ่าตัดอยู่)
 // ==========================================
 async function loadSurgeryCases() {
-  // ดึงข้อมูลทั้งหมดของ Event วันนี้มาก่อน เพื่อป้องกัน Error จาก .in() ใน PostgREST บางเวอร์ชัน
+  // แก้ไข: ดึงข้อมูลทั้งหมดของ Event วันนี้มาก่อน (เอา .in ออก) เพื่อป้องกัน Error ในการ query
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`
@@ -147,7 +147,7 @@ async function loadSurgeryCases() {
     return;
   }
 
-  // กรองด้วย JavaScript เพื่อเอาเฉพาะคนที่สถานะ 'anesthesia' (วางยา) และ 'surgery' (ผ่าตัด)
+  // ใช้ JavaScript กรองเฉพาะคนที่สถานะ 'anesthesia' (วางยา) และ 'surgery' (ผ่าตัด)
   const activeCases = data.filter(a => {
     const status = a.vasd_queue[0]?.status;
     return status === 'anesthesia' || status === 'surgery';
@@ -157,6 +157,9 @@ async function loadSurgeryCases() {
     grid.innerHTML = `<div style="text-align:center; padding:40px; background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-muted);">ไม่มีเคสรอผ่าตัดหรือกำลังผ่าตัดในขณะนี้</div>`;
     return;
   }
+
+  // เรียงลำดับตามคิว
+  activeCases.sort((a, b) => a.queue_number - b.queue_number);
 
   grid.innerHTML = activeCases.map(a => {
     const q = a.vasd_queue[0];
@@ -171,7 +174,7 @@ async function loadSurgeryCases() {
     let extraNotes = { assistant: '', nurse: '' };
     try { if(q.notes) extraNotes = JSON.parse(q.notes); } catch(e){}
 
-    // สร้าง Option โต๊ะผ่าตัด และเลือกค่าเดิมถ้ามี
+    // สร้าง Option โต๊ะผ่าตัด
     let tableOptions = '<option value="">-- เลือกโต๊ะผ่าตัด --</option>';
     for(let i=1; i<=20; i++) {
       let selected = (q.table_number === i) ? 'selected' : '';
@@ -194,10 +197,9 @@ async function loadSurgeryCases() {
     }).join("");
     if(vitals.length === 0) vitalRows = `<tr><td colspan="7" style="text-align:center; color:#aaa; padding: 20px;">ยังไม่มีข้อมูลบันทึกสัญญาณชีพ</td></tr>`;
 
-    // อัปเดตเวลาปัจจุบันในช่องเวลาเสมอ
     const currentTime = new Date().toTimeString().substring(0,5);
 
-    // กำหนดสีของ Card และหัวข้อ เพื่อแยกแยะว่า กำลังวางยาสลบ หรือ ขึ้นโต๊ะแล้ว
+    // ตรวจสอบสถานะเพื่อเปลี่ยนสี
     const isAnesthesia = (q.status === 'anesthesia');
     const cardBorderColor = isAnesthesia ? 'var(--warning)' : 'var(--teal)';
     const headerTitle = isAnesthesia ? '💉 กำลังวางยาสลบ (รอเลือกโต๊ะ)' : `🔬 โต๊ะผ่าตัดที่ ${q.table_number}`;
