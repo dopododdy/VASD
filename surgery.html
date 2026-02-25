@@ -12,6 +12,7 @@
   --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
   --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
+  --shadow-lg:0 12px 40px rgba(13,27,42,0.12);
   --radius:10px; --radius-sm:6px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -68,21 +69,53 @@ header{
 .btn-success:hover { background:#2f855a; }
 .btn-warning { background:var(--warning); color:#fff; }
 .btn-warning:hover { background:#b7791f; }
+.btn-danger { background:#fee2e2; color:var(--danger); }
+.btn-danger:hover { background:var(--danger); color:#fff; }
 .action-bar { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
 
-/* MODAL */
-.modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center; }
-.modal { background:#fff; width:95%; max-width:850px; border-radius:var(--radius); padding:24px; box-shadow:var(--shadow-md); max-height: 90vh; overflow-y: auto;}
-.modal-header { font-size:18px; font-weight:700; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px; display: flex; justify-content: space-between; align-items: center; }
+/* ─── MODAL ADD RX (รูปแบบเดียวกับ Anesthesia) ─── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(13, 27, 42, 0.7); z-index: 1000;
+  display: none; justify-content: center; align-items: center;
+  padding: 20px; backdrop-filter: blur(2px);
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: var(--surface); width: 100%; max-width: 700px;
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  animation: fadeUp 0.3s ease both; max-height: 90vh; display: flex; flex-direction: column;
+}
+.modal-header {
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; background: #fafbfc; border-radius: var(--radius) var(--radius) 0 0;
+}
+.modal-header h3 { font-size: 18px; color: var(--navy); margin: 0; display:flex; align-items:center; gap:8px;}
+.btn-close-modal { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding:4px;}
+.btn-close-modal:hover { color: var(--danger); }
+.modal-body { padding: 24px; overflow-y: auto; background:#f8fafc; }
+.modal-footer {
+  padding: 16px 24px; border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px; background: #fff; border-radius: 0 0 var(--radius) var(--radius);
+}
 
-/* RX LIST STYLES */
-.rx-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-.rx-item { display: grid; grid-template-columns: 30px 2fr 2fr 0.8fr 0.8fr 1fr; gap: 10px; align-items: center; background: #f8fafc; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
-.rx-item.header { background: var(--navy); color: #fff; font-weight: bold; border: none; }
-.rx-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.rx-input { padding: 6px; border: 1px solid var(--border); border-radius: 4px; text-align: center; width: 100%; }
+/* ─── RX GRID ─── */
+.rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:560px){.rx-grid{grid-template-columns:1fr;}}
+.rx-card-item{background:#fff; border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;
+  cursor:pointer;transition:all 0.2s;}
+.rx-card-item.selected{border-color:var(--teal-light);background:#e6f6f4;box-shadow:0 2px 8px rgba(34,145,154,0.15);}
+.rx-card-item label{display:flex;align-items:flex-start;gap:10px;cursor:pointer; margin:0;}
+.rx-card-item input[type="checkbox"]{width:18px;height:18px;accent-color:var(--teal-light);flex-shrink:0;margin-top:2px;}
+.rx-cat{font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;}
+.rx-name{font-size:14px;font-weight:700;color:var(--navy);}
+.rx-custom-inputs { display: none; flex-direction: column; gap: 8px; margin-top: 12px; padding-top:12px; border-top:1px dashed #cbd5e0;}
+.rx-input-group { display: flex; align-items: center; gap: 8px; }
+.rx-input-group label { font-size: 12px; color: var(--teal); font-weight:600; width: 50px; flex-shrink: 0; }
+.rx-input-group input { flex: 1; padding: 6px 10px; font-size: 13px; font-family:"Sarabun",sans-serif; border: 1px solid var(--border); border-radius: 4px; outline:none; }
+.rx-input-group input:focus{border-color:var(--teal-light);}
 
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
@@ -106,33 +139,19 @@ header{
 </div>
 
 <div class="modal-overlay" id="rxModal">
-  <div class="modal">
+  <div class="modal-content">
     <div class="modal-header">
-      <div>💊 สั่งจ่ายยา (Prescription) <span id="rxAnimalName" style="color:var(--teal);"></span></div>
-      <div style="font-size:14px; font-weight:normal; color:var(--text-muted);">น้ำหนัก: <strong id="rxWeight" style="color:var(--navy);"></strong> kg</div>
+      <h3>💊 สั่งจ่ายยา (Prescription)</h3>
+      <button class="btn-close-modal" onclick="closeRxModal()">✖</button>
     </div>
-    
-    <div class="rx-list" id="rxListContainer">
-      <div class="rx-item header">
-        <div>✓</div>
-        <div>รายการยา (Drug Name)</div>
-        <div>วิธีใช้ (Instructions)</div>
-        <div>ต่อครั้ง</div>
-        <div>วัน</div>
-        <div>รวม (เม็ด)</div>
-      </div>
-      </div>
-
-    <div style="border-top: 1px solid var(--border); padding-top: 15px; margin-top: 10px;">
-      <h4 style="font-size:14px; margin-bottom:10px;">ยาเพิ่มเติม (Other)</h4>
-      <div id="rxOtherContainer" style="display:flex; flex-direction:column; gap:8px;">
+    <div class="modal-body">
+      <div style="margin-bottom: 14px; font-size:13px; color:var(--text-muted);" id="rxModalAnimalName"></div>
+      <div class="rx-grid" id="rxModalGrid">
         </div>
-      <button class="btn" style="margin-top:10px; font-size:12px; padding:6px 12px; background:#edf2f7;" onclick="addOtherRow()">+ เพิ่มยาอื่นๆ</button>
     </div>
-
-    <div class="action-bar">
-      <button class="btn" onclick="closeRxModal()" style="background:#e2e8f0; color:var(--text);">ยกเลิก</button>
-      <button class="btn btn-success" onclick="saveRx()">บันทึกการจ่ายยา</button>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeRxModal()" style="background:#e2e8f0; color:var(--text);">ยกเลิก</button>
+      <button class="btn btn-success" onclick="saveNewRx()">💾 บันทึกการสั่งยา</button>
     </div>
   </div>
 </div>
@@ -141,18 +160,6 @@ header{
 import { supabase } from "./js/supabase.js";
 
 let currentEventId = null;
-let currentRxAnimalId = null;
-let currentAnimalWeight = 0;
-
-// รายการยามาตรฐาน
-const PREDEFINED_RX = [
-  { id: 'doxy100', name: 'Doxycycline 100 mg', type: 'antibiotic', dose_mg_kg: 10, unit_mg: 100, freq_str: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', freq_n: 1, days: 7 },
-  { id: 'norflox200', name: 'Norfloxacin 200 mg', type: 'antibiotic', dose_mg_kg: 20, unit_mg: 200, freq_str: 'วันละ 2 ครั้ง หลังอาหาร เช้า - เย็น', freq_n: 2, days: 7 },
-  { id: 'norflox100', name: 'Norfloxacin 100 mg', type: 'antibiotic', dose_mg_kg: 20, unit_mg: 100, freq_str: 'วันละ 2 ครั้ง หลังอาหาร เช้า - เย็น', freq_n: 2, days: 7 },
-  { id: 'tol60', name: 'Tolfedine 60 mg', type: 'nsaid', dose_mg_kg: 4, unit_mg: 60, freq_str: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', freq_n: 1, days: 3 },
-  { id: 'tol6', name: 'Tolfedine 6 mg', type: 'nsaid', dose_mg_kg: 4, unit_mg: 6, freq_str: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', freq_n: 1, days: 3 },
-  { id: 'fbc', name: 'บำรุงเลือด FBC', type: 'tonic', dose_mg_kg: null, unit_mg: null, freq_str: 'วันละ 1 ครั้ง หลังอาหารเช้า', freq_n: 1, days: 7 }
-];
 
 async function init() {
   const { data: eventId } = await supabase.rpc("get_today_event");
@@ -160,11 +167,7 @@ async function init() {
   loadSurgeryCases();
 }
 
-// ... (functions loadSurgeryCases, saveSurgeryInfo, addVital, finishSurgery are same as before) ...
-// เพื่อประหยัดพื้นที่ ผมขออนุญาตใช้ฟังก์ชันเดิมในส่วนของการโหลดข้อมูลนะครับ 
-// (ถ้าต้องการ Full Code ทั้งหมดจริงๆ แจ้งได้ครับ แต่ส่วนนี้เหมือนเดิม 100%)
-// [ส่วนนี้คือโค้ดเดิมด้านบนที่ผมเขียนให้ก่อนหน้านี้ ใช้ได้เลยครับ]
-
+// โหลดข้อมูลเคสผ่าตัด (โค้ดเดิม)
 async function loadSurgeryCases() {
   const grid = document.getElementById("surgeryGrid");
   try {
@@ -278,7 +281,7 @@ async function loadSurgeryCases() {
           </div>
 
           <div class="action-bar" style="background:#f0f4f8; margin:-20px -20px; padding:16px 20px; margin-top:20px; border-radius:0 0 10px 10px;">
-            <button class="btn btn-warning" onclick="openRxModal('${a.id}', '${a.animal_name}', ${a.actual_weight})">💊 จ่ายยา</button>
+            <button class="btn btn-warning" onclick="openRxModal('${a.id}', '${a.animal_name}', ${a.actual_weight}, '${a.species}')">💊 จ่ายยา</button>
             <button class="btn btn-success" onclick="finishSurgery('${a.id}')">✅ เสร็จสิ้นการผ่าตัด</button>
           </div>
         </div>
@@ -287,7 +290,6 @@ async function loadSurgeryCases() {
   } catch (err) { console.error(err); grid.innerHTML = `<div style="text-align:center; color:red;">Error: ${err.message}</div>`; }
 }
 
-// (saveSurgeryInfo, addVital, finishSurgery are same - omitted for brevity but include in final file)
 window.saveSurgeryInfo = async function(animalId) {
   const tableNum = document.getElementById(`table-sel-${animalId}`).value;
   const surg = document.getElementById(`surg-${animalId}`).value;
@@ -329,148 +331,144 @@ window.finishSurgery = async function(animalId) {
 };
 
 
-// ==========================================
-// MODAL: จ่ายยา (Updated Logic)
-// ==========================================
-window.openRxModal = function(animalId, animalName, weight) {
+/* ── ฟังก์ชันช่วยคำนวณและสร้างฟอร์มยา สำหรับ Modal Rx (รูปแบบเดียวกับหน้า Anesthesia) ── */
+function round(val) { 
+  let num = Math.ceil(val * 4) / 4; 
+  return num < 0.25 ? 0.25 : num;
+}
+
+window.recalcTotalRxNew = function(did) {
+  const doseStr = document.getElementById(`newrxdose-${did}`).value;
+  const freqStr = document.getElementById(`newrxfreq-${did}`).value;
+  const daysStr = document.getElementById(`newrxdays-${did}`).value;
+
+  const doseMatch = doseStr.match(/[\d.]+/);
+  const dose = doseMatch ? parseFloat(doseMatch[0]) : 0;
+  
+  const freqMatch = freqStr.match(/[\d.]+/);
+  const freq = freqMatch ? parseFloat(freqMatch[0]) : 0;
+  
+  const days = parseFloat(daysStr) || 0;
+
+  const total = Math.ceil(dose * freq * days);
+  document.getElementById(`newrxtotal-${did}`).value = total;
+};
+
+window.toggleNewRx = function(chk, did) {
+  const card = document.getElementById(`newrxcard-${did}`);
+  const inputs = document.getElementById(`newrxcustom-${did}`);
+  if(chk.checked) {
+    card.classList.add("selected");
+    inputs.style.display = "flex";
+  } else {
+    card.classList.remove("selected");
+    inputs.style.display = "none";
+  }
+};
+
+let currentRxAnimalId = null;
+
+// เปิด Modal สั่งยา
+window.openRxModal = function(animalId, animalName, w, species) {
   currentRxAnimalId = animalId;
-  currentAnimalWeight = parseFloat(weight) || 0;
+  w = parseFloat(w) || 0;
   
-  document.getElementById("rxAnimalName").innerText = `- ${animalName}`;
-  document.getElementById("rxWeight").innerText = currentAnimalWeight;
+  document.getElementById("rxModalAnimalName").innerHTML = `สั่งยาให้: <strong>${animalName}</strong> (น้ำหนัก: ${w} กก.)`;
+  const grid = document.getElementById("rxModalGrid");
   
-  // สร้างรายการยาถาวร
-  const container = document.getElementById("rxListContainer");
-  // เก็บ Header ไว้
-  container.innerHTML = `
-      <div class="rx-item header">
-        <div>✓</div>
-        <div>รายการยา (Drug Name)</div>
-        <div>วิธีใช้ (Instructions)</div>
-        <div>ต่อครั้ง</div>
-        <div>วัน</div>
-        <div>รวม (เม็ด)</div>
+  // ลิสต์ยาเหมือนหน้า Anesthesia
+  const drugs = [
+    {id:"dox",    cat:"Antibiotic",    name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:14},
+    {id:"nor200", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 200 mg",  tabs: round((w*20)/200), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
+    {id:"nor100", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 100 mg",  tabs: round((w*20)/100), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
+    {id:"tolf60", cat:"NSAID",         name:"แก้ปวด Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
+    {id:"tolf6",  cat:"NSAID",         name:"แก้ปวด Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
+    {id:"fbc",    cat:"Blood support", name:"บำรุงเลือด FBC",              tabs: (w>=10?1:0.5),     freq:"วันละ 1 ครั้ง หลังอาหารเช้า", f_num:1, days:14},
+    {id:"custom1",cat:"อื่นๆ",         name:"ระบุยาเอง...",                tabs: 1, freq:"วันละ 1 ครั้ง", f_num:1, days:5, isCustom:true}
+  ];
+
+  grid.innerHTML = drugs.map(d => `
+    <div class="rx-card-item" id="newrxcard-${d.id}">
+      <label>
+        <input type="checkbox" id="newrxchk-${d.id}" data-name="${d.name}" onchange="toggleNewRx(this, '${d.id}')">
+        <div style="width:100%;">
+          <div class="rx-cat">${d.cat}</div>
+          ${d.isCustom ? 
+            `<input type="text" id="custom-name-${d.id}" placeholder="พิมพ์ชื่อยา..." class="rx-input" style="border:1px solid #cbd5e0; background:#fff; margin-top:4px;" onclick="event.preventDefault();">` : 
+            `<div class="rx-name">${d.name}</div>`
+          }
+        </div>
+      </label>
+      <div class="rx-custom-inputs" id="newrxcustom-${d.id}">
+        <div class="rx-input-group">
+          <label>ปริมาณ</label>
+          <input type="text" id="newrxdose-${d.id}" value="ป้อนครั้งละ ${d.tabs} เม็ด" oninput="recalcTotalRxNew('${d.id}')">
+        </div>
+        <div class="rx-input-group">
+          <label>ความถี่</label>
+          <input type="text" id="newrxfreq-${d.id}" value="${d.freq}" oninput="recalcTotalRxNew('${d.id}')">
+        </div>
+        <div class="rx-input-group" style="display:flex; gap:10px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label>จน.วัน</label>
+            <input type="number" id="newrxdays-${d.id}" value="${d.days}" style="width:60px;" oninput="recalcTotalRxNew('${d.id}')">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="color:var(--danger);">รวม</label>
+            <input type="number" step="1" id="newrxtotal-${d.id}" value="${Math.ceil(d.tabs * d.f_num * d.days)}" style="width:60px; font-weight:bold; color:var(--danger);">
+          </div>
+        </div>
       </div>
-  `;
+    </div>`).join("");
 
-  PREDEFINED_RX.forEach(drug => {
-    // คำนวณโดส
-    let dosePerTime = 0;
-    if (drug.id === 'fbc') {
-      // FBC คิดง่ายๆ 1 เม็ดต่อ 10 กก. (ปรับตามความเหมาะสมได้)
-      dosePerTime = currentAnimalWeight >= 10 ? 1 : 0.5;
-    } else {
-      // สูตร: (น้ำหนัก * dose_mg_kg) / unit_mg
-      // ปัดเศษให้เป็น 0.25, 0.5, 0.75, 1 เพื่อให้แบ่งเม็ดยาได้
-      let rawDose = (currentAnimalWeight * drug.dose_mg_kg) / drug.unit_mg;
-      dosePerTime = Math.ceil(rawDose * 4) / 4; // ปัดขึ้นทีละ 0.25
-      if(dosePerTime < 0.25) dosePerTime = 0.25; // ขั้นต่ำ
-    }
-
-    const totalPills = Math.ceil(dosePerTime * drug.freq_n * drug.days);
-
-    const div = document.createElement("div");
-    div.className = "rx-item";
-    div.innerHTML = `
-      <input type="checkbox" id="chk-${drug.id}" onchange="toggleRx('${drug.id}')">
-      <div>
-        <strong>${drug.name}</strong>
-        <input type="hidden" id="name-${drug.id}" value="${drug.name}">
-      </div>
-      <div class="rx-detail">
-        <input type="text" id="freq-${drug.id}" value="${drug.freq_str}" class="rx-input" style="text-align:left;">
-      </div>
-      <div><input type="number" id="dose-${drug.id}" value="${dosePerTime}" class="rx-input" step="0.25" onchange="recalcTotal('${drug.id}', ${drug.freq_n})"></div>
-      <div><input type="number" id="days-${drug.id}" value="${drug.days}" class="rx-input" onchange="recalcTotal('${drug.id}', ${drug.freq_n})"></div>
-      <div><input type="number" id="total-${drug.id}" value="${totalPills}" class="rx-input"></div>
-    `;
-    container.appendChild(div);
-  });
-
-  // Reset Other list
-  document.getElementById("rxOtherContainer").innerHTML = '';
-  addOtherRow(); // Add 1 empty row
-
-  document.getElementById("rxModal").style.display = "flex";
-};
-
-window.toggleRx = function(id) {
-  // Optional: Add visual highlight or enable/disable inputs
-};
-
-window.recalcTotal = function(id, freqN) {
-  const dose = parseFloat(document.getElementById(`dose-${id}`).value) || 0;
-  const days = parseFloat(document.getElementById(`days-${id}`).value) || 0;
-  const total = Math.ceil(dose * freqN * days);
-  document.getElementById(`total-${id}`).value = total;
-};
-
-window.addOtherRow = function() {
-  const container = document.getElementById("rxOtherContainer");
-  const idx = container.children.length + 1;
-  const div = document.createElement("div");
-  div.style.display = "flex";
-  div.style.gap = "8px";
-  div.innerHTML = `
-    <input type="checkbox" class="chk-other" checked>
-    <input type="text" class="rx-input name-other" placeholder="ชื่อยาอื่นๆ" style="flex:2;">
-    <input type="text" class="rx-input freq-other" placeholder="วิธีใช้" style="flex:2;">
-    <input type="number" class="rx-input dose-other" placeholder="Dose" style="width:60px;">
-    <input type="number" class="rx-input days-other" placeholder="วัน" style="width:50px;">
-    <input type="number" class="rx-input total-other" placeholder="รวม" style="width:60px;">
-  `;
-  container.appendChild(div);
+  document.getElementById("rxModal").classList.add("active");
 };
 
 window.closeRxModal = function() {
-  document.getElementById("rxModal").style.display = "none";
+  document.getElementById("rxModal").classList.remove("active");
   currentRxAnimalId = null;
 };
 
-window.saveRx = async function() {
+// บันทึกยาลงฐานข้อมูล
+window.saveNewRx = async function() {
+  if(!currentRxAnimalId) return;
   const rxInserts = [];
-
-  // 1. เก็บข้อมูลจาก Predefined List
-  PREDEFINED_RX.forEach(drug => {
-    const chk = document.getElementById(`chk-${drug.id}`);
-    if (chk && chk.checked) {
-      rxInserts.push({
-        animal_id: currentRxAnimalId,
-        drug_id: document.getElementById(`name-${drug.id}`).value,
-        dose: document.getElementById(`dose-${drug.id}`).value,
-        freq: document.getElementById(`freq-${drug.id}`).value,
-        days: parseInt(document.getElementById(`days-${drug.id}`).value) || 0,
-        total_pills: parseFloat(document.getElementById(`total-${drug.id}`).value) || 0
-      });
+  
+  Array.from(document.querySelectorAll(`input[id^="newrxchk-"]:checked`)).forEach(el => {
+    const did = el.id.replace("newrxchk-", "");
+    
+    let drugName = el.dataset.name;
+    if(did.startsWith("custom")) {
+      const customNameInput = document.getElementById(`custom-name-${did}`);
+      if(customNameInput && customNameInput.value.trim() !== "") {
+        drugName = customNameInput.value.trim();
+      } else {
+        drugName = "ยาเพิ่มเติม";
+      }
     }
+
+    rxInserts.push({
+      animal_id:    currentRxAnimalId,
+      drug_id:      drugName, 
+      dose:         document.getElementById(`newrxdose-${did}`).value,
+      freq:         document.getElementById(`newrxfreq-${did}`).value,
+      days:         parseInt(document.getElementById(`newrxdays-${did}`).value) || 5,
+      total_pills:  parseFloat(document.getElementById(`newrxtotal-${did}`).value) || 0 
+    });
   });
 
-  // 2. เก็บข้อมูลจาก Other List
-  const others = document.querySelectorAll("#rxOtherContainer > div");
-  others.forEach(row => {
-    const chk = row.querySelector(".chk-other");
-    const name = row.querySelector(".name-other").value;
-    if (chk && chk.checked && name.trim() !== "") {
-      rxInserts.push({
-        animal_id: currentRxAnimalId,
-        drug_id: name,
-        dose: row.querySelector(".dose-other").value,
-        freq: row.querySelector(".freq-other").value,
-        days: parseInt(row.querySelector(".days-other").value) || 0,
-        total_pills: parseFloat(row.querySelector(".total-other").value) || 0
-      });
-    }
-  });
-
-  if (rxInserts.length > 0) {
-    const { error } = await supabase.from("vasd_prescription").insert(rxInserts);
-    if (error) {
-      alert("บันทึกยาผิดพลาด: " + error.message);
-      return;
-    }
+  if(rxInserts.length === 0) {
+    alert("กรุณาเลือกยาที่ต้องการสั่งจ่ายอย่างน้อย 1 รายการ");
+    return;
   }
-  alert("บันทึกการจ่ายยาเรียบร้อย ส่งข้อมูลไปห้องจ่ายยาแล้ว");
-  closeRxModal();
+
+  const { error } = await supabase.from("vasd_prescription").insert(rxInserts);
+  if(error) {
+    alert("❌ บันทึกไม่สำเร็จ: " + error.message);
+  } else {
+    alert("บันทึกการสั่งจ่ายยาเรียบร้อย ข้อมูลถูกส่งไปที่ห้องจ่ายยา");
+    closeRxModal();
+  }
 };
 
 // Real-time Update
