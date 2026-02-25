@@ -409,8 +409,9 @@ async function loadPrescriptions() {
       const rxList = animal.vasd_prescription; 
       const weight = animal.actual_weight || animal.est_weight || 0;
 
-      // ✅ เช็คเงื่อนไขว่าใน Array service_type มีคำว่า "วัคซีน" หรือไม่
+      // ✅ เช็คเงื่อนไขและเตรียมข้อความแสดงบริการ
       const hasVaccine = (animal.vasd_service || []).some(s => s.service_type.includes("วัคซีน"));
+      const servicesText = (animal.vasd_service || []).map(s => s.service_type).join(", ") || "ไม่มีข้อมูลบริการ";
 
       const allRxIds = rxList.map(rx => rx.id).join(",");
 
@@ -452,7 +453,10 @@ async function loadPrescriptions() {
       
       card.innerHTML = `
         <div class="rx-header">
-          <h3>🐾 ${animal.animal_name} <span style="font-weight:normal;">(${species})</span> <span style="margin-left:8px;font-size:13px;">| เจ้าของ: ${ownerName}</span></h3>
+          <div>
+            <h3>🐾 ${animal.animal_name} <span style="font-weight:normal;">(${species})</span> <span style="margin-left:8px;font-size:13px;">| เจ้าของ: ${ownerName}</span></h3>
+            <div style="font-size:13px; color:var(--teal); margin-top:6px; font-weight:600;">🩺 บริการที่รับ: ${servicesText}</div>
+          </div>
           <div class="rx-header-actions">
             <button class="btn btn-add-rx" onclick="openRxModal('${q.animal_id}', '${animal.animal_name}', ${weight}, '${animal.species}')">💊 จ่ายยาเพิ่ม</button>
             
