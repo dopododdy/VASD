@@ -107,9 +107,39 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 .info-grid div { background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
 .info-grid strong { color: var(--navy); display: inline-block; width: 100px; }
 
-.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 10px; }
-.data-table th, .data-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+/* ✅ ปรับปรุง CSS สำหรับตารางย่อย เพื่อแก้ปัญหาล้นหน้าจอ */
+.data-table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  font-size: 13px; 
+  margin-bottom: 10px; 
+  table-layout: fixed; /* บังคับให้ความกว้าง 100% พอดี ไม่ขยายตามเนื้อหา */
+}
+.data-table th, .data-table td { 
+  border: 1px solid var(--border); 
+  padding: 6px; 
+  text-align: left; 
+  vertical-align: top;
+  word-wrap: break-word; /* ตัดคำที่ยาวเกินไปให้ขึ้นบรรทัดใหม่ */
+  overflow-wrap: break-word;
+}
 .data-table th { background: #f1f5f9; color: var(--navy); font-weight: 600; }
+
+/* สัดส่วนความกว้างคอลัมน์ ตารางสัญญาณชีพ */
+.vitals-table th:nth-child(1) { width: 10%; } /* เวลา */
+.vitals-table th:nth-child(2) { width: 10%; } /* HR */
+.vitals-table th:nth-child(3) { width: 10%; } /* RR */
+.vitals-table th:nth-child(4) { width: 10%; } /* Temp */
+.vitals-table th:nth-child(5) { width: 12%; } /* SpO2 */
+.vitals-table th:nth-child(6) { width: 18%; } /* Zoletil Top */
+.vitals-table th:nth-child(7) { width: 30%; } /* Note */
+
+/* สัดส่วนความกว้างคอลัมน์ ตารางสั่งจ่ายยา */
+.rx-table th:nth-child(1) { width: 30%; } /* รายการยา */
+.rx-table th:nth-child(2) { width: 20%; } /* ปริมาณ */
+.rx-table th:nth-child(3) { width: 25%; } /* ความถี่ */
+.rx-table th:nth-child(4) { width: 10%; } /* วัน */
+.rx-table th:nth-child(5) { width: 15%; } /* รวม */
 
 .print-bar { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
 .btn-print { background: var(--navy); color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-family:"Sarabun"; }
@@ -142,6 +172,9 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   
+  /* ✅ ลดขนาดฟอนต์ของตารางลงเล็กน้อยตอนพิมพ์ จะได้ไม่แน่นเกินไป */
+  .data-table { font-size: 11px; }
+
   .data-table th {
     background-color: #f1f5f9 !important;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
@@ -221,7 +254,7 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 
     <div class="report-section">
       <h3>📈 สัญญาณชีพ & ยาสลบ (Vital Signs & Anesthesia)</h3>
-      <table class="data-table">
+      <table class="data-table vitals-table">
         <thead>
           <tr>
             <th>เวลา</th><th>HR</th><th>RR</th><th>Temp</th><th>SpO2</th><th>Zoletil Top</th><th>Note</th>
@@ -233,10 +266,10 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 
     <div class="report-section">
       <h3>💊 การสั่งจ่ายยา (Prescription)</h3>
-      <table class="data-table">
+      <table class="data-table rx-table">
         <thead>
           <tr>
-            <th>รายการยา</th><th>ปริมาณ</th><th>ความถี่</th><th>จำนวนวัน</th><th>รวม</th>
+            <th>รายการยา</th><th>ปริมาณ</th><th>ความถี่</th><th>วัน</th><th>รวม</th>
           </tr>
         </thead>
         <tbody id="r-rx"></tbody>
@@ -283,13 +316,11 @@ async function loadReport() {
     }
 
     allData.forEach(a => {
-      // ✅ วิธีดึง Queue ที่ถูกต้อง (รองรับทั้ง Object เดี่ยว และ Array)
       let q = {};
       if (a.vasd_queue) {
         q = Array.isArray(a.vasd_queue) ? (a.vasd_queue[0] || {}) : a.vasd_queue;
       }
 
-      // ป้องกันการ Error เผื่อชื่อหมอถูกบันทึกไว้ใน JSON notes
       let extraNotes = {};
       if (q.notes) {
         try { extraNotes = typeof q.notes === 'string' ? JSON.parse(q.notes) : q.notes; } catch(e) {}
@@ -306,7 +337,6 @@ async function loadReport() {
       const phone = a.vasd_owner ? a.vasd_owner.phone : '-';
       const species = a.species === 'ส' ? 'สุนัข' : 'แมว';
       
-      // ✅ อ่านชื่อหมอจากคอลัมน์หลัก หรือจาก Notes (เผื่อไว้)
       const surgeon = q.surgeon_name || extraNotes.surgeon_name || extraNotes.surgeon || '-';
       const anes = q.anesthesiologist_name || extraNotes.anesthesiologist_name || extraNotes.anesthesiologist || '-';
 
@@ -343,7 +373,6 @@ window.openReportModal = function(animalId) {
   const a = allData.find(x => x.id === animalId);
   if(!a) return;
 
-  // ✅ ใช้วิธีดึง Queue แบบเดียวกัน
   let q = {};
   if (a.vasd_queue) {
     q = Array.isArray(a.vasd_queue) ? (a.vasd_queue[0] || {}) : a.vasd_queue;
@@ -365,7 +394,6 @@ window.openReportModal = function(animalId) {
   document.getElementById("r-phone").innerText = a.vasd_owner ? a.vasd_owner.phone : '-';
   document.getElementById("r-services").innerText = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
 
-  // ✅ ใส่ข้อมูลใน Modal ตามคอลัมน์หลัก หรือเผื่อใน notes
   document.getElementById("r-surgeon").innerText = q.surgeon_name || extraNotes.surgeon_name || extraNotes.surgeon || '-';
   document.getElementById("r-anes").innerText = q.anesthesiologist_name || extraNotes.anesthesiologist_name || extraNotes.anesthesiologist || '-';
 
@@ -400,8 +428,8 @@ window.openReportModal = function(animalId) {
   } else {
     rxBody.innerHTML = rxs.map(rx => `<tr>
       <td>${rx.drug_id||'-'}</td><td>${rx.dose||'-'}</td>
-      <td>${rx.freq||'-'}</td><td>${rx.days ? rx.days + ' วัน' : '-'}</td>
-      <td style="font-weight:bold;">${rx.total_pills ? rx.total_pills + ' เม็ด' : '-'}</td>
+      <td>${rx.freq||'-'}</td><td>${rx.days ? rx.days + '' : '-'}</td>
+      <td style="font-weight:bold;">${rx.total_pills ? rx.total_pills + '' : '-'}</td>
     </tr>`).join("");
   }
 
