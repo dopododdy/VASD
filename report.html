@@ -120,35 +120,25 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
    PRINT STYLES - สำหรับกระดาษ A4
    ========================================= */
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 15mm; 
-  }
+  @page { size: A4 portrait; margin: 15mm; }
   body * { visibility: hidden; }
-  header, .page-header, .card, .btn-close-modal, .print-bar { 
-    display: none !important; 
-  }
+  header, .page-header, .card, .btn-close-modal, .print-bar { display: none !important; }
   
   .modal-overlay { 
-    position: static; 
-    display: block !important; 
-    background: transparent !important; 
-    padding: 0 !important; 
-    margin: 0 !important;
+    position: static; display: block !important; 
+    background: transparent !important; padding: 0 !important; margin: 0 !important;
   }
   
   .modal-content, .modal-content * { visibility: visible; }
   
   .modal-content { 
-    position: relative; left: 0; top: 0; 
-    width: 100% !important; max-width: 100% !important; 
+    position: relative; left: 0; top: 0; width: 100% !important; max-width: 100% !important; 
     box-shadow: none !important; padding: 0 !important; margin: 0 !important; border: none !important; 
     border-radius: 0; background: white !important; 
   }
 
   .info-grid div {
-    background-color: #f8fafc !important;
-    border: 1px solid #ccc;
+    background-color: #f8fafc !important; border: 1px solid #ccc;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   
@@ -157,8 +147,7 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   
-  .report-section { page-break-inside: avoid; }
-  .data-table tr { page-break-inside: avoid; }
+  .report-section, .data-table tr { page-break-inside: avoid; }
 }
 </style>
 </head>
@@ -275,7 +264,7 @@ async function loadReport() {
         id, queue_number, animal_name, species, sex, est_weight, actual_weight,
         vasd_owner(owner_name, phone),
         vasd_service(service_type),
-        vasd_queue(status, surgeon_name, anesthesiologist_name, notes),
+        vasd_queue(status, surgeon_name, anesthesiologist_name),
         vasd_vital_signs(time_recorded, created_at, hr, rr, temp, spo2, zoletil_top, note),
         vasd_prescription(drug_id, dose, freq, days, total_pills)
       `)
@@ -306,15 +295,15 @@ async function loadReport() {
       const phone = a.vasd_owner ? a.vasd_owner.phone : '-';
       const species = a.species === 'ส' ? 'สุนัข' : 'แมว';
       
-      // นำข้อมูล Staff มาแสดงเฉพาะ 2 ตำแหน่ง
+      // ดึงข้อมูลตามชื่อคอลัมน์ใน SQL เป๊ะๆ
       const surgeon = q.surgeon_name || '-';
       const anes = q.anesthesiologist_name || '-';
 
       let staffHtml = `
         <div style="line-height:1.4;">
-          <strong>หมอผ่าตัด:</strong> ${surgeon}<br>
+          <strong>ศัลยแพทย์:</strong> ${surgeon}<br>
           <span style="font-size:12px; color:var(--text-muted);">
-            <strong>วิสัญญี:</strong> ${anes}
+            <strong>วิสัญญีแพทย์:</strong> ${anes}
           </span>
         </div>
       `;
@@ -356,7 +345,7 @@ window.openReportModal = function(animalId) {
   document.getElementById("r-phone").innerText = a.vasd_owner ? a.vasd_owner.phone : '-';
   document.getElementById("r-services").innerText = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
 
-  // ใส่ข้อมูล Staff ลงใน Modal (เฉพาะศัลยแพทย์และวิสัญญี)
+  // ใส่ข้อมูลใน Modal ตามคอลัมน์เดิมใน DB
   document.getElementById("r-surgeon").innerText = q.surgeon_name || '-';
   document.getElementById("r-anes").innerText = q.anesthesiologist_name || '-';
 
