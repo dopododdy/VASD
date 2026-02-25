@@ -48,7 +48,7 @@ header{
 }
 .page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
 
-/* TABLE */
+/* TABLE (สำหรับหน้าจอหลัก) */
 .card {
   background:var(--surface);border-radius:var(--radius);
   border:1px solid var(--border);box-shadow:var(--shadow-sm);
@@ -107,20 +107,22 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 .info-grid div { background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
 .info-grid strong { color: var(--navy); display: inline-block; width: 100px; }
 
-/* ✅ ปรับปรุง CSS สำหรับตารางย่อย เพื่อแก้ปัญหาล้นหน้าจอ */
+/* ✅ ตารางสำหรับ Modal/Print โดยเฉพาะ */
 .data-table { 
   width: 100%; 
   border-collapse: collapse; 
   font-size: 13px; 
   margin-bottom: 10px; 
-  table-layout: fixed; /* บังคับให้ความกว้าง 100% พอดี ไม่ขยายตามเนื้อหา */
+  table-layout: fixed; /* ล็อคความกว้าง */
+  min-width: 0 !important; /* ✅ ลบล้างค่า min-width: 900px ออก ทำให้ตารางหดเข้าพอดีกรอบได้ */
 }
 .data-table th, .data-table td { 
   border: 1px solid var(--border); 
   padding: 6px; 
   text-align: left; 
   vertical-align: top;
-  word-wrap: break-word; /* ตัดคำที่ยาวเกินไปให้ขึ้นบรรทัดใหม่ */
+  word-wrap: break-word; 
+  word-break: break-word; /* ✅ บังคับตัดคำยาวๆ (เช่น ชื่อยา) ขึ้นบรรทัดใหม่ */
   overflow-wrap: break-word;
 }
 .data-table th { background: #f1f5f9; color: var(--navy); font-weight: 600; }
@@ -150,7 +152,7 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
    PRINT STYLES - สำหรับกระดาษ A4
    ========================================= */
 @media print {
-  @page { size: A4 portrait; margin: 15mm; }
+  @page { size: A4 portrait; margin: 10mm 15mm; } /* ✅ ปรับขอบกระดาษให้มีพื้นที่ซ้ายขวาเพิ่มขึ้น */
   body * { visibility: hidden; }
   header, .page-header, .card, .btn-close-modal, .print-bar { display: none !important; }
   
@@ -172,8 +174,11 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   
-  /* ✅ ลดขนาดฟอนต์ของตารางลงเล็กน้อยตอนพิมพ์ จะได้ไม่แน่นเกินไป */
-  .data-table { font-size: 11px; }
+  .data-table { 
+    font-size: 11px; /* ลดฟอนต์ลงนิดนึงให้อ่านง่ายและไม่เบียด */
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
 
   .data-table th {
     background-color: #f1f5f9 !important;
