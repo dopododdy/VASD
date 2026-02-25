@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>RMUTTO - VASD | ห้องพักฟื้น (Recovery)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
+  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
+  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
+  --radius:14px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);}
+
+header{
+  background:var(--navy);padding:0 32px;display:flex;
+  justify-content:space-between;align-items:center;height:68px;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
+}
+.header-brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{
+  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
+.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
+.btn-home{
+  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
+  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
+  cursor:pointer;transition:background 0.2s;
+}
+.btn-home:hover{background:rgba(255,255,255,0.18);}
+
+.container{max-width:1200px;margin:0 auto;padding:28px 24px;}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(500px, 1fr));gap:20px;}
+
+/* RECOVERY CARD */
+.card{
+  background:var(--surface);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  overflow:hidden;animation:fadeUp 0.4s ease both;
+  display:flex;flex-direction:column;
+}
+.card-header{
+  background:#faf5ff;border-bottom:1px solid var(--border);
+  padding:16px 20px;display:flex;justify-content:space-between;align-items:center;
+}
+.card-title{font-size:16px;font-weight:700;color:#6b46c1;display:flex;align-items:center;gap:8px;}
+.queue-badge{background:#6b46c1;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;}
+
+.card-body{padding:20px;flex:1;}
+.info-row{display:flex;gap:16px;margin-bottom:16px;font-size:14px;}
+.info-row div{background:var(--bg);padding:8px 12px;border-radius:var(--radius-sm);flex:1;}
+.info-row span{display:block;font-size:11px;color:var(--text-muted);margin-bottom:2px;}
+
+/* VITAL SIGNS TABLE */
+.vital-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px;}
+.vital-table th{background:var(--bg);text-align:left;padding:8px;border:1px solid var(--border);color:var(--text-muted);}
+.vital-table td{padding:8px;border:1px solid var(--border);text-align:center;}
+
+/* FORM INPUTS */
+.vital-form{display:flex;gap:8px;flex-wrap:wrap;background:var(--bg);padding:12px;border-radius:var(--radius-sm);margin-bottom:16px;}
+.vital-form input{
+  flex:1;min-width:60px;padding:6px 8px;font-size:12px;font-family:"Sarabun",sans-serif;
+  border:1px solid var(--border);border-radius:6px;outline:none;
+}
+.vital-form input:focus{border-color:#6b46c1;}
+.btn-add-vital{
+  background:#6b46c1;color:#fff;border:none;border-radius:6px;
+  padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600;
+}
+
+/* ACTIONS */
+.card-footer{
+  padding:16px 20px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;background:#fafbfc;
+}
+.btn{
+  padding:8px 16px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
+  border:none;border-radius:6px;cursor:pointer;transition:opacity 0.2s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{opacity:0.85;}
+.btn-rx{background:var(--teal-light);color:#fff;}
+.btn-close{background:var(--success);color:#fff;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="brand-icon">🟣</div>
+    <div class="brand-text">
+      <h1>ห้องพักฟื้น (Recovery)</h1>
+      <span>RMUTTO – Veterinary Academic Service Division</span>
+    </div>
+  </div>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h2>รายชื่อสัตว์ที่กำลังพักฟื้น</h2>
+  </div>
+  <div class="grid" id="recoveryGrid">
+    </div>
+</div>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+async function loadRecoveryAnimals() {
+  const grid = document.getElementById("recoveryGrid");
+  grid.innerHTML = "<p>กำลังโหลดข้อมูล...</p>";
+
+  const { data:eventId } = await supabase.rpc("get_today_event");
+  
+  // ดึงสัตว์ที่มีสถานะ recovery และดึงประวัติ vital signs มาด้วย
+  const { data, error } = await supabase
+    .from("vasd_animal")
+    .select(`
+      id, queue_number, animal_name, species, sex, actual_weight,
+      vasd_queue!inner(status),
+      vasd_vital_signs(id, time_recorded, temp, hr, rr, spo2)
+    `)
+    .eq("event_id", eventId)
+    .eq("vasd_queue.status", "recovery")
+    .order("queue_number");
+
+  if (error) { console.error(error); grid.innerHTML = "<p style='color:red;'>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>"; return; }
+  
+  if (data.length === 0) {
+    grid.innerHTML = "<p style='color:var(--text-muted);'>ขณะนี้ไม่มีสัตว์ในห้องพักฟื้น</p>";
+    return;
+  }
+
+  grid.innerHTML = "";
+
+  data.forEach(a => {
+    // เรียงเวลา vital signs
+    const vitals = (a.vasd_vital_signs || []).sort((x, y) => x.time_recorded.localeCompare(y.time_recorded));
+    
+    let vitalRows = vitals.map(v => `
+      <tr>
+        <td>${v.time_recorded.substring(0,5)}</td>
+        <td>${v.hr || '-'}</td>
+        <td>${v.rr || '-'}</td>
+        <td>${v.temp || '-'}</td>
+        <td>${v.spo2 || '-'}%</td>
+      </tr>
+    `).join("");
+
+    if(vitals.length === 0) {
+      vitalRows = `<tr><td colspan="5" style="color:#aaa;">ยังไม่มีการบันทึก</td></tr>`;
+    }
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">
+          <span class="queue-badge">#${a.queue_number}</span>
+          ${a.animal_name} (${a.species === 'ส' ? 'สุนัข' : 'แมว'})
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <div><span>เพศ</span><strong>${a.sex}</strong></div>
+          <div><span>น้ำหนักจริง</span><strong>${a.actual_weight || '-'} กก.</strong></div>
+        </div>
+        
+        <table class="vital-table">
+          <thead><tr><th>เวลา</th><th>HR (ครั้ง/นาที)</th><th>RR (ครั้ง/นาที)</th><th>Temp (°C)</th><th>SpO2</th></tr></thead>
+          <tbody>${vitalRows}</tbody>
+        </table>
+
+        <div class="vital-form" id="form-${a.id}">
+          <input type="time" class="v-time" required>
+          <input type="number" class="v-hr" placeholder="HR" title="Heart Rate">
+          <input type="number" class="v-rr" placeholder="RR" title="Respiratory Rate">
+          <input type="number" class="v-temp" placeholder="Temp" title="Temperature">
+          <input type="number" class="v-spo2" placeholder="SpO2" title="Oxygen Saturation">
+          <button class="btn-add-vital" onclick="saveVital('${a.id}')">➕ บันทึก</button>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-rx" onclick="location.href='rx.html?animal_id=${a.id}'">💊 สั่งยาเพิ่มเติม</button>
+        <button class="btn btn-close" onclick="closeRecoveryJob('${a.id}')">✅ ฟื้นแล้ว (ปิด Job)</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    
+    // Set default time to now for inputs
+    const now = new Date();
+    const timeString = now.toTimeString().substring(0,5);
+    document.querySelector(`#form-${a.id} .v-time`).value = timeString;
+  });
+}
+
+window.saveVital = async function(animalId) {
+  const form = document.querySelector(`#form-${animalId}`);
+  const timeVal = form.querySelector('.v-time').value;
+  const hrVal = form.querySelector('.v-hr').value;
+  const rrVal = form.querySelector('.v-rr').value;
+  const tempVal = form.querySelector('.v-temp').value;
+  const spo2Val = form.querySelector('.v-spo2').value;
+
+  if(!timeVal) return alert("กรุณาระบุเวลา");
+
+  const { error } = await supabase.from('vasd_vital_signs').insert({
+    animal_id: animalId,
+    time_recorded: timeVal,
+    hr: hrVal || null,
+    rr: rrVal || null,
+    temp: tempVal || null,
+    spo2: spo2Val || null
+  });
+
+  if (error) { alert("บันทึกไม่สำเร็จ: " + error.message); } 
+  else { loadRecoveryAnimals(); }
+};
+
+window.closeRecoveryJob = async function(animalId) {
+  if(!confirm("ยืนยันว่าสัตว์ฟื้นตัวดีแล้ว และต้องการปิด Job พักฟื้น เพื่อส่งข้อมูลไปสรุปรายงาน?")) return;
+  
+  // เปลี่ยนสถานะเป็น ฟื้นแล้ว/รอรับกลับ (ready_to_go_home)
+  const { error } = await supabase
+    .from('vasd_queue')
+    .update({ status: 'ready_to_go_home', updated_at: new Date() })
+    .eq('animal_id', animalId);
+
+  if (error) {
+    alert("อัปเดตสถานะไม่สำเร็จ");
+  } else {
+    // เมื่อปิด Job สำเร็จ สามารถเด้งไปหน้ารายงาน หรือโหลดหน้าเดิมใหม่
+    alert("✅ ปิด Job พักฟื้นเรียบร้อยแล้ว ข้อมูลพร้อมสำหรับสรุปรายงาน");
+    loadRecoveryAnimals();
+  }
+};
+
+// Real-time Update
+supabase.channel("recovery-live")
+  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"}, loadRecoveryAnimals)
+  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_vital_signs"}, loadRecoveryAnimals)
+  .subscribe();
+
+loadRecoveryAnimals();
+</script>
+</body>
+</html>
