@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>โต๊ะผ่าตัด</title>
+<title>RMUTTO - VASD | โต๊ะผ่าตัด (Surgery)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
@@ -36,19 +36,12 @@ header{
   border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);cursor:pointer;
 }
 
-/* TABS */
-.tabs-container { padding: 20px 32px 0 32px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; gap:10px; }
-.tab-btn {
-  padding:12px 24px; font-size:15px; font-weight:700; font-family:"Sarabun",sans-serif;
-  background:transparent; border:none; border-bottom:3px solid transparent; color:var(--text-muted);
-  cursor:pointer; transition:all 0.2s;
-}
-.tab-btn.active { border-bottom-color:var(--teal); color:var(--teal); }
-.tab-content { display:none; padding:24px 32px; flex:1; overflow-y:auto; }
-.tab-content.active { display:block; animation:fadeIn 0.3s ease; }
+/* MAIN CONTENT */
+.main-content { padding: 24px 32px; flex: 1; overflow-y: auto; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--border); padding-bottom: 8px;}
 
 /* GRID LAYOUTS */
-.grid-waiting { display:grid; grid-template-columns:repeat(auto-fill, minmax(400px, 1fr)); gap:20px; }
+.grid-waiting { display:grid; grid-template-columns:repeat(auto-fill, minmax(400px, 1fr)); gap:20px; margin-bottom: 40px;}
 .grid-surgery { display:grid; grid-template-columns:1fr; gap:24px; }
 
 /* CARDS */
@@ -92,28 +85,20 @@ header{
   <div class="header-brand">
     <div class="brand-icon">📋</div>
     <div class="brand-text">
-      <h1>โต๊ะผ่าตัด/ติดตามสัญญาณชีพ</h1>
+      <h1>ระบบจัดการโต๊ะผ่าตัด (Surgery)</h1>
       <span>RMUTTO – Veterinary Academic Service Division</span>
     </div>
   </div>
   <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
 </header>
 
-<div class="tabs-container">
-  <button class="tab-btn active" onclick="switchTab('tab-waiting', this)">1. รอรับเคสขึ้นโต๊ะ (จากห้องดมยา)</button>
-  <button class="tab-btn" onclick="switchTab('tab-surgery', this)">2. กำลังผ่าตัด / บันทึก Vitals</button>
-</div>
-
-<div id="tab-waiting" class="tab-content active">
-  <div style="margin-bottom: 20px; padding: 12px; background: #e6fffa; border-left: 4px solid var(--teal); border-radius: 4px; font-size: 14px; color: #234e52;">
-    ℹ️ <strong>สัตว์ในหน้านี้:</strong> คือเคสที่ได้รับยาสลบแล้ว (Anesthesia) รอให้สัตวแพทย์มารับเคสและเลือก <strong>โต๊ะผ่าตัด</strong>
-  </div>
+<div class="main-content">
+  <div class="section-title">⏳ รอรับเคสขึ้นโต๊ะผ่าตัด (จากห้องดมยา)</div>
   <div class="grid-waiting" id="waitingGrid">
     <p style="color:var(--text-muted);">กำลังโหลดคิว...</p>
   </div>
-</div>
 
-<div id="tab-surgery" class="tab-content">
+  <div class="section-title">🔬 โต๊ะกำลังผ่าตัด / บันทึกข้อมูล</div>
   <div class="grid-surgery" id="surgeryGrid">
     <p style="color:var(--text-muted);">กำลังโหลดโต๊ะผ่าตัด...</p>
   </div>
@@ -137,13 +122,6 @@ import { supabase } from "./js/supabase.js";
 let currentEventId = null;
 let currentRxAnimalId = null;
 
-window.switchTab = function(tabId, btn) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  btn.classList.add('active');
-};
-
 async function init() {
   const { data: eventId } = await supabase.rpc("get_today_event");
   currentEventId = eventId;
@@ -156,7 +134,7 @@ async function loadData() {
 }
 
 // ==========================================
-// TAB 1: โหลดคิวรอรับขึ้นโต๊ะ (Anesthesia)
+// 1. โหลดคิวรอรับขึ้นโต๊ะ (มาจาก anesthesia.html)
 // ==========================================
 async function loadWaitingSurgery() {
   const { data, error } = await supabase
@@ -166,12 +144,12 @@ async function loadWaitingSurgery() {
       vasd_queue!inner(id, status, notes, anesthesiologist_name)
     `)
     .eq("event_id", currentEventId)
-    .eq("vasd_queue.status", "anesthesia")
+    .eq("vasd_queue.status", "anesthesia") // กรองเฉพาะคนที่มาจากหน้าดมยา
     .order("queue_number");
 
   const grid = document.getElementById("waitingGrid");
   if (error || !data || data.length === 0) {
-    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); width:100%; grid-column: 1/-1;">ไม่มีเคสรอขึ้นโต๊ะผ่าตัด</div>`;
+    grid.innerHTML = `<div style="text-align:center; padding:30px; background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-muted); width:100%; grid-column: 1/-1;">ไม่มีเคสรอขึ้นโต๊ะผ่าตัด</div>`;
     return;
   }
 
@@ -182,10 +160,10 @@ async function loadWaitingSurgery() {
     const anesName = a.vasd_queue[0]?.anesthesiologist_name || '-';
 
     return `
-      <div class="card">
+      <div class="card" style="border-left: 4px solid var(--warning);">
         <div class="card-header">
           <div style="font-size:16px; font-weight:700;">${a.animal_name}</div>
-          <span class="badge-q">คิว ${a.queue_number}</span>
+          <span class="badge-q" style="background:var(--warning);">คิว ${a.queue_number}</span>
         </div>
         <div style="font-size:14px; margin-bottom:12px; line-height:1.6;">
           ${a.species === 'ส' ? 'สุนัข' : 'แมว'} | เพศ: ${a.sex} | <strong>น้ำหนัก: ${a.actual_weight} kg</strong><br>
@@ -218,16 +196,14 @@ window.acceptToSurgery = async function(animalId) {
     .eq("animal_id", animalId);
 
   if (!error) {
-    await loadData();
-    const tab2Btn = document.querySelectorAll('.tab-btn')[1];
-    switchTab('tab-surgery', tab2Btn);
+    loadData(); // โหลดหน้าจอใหม่ สัตว์จะย้ายไปอยู่โซนล่างอัตโนมัติ
   } else {
     alert("เกิดข้อผิดพลาด: " + error.message);
   }
 };
 
 // ==========================================
-// TAB 2: โหลดโต๊ะที่กำลังผ่าตัด (Surgery)
+// 2. โหลดโต๊ะที่กำลังผ่าตัด (Surgery)
 // ==========================================
 async function loadInSurgery() {
   const { data, error } = await supabase
@@ -244,7 +220,7 @@ async function loadInSurgery() {
 
   const grid = document.getElementById("surgeryGrid");
   if (error || !data || data.length === 0) {
-    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">ไม่มีเคสกำลังผ่าตัด</div>`;
+    grid.innerHTML = `<div style="text-align:center; padding:40px; background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-muted);">ไม่มีเคสกำลังผ่าตัด</div>`;
     return;
   }
 
@@ -275,10 +251,10 @@ async function loadInSurgery() {
         <td>${v.spo2 ? v.spo2+'%' : '-'}</td><td>${v.zoletil_top||'-'}</td><td>${v.note||'-'}</td>
       </tr>`;
     }).join("");
-    if(vitals.length === 0) vitalRows = `<tr><td colspan=\"7\" style=\"text-align:center; color:#aaa;\">ยังไม่มีบันทึก</td></tr>`;
+    if(vitals.length === 0) vitalRows = `<tr><td colspan="7" style="text-align:center; color:#aaa;">ยังไม่มีบันทึกสัญญาณชีพ</td></tr>`;
 
     return `
-      <div class="card">
+      <div class="card" style="border-left: 4px solid var(--teal);">
         <div class="card-header" style="background:#e6fffa; padding:16px; margin:-20px -20px 20px -20px; border-radius:10px 10px 0 0;">
           <div style="font-size:18px; font-weight:700; color:var(--teal);">โต๊ะผ่าตัดที่ ${q.table_number}</div>
           <span class="badge-q">คิว ${a.queue_number}</span>
@@ -408,7 +384,7 @@ window.saveRx = async function() {
     if(name.trim() !== '') {
       rxInserts.push({
         animal_id: currentRxAnimalId,
-        drug_id: name, // ใช้ช่องชื่อยาเป็น drug_id ในหน้า UI ชั่วคราว
+        drug_id: name, // ใช้ช่องชื่อยาเป็น drug_id ชั่วคราวไปก่อน
         dose: document.getElementById(`rx-dose-${i}`).value,
         freq: document.getElementById(`rx-freq-${i}`).value,
         days: parseInt(document.getElementById(`rx-days-${i}`).value) || null,
