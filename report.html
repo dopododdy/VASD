@@ -88,7 +88,7 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 .modal-content {
   background: #fff; width: 100%; max-width: 850px;
   border-radius: var(--radius); box-shadow: var(--shadow-lg);
-  padding: 30px; position: relative; margin-bottom: 40px;
+  padding: 40px; position: relative; margin-bottom: 40px;
 }
 .btn-close-modal {
   position: absolute; top: 20px; right: 20px; background: #e2e8f0; border: none;
@@ -96,11 +96,11 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 }
 .btn-close-modal:hover { background: var(--danger); color: white; }
 
-.report-header { text-align: center; margin-bottom: 24px; border-bottom: 2px solid var(--navy); padding-bottom: 16px; }
+.report-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--navy); padding-bottom: 16px; }
 .report-header h2 { font-size: 24px; color: var(--navy); margin-bottom: 4px; }
 .report-header p { color: var(--text-muted); font-size: 14px; }
 
-.report-section { margin-bottom: 24px; }
+.report-section { margin-bottom: 24px; break-inside: avoid; }
 .report-section h3 { font-size: 16px; color: var(--teal); border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 12px; }
 
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; }
@@ -111,17 +111,48 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 .data-table th, .data-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
 .data-table th { background: #f1f5f9; color: var(--navy); font-weight: 600; }
 
-.print-bar { display: flex; justify-content: center; margin-top: 20px; gap: 10px; }
+.print-bar { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
 .btn-print { background: var(--navy); color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-family:"Sarabun"; }
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 
+/* =========================================
+   การตั้งค่าสำหรับการพิมพ์ให้ออกมาพอดีหน้า A4 
+   ========================================= */
 @media print {
+  @page {
+    size: A4;
+    margin: 10mm; /* ขอบกระดาษ 1 cm */
+  }
   body * { visibility: hidden; }
-  .modal-overlay { position: absolute; left: 0; top: 0; background: none; padding: 0; overflow: visible; display: block;}
+  header, .print-bar, .btn-close-modal, .page-header, .card { display: none !important; }
+  
+  .modal-overlay { 
+    position: absolute; left: 0; top: 0; 
+    background: none; padding: 0; margin: 0;
+    overflow: visible; display: block;
+  }
+  
   .modal-content, .modal-content * { visibility: visible; }
-  .modal-content { position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; box-shadow: none; padding: 0; border: none; }
-  .btn-close-modal, .print-bar { display: none !important; }
+  
+  .modal-content { 
+    position: relative; left: 0; top: 0; 
+    width: 100%; max-width: 100%; 
+    box-shadow: none; padding: 0; border: none; 
+    border-radius: 0;
+    /* ป้องกันพื้นหลังสีเทาตอนปริ้น */
+    background: white !important; 
+  }
+
+  .info-grid div {
+    background: white !important; /* เปลี่ยนพื้นหลังเป็นสีขาวล้วนให้ดูสะอาดตอนพิมพ์ */
+    border: 1px solid #ccc;
+    -webkit-print-color-adjust: exact;
+  }
+  .data-table th {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+  }
 }
 </style>
 </head>
@@ -234,7 +265,7 @@ async function loadReport() {
   try {
     const { data: eventId } = await supabase.rpc("get_today_event");
 
-    // ดึงข้อมูลทั้งหมดที่เกี่ยวข้อง (เพื่อทำรายงานสรุป)
+    // ✅ เพิ่มการดึงคอลัมน์ทีมผ่าตัดทั้งหมด (surgeon_name, anesthesiologist_name, notes) จาก vasd_queue 
     const { data, error } = await supabase
       .from("vasd_animal")
       .select(`
@@ -313,6 +344,7 @@ window.openReportModal = function(animalId) {
   document.getElementById("r-phone").innerText = a.vasd_owner ? a.vasd_owner.phone : '-';
   document.getElementById("r-services").innerText = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
 
+  // ✅ แสดงข้อมูลทีมผ่าตัด
   document.getElementById("r-surgeon").innerText = q.surgeon_name || '-';
   document.getElementById("r-anes").innerText = q.anesthesiologist_name || '-';
   document.getElementById("r-notes").innerText = `ผช: ${extraNotes.assistant || '-'} | พยาบาล: ${extraNotes.nurse || '-'}`;
