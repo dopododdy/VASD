@@ -308,7 +308,7 @@
   .card:nth-child(5) { animation-delay: 0.45s; }
   .card:nth-child(6) { animation-delay: 0.5s; }
   .card:nth-child(7) { animation-delay: 0.55s; }
-  .card:nth-child(8) { animation-delay: 0.60s; } /* เพิ่ม delay สำหรับการ์ดใบที่ 8 */
+  .card:nth-child(8) { animation-delay: 0.60s; }
 
   .card:hover {
     box-shadow: var(--shadow-md);
@@ -481,10 +481,11 @@
       <div class="card-arrow">›</div>
     </div>
 
-    <div class="card disabled">
+    <div class="card" onclick="location.href='recovery.html'">
       <span class="card-emoji">🟣</span>
       <h3>พักฟื้น</h3>
       <p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
+      <div class="card-arrow">›</div>
     </div>
 
     <div class="card" onclick="location.href='rx.html'">
@@ -567,9 +568,11 @@ async function loadSummary() {
   const { data: eventId } = await supabase.rpc("get_today_event");
 
   const total    = (await supabase.from("vasd_animal").select("*",{count:"exact",head:true}).eq("event_id",eventId)).count;
-  const surgery  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","กำลังผ่าตัด")).count;
-  const recovery = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","กำลังพักฟื้น")).count;
-  const done     = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","รับกลับแล้ว")).count;
+  
+  // ✅ อัปเดตสถานะให้ตรงกับตารางภาษาอังกฤษ เพื่อให้ตัวเลขสรุปทำงานได้อย่างถูกต้อง
+  const surgery  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","surgery")).count;
+  const recovery = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","recovery")).count;
+  const done     = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home")).count;
 
   document.getElementById("totalAnimal").innerText = total    ?? 0;
   document.getElementById("inSurgery").innerText   = surgery  ?? 0;
@@ -579,6 +582,13 @@ async function loadSummary() {
 
 // โหลดข้อมูล Dashboard
 loadSummary();
+
+// Real-time Dashboard Update (Optional แต่ช่วยให้ตัวเลขเปลี่ยนแบบเรียลไทม์)
+supabase.channel('dashboard-live')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
+  .subscribe();
+
 </script>
 </body>
 </html>
