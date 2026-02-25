@@ -185,6 +185,9 @@ input:last-child,select:last-child{margin-bottom:0;}
         <strong>ข้อมูลยา (ฉลากยา)</strong>
         <code>{{drug_id}}</code> <code>{{dose}}</code> <code>{{freq}}</code> 
         <code>{{days}}</code> <code>{{total_pills}}</code>
+        
+        <strong>ข้อมูลวันที่</strong>
+        <code>{{today}}</code> <code>{{next7day}}</code>
       </div>
     </div>
 
@@ -209,6 +212,14 @@ let currentConfig = [];
 function renderPreview() {
   const box = document.getElementById("sticker");
   box.innerHTML = "";
+  
+  // ✅ คำนวณวันที่จำลองสำหรับ {{today}} และ {{next7day}}
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const next7 = new Date();
+  next7.setDate(next7.getDate() + 7);
+  const next7Str = next7.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
   currentConfig.forEach(l => {
     const div = document.createElement("div");
     div.className = "line";
@@ -220,21 +231,22 @@ function renderPreview() {
     div.style.textAlign  = l.align || "left";
     div.style.width      = `calc(100% - ${l.x}px)`;
     
-    // เปลี่ยนตัวแปรให้เป็นข้อความจำลอง
+    // ✅ แทนที่ตัวแปร (รวมถึง today และ next7day)
     div.innerText = l.text
-      .replace("{{queue_number}}","1")
-      .replace("{{animal_name}}","น้องถุงทอง")
-      .replace("{{species}}","แมว")
-      .replace("{{sex}}","ผู้")
-      .replace("{{owner_name}}","สมชาย ใจดี")
-      .replace("{{phone}}","081-234-5678")
-      .replace("{{services}}","ทำหมัน, วัคซีน")
-      // จำลองตัวแปรยา
-      .replace("{{drug_id}}","Amoxicillin 250mg")
-      .replace("{{dose}}","กินครั้งละ 1 เม็ด")
-      .replace("{{freq}}","วันละ 2 ครั้ง (เช้า-เย็น) หลังอาหาร")
-      .replace("{{days}}","5 วัน")
-      .replace("{{total_pills}}","10");
+      .replace(/{{queue_number}}/g, "1")
+      .replace(/{{animal_name}}/g, "น้องถุงทอง")
+      .replace(/{{species}}/g, "แมว")
+      .replace(/{{sex}}/g, "ผู้")
+      .replace(/{{owner_name}}/g, "สมชาย ใจดี")
+      .replace(/{{phone}}/g, "081-234-5678")
+      .replace(/{{services}}/g, "ทำหมัน, วัคซีน")
+      .replace(/{{drug_id}}/g, "Amoxicillin 250mg")
+      .replace(/{{dose}}/g, "กินครั้งละ 1 เม็ด")
+      .replace(/{{freq}}/g, "วันละ 2 ครั้ง (เช้า-เย็น) หลังอาหาร")
+      .replace(/{{days}}/g, "5 วัน")
+      .replace(/{{total_pills}}/g, "10")
+      .replace(/{{today}}/g, todayStr)
+      .replace(/{{next7day}}/g, next7Str);
       
     box.appendChild(div);
   });
