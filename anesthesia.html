@@ -12,7 +12,7 @@
   --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
   --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --radius:14px; --radius-sm:8px;
+  --radius:10px; --radius-sm:6px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;}
@@ -30,91 +30,65 @@ header{
 }
 .brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
 .brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
-
 .btn-home{
   padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
   background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-  cursor:pointer;transition:background 0.2s;
+  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);cursor:pointer;
 }
-.btn-home:hover{background:rgba(255,255,255,0.18);}
 
-/* MAIN LAYOUT */
-.layout { display:flex; flex:1; overflow:hidden; }
-
-/* SIDEBAR QUEUE */
-.sidebar {
-  width: 320px; background:var(--surface); border-right:1px solid var(--border);
-  display:flex; flex-direction:column; overflow:hidden;
+/* TABS */
+.tabs-container { padding: 20px 32px 0 32px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; gap:10px; }
+.tab-btn {
+  padding:12px 24px; font-size:15px; font-weight:700; font-family:"Sarabun",sans-serif;
+  background:transparent; border:none; border-bottom:3px solid transparent; color:var(--text-muted);
+  cursor:pointer; transition:all 0.2s;
 }
-.sidebar-header { padding:16px; border-bottom:1px solid var(--border); background:#fafbfc; }
-.sidebar-header h3 { font-size:15px; color:var(--navy); }
-.queue-list { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
-.queue-card {
-  background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm);
-  padding:12px; box-shadow:var(--shadow-sm); cursor:pointer; transition:all 0.2s;
-}
-.queue-card:hover { border-color:var(--teal-light); transform:translateY(-1px); }
-.q-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-.q-num { font-size:12px; font-weight:700; background:var(--navy); color:#fff; padding:2px 8px; border-radius:20px; }
-.q-name { font-size:15px; font-weight:700; color:var(--text); }
-.q-info { font-size:13px; color:var(--text-muted); }
+.tab-btn.active { border-bottom-color:var(--teal); color:var(--teal); }
+.tab-content { display:none; padding:24px 32px; flex:1; overflow-y:auto; }
+.tab-content.active { display:block; animation:fadeIn 0.3s ease; }
 
-/* MAIN CONTENT (SURGERY TABLES) */
-.main-content { flex:1; overflow-y:auto; padding:24px; background:var(--bg); }
-.tables-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(550px, 1fr)); gap:20px; }
+/* GRID LAYOUTS */
+.grid-waiting { display:grid; grid-template-columns:repeat(auto-fill, minmax(400px, 1fr)); gap:20px; }
+.grid-surgery { display:grid; grid-template-columns:1fr; gap:24px; }
 
-/* TABLE CARD */
-.table-card {
-  background:var(--surface); border-radius:var(--radius); border:1px solid var(--border);
-  box-shadow:var(--shadow-sm); overflow:hidden; animation:fadeUp 0.3s ease both;
-  display:flex; flex-direction:column;
-}
-.tc-header {
-  padding:16px 20px; background:#e6fffa; border-bottom:1px solid var(--border);
-  display:flex; justify-content:space-between; align-items:center;
-}
-.tc-title { font-size:16px; font-weight:700; color:var(--teal); display:flex; align-items:center; gap:8px;}
-.tc-body { padding:20px; flex:1; }
+/* CARDS */
+.card { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow-sm); padding:20px; }
+.card-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px; }
+.badge-q { background:var(--navy); color:#fff; padding:4px 10px; border-radius:20px; font-size:13px; font-weight:700; }
 
-.info-box { background:#f7fafc; padding:12px; border-radius:var(--radius-sm); margin-bottom:16px; font-size:14px; }
-.info-box strong { color:var(--navy); }
+/* DRUG CALC BOX */
+.calc-box { background:#f7fafc; border-left:4px solid var(--teal-light); padding:12px; margin-bottom:16px; border-radius:4px; font-size:13px; }
+.calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+.calc-item { background:#fff; padding:8px; border:1px solid var(--border); border-radius:4px; display:flex; justify-content:space-between; }
+.calc-item span.vol { font-weight:700; color:var(--danger); }
 
-/* VITAL SIGNS */
-.vital-table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:12px; }
-.vital-table th { background:var(--bg); padding:8px; border:1px solid var(--border); text-align:left; color:var(--text-muted); }
-.vital-table td { padding:8px; border:1px solid var(--border); text-align:center; }
+/* FORMS & TABLES */
+.form-group { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+.form-group label { width:100px; font-size:13px; font-weight:600; color:var(--text-muted); }
+.form-control { flex:1; padding:8px 12px; font-family:"Sarabun"; border:1px solid var(--border); border-radius:var(--radius-sm); outline:none; font-size:14px; }
 
-.vital-form { display:flex; gap:6px; flex-wrap:wrap; background:var(--bg); padding:10px; border-radius:var(--radius-sm); margin-bottom:20px; }
-.vital-form input {
-  flex:1; min-width:60px; padding:6px 8px; font-size:12px; font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border); border-radius:4px; outline:none;
-}
-.vital-form input:focus { border-color:var(--teal); }
-.btn-primary { background:var(--teal); color:#fff; border:none; border-radius:4px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+.staff-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f0f4f8; padding:16px; border-radius:var(--radius-sm); margin-bottom:20px; }
+
+.vital-table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:13px; }
+.vital-table th { background:var(--bg); padding:10px; border:1px solid var(--border); text-align:left; color:var(--text-muted); }
+.vital-table td { padding:10px; border:1px solid var(--border); text-align:center; }
+.vital-form { display:flex; gap:6px; background:#fff; padding:12px; border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:20px; flex-wrap:wrap; }
+.vital-form input { flex:1; min-width:80px; padding:8px; font-size:13px; border:1px solid var(--border); border-radius:4px; }
+
+/* BUTTONS */
+.btn { padding:8px 16px; font-size:13px; font-weight:700; font-family:"Sarabun"; border:none; border-radius:6px; cursor:pointer; }
+.btn-primary { background:var(--teal); color:#fff; }
 .btn-primary:hover { background:var(--teal-light); }
+.btn-success { background:var(--success); color:#fff; }
+.btn-warning { background:var(--warning); color:#fff; }
+.action-bar { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
 
-/* RX GRID */
-.rx-section { border-top:1px solid var(--border); padding-top:16px; }
-.rx-title { font-size:14px; font-weight:700; margin-bottom:10px; color:var(--navy); }
-.rx-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.rx-item {
-  border:1px solid var(--border); padding:10px; border-radius:var(--radius-sm);
-  display:flex; flex-direction:column; gap:6px; transition:all 0.2s; background:#fff;
-}
-.rx-item.selected { border-color:var(--teal); background:#ebf8f6; }
-.rx-head { display:flex; gap:8px; align-items:flex-start; font-size:13px; font-weight:600; cursor:pointer; }
-.rx-inputs { display:none; flex-direction:column; gap:6px; margin-top:6px; padding-top:6px; border-top:1px dashed #cbd5e0; }
-.rx-inputs input { width:100%; padding:4px 8px; font-size:12px; font-family:"Sarabun",sans-serif; border:1px solid var(--border); border-radius:4px; }
+/* MODAL */
+.modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center; }
+.modal { background:#fff; width:90%; max-width:600px; border-radius:var(--radius); padding:24px; box-shadow:var(--shadow-md); }
+.modal-header { font-size:18px; font-weight:700; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px; }
 
-/* FOOTER ACTIONS */
-.tc-footer { padding:16px 20px; border-top:1px solid var(--border); background:#fafbfc; display:flex; justify-content:space-between; }
-.btn-cancel { background:#e2e8f0; color:var(--text); border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-family:"Sarabun"; }
-.btn-cancel:hover { background:var(--danger); color:#fff; }
-.btn-finish { background:var(--success); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-family:"Sarabun"; }
-.btn-finish:hover { opacity:0.85; }
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
@@ -130,32 +104,55 @@ header{
   <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
 </header>
 
-<div class="layout">
-  
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <h3>📋 คิวรอผ่าตัด / วางยา</h3>
-    </div>
-    <div class="queue-list" id="queueList">
-      <p style="color:var(--text-muted); font-size:13px; text-align:center;">กำลังโหลดคิว...</p>
+<div class="tabs-container">
+  <button class="tab-btn active" onclick="switchTab('tab-waiting', this)">1. คิวรอผ่าตัด / คำนวณยา</button>
+  <button class="tab-btn" onclick="switchTab('tab-surgery', this)">2. โต๊ะกำลังผ่าตัด / บันทึก Vitals</button>
+</div>
+
+<div id="tab-waiting" class="tab-content active">
+  <div class="grid-waiting" id="waitingGrid">
+    <p style="color:var(--text-muted);">กำลังโหลดคิว...</p>
+  </div>
+</div>
+
+<div id="tab-surgery" class="tab-content">
+  <div class="grid-surgery" id="surgeryGrid">
+    <p style="color:var(--text-muted);">กำลังโหลดโต๊ะผ่าตัด...</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="rxModal">
+  <div class="modal">
+    <div class="modal-header">💊 จัดยา (Prescription) <span id="rxAnimalName" style="color:var(--teal);"></span></div>
+    <div id="rxFormList" style="display:flex; flex-direction:column; gap:12px; max-height:400px; overflow-y:auto; margin-bottom:20px;">
+      </div>
+    <div class="action-bar">
+      <button class="btn" onclick="closeRxModal()" style="background:#e2e8f0;">ยกเลิก</button>
+      <button class="btn btn-success" onclick="saveRx()">บันทึกรายการยา</button>
     </div>
   </div>
-
-  <div class="main-content">
-    <div class="tables-grid" id="tablesGrid">
-      <p style="color:var(--text-muted); font-size:14px;">กำลังโหลดโต๊ะผ่าตัด...</p>
-    </div>
-  </div>
-
 </div>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-// ฟังก์ชันปัดเศษจำนวนเม็ดยา
-function roundToQuarter(val) { return Math.ceil(val * 4) / 4; }
-
 let currentEventId = null;
+let currentRxAnimalId = null;
+
+// ตั้งค่าโปรโตคอลการคำนวณยา (ปรับแก้ตัวเลข mg/kg ได้ที่นี่)
+const DRUG_PROTOCOL = {
+  xylazine: { dose_mg_kg: 2, conc_mg_ml: 20, name: "Xylazine 20mg/ml" },
+  zoletil:  { dose_mg_kg: 5, conc_mg_ml: 100, name: "Zoletil 100mg/ml" },
+  tolfedine:{ dose_mg_kg: 4, conc_mg_ml: 40, name: "Tolfedine 40mg/ml" },
+  penstrep: { dose_ml_kg: 1, name: "Pen-Strep" } // ใช้เป็น ml/kg โดยตรง
+};
+
+window.switchTab = function(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+};
 
 async function init() {
   const { data: eventId } = await supabase.rpc("get_today_event");
@@ -164,12 +161,14 @@ async function init() {
 }
 
 async function loadData() {
-  await loadQueue();
-  await loadTables();
+  await loadWaiting();
+  await loadSurgery();
 }
 
-// โหลดคิวรอ (waiting)
-async function loadQueue() {
+// ==========================================
+// TAB 1: โหลดคิวรอผ่าตัด (Waiting)
+// ==========================================
+async function loadWaiting() {
   const { data, error } = await supabase
     .from("vasd_queue")
     .select(`
@@ -180,36 +179,64 @@ async function loadQueue() {
     .eq("status", "waiting")
     .order("created_at");
 
-  const list = document.getElementById("queueList");
+  const grid = document.getElementById("waitingGrid");
   if (error || !data || data.length === 0) {
-    list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">ไม่มีคิวรอผ่าตัด</div>`;
+    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); width:100%;">ไม่มีคิวรอผ่าตัด</div>`;
     return;
   }
 
-  list.innerHTML = data.map(q => {
+  grid.innerHTML = data.map(q => {
     const a = q.vasd_animal;
-    const w = a.actual_weight || 0;
+    const w = parseFloat(a.actual_weight) || 0;
+    
+    // คำนวณปริมาณยา (Volume ml)
+    const volXyl = ((w * DRUG_PROTOCOL.xylazine.dose_mg_kg) / DRUG_PROTOCOL.xylazine.conc_mg_ml).toFixed(2);
+    const volZol = ((w * DRUG_PROTOCOL.zoletil.dose_mg_kg) / DRUG_PROTOCOL.zoletil.conc_mg_ml).toFixed(2);
+    const volTol = ((w * DRUG_PROTOCOL.tolfedine.dose_mg_kg) / DRUG_PROTOCOL.tolfedine.conc_mg_ml).toFixed(2);
+    const volPen = (w * DRUG_PROTOCOL.penstrep.dose_ml_kg).toFixed(2);
+
+    let tableOptions = '<option value="">-- เลือกโต๊ะ --</option>';
+    for(let i=1; i<=20; i++) tableOptions += `<option value="${i}">โต๊ะที่ ${i}</option>`;
+
     return `
-      <div class="queue-card" onclick="moveToTable('${q.animal_id}')">
-        <div class="q-head">
-          <span class="q-num">คิว ${a.queue_number}</span>
-          <span class="q-name">${a.animal_name}</span>
+      <div class="card">
+        <div class="card-header">
+          <div style="font-size:16px; font-weight:700;">${a.animal_name}</div>
+          <span class="badge-q">คิว ${a.queue_number}</span>
         </div>
-        <div class="q-info">
-          ${a.species === 'ส' ? 'สุนัข' : 'แมว'} | เพศ: ${a.sex} | น้ำหนัก: ${w} กก.
+        <div style="font-size:14px; margin-bottom:12px;">
+          ${a.species === 'ส' ? 'สุนัข' : 'แมว'} | เพศ: ${a.sex} | <strong style="color:var(--teal);">น้ำหนักจริง: ${w} kg</strong>
         </div>
-        <div style="margin-top:8px; text-align:right;">
-          <button class="btn-primary" style="font-size:11px; padding:4px 10px;">นำขึ้นโต๊ะผ่าตัด ›</button>
+        
+        <div class="calc-box">
+          <div style="font-weight:700; margin-bottom:4px;">💉 คำนวณยาฉีด (Pre-med & Anesthesia)</div>
+          <div class="calc-grid">
+            <div class="calc-item"><span>${DRUG_PROTOCOL.xylazine.name}</span> <span class="vol">${volXyl} ml</span></div>
+            <div class="calc-item"><span>${DRUG_PROTOCOL.zoletil.name}</span> <span class="vol">${volZol} ml</span></div>
+            <div class="calc-item"><span>${DRUG_PROTOCOL.tolfedine.name}</span> <span class="vol">${volTol} ml</span></div>
+            <div class="calc-item"><span>${DRUG_PROTOCOL.penstrep.name}</span> <span class="vol">${volPen} ml</span></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>ระบุโต๊ะผ่าตัด:</label>
+          <select class="form-control" id="table-sel-${a.id}">
+            ${tableOptions}
+          </select>
+        </div>
+        
+        <div style="text-align:right;">
+          <button class="btn btn-primary" onclick="moveToTable('${a.id}')">นำขึ้นโต๊ะผ่าตัด ›</button>
         </div>
       </div>
     `;
   }).join("");
 }
 
-// ย้ายคิวขึ้นโต๊ะผ่าตัด
+// ย้ายขึ้นโต๊ะ
 window.moveToTable = async function(animalId) {
-  const tableNum = prompt("โปรดระบุหมายเลขโต๊ะผ่าตัด (เช่น 1, 2, 3):", "1");
-  if (!tableNum) return;
+  const tableNum = document.getElementById(`table-sel-${animalId}`).value;
+  if (!tableNum) return alert("กรุณาเลือกโต๊ะผ่าตัด");
 
   const { error } = await supabase
     .from("vasd_queue")
@@ -219,230 +246,241 @@ window.moveToTable = async function(animalId) {
   if (!error) loadData();
 };
 
-// คำนวณยาเวลาเลือก Checkbox
-window.toggleRx = function(chk, animalId, drugId) {
-  const item = document.getElementById(`rx-item-${animalId}-${drugId}`);
-  const inputs = document.getElementById(`rx-inputs-${animalId}-${drugId}`);
-  if(chk.checked) {
-    item.classList.add("selected");
-    inputs.style.display = "flex";
-  } else {
-    item.classList.remove("selected");
-    inputs.style.display = "none";
-  }
-};
-
-window.recalcTotal = function(animalId, did) {
-  const dose = parseFloat((document.getElementById(`rx-dose-${animalId}-${did}`).value.match(/[\d.]+/) || [0])[0]);
-  const freq = parseFloat((document.getElementById(`rx-freq-${animalId}-${did}`).value.match(/[\d.]+/) || [0])[0]);
-  const days = parseFloat(document.getElementById(`rx-days-${animalId}-${did}`).value) || 0;
-  document.getElementById(`rx-total-${animalId}-${did}`).value = dose * freq * days;
-};
-
-// โหลดข้อมูลโต๊ะผ่าตัด (surgery)
-async function loadTables() {
+// ==========================================
+// TAB 2: โหลดโต๊ะกำลังผ่าตัด (Surgery)
+// ==========================================
+async function loadSurgery() {
   const { data, error } = await supabase
     .from("vasd_queue")
     .select(`
-      id, animal_id, status, table_number, surgeon_name, anesthesiologist_name,
-      vasd_animal!inner(id, event_id, queue_number, animal_name, species, sex, actual_weight),
+      id, animal_id, status, table_number, surgeon_name, anesthesiologist_name, notes,
+      vasd_animal!inner(
+        id, event_id, queue_number, animal_name, species, sex, actual_weight, health_note,
+        vasd_owner(owner_name, phone),
+        vasd_service(service_type)
+      ),
       vasd_vital_signs(*)
     `)
     .eq("vasd_animal.event_id", currentEventId)
     .eq("status", "surgery")
     .order("table_number");
 
-  const grid = document.getElementById("tablesGrid");
+  const grid = document.getElementById("surgeryGrid");
   if (error || !data || data.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">ไม่มีสัตว์กำลังผ่าตัด</div>`;
+    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">ไม่มีเคสกำลังผ่าตัด</div>`;
     return;
   }
 
-  grid.innerHTML = "";
-
-  data.forEach(q => {
+  grid.innerHTML = data.map(q => {
     const a = q.vasd_animal;
-    const w = parseFloat(a.actual_weight) || 0;
+    const ownerName = a.vasd_owner?.owner_name || 'ไม่ระบุ';
+    const phone = a.vasd_owner?.phone || '-';
+    const services = (a.vasd_service || []).map(s => s.service_type).join(', ') || '-';
+    
+    // Parse Staff จาก notes (เนื่องจาก DB มีแค่ surgeon กับ anes)
+    let extraNotes = { assistant: '', nurse: '' };
+    try { if(q.notes) extraNotes = JSON.parse(q.notes); } catch(e){}
 
-    // จัดเรียง Vital Signs
+    // ประวัติ Vitals เรียงตามเวลา
     const vitals = (q.vasd_vital_signs || []).sort((x, y) => {
         const t1 = x.time_recorded || x.created_at || "";
         const t2 = y.time_recorded || y.created_at || "";
         return t1.localeCompare(t2);
     });
-
+    
     let vitalRows = vitals.map(v => {
       let timeStr = v.time_recorded ? v.time_recorded.substring(0,5) : (v.created_at ? new Date(v.created_at).toLocaleTimeString("th-TH").substring(0,5) : '-');
-      return `
-        <tr>
-          <td>${timeStr}</td>
-          <td>${v.hr || '-'}</td>
-          <td>${v.rr || '-'}</td>
-          <td>${v.temp || v.bt || '-'}</td>
-          <td>${v.spo2 ? v.spo2+'%' : '-'}</td>
-          <td>${v.zoletil_top || '-'}</td>
-        </tr>
-      `;
+      return `<tr>
+        <td>${timeStr}</td><td>${v.hr||'-'}</td><td>${v.rr||'-'}</td><td>${v.temp||'-'}</td>
+        <td>${v.spo2 ? v.spo2+'%' : '-'}</td><td>${v.zoletil_top||'-'}</td><td>${v.note||'-'}</td>
+      </tr>`;
     }).join("");
+    if(vitals.length === 0) vitalRows = `<tr><td colspan="7" style="text-align:center; color:#aaa;">ยังไม่มีบันทึก</td></tr>`;
 
-    if(vitals.length === 0) vitalRows = `<tr><td colspan="6" style="text-align:center; color:#aaa;">ยังไม่มีการบันทึก</td></tr>`;
+    return `
+      <div class="card">
+        <div class="card-header" style="background:#e6fffa; padding:16px; margin:-20px -20px 20px -20px; border-radius:10px 10px 0 0;">
+          <div style="font-size:18px; font-weight:700; color:var(--teal);">โต๊ะผ่าตัดที่ ${q.table_number}</div>
+          <span class="badge-q">คิว ${a.queue_number}</span>
+        </div>
 
-    // เตรียมรายการยา Rx
-    const drugs = [
-      {id:"dox",    name:"ปฏิชีวนะ Doxycycline 100 mg", tabs: roundToQuarter((w*10)/100)||0.25, freq:"วันละ 1 ครั้ง", f:1, days:14},
-      {id:"nor200", name:"ปฏิชีวนะ Norfloxacin 200 mg", tabs: roundToQuarter((w*10)/200)||0.25, freq:"วันละ 2 ครั้ง", f:2, days:7},
-      {id:"tolf60", name:"แก้ปวด Tolfedine 60 mg",      tabs: roundToQuarter((w*4)/60)||0.25,   freq:"วันละ 1 ครั้ง", f:1, days:3}
-    ];
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          <div>
+            <div style="background:#f7fafc; padding:12px; border-radius:6px; margin-bottom:16px; font-size:14px; line-height:1.6;">
+              <strong>ชื่อสัตว์:</strong> ${a.animal_name} (${a.species === 'ส' ? 'สุนัข' : 'แมว'} | เพศ ${a.sex} | นน. ${a.actual_weight} kg)<br>
+              <strong>เจ้าของ:</strong> ${ownerName} (โทร: ${phone})<br>
+              <strong>บริการ:</strong> ${services}<br>
+              <strong>บันทึกสุขภาพ:</strong> <span style="color:var(--danger);">${a.health_note || '-'}</span>
+            </div>
 
-    let rxHtml = drugs.map(d => `
-      <div class="rx-item" id="rx-item-${a.id}-${d.id}">
-        <label class="rx-head">
-          <input type="checkbox" id="rx-chk-${a.id}-${d.id}" data-name="${d.name}" onchange="toggleRx(this, '${a.id}', '${d.id}')">
-          <span>${d.name}</span>
-        </label>
-        <div class="rx-inputs" id="rx-inputs-${a.id}-${d.id}">
-          <input type="text" id="rx-dose-${a.id}-${d.id}" value="ครั้งละ ${d.tabs} เม็ด" oninput="recalcTotal('${a.id}','${d.id}')">
-          <input type="text" id="rx-freq-${a.id}-${d.id}" value="${d.freq}" oninput="recalcTotal('${a.id}','${d.id}')">
-          <div style="display:flex; gap:6px;">
-            <input type="number" id="rx-days-${a.id}-${d.id}" value="${d.days}" title="จำนวนวัน" style="width:50%;" oninput="recalcTotal('${a.id}','${d.id}')">
-            <input type="number" step="0.25" id="rx-total-${a.id}-${d.id}" value="${d.tabs * d.f * d.days}" title="รวมเม็ด" style="width:50%; font-weight:bold; color:var(--danger);" readonly>
+            <div class="staff-grid">
+              <div><label style="font-size:12px; color:var(--text-muted);">👨‍⚕️ Surgeon (บังคับ)</label><input type="text" class="form-control" id="surg-${a.id}" value="${q.surgeon_name || ''}" placeholder="ชื่อสัตวแพทย์"></div>
+              <div><label style="font-size:12px; color:var(--text-muted);">🧑‍⚕️ Assistant</label><input type="text" class="form-control" id="asst-${a.id}" value="${extraNotes.assistant || ''}" placeholder="ผู้ช่วย"></div>
+              <div><label style="font-size:12px; color:var(--text-muted);">💉 Anesthetist</label><input type="text" class="form-control" id="anes-${a.id}" value="${q.anesthesiologist_name || ''}" placeholder="หมอดมยา"></div>
+              <div><label style="font-size:12px; color:var(--text-muted);">🩺 Nurse</label><input type="text" class="form-control" id="nurs-${a.id}" value="${extraNotes.nurse || ''}" placeholder="พยาบาล"></div>
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="saveStaff('${a.id}')">💾 บันทึกรายชื่อ Staff</button>
+          </div>
+
+          <div>
+            <h4 style="font-size:14px; margin-bottom:8px; color:var(--navy);">บันทึกสัญญาณชีพ (Vital Signs)</h4>
+            <div class="vital-form">
+              <input type="time" id="v-time-${a.id}" value="${new Date().toTimeString().substring(0,5)}" title="เวลา">
+              <input type="number" id="v-hr-${a.id}" placeholder="HR">
+              <input type="number" id="v-rr-${a.id}" placeholder="RR">
+              <input type="number" id="v-temp-${a.id}" placeholder="Temp(F)">
+              <input type="number" id="v-spo2-${a.id}" placeholder="SpO2%">
+              <input type="text" id="v-zol-${a.id}" placeholder="Zoletil (ml)">
+              <input type="text" id="v-note-${a.id}" placeholder="Note" style="min-width:120px;">
+              <button class="btn btn-primary" onclick="addVital('${a.id}')">➕ เพิ่ม</button>
+            </div>
+            
+            <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:6px;">
+              <table class="vital-table" style="margin:0;">
+                <thead style="position:sticky; top:0;"><tr><th>เวลา</th><th>HR</th><th>RR</th><th>Temp</th><th>O2%</th><th>Zoletil</th><th>Note</th></tr></thead>
+                <tbody>${vitalRows}</tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-    `).join("");
 
-    const card = document.createElement("div");
-    card.className = "table-card";
-    card.innerHTML = `
-      <div class="tc-header">
-        <div class="tc-title">โต๊ะที่ ${q.table_number || '-'}</div>
-        <div style="font-size:13px; font-weight:600; background:rgba(26,107,114,0.1); color:var(--teal); padding:4px 10px; border-radius:20px;">คิว ${a.queue_number}</div>
-      </div>
-      
-      <div class="tc-body">
-        <div class="info-box">
-          <strong>${a.animal_name}</strong> (${a.species === 'ส' ? 'สุนัข' : 'แมว'}) | เพศ: ${a.sex} | น้ำหนักจริง: ${w} กก.
+        <div class="action-bar">
+          <button class="btn btn-warning" onclick="openRxModal('${a.id}', '${a.animal_name}')">💊 จัดยา (Prescription)</button>
+          <button class="btn btn-success" onclick="finishSurgery('${a.id}')">ยกลงโต๊ะไปพักฟื้น ›</button>
         </div>
-
-        <h4 style="font-size:13px; margin-bottom:8px; color:var(--text-muted);">บันทึกสัญญาณชีพ (Vital Signs)</h4>
-        <table class="vital-table">
-          <thead><tr><th>เวลา</th><th>HR</th><th>RR</th><th>Temp</th><th>SpO2</th><th>Top-up</th></tr></thead>
-          <tbody>${vitalRows}</tbody>
-        </table>
-        
-        <div class="vital-form">
-          <input type="time" id="v-time-${a.id}" value="${new Date().toTimeString().substring(0,5)}" title="เวลา">
-          <input type="number" id="v-hr-${a.id}" placeholder="HR">
-          <input type="number" id="v-rr-${a.id}" placeholder="RR">
-          <input type="number" id="v-temp-${a.id}" placeholder="Temp">
-          <input type="number" id="v-spo2-${a.id}" placeholder="SpO2%">
-          <input type="text" id="v-top-${a.id}" placeholder="Zoletil Top">
-          <button class="btn-primary" onclick="addVital('${a.id}')">➕ เพิ่ม</button>
-        </div>
-
-        <div class="rx-section">
-          <div class="rx-title">💊 สั่งจ่ายยา (คำนวณจากน้ำหนัก ${w} กก.)</div>
-          <div class="rx-grid">${rxHtml}</div>
-        </div>
-      </div>
-
-      <div class="tc-footer">
-        <button class="btn-cancel" onclick="cancelSurgery('${a.id}')">ยกเลิก (คืนคิว)</button>
-        <button class="btn-finish" onclick="finishSurgery('${a.id}')">ผ่าตัดเสร็จสิ้น (ส่งพักฟื้น) ›</button>
       </div>
     `;
-    grid.appendChild(card);
-  });
+  }).join("");
 }
 
-// ---------------------------------------------
-// บันทึก Vital Signs โดยใช้ Temp และ Time_recorded 
-// ---------------------------------------------
-window.addVital = async function(animalId) {
-  const timeInput = document.getElementById("v-time-" + animalId).value;
-  if (!timeInput) return alert("กรุณาระบุเวลา");
+// บันทึกชื่อ Staff ลง DB (เก็บ Asst/Nurse ใน notes เป็น JSON)
+window.saveStaff = async function(animalId) {
+  const surg = document.getElementById(`surg-${animalId}`).value;
+  const asst = document.getElementById(`asst-${animalId}`).value;
+  const anes = document.getElementById(`anes-${animalId}`).value;
+  const nurs = document.getElementById(`nurs-${animalId}`).value;
 
-  const hrVal = document.getElementById("v-hr-" + animalId).value;
-  const rrVal = document.getElementById("v-rr-" + animalId).value;
-  const tempVal = document.getElementById("v-temp-" + animalId).value;
-  const spo2Val = document.getElementById("v-spo2-" + animalId).value;
-  const topVal = document.getElementById("v-top-" + animalId).value;
+  const extraNotes = JSON.stringify({ assistant: asst, nurse: nurs });
+
+  const { error } = await supabase.from('vasd_queue').update({
+    surgeon_name: surg,
+    anesthesiologist_name: anes,
+    notes: extraNotes,
+    updated_at: new Date()
+  }).eq('animal_id', animalId);
+
+  if(error) alert("บันทึกผิดพลาด: " + error.message);
+  else alert("บันทึกรายชื่อ Staff เรียบร้อย");
+};
+
+// บันทึก Vital Signs
+window.addVital = async function(animalId) {
+  const timeInput = document.getElementById(`v-time-${animalId}`).value;
+  if (!timeInput) return alert("กรุณาระบุเวลา");
 
   const { error } = await supabase.from('vasd_vital_signs').insert({
     animal_id: animalId,
-    time_recorded: timeInput,  // ✅ บันทึกเวลาที่เลือก
-    hr: hrVal || null,
-    rr: rrVal || null,
-    temp: tempVal || null,     // ✅ บันทึกลง Temp (ไม่ใช่ bt)
-    spo2: spo2Val || null,
-    zoletil_top: topVal || null
+    time_recorded: timeInput,
+    hr: document.getElementById(`v-hr-${animalId}`).value || null,
+    rr: document.getElementById(`v-rr-${animalId}`).value || null,
+    temp: document.getElementById(`v-temp-${animalId}`).value || null,
+    spo2: document.getElementById(`v-spo2-${animalId}`).value || null,
+    zoletil_top: document.getElementById(`v-zol-${animalId}`).value || null,
+    note: document.getElementById(`v-note-${animalId}`).value || null
   });
 
-  if (error) {
-    alert("บันทึกไม่สำเร็จ: " + error.message);
-  } else {
-    loadTables(); // โหลดตารางใหม่เพื่อให้ข้อมูลมาแสดง
-  }
+  if (error) alert("บันทึกไม่สำเร็จ: " + error.message);
+  else loadSurgery(); 
 };
 
-// ---------------------------------------------
-// ผ่าตัดเสร็จสิ้น (ส่งไปห้องพักฟื้น และบันทึกยา)
-// ---------------------------------------------
-window.finishSurgery = async function(animalId) {
-  if(!confirm("ยืนยันว่าผ่าตัดเสร็จแล้ว และต้องการส่งสัตว์เข้าห้องพักฟื้น?")) return;
+// ==========================================
+// MODAL: จัดยา (Prescription)
+// ==========================================
+window.openRxModal = function(animalId, animalName) {
+  currentRxAnimalId = animalId;
+  document.getElementById("rxAnimalName").innerText = `- ${animalName}`;
+  
+  // สร้าง Form เปล่าๆ 3 แถวให้คลินิกพิมพ์จัดยา (ปรับให้ตรงกับการใช้งานจริง)
+  let formHtml = '';
+  for(let i=1; i<=3; i++) {
+    formHtml += `
+      <div style="display:flex; gap:10px; background:#f7fafc; padding:10px; border:1px solid var(--border); border-radius:6px;">
+        <input type="text" id="rx-name-${i}" class="form-control" placeholder="ชื่อยา" style="flex:2;">
+        <input type="text" id="rx-dose-${i}" class="form-control" placeholder="Dose (เช่น 1 เม็ด)">
+        <input type="text" id="rx-freq-${i}" class="form-control" placeholder="ความถี่ (เช่น 2 เวลา)">
+        <input type="number" id="rx-days-${i}" class="form-control" placeholder="จำนวนวัน" style="width:80px;">
+        <input type="number" id="rx-total-${i}" class="form-control" placeholder="รวมเม็ด" style="width:80px;">
+      </div>
+    `;
+  }
+  document.getElementById("rxFormList").innerHTML = formHtml;
+  document.getElementById("rxModal").style.display = "flex";
+};
 
-  // รวบรวมข้อมูลยาที่ติ๊กเลือก
+window.closeRxModal = function() {
+  document.getElementById("rxModal").style.display = "none";
+  currentRxAnimalId = null;
+};
+
+window.saveRx = async function() {
   const rxInserts = [];
-  document.querySelectorAll(`input[id^="rx-chk-${animalId}-"]:checked`).forEach(el => {
-    const did = el.id.split("-").pop();
-    rxInserts.push({
-      animal_id: animalId,
-      drug_id: el.dataset.name,
-      dose: document.getElementById(`rx-dose-${animalId}-${did}`).value,
-      freq: document.getElementById(`rx-freq-${animalId}-${did}`).value,
-      days: parseInt(document.getElementById(`rx-days-${animalId}-${did}`).value) || 5,
-      total_pills: parseFloat(document.getElementById(`rx-total-${animalId}-${did}`).value) || 0
-    });
-  });
-
-  if(rxInserts.length > 0) {
-    const { error: rxError } = await supabase.from("vasd_prescription").insert(rxInserts);
-    if(rxError) console.error("Rx Error:", rxError);
+  for(let i=1; i<=3; i++) {
+    const name = document.getElementById(`rx-name-${i}`).value;
+    if(name.trim() !== '') {
+      rxInserts.push({
+        animal_id: currentRxAnimalId,
+        drug_id: name, // ใช้ช่องชื่อยาเป็น drug_id ในหน้า UI ชั่วคราว
+        dose: document.getElementById(`rx-dose-${i}`).value,
+        freq: document.getElementById(`rx-freq-${i}`).value,
+        days: parseInt(document.getElementById(`rx-days-${i}`).value) || null,
+        total_pills: parseFloat(document.getElementById(`rx-total-${i}`).value) || 0
+      });
+    }
   }
 
-  // อัปเดตสถานะเป็น recovery
+  if(rxInserts.length > 0) {
+    const { error } = await supabase.from("vasd_prescription").insert(rxInserts);
+    if(error) {
+      alert("บันทึกยาผิดพลาด: " + error.message);
+      return;
+    }
+  }
+  alert("บันทึกการจัดยาเรียบร้อยส่งต่อให้หน้าจัดยาแล้ว");
+  closeRxModal();
+};
+
+// ==========================================
+// ยกลงโต๊ะไปพักฟื้น
+// ==========================================
+window.finishSurgery = async function(animalId) {
+  const surgInput = document.getElementById(`surg-${animalId}`).value;
+  if(!surgInput || surgInput.trim() === "") {
+    alert("กรุณาระบุชื่อ Surgeon ก่อนส่งสัตว์ไปห้องพักฟื้น!");
+    document.getElementById(`surg-${animalId}`).focus();
+    return;
+  }
+
+  if(!confirm("ยืนยันการยกลงโต๊ะผ่าตัด และส่งเข้าสู่สถานะ พักฟื้น (Recovery)?")) return;
+
+  // บันทึก Staff ทิ้งทวนก่อนย้าย Status
+  await saveStaff(animalId);
+
+  // อัปเดตสถานะ
   const { error } = await supabase
     .from("vasd_queue")
     .update({ status: "recovery", table_number: null, updated_at: new Date() })
     .eq("animal_id", animalId);
 
-  if (error) {
-    alert("อัปเดตสถานะไม่สำเร็จ: " + error.message);
-  } else {
-    alert(`✅ ส่งเข้าห้องพักฟื้นเรียบร้อย ${rxInserts.length > 0 ? '(พร้อมบันทึกยา)' : ''}`);
-    loadData();
-  }
+  if (error) alert("อัปเดตสถานะไม่สำเร็จ: " + error.message);
+  else loadData();
 };
 
-// ---------------------------------------------
-// ยกเลิกและคืนคิว
-// ---------------------------------------------
-window.cancelSurgery = async function(animalId) {
-  if(!confirm("ต้องการยกเลิกเคสนี้ และคืนกลับไปที่คิวรอผ่าตัดใช่หรือไม่?")) return;
-  await supabase
-    .from("vasd_queue")
-    .update({ status: "waiting", table_number: null, updated_at: new Date() })
-    .eq("animal_id", animalId);
-  loadData();
-};
-
-// Real-time
+// Real-time Update
 supabase.channel("anesthesia-live")
   .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadData)
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_vital_signs" }, loadTables)
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_vital_signs" }, loadSurgery)
   .subscribe();
 
-// เริ่มต้น
 init();
 </script>
 </body>
