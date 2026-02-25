@@ -536,6 +536,16 @@ window.deleteRx = async function(rxId) {
 
 /* ─── การจัดการพิมพ์ (Print) ─── */
 
+// สร้างวันที่จำลองสำหรับ {{today}} และ {{next7day}}
+function getTodayAndNext7() {
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const next7 = new Date();
+  next7.setDate(next7.getDate() + 7);
+  const next7Str = next7.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return { todayStr, next7Str };
+}
+
 // 1. พิมพ์ฉลากยาแบบเดี่ยว/ซองยา (เจาะจงยาแต่ละตัว)
 async function generateStickerHTML(rxId) {
   const { data: rx, error } = await supabase.from("vasd_prescription").select(`*, vasd_animal ( queue_number, animal_name, species, sex, vasd_owner ( owner_name, phone ), vasd_service ( service_type ) )`).eq("id", rxId).single();
@@ -550,9 +560,26 @@ async function generateStickerHTML(rxId) {
   const phone = a.vasd_owner?.phone || "ไม่ระบุ";
   const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
 
+  const { todayStr, next7Str } = getTodayAndNext7();
+
   let html = `<div class="sticker-page">`;
   tmpl.config.forEach(l => {
-    let text = l.text.replace("{{queue_number}}", a.queue_number || "").replace("{{animal_name}}", a.animal_name || "").replace("{{species}}", spcText).replace("{{sex}}", a.sex || "").replace("{{owner_name}}", ownerName).replace("{{phone}}", phone).replace("{{services}}", services).replace("{{drug_id}}", rx.drug_id || "").replace("{{dose}}", rx.dose || "").replace("{{freq}}", rx.freq || "").replace("{{days}}", rx.days ? rx.days + " วัน" : "").replace("{{total_pills}}", rx.total_pills ? rx.total_pills + " เม็ด" : "");
+    let text = l.text
+      .replace(/{{queue_number}}/g, a.queue_number || "")
+      .replace(/{{animal_name}}/g, a.animal_name || "")
+      .replace(/{{species}}/g, spcText)
+      .replace(/{{sex}}/g, a.sex || "")
+      .replace(/{{owner_name}}/g, ownerName)
+      .replace(/{{phone}}/g, phone)
+      .replace(/{{services}}/g, services)
+      .replace(/{{drug_id}}/g, rx.drug_id || "")
+      .replace(/{{dose}}/g, rx.dose || "")
+      .replace(/{{freq}}/g, rx.freq || "")
+      .replace(/{{days}}/g, rx.days ? rx.days + " วัน" : "")
+      .replace(/{{total_pills}}/g, rx.total_pills ? rx.total_pills + " เม็ด" : "")
+      .replace(/{{today}}/g, todayStr)
+      .replace(/{{next7day}}/g, next7Str);
+
     html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
   });
   html += `</div>`;
@@ -572,9 +599,26 @@ async function generateGeneralStickerHTML(animalId, templateType) {
   const phone = a.vasd_owner?.phone || "ไม่ระบุ";
   const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
 
+  const { todayStr, next7Str } = getTodayAndNext7();
+
   let html = `<div class="sticker-page">`;
   tmpl.config.forEach(l => {
-    let text = l.text.replace("{{queue_number}}", a.queue_number || "").replace("{{animal_name}}", a.animal_name || "").replace("{{species}}", spcText).replace("{{sex}}", a.sex || "").replace("{{owner_name}}", ownerName).replace("{{phone}}", phone).replace("{{services}}", services).replace("{{drug_id}}", "").replace("{{dose}}", "").replace("{{freq}}", "").replace("{{days}}", "").replace("{{total_pills}}", "");
+    let text = l.text
+      .replace(/{{queue_number}}/g, a.queue_number || "")
+      .replace(/{{animal_name}}/g, a.animal_name || "")
+      .replace(/{{species}}/g, spcText)
+      .replace(/{{sex}}/g, a.sex || "")
+      .replace(/{{owner_name}}/g, ownerName)
+      .replace(/{{phone}}/g, phone)
+      .replace(/{{services}}/g, services)
+      .replace(/{{drug_id}}/g, "")
+      .replace(/{{dose}}/g, "")
+      .replace(/{{freq}}/g, "")
+      .replace(/{{days}}/g, "")
+      .replace(/{{total_pills}}/g, "")
+      .replace(/{{today}}/g, todayStr)
+      .replace(/{{next7day}}/g, next7Str);
+
     html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
   });
   html += `</div>`;
