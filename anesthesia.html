@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>วางยาสลบ</title>
+<title>RMUTTO - VASD | วางยาสลบ (Anesthesia)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
@@ -112,25 +112,33 @@ async function init() {
 // โหลดคิวรอวางยาสลบ (Waiting)
 // ==========================================
 async function loadWaiting() {
+  // ดึงจากตาราง vasd_animal เป็นหลัก เพื่อป้องกันปัญหา Error สับสน Column
   const { data, error } = await supabase
-    .from("vasd_queue")
+    .from("vasd_animal")
     .select(`
-      id, animal_id, status,
-      vasd_animal!inner(id, event_id, queue_number, animal_name, species, sex, actual_weight)
+      id, event_id, queue_number, animal_name, species, sex, est_weight, actual_weight,
+      vasd_queue!inner(id, status)
     `)
-    .eq("vasd_animal.event_id", currentEventId)
-    .eq("status", "waiting")
-    .order("created_at");
+    .eq("event_id", currentEventId)
+    .eq("vasd_queue.status", "waiting")
+    .order("queue_number");
 
   const grid = document.getElementById("waitingGrid");
-  if (error || !data || data.length === 0) {
+  
+  if (error) {
+    console.error("Supabase Error:", error);
+    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--danger); width:100%; grid-column: 1 / -1;">เกิดข้อผิดพลาด: ${error.message}</div>`;
+    return;
+  }
+  
+  if (!data || data.length === 0) {
     grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); width:100%; grid-column: 1 / -1;">ไม่มีคิวรอวางยาสลบ</div>`;
     return;
   }
 
-  grid.innerHTML = data.map(q => {
-    const a = q.vasd_animal;
-    const w = parseFloat(a.actual_weight) || 0;
+  grid.innerHTML = data.map(a => {
+    // ใช้น้ำหนักจริง ถ้ายังไม่มีให้ดึงน้ำหนักประเมิน (est_weight) มาเป็นค่าเริ่มต้น
+    const w = parseFloat(a.actual_weight) || parseFloat(a.est_weight) || 0;
     
     // คำนวณปริมาณยาเริ่มต้น
     const volXyl = ((w * DRUG_PROTOCOL.xylazine.dose_mg_kg) / DRUG_PROTOCOL.xylazine.conc_mg_ml).toFixed(2);
@@ -183,7 +191,7 @@ window.recalcDrugs = function(animalId) {
   document.getElementById(`vol-pen-${animalId}`).innerText = volPen + " ml";
 };
 
-// ย้ายเคสไปสถานะ 'กำลังวางยาสลบ'
+// ย้ายเคสไปสถานะ 'กำลังวางยาสลบ' (anesthesia)
 window.sendToAnesthesia = async function(animalId) {
   const newWeight = parseFloat(document.getElementById(`weight-${animalId}`).value) || 0;
   if (newWeight <= 0) return alert("กรุณาระบุน้ำหนักที่ถูกต้องก่อนทำการวางยา");
@@ -206,4 +214,12 @@ window.sendToAnesthesia = async function(animalId) {
   }
 };
 
-// Real
+// Real-time Update (รับข้อมูลล่าสุดจาก Database เสมอ)
+supabase.channel("anesthesia-live")
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadWaiting)
+  .subscribe();
+
+init();
+</script>
+</body>
+</html>
