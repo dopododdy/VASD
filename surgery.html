@@ -113,166 +113,167 @@ header{
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-let currentEventId = null;
 let currentRxAnimalId = null;
 
 async function init() {
-  const { data: eventId } = await supabase.rpc("get_today_event");
-  currentEventId = eventId;
   loadSurgeryCases();
 }
 
 // ==========================================
-// โหลดเคสทั้งหมด (มาจากห้องดมยา หรือ กำลังผ่าตัดอยู่)
+// โหลดเคสทั้งหมดโดยดึงจากคิวโดยตรง (ตัดปัญหาเรื่องวันที่)
 // ==========================================
 async function loadSurgeryCases() {
-  // แก้ไข: ดึงข้อมูลทั้งหมดของ Event วันนี้มาก่อน (เอา .in ออก) เพื่อป้องกัน Error ในการ query
-  const { data, error } = await supabase
-    .from("vasd_animal")
-    .select(`
-      id, event_id, queue_number, animal_name, species, sex, actual_weight, health_note,
-      vasd_owner(owner_name, phone),
-      vasd_service(service_type),
-      vasd_queue!inner(id, status, table_number, surgeon_name, anesthesiologist_name, notes),
-      vasd_vital_signs(*)
-    `)
-    .eq("event_id", currentEventId)
-    .order("queue_number");
-
   const grid = document.getElementById("surgeryGrid");
+  
+  try {
+    // 1. วิ่งหาคิวที่มีสถานะเป็น anesthesia หรือ surgery ก่อนเป็นอันดับแรก
+    const { data: queues, error: qError } = await supabase
+      .from("vasd_queue")
+      .select("*")
+      .in("status", ["anesthesia", "surgery"]);
 
-  if (error) {
-    console.error("Supabase Query Error:", error);
-    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--danger);">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</div>`;
-    return;
-  }
+    if (qError) throw qError;
 
-  // ใช้ JavaScript กรองเฉพาะคนที่สถานะ 'anesthesia' (วางยา) และ 'surgery' (ผ่าตัด)
-  const activeCases = data.filter(a => {
-    const status = a.vasd_queue[0]?.status;
-    return status === 'anesthesia' || status === 'surgery';
-  });
-
-  if (!activeCases || activeCases.length === 0) {
-    grid.innerHTML = `<div style="text-align:center; padding:40px; background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-muted);">ไม่มีเคสรอผ่าตัดหรือกำลังผ่าตัดในขณะนี้</div>`;
-    return;
-  }
-
-  // เรียงลำดับตามคิว
-  activeCases.sort((a, b) => a.queue_number - b.queue_number);
-
-  grid.innerHTML = activeCases.map(a => {
-    const q = a.vasd_queue[0];
-    const ownerName = a.vasd_owner?.owner_name || 'ไม่ระบุ';
-    const phone = a.vasd_owner?.phone || '-';
-    
-    // ดึงบริการทั้งหมดมาแสดง
-    const services = (a.vasd_service || []).map(s => s.service_type).join(', ');
-    const displayServices = services ? services : '<span style="color:#aaa;">ไม่มีข้อมูลบริการ</span>';
-    
-    // Parse Staff จาก notes 
-    let extraNotes = { assistant: '', nurse: '' };
-    try { if(q.notes) extraNotes = JSON.parse(q.notes); } catch(e){}
-
-    // สร้าง Option โต๊ะผ่าตัด
-    let tableOptions = '<option value="">-- เลือกโต๊ะผ่าตัด --</option>';
-    for(let i=1; i<=20; i++) {
-      let selected = (q.table_number === i) ? 'selected' : '';
-      tableOptions += `<option value="${i}" ${selected}>โต๊ะผ่าตัดที่ ${i}</option>`;
+    if (!queues || queues.length === 0) {
+      grid.innerHTML = `<div style="text-align:center; padding:40px; background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-muted);">ไม่มีเคสรอผ่าตัดหรือกำลังผ่าตัดในขณะนี้</div>`;
+      return;
     }
 
-    // ประวัติ Vitals เรียงตามเวลา
-    const vitals = (a.vasd_vital_signs || []).sort((x, y) => {
-        const t1 = x.time_recorded || x.created_at || "";
-        const t2 = y.time_recorded || y.created_at || "";
-        return t1.localeCompare(t2);
+    // 2. ดึง animal_id ออกมาเพื่อไปหาข้อมูลสัตว์และประวัติ
+    const animalIds = queues.map(q => q.animal_id);
+    const { data: animals, error: aError } = await supabase
+      .from("vasd_animal")
+      .select(`
+        id, queue_number, animal_name, species, sex, actual_weight, health_note,
+        vasd_owner(owner_name, phone),
+        vasd_service(service_type),
+        vasd_vital_signs(*)
+      `)
+      .in("id", animalIds);
+
+    if (aError) throw aError;
+
+    // 3. นำข้อมูลมาประกอบกัน
+    const activeCases = animals.map(animal => {
+      const matchedQueue = queues.find(x => x.animal_id === animal.id);
+      return { ...animal, vasd_queue: [matchedQueue] };
     });
-    
-    let vitalRows = vitals.map(v => {
-      let timeStr = v.time_recorded ? v.time_recorded.substring(0,5) : (v.created_at ? new Date(v.created_at).toLocaleTimeString("th-TH").substring(0,5) : '-');
-      return `<tr>
-        <td>${timeStr}</td><td>${v.hr||'-'}</td><td>${v.rr||'-'}</td><td>${v.temp||'-'}</td>
-        <td>${v.spo2 ? v.spo2+'%' : '-'}</td><td>${v.zoletil_top||'-'}</td><td style="text-align:left;">${v.note||'-'}</td>
-      </tr>`;
+
+    // เรียงลำดับตามคิว
+    activeCases.sort((a, b) => a.queue_number - b.queue_number);
+
+    grid.innerHTML = activeCases.map(a => {
+      const q = a.vasd_queue[0];
+      const ownerName = a.vasd_owner?.owner_name || 'ไม่ระบุ';
+      const phone = a.vasd_owner?.phone || '-';
+      
+      const services = (a.vasd_service || []).map(s => s.service_type).join(', ');
+      const displayServices = services ? services : '<span style="color:#aaa;">ไม่มีข้อมูลบริการ</span>';
+      
+      let extraNotes = { assistant: '', nurse: '' };
+      try { if(q.notes) extraNotes = JSON.parse(q.notes); } catch(e){}
+
+      let tableOptions = '<option value="">-- เลือกโต๊ะผ่าตัด --</option>';
+      for(let i=1; i<=20; i++) {
+        let selected = (q.table_number === i) ? 'selected' : '';
+        tableOptions += `<option value="${i}" ${selected}>โต๊ะผ่าตัดที่ ${i}</option>`;
+      }
+
+      const vitals = (a.vasd_vital_signs || []).sort((x, y) => {
+          const t1 = x.time_recorded || x.created_at || "";
+          const t2 = y.time_recorded || y.created_at || "";
+          return t1.localeCompare(t2);
+      });
+      
+      let vitalRows = vitals.map(v => {
+        let timeStr = v.time_recorded ? v.time_recorded.substring(0,5) : (v.created_at ? new Date(v.created_at).toLocaleTimeString("th-TH").substring(0,5) : '-');
+        return `<tr>
+          <td>${timeStr}</td><td>${v.hr||'-'}</td><td>${v.rr||'-'}</td><td>${v.temp||'-'}</td>
+          <td>${v.spo2 ? v.spo2+'%' : '-'}</td><td>${v.zoletil_top||'-'}</td><td style="text-align:left;">${v.note||'-'}</td>
+        </tr>`;
+      }).join("");
+      if(vitals.length === 0) vitalRows = `<tr><td colspan="7" style="text-align:center; color:#aaa; padding: 20px;">ยังไม่มีข้อมูลบันทึกสัญญาณชีพ</td></tr>`;
+
+      const currentTime = new Date().toTimeString().substring(0,5);
+
+      const isAnesthesia = (q.status === 'anesthesia');
+      const cardBorderColor = isAnesthesia ? 'var(--warning)' : 'var(--teal)';
+      const headerTitle = isAnesthesia ? '💉 กำลังวางยาสลบ (รอเลือกโต๊ะ)' : `🔬 โต๊ะผ่าตัดที่ ${q.table_number}`;
+
+      return `
+        <div class="card" style="border-top: 4px solid ${cardBorderColor};">
+          <div class="card-header" style="background:#f7fafc; padding:16px; margin:-20px -20px 20px -20px; border-radius:10px 10px 0 0;">
+            <div style="font-size:18px; font-weight:700; color:${cardBorderColor};">
+              ${headerTitle}
+            </div>
+            <span class="badge-q">คิว ${a.queue_number}</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+            <div>
+              <div style="background:#fff; border:1px solid var(--border); padding:16px; border-radius:var(--radius-sm); margin-bottom:16px; font-size:14px; line-height:1.8;">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                  <strong>ชื่อสัตว์: <span style="color:var(--navy); font-size:16px;">${a.animal_name}</span></strong>
+                  <span>${a.species === 'ส' ? 'สุนัข 🐶' : 'แมว 🐱'} | ${a.sex} | ${a.actual_weight} kg</span>
+                </div>
+                <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px;">
+                  <strong>เจ้าของ:</strong> ${ownerName} (โทร: ${phone})<br>
+                  <strong>บริการที่ต้องได้รับ:</strong> <span style="color:var(--teal); font-weight: 600;">${displayServices}</span><br>
+                  <strong>บันทึกสุขภาพ (Health Note):</strong> <span style="color:var(--danger);">${a.health_note || 'ไม่มี'}</span>
+                </div>
+              </div>
+
+              <h4 style="font-size:14px; color:var(--navy); margin-bottom: 10px;">👨‍⚕️ ระบุโต๊ะ และทีมผ่าตัด</h4>
+              <div class="staff-grid">
+                <div style="grid-column: 1 / -1;">
+                  <label style="font-size:12px; color:var(--text-muted); font-weight:bold;">หมายเลขโต๊ะผ่าตัด *</label>
+                  <select class="form-control" id="table-sel-${a.id}">${tableOptions}</select>
+                </div>
+                <div><label style="font-size:12px; color:var(--text-muted);">Surgeon (ศัลยแพทย์) *</label><input type="text" class="form-control" id="surg-${a.id}" value="${q.surgeon_name || ''}" placeholder="บังคับกรอก"></div>
+                <div><label style="font-size:12px; color:var(--text-muted);">Assistant (ผู้ช่วย)</label><input type="text" class="form-control" id="asst-${a.id}" value="${extraNotes.assistant || ''}" placeholder="ชื่อผู้ช่วย"></div>
+                <div><label style="font-size:12px; color:var(--text-muted);">Anesthetist (วิสัญญี)</label><input type="text" class="form-control" id="anes-${a.id}" value="${q.anesthesiologist_name || ''}" placeholder="หมอดมยา"></div>
+                <div><label style="font-size:12px; color:var(--text-muted);">Nurse (พยาบาล)</label><input type="text" class="form-control" id="nurs-${a.id}" value="${extraNotes.nurse || ''}" placeholder="พยาบาล"></div>
+              </div>
+              <button class="btn btn-primary" style="width:100%; margin-bottom:10px; background:var(--navy);" onclick="saveSurgeryInfo('${a.id}')">💾 บันทึกโต๊ะ และทีมงาน</button>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h4 style="font-size:14px; color:var(--navy);">🩺 บันทึกสัญญาณชีพ (Vital Signs)</h4>
+              </div>
+              
+              <div class="vital-form" style="background:#f7fafc;">
+                <input type="time" id="v-time-${a.id}" value="${currentTime}" title="เวลา" style="flex:0.8; font-weight:bold;">
+                <input type="number" id="v-hr-${a.id}" placeholder="HR">
+                <input type="number" id="v-rr-${a.id}" placeholder="RR">
+                <input type="number" id="v-temp-${a.id}" placeholder="Temp(F)">
+                <input type="number" id="v-spo2-${a.id}" placeholder="SpO2%">
+                <input type="text" id="v-zol-${a.id}" placeholder="Zoletil">
+                <input type="text" id="v-note-${a.id}" placeholder="Note" style="flex:2; text-align:left;">
+                <button class="btn btn-primary" onclick="addVital('${a.id}')">➕ บันทึก</button>
+              </div>
+              
+              <div style="max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:6px;">
+                <table class="vital-table" style="margin:0;">
+                  <thead><tr><th width="15%">เวลา</th><th width="12%">HR</th><th width="12%">RR</th><th width="12%">Temp</th><th width="12%">O2%</th><th width="12%">Zoletil</th><th width="25%">Note</th></tr></thead>
+                  <tbody>${vitalRows}</tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar" style="background:#f0f4f8; margin:-20px -20px; padding:16px 20px; margin-top:20px; border-radius:0 0 10px 10px;">
+            <button class="btn btn-warning" onclick="openRxModal('${a.id}', '${a.animal_name}')">💊 จ่ายยา</button>
+            <button class="btn btn-success" onclick="finishSurgery('${a.id}')">✅ เสร็จสิ้นการผ่าตัด</button>
+          </div>
+        </div>
+      `;
     }).join("");
-    if(vitals.length === 0) vitalRows = `<tr><td colspan="7" style="text-align:center; color:#aaa; padding: 20px;">ยังไม่มีข้อมูลบันทึกสัญญาณชีพ</td></tr>`;
-
-    const currentTime = new Date().toTimeString().substring(0,5);
-
-    // ตรวจสอบสถานะเพื่อเปลี่ยนสี
-    const isAnesthesia = (q.status === 'anesthesia');
-    const cardBorderColor = isAnesthesia ? 'var(--warning)' : 'var(--teal)';
-    const headerTitle = isAnesthesia ? '💉 กำลังวางยาสลบ (รอเลือกโต๊ะ)' : `🔬 โต๊ะผ่าตัดที่ ${q.table_number}`;
-
-    return `
-      <div class="card" style="border-top: 4px solid ${cardBorderColor};">
-        <div class="card-header" style="background:#f7fafc; padding:16px; margin:-20px -20px 20px -20px; border-radius:10px 10px 0 0;">
-          <div style="font-size:18px; font-weight:700; color:${cardBorderColor};">
-            ${headerTitle}
-          </div>
-          <span class="badge-q">คิว ${a.queue_number}</span>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
-          <div>
-            <div style="background:#fff; border:1px solid var(--border); padding:16px; border-radius:var(--radius-sm); margin-bottom:16px; font-size:14px; line-height:1.8;">
-              <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-                <strong>ชื่อสัตว์: <span style="color:var(--navy); font-size:16px;">${a.animal_name}</span></strong>
-                <span>${a.species === 'ส' ? 'สุนัข 🐶' : 'แมว 🐱'} | ${a.sex} | ${a.actual_weight} kg</span>
-              </div>
-              <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px;">
-                <strong>เจ้าของ:</strong> ${ownerName} (โทร: ${phone})<br>
-                <strong>บริการที่ต้องได้รับ:</strong> <span style="color:var(--teal); font-weight: 600;">${displayServices}</span><br>
-                <strong>บันทึกสุขภาพ (Health Note):</strong> <span style="color:var(--danger);">${a.health_note || 'ไม่มี'}</span>
-              </div>
-            </div>
-
-            <h4 style="font-size:14px; color:var(--navy); margin-bottom: 10px;">👨‍⚕️ ระบุโต๊ะ และทีมผ่าตัด</h4>
-            <div class="staff-grid">
-              <div style="grid-column: 1 / -1;">
-                <label style="font-size:12px; color:var(--text-muted); font-weight:bold;">หมายเลขโต๊ะผ่าตัด *</label>
-                <select class="form-control" id="table-sel-${a.id}">${tableOptions}</select>
-              </div>
-              <div><label style="font-size:12px; color:var(--text-muted);">Surgeon (ศัลยแพทย์) *</label><input type="text" class="form-control" id="surg-${a.id}" value="${q.surgeon_name || ''}" placeholder="บังคับกรอก"></div>
-              <div><label style="font-size:12px; color:var(--text-muted);">Assistant (ผู้ช่วย)</label><input type="text" class="form-control" id="asst-${a.id}" value="${extraNotes.assistant || ''}" placeholder="ชื่อผู้ช่วย"></div>
-              <div><label style="font-size:12px; color:var(--text-muted);">Anesthetist (วิสัญญี)</label><input type="text" class="form-control" id="anes-${a.id}" value="${q.anesthesiologist_name || ''}" placeholder="หมอดมยา"></div>
-              <div><label style="font-size:12px; color:var(--text-muted);">Nurse (พยาบาล)</label><input type="text" class="form-control" id="nurs-${a.id}" value="${extraNotes.nurse || ''}" placeholder="พยาบาล"></div>
-            </div>
-            <button class="btn btn-primary" style="width:100%; margin-bottom:10px; background:var(--navy);" onclick="saveSurgeryInfo('${a.id}')">💾 บันทึกโต๊ะ และทีมงาน</button>
-          </div>
-
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h4 style="font-size:14px; color:var(--navy);">🩺 บันทึกสัญญาณชีพ (Vital Signs)</h4>
-            </div>
-            
-            <div class="vital-form" style="background:#f7fafc;">
-              <input type="time" id="v-time-${a.id}" value="${currentTime}" title="เวลา" style="flex:0.8; font-weight:bold;">
-              <input type="number" id="v-hr-${a.id}" placeholder="HR">
-              <input type="number" id="v-rr-${a.id}" placeholder="RR">
-              <input type="number" id="v-temp-${a.id}" placeholder="Temp(F)">
-              <input type="number" id="v-spo2-${a.id}" placeholder="SpO2%">
-              <input type="text" id="v-zol-${a.id}" placeholder="Zoletil">
-              <input type="text" id="v-note-${a.id}" placeholder="Note" style="flex:2; text-align:left;">
-              <button class="btn btn-primary" onclick="addVital('${a.id}')">➕ บันทึก</button>
-            </div>
-            
-            <div style="max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:6px;">
-              <table class="vital-table" style="margin:0;">
-                <thead><tr><th width="15%">เวลา</th><th width="12%">HR</th><th width="12%">RR</th><th width="12%">Temp</th><th width="12%">O2%</th><th width="12%">Zoletil</th><th width="25%">Note</th></tr></thead>
-                <tbody>${vitalRows}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="action-bar" style="background:#f0f4f8; margin:-20px -20px; padding:16px 20px; margin-top:20px; border-radius:0 0 10px 10px;">
-          <button class="btn btn-warning" onclick="openRxModal('${a.id}', '${a.animal_name}')">💊 จ่ายยา</button>
-          <button class="btn btn-success" onclick="finishSurgery('${a.id}')">✅ เสร็จสิ้นการผ่าตัด</button>
-        </div>
-      </div>
-    `;
-  }).join("");
+    
+  } catch (err) {
+    console.error("Supabase Error:", err);
+    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--danger);">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div>`;
+  }
 }
 
 // บันทึกหมายเลขโต๊ะ และ ทีมงานผ่าตัด
@@ -285,7 +286,6 @@ window.saveSurgeryInfo = async function(animalId) {
 
   const extraNotes = JSON.stringify({ assistant: asst, nurse: nurs });
 
-  // อัปเดตข้อมูล และเปลี่ยนสถานะเป็น surgery (เพื่อยืนยันว่าขึ้นโต๊ะผ่าตัดแล้ว)
   const { error } = await supabase.from('vasd_queue').update({
     status: 'surgery',
     table_number: tableNum ? parseInt(tableNum) : null,
@@ -298,7 +298,7 @@ window.saveSurgeryInfo = async function(animalId) {
   if(error) alert("บันทึกผิดพลาด: " + error.message);
   else {
     alert("บันทึกโต๊ะผ่าตัด และทีมงานเรียบร้อยแล้ว");
-    loadSurgeryCases(); // โหลดใหม่เพื่อให้สีกรอบเปลี่ยนเป็นสีเขียว
+    loadSurgeryCases();
   }
 };
 
@@ -321,14 +321,13 @@ window.addVital = async function(animalId) {
   if (error) {
     alert("บันทึกสัญญาณชีพไม่สำเร็จ: " + error.message);
   } else {
-    // ล้างค่าช่องกรอกข้อมูลหลังบันทึกสำเร็จ ยกเว้นเวลา
     document.getElementById(`v-hr-${animalId}`).value = '';
     document.getElementById(`v-rr-${animalId}`).value = '';
     document.getElementById(`v-temp-${animalId}`).value = '';
     document.getElementById(`v-spo2-${animalId}`).value = '';
     document.getElementById(`v-zol-${animalId}`).value = '';
     document.getElementById(`v-note-${animalId}`).value = '';
-    loadSurgeryCases(); // โหลดตารางใหม่
+    loadSurgeryCases();
   }
 };
 
@@ -409,10 +408,8 @@ window.finishSurgery = async function(animalId) {
 
   if(!confirm("ยืนยันว่าทำการผ่าตัดเสร็จสิ้นแล้ว และต้องการย้ายสัตว์ตัวนี้ไปห้อง 'พักฟื้น' (Recovery) ใช่หรือไม่?")) return;
 
-  // บันทึกโต๊ะและทีมงานทิ้งทวนก่อนย้าย Status
   await saveSurgeryInfo(animalId);
 
-  // อัปเดตสถานะเป็น recovery และลบเบอร์โต๊ะทิ้ง
   const { error } = await supabase
     .from("vasd_queue")
     .update({ status: "recovery", table_number: null, updated_at: new Date() })
