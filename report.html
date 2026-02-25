@@ -212,8 +212,8 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
     <div class="report-section">
       <h3>🐾 ข้อมูลทั่วไป (General Info)</h3>
       <div class="info-grid">
-        <div><strong>คิวที่ (Queue):</strong> <span id="r-queue"></span></div>
-        <div><strong>ชื่อสัตว์ (Name):</strong> <span id="r-name"></span></div>
+        <div><strong>คิวที่:</strong> <span id="r-queue"></span></div>
+        <div><strong>ชื่อสัตว์:</strong> <span id="r-name"></span></div>
         <div><strong>ชนิด/เพศ:</strong> <span id="r-species"></span></div>
         <div><strong>น้ำหนักจริง:</strong> <span id="r-weight"></span> กก.</div>
         <div><strong>เจ้าของ:</strong> <span id="r-owner"></span></div>
@@ -227,7 +227,6 @@ tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
       <div class="info-grid">
         <div><strong>ศัลยแพทย์:</strong> <span id="r-surgeon"></span></div>
         <div><strong>วิสัญญีแพทย์:</strong> <span id="r-anes"></span></div>
-        <div style="grid-column: 1 / -1;"><strong>ผู้ช่วย/พยาบาล:</strong> <span id="r-notes"></span></div>
       </div>
     </div>
 
@@ -298,7 +297,6 @@ async function loadReport() {
       const q = a.vasd_queue && a.vasd_queue.length > 0 ? a.vasd_queue[0] : {};
       const status = q.status || 'waiting';
       
-      // การแปลงสถานะ
       let statusHtml = "";
       if(status === 'done') statusHtml = `<span class="status-badge st-done">✅ กลับบ้านแล้ว</span>`;
       else if(status === 'ready_to_go_home') statusHtml = `<span class="status-badge st-ready">🕒 รอรับกลับ/รอจัดยา</span>`;
@@ -308,28 +306,15 @@ async function loadReport() {
       const phone = a.vasd_owner ? a.vasd_owner.phone : '-';
       const species = a.species === 'ส' ? 'สุนัข' : 'แมว';
       
-      // ✅ วิธีแปลงข้อมูล Notes ให้แสดงผลได้อย่างปลอดภัย
-      let extraNotes = { assistant: '-', nurse: '-' };
-      if (q.notes) {
-        if (typeof q.notes === 'string') {
-          try { extraNotes = JSON.parse(q.notes); } catch(e) {}
-        } else if (typeof q.notes === 'object') {
-          extraNotes = q.notes;
-        }
-      }
-
-      // นำข้อมูล Staff มาแสดงรวมกันในตารางหลัก
+      // นำข้อมูล Staff มาแสดงเฉพาะ 2 ตำแหน่ง
       const surgeon = q.surgeon_name || '-';
       const anes = q.anesthesiologist_name || '-';
-      const asst = extraNotes.assistant || '-';
-      const nurse = extraNotes.nurse || '-';
 
       let staffHtml = `
         <div style="line-height:1.4;">
-          <strong>ศัลยแพทย์:</strong> ${surgeon}<br>
+          <strong>หมอผ่าตัด:</strong> ${surgeon}<br>
           <span style="font-size:12px; color:var(--text-muted);">
-            <strong>วิสัญญี:</strong> ${anes}<br>
-            <strong>ผช:</strong> ${asst} | <strong>พยาบาล:</strong> ${nurse}
+            <strong>วิสัญญี:</strong> ${anes}
           </span>
         </div>
       `;
@@ -359,16 +344,6 @@ window.openReportModal = function(animalId) {
   if(!a) return;
 
   const q = a.vasd_queue && a.vasd_queue.length > 0 ? a.vasd_queue[0] : {};
-  
-  // ✅ แปลง JSON อย่างปลอดภัยอีกครั้งสำหรับหน้าจอ Modal
-  let extraNotes = { assistant: '-', nurse: '-' };
-  if (q.notes) {
-    if (typeof q.notes === 'string') {
-      try { extraNotes = JSON.parse(q.notes); } catch(e) {}
-    } else if (typeof q.notes === 'object') {
-      extraNotes = q.notes;
-    }
-  }
 
   const now = new Date();
   document.getElementById("r-date").innerText = `วันที่พิมพ์: ${now.toLocaleDateString('th-TH', {year:'numeric', month:'long', day:'numeric'})}`;
@@ -381,10 +356,9 @@ window.openReportModal = function(animalId) {
   document.getElementById("r-phone").innerText = a.vasd_owner ? a.vasd_owner.phone : '-';
   document.getElementById("r-services").innerText = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
 
-  // ใส่ข้อมูล Staff ลงใน Modal
+  // ใส่ข้อมูล Staff ลงใน Modal (เฉพาะศัลยแพทย์และวิสัญญี)
   document.getElementById("r-surgeon").innerText = q.surgeon_name || '-';
   document.getElementById("r-anes").innerText = q.anesthesiologist_name || '-';
-  document.getElementById("r-notes").innerText = `ผช: ${extraNotes.assistant || '-'} | พยาบาล: ${extraNotes.nurse || '-'}`;
 
   // Vitals
   const vBody = document.getElementById("r-vitals");
@@ -398,7 +372,6 @@ window.openReportModal = function(animalId) {
   } else {
     vBody.innerHTML = vitals.map(v => {
       let t = v.time_recorded ? v.time_recorded.substring(0,5) : (v.created_at ? new Date(v.created_at).toLocaleTimeString('th-TH', {hour12:false}).substring(0,5) : '-');
-      // รองรับชื่อ column temp หรือ bt
       let temp = v.temp || v.bt || '-';
       let spo2 = v.spo2 ? v.spo2 + '%' : '-';
       
