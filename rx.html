@@ -143,7 +143,7 @@ tbody tr:last-child{border-bottom:none;}
   display: flex; justify-content: flex-end; gap: 10px; background: #fff; border-radius: 0 0 var(--radius) var(--radius);
 }
 
-/* ─── RX GRID (เหมือนหน้าผ่าตัด) ─── */
+/* ─── RX GRID ─── */
 .rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 @media(max-width:560px){.rx-grid{grid-template-columns:1fr;}}
 .rx-card-item{background:#fff; border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;
@@ -159,7 +159,6 @@ tbody tr:last-child{border-bottom:none;}
 .rx-input-group input { flex: 1; padding: 6px 10px; font-size: 13px; font-family:"Sarabun",sans-serif; border: 1px solid var(--border); border-radius: 4px; outline:none; }
 .rx-input-group input:focus{border-color:var(--teal-light);}
 
-/* สำหรับการพิมพ์ */
 @media print {
   body { background: white; padding: 0; }
   header, .btn-home, .page-header button, .btn-dispense, .btn-print-all, .btn-add-rx, .btn-sm { display: none !important; }
@@ -234,7 +233,7 @@ window.recalcTotalRxNew = function(did) {
   
   const days = parseFloat(daysStr) || 0;
 
-  const total = dose * freq * days;
+  const total = Math.ceil(dose * freq * days);
   document.getElementById(`newrxtotal-${did}`).value = total;
 };
 
@@ -260,14 +259,14 @@ window.openRxModal = function(animalId, animalName, w, species) {
   document.getElementById("rxModalAnimalName").innerHTML = `สั่งยาให้: <strong>${animalName}</strong> (น้ำหนักอ้างอิง: ${w} กก.)`;
   const grid = document.getElementById("rxModalGrid");
   
-  // ลิสต์ยาเหมือนหน้า Anesthesia และเพิ่ม Custom ให้กรอกเอง
+  // ✅ ปรับข้อมูลชื่อยา ความถี่(เอาวงเล็บออก) ตามมาตรฐานใหม่
   const drugs = [
-    {id:"dox",    cat:"Antibiotic",    name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง (หลังอาหารเย็น)", f_num:1, days:14},
-    {id:"nor200", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 200 mg",  tabs: round((w*10)/200), freq:"วันละ 2 ครั้ง (เช้า-เย็น หลังอาหาร)", f_num:2, days:7},
-    {id:"nor100", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 100 mg",  tabs: round((w*10)/100), freq:"วันละ 2 ครั้ง (เช้า-เย็น หลังอาหาร)", f_num:2, days:7},
-    {id:"tolf60", cat:"NSAID",         name:"แก้ปวด Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง (หลังอาหารเย็น)", f_num:1, days:3},
-    {id:"tolf6",  cat:"NSAID",         name:"แก้ปวด Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง (หลังอาหารเย็น)", f_num:1, days:3},
-    {id:"fbc",    cat:"Blood support", name:"บำรุงเลือด FBC",              tabs: round((w*1)/10)||0.25, freq:"วันละ 1 ครั้ง (หลังอาหารเช้า)", f_num:1, days:14},
+    {id:"dox",    cat:"Antibiotic",    name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:14},
+    {id:"nor200", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 200 mg",  tabs: round((w*20)/200), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
+    {id:"nor100", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 100 mg",  tabs: round((w*20)/100), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
+    {id:"tolf60", cat:"NSAID",         name:"แก้ปวด Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
+    {id:"tolf6",  cat:"NSAID",         name:"แก้ปวด Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
+    {id:"fbc",    cat:"Blood support", name:"บำรุงเลือด FBC",              tabs: (w>=10?1:0.5),     freq:"วันละ 1 ครั้ง หลังอาหารเช้า", f_num:1, days:14},
     {id:"custom1",cat:"อื่นๆ",         name:"ระบุยาเอง...",                tabs: 1, freq:"วันละ 1 ครั้ง", f_num:1, days:5, isCustom:true}
   ];
 
@@ -286,7 +285,7 @@ window.openRxModal = function(animalId, animalName, w, species) {
       <div class="rx-custom-inputs" id="newrxcustom-${d.id}">
         <div class="rx-input-group">
           <label>ปริมาณ</label>
-          <input type="text" id="newrxdose-${d.id}" value="ครั้งละ ${d.tabs} เม็ด" oninput="recalcTotalRxNew('${d.id}')">
+          <input type="text" id="newrxdose-${d.id}" value="ป้อนครั้งละ ${d.tabs} เม็ด" oninput="recalcTotalRxNew('${d.id}')">
         </div>
         <div class="rx-input-group">
           <label>ความถี่</label>
@@ -299,7 +298,7 @@ window.openRxModal = function(animalId, animalName, w, species) {
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             <label style="color:var(--danger);">รวม</label>
-            <input type="number" step="0.25" id="newrxtotal-${d.id}" value="${d.tabs * d.f_num * d.days}" style="width:60px; font-weight:bold; color:var(--danger);">
+            <input type="number" step="1" id="newrxtotal-${d.id}" value="${Math.ceil(d.tabs * d.f_num * d.days)}" style="width:60px; font-weight:bold; color:var(--danger);">
           </div>
         </div>
       </div>
@@ -360,7 +359,6 @@ window.saveNewRx = async function() {
     alert("❌ บันทึกไม่สำเร็จ: " + error.message);
   } else {
     closeRxModal();
-    // loadPrescriptions จะถูกเรียกอัตโนมัติผ่าน Real-time listener
   }
 };
 
@@ -369,7 +367,6 @@ async function loadPrescriptions() {
   try {
     const { data: eventId } = await supabase.rpc("get_today_event");
 
-    // ✅ เพิ่มการดึง actual_weight และ est_weight เพื่อนำไปใช้คำนวณยา
     const { data: queueData, error } = await supabase
       .from("vasd_queue")
       .select(`
@@ -412,6 +409,9 @@ async function loadPrescriptions() {
       const rxList = animal.vasd_prescription; 
       const weight = animal.actual_weight || animal.est_weight || 0;
 
+      // ✅ เช็คเงื่อนไขว่าใน Array service_type มีคำว่า "วัคซีน" หรือไม่
+      const hasVaccine = (animal.vasd_service || []).some(s => s.service_type.includes("วัคซีน"));
+
       const allRxIds = rxList.map(rx => rx.id).join(",");
 
       let rxRows = rxList.map((rx, idx) => `
@@ -441,6 +441,11 @@ async function loadPrescriptions() {
         </tr>
       `).join("");
 
+      // ✅ สร้างปุ่มสมุดวัคซีนแบบแสดงตามเงื่อนไข
+      let vaccineBtnHTML = hasVaccine 
+        ? `<button class="btn btn-print-all" style="background:var(--warning);" onclick="printVaccine('${q.animal_id}')">📘 พิมพ์สมุดวัคซีน</button>` 
+        : "";
+
       const card = document.createElement("div");
       card.className = "rx-card";
       card.style.animationDelay = `${(index * 0.1) + 0.1}s`; 
@@ -450,7 +455,11 @@ async function loadPrescriptions() {
           <h3>🐾 ${animal.animal_name} <span style="font-weight:normal;">(${species})</span> <span style="margin-left:8px;font-size:13px;">| เจ้าของ: ${ownerName}</span></h3>
           <div class="rx-header-actions">
             <button class="btn btn-add-rx" onclick="openRxModal('${q.animal_id}', '${animal.animal_name}', ${weight}, '${animal.species}')">💊 จ่ายยาเพิ่ม</button>
-            <button class="btn btn-print-all" onclick="printMultipleRx('${allRxIds}')">🖨️ พิมพ์ทั้งหมด</button>
+            
+            <button class="btn btn-print-all" style="background:var(--teal);" onclick="printBag('${q.animal_id}')">🛍️ พิมพ์ถุงยา</button>
+            ${vaccineBtnHTML}
+            <button class="btn btn-print-all" onclick="printMultipleRx('${allRxIds}')">🖨️ ซองยาทั้งหมด</button>
+            
             <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ จัดยาเสร็จสิ้น</button>
           </div>
         </div>
@@ -481,105 +490,54 @@ async function loadPrescriptions() {
   }
 }
 
-// ------------------------------------
-// ฟังก์ชัน จัดยาเสร็จสิ้น (ยกคิวออก)
-// ------------------------------------
+// จัดยาเสร็จสิ้น
 window.markAsDispensed = async function(animalId) {
   if(confirm("ยืนยันว่าทำการจัดยาและจ่ายยานี้เรียบร้อยแล้ว?\n(ระบบจะเปลี่ยนสถานะเป็น 'รับกลับแล้ว')")) {
-    const { error } = await supabase
-      .from("vasd_queue")
-      .update({ status: "done", updated_at: new Date() })
-      .eq("animal_id", animalId);
-      
-    if (error) {
-      alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-      console.error(error);
-    } else {
-      loadPrescriptions();
-    }
+    const { error } = await supabase.from("vasd_queue").update({ status: "done", updated_at: new Date() }).eq("animal_id", animalId);
+    if (error) { alert("❌ เกิดข้อผิดพลาด"); } else { loadPrescriptions(); }
   }
 };
 
-// ------------------------------------
-// ฟังก์ชัน แก้ไข และ บันทึกยา
-// ------------------------------------
+// แก้ไขยา
 window.editRx = function(btn) {
   const tr = btn.closest("tr");
   const inputs = tr.querySelectorAll(".rx-input");
   inputs.forEach(input => input.removeAttribute("readonly"));
-  
   tr.querySelector(".btn-action-edit").style.display = "none";
   tr.querySelector(".btn-action-save").style.display = "inline-flex";
 };
 
 window.saveRx = async function(btn, rxId) {
   const tr = btn.closest("tr");
-  
   const drug_id = tr.querySelector(".rx-drug").value;
   const dose = tr.querySelector(".rx-dose").value;
   const freq = tr.querySelector(".rx-freq").value;
   const days = parseInt(tr.querySelector(".rx-days").value) || 0;
   const total_pills = parseFloat(tr.querySelector(".rx-total").value) || 0;
 
-  const { error } = await supabase
-    .from("vasd_prescription")
-    .update({ drug_id, dose, freq, days, total_pills })
-    .eq("id", rxId);
-
-  if (error) {
-    alert("❌ บันทึกไม่สำเร็จ: " + error.message);
-    return;
-  }
+  const { error } = await supabase.from("vasd_prescription").update({ drug_id, dose, freq, days, total_pills }).eq("id", rxId);
+  if (error) return alert("❌ บันทึกไม่สำเร็จ: " + error.message);
 
   const inputs = tr.querySelectorAll(".rx-input");
   inputs.forEach(input => input.setAttribute("readonly", true));
-
   tr.querySelector(".btn-action-save").style.display = "none";
   tr.querySelector(".btn-action-edit").style.display = "inline-flex";
 };
 
-// ------------------------------------
-// ฟังก์ชัน ลบรายการยา
-// ------------------------------------
 window.deleteRx = async function(rxId) {
   if(!confirm("คุณต้องการลบรายการยานี้ใช่หรือไม่?")) return;
-
-  const { error } = await supabase
-    .from("vasd_prescription")
-    .delete()
-    .eq("id", rxId);
-
-  if (error) {
-    alert("❌ ลบไม่สำเร็จ: " + error.message);
-  } else {
-    document.getElementById(`rx-row-${rxId}`).remove();
-  }
+  const { error } = await supabase.from("vasd_prescription").delete().eq("id", rxId);
+  if (error) alert("❌ ลบไม่สำเร็จ"); else document.getElementById(`rx-row-${rxId}`).remove();
 };
 
-// ------------------------------------
-// ฟังก์ชัน ดึงและแทนค่า Template ยา
-// ------------------------------------
-async function generateStickerHTML(rxId) {
-  const { data: rx, error } = await supabase
-    .from("vasd_prescription")
-    .select(`
-      *,
-      vasd_animal (
-        queue_number, animal_name, species, sex,
-        vasd_owner ( owner_name, phone ),
-        vasd_service ( service_type )
-      )
-    `)
-    .eq("id", rxId)
-    .single();
+/* ─── การจัดการพิมพ์ (Print) ─── */
 
+// 1. พิมพ์ฉลากยาแบบเดี่ยว/ซองยา (เจาะจงยาแต่ละตัว)
+async function generateStickerHTML(rxId) {
+  const { data: rx, error } = await supabase.from("vasd_prescription").select(`*, vasd_animal ( queue_number, animal_name, species, sex, vasd_owner ( owner_name, phone ), vasd_service ( service_type ) )`).eq("id", rxId).single();
   if (error || !rx) return null;
 
   let { data: tmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", "envelope").single();
-  if (!tmpl || !tmpl.config) {
-    const { data: bagTmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", "bag").single();
-    tmpl = bagTmpl;
-  }
   if (!tmpl || !tmpl.config) return null;
 
   const a = rx.vasd_animal;
@@ -590,55 +548,69 @@ async function generateStickerHTML(rxId) {
 
   let html = `<div class="sticker-page">`;
   tmpl.config.forEach(l => {
-    let text = l.text
-      .replace("{{queue_number}}", a.queue_number || "")
-      .replace("{{animal_name}}", a.animal_name || "")
-      .replace("{{species}}", spcText)
-      .replace("{{sex}}", a.sex || "")
-      .replace("{{owner_name}}", ownerName)
-      .replace("{{phone}}", phone)
-      .replace("{{services}}", services)
-      .replace("{{drug_id}}", rx.drug_id || "")
-      .replace("{{dose}}", rx.dose || "")
-      .replace("{{freq}}", rx.freq || "")
-      .replace("{{days}}", rx.days ? rx.days + " วัน" : "")
-      .replace("{{total_pills}}", rx.total_pills ? rx.total_pills + " เม็ด" : "");
-
+    let text = l.text.replace("{{queue_number}}", a.queue_number || "").replace("{{animal_name}}", a.animal_name || "").replace("{{species}}", spcText).replace("{{sex}}", a.sex || "").replace("{{owner_name}}", ownerName).replace("{{phone}}", phone).replace("{{services}}", services).replace("{{drug_id}}", rx.drug_id || "").replace("{{dose}}", rx.dose || "").replace("{{freq}}", rx.freq || "").replace("{{days}}", rx.days ? rx.days + " วัน" : "").replace("{{total_pills}}", rx.total_pills ? rx.total_pills + " เม็ด" : "");
     html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
   });
   html += `</div>`;
-  
   return html;
 }
 
-// ------------------------------------
-// ฟังก์ชัน พิมพ์ยา 1 รายการ
-// ------------------------------------
+// 2. พิมพ์แบบไม่เจาะจงยา (ถุงยา หรือ สมุดวัคซีน)
+async function generateGeneralStickerHTML(animalId, templateType) {
+  const { data: a, error } = await supabase.from("vasd_animal").select(`queue_number, animal_name, species, sex, vasd_owner ( owner_name, phone ), vasd_service ( service_type )`).eq("id", animalId).single();
+  if (error || !a) return null;
+
+  const { data: tmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", templateType).single();
+  if (!tmpl || !tmpl.config) return null;
+
+  const spcText = a.species === "ส" ? "สุนัข" : (a.species === "ม" ? "แมว" : a.species);
+  const ownerName = a.vasd_owner?.owner_name || "";
+  const phone = a.vasd_owner?.phone || "ไม่ระบุ";
+  const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
+
+  let html = `<div class="sticker-page">`;
+  tmpl.config.forEach(l => {
+    let text = l.text.replace("{{queue_number}}", a.queue_number || "").replace("{{animal_name}}", a.animal_name || "").replace("{{species}}", spcText).replace("{{sex}}", a.sex || "").replace("{{owner_name}}", ownerName).replace("{{phone}}", phone).replace("{{services}}", services).replace("{{drug_id}}", "").replace("{{dose}}", "").replace("{{freq}}", "").replace("{{days}}", "").replace("{{total_pills}}", "");
+    html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
 window.printRx = async function(rxId) {
   const content = await generateStickerHTML(rxId);
-  if (!content) { alert("⚠️ ไม่พบข้อมูลยา หรือยังไม่ได้ตั้งค่า Template ซองยา/ถุงยา"); return; }
+  if (!content) { alert("⚠️ ไม่พบข้อมูล หรือยังไม่ได้ตั้งค่า Template 'ซองยา' (envelope)"); return; }
   openPrintWindow(content);
 };
 
-// ------------------------------------
-// ฟังก์ชัน พิมพ์ยาทั้งหมดของสัตว์ตัวนั้น
-// ------------------------------------
 window.printMultipleRx = async function(rxIdsStr) {
   const rxIds = rxIdsStr.split(",");
   let allContents = "";
-
   for (let id of rxIds) {
     const content = await generateStickerHTML(id);
     if (content) allContents += content;
   }
-
-  if (allContents === "") { alert("⚠️ ไม่พบข้อมูลให้พิมพ์"); return; }
+  if (allContents === "") { alert("⚠️ ไม่พบข้อมูลให้พิมพ์ หรือยังไม่ได้ตั้งค่า Template 'ซองยา'"); return; }
   openPrintWindow(allContents);
+};
+
+// ✅ ฟังก์ชันพิมพ์ถุงยา (Bag)
+window.printBag = async function(animalId) {
+  const content = await generateGeneralStickerHTML(animalId, "bag");
+  if (!content) { alert("⚠️ ไม่พบข้อมูล หรือยังไม่ได้สร้าง Template 'bag' ในระบบ"); return; }
+  openPrintWindow(content);
+};
+
+// ✅ ฟังก์ชันพิมพ์สมุดวัคซีน (Vaccine)
+window.printVaccine = async function(animalId) {
+  const content = await generateGeneralStickerHTML(animalId, "vaccine");
+  if (!content) { alert("⚠️ ไม่พบข้อมูล หรือยังไม่ได้สร้าง Template 'vaccine' ในระบบ"); return; }
+  openPrintWindow(content);
 };
 
 function openPrintWindow(htmlContent) {
   const pw = window.open("","_blank","width=800,height=600");
-  pw.document.write(`<html><head><title>Print Rx</title>
+  pw.document.write(`<html><head><title>Print Job</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
       body { margin: 0; }
@@ -651,10 +623,8 @@ function openPrintWindow(htmlContent) {
   pw.document.close();
 }
 
-// สั่งทำงานเมื่อเปิดหน้า
 loadPrescriptions();
 
-// เปิด Realtime
 supabase.channel("vasd-rx-live")
   .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadPrescriptions)
   .on("postgres_changes", { event: "*", schema: "public", table: "vasd_prescription" }, loadPrescriptions)
