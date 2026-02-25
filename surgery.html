@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>RMUTTO - VASD | โต๊ะผ่าตัด (Surgery)</title>
+<title>รายงานสรุป (Report)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
@@ -12,146 +12,261 @@
   --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
   --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --shadow-lg:0 12px 40px rgba(13,27,42,0.12);
-  --radius:10px; --radius-sm:6px;
+  --radius:14px; --radius-sm:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;}
+body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* HEADER */
 header{
   background:var(--navy);padding:0 32px;display:flex;
   justify-content:space-between;align-items:center;height:68px;
-  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);flex-shrink:0;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
 }
 .header-brand{display:flex;align-items:center;gap:14px;}
 .brand-icon{
-  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
+  width:40px;height:40px;background:linear-gradient(135deg,var(--text-muted),#a0aec0);
   border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
 }
 .brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
 .brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
+
 .btn-home{
   padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
   background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);cursor:pointer;
+  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
+  cursor:pointer;transition:background 0.2s;
 }
+.btn-home:hover{background:rgba(255,255,255,0.18);}
 
-/* MAIN CONTENT */
-.main-content { padding: 24px 32px; flex: 1; overflow-y: auto; }
-.section-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--border); padding-bottom: 12px;}
+/* MAIN */
+.container{max-width:1200px;margin:0 auto;padding:28px 24px;}
 
-/* GRID LAYOUTS */
-.grid-surgery { display:grid; grid-template-columns:1fr; gap:24px; }
+.page-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:24px;animation:fadeUp 0.4s ease both;
+}
+.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
 
-/* CARDS */
-.card { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow-sm); padding:20px; }
-.card-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px; }
-.badge-q { background:var(--navy); color:#fff; padding:4px 10px; border-radius:20px; font-size:13px; font-weight:700; }
+/* TABLE */
+.card {
+  background:var(--surface);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  padding:20px;overflow-x:auto;animation:fadeUp 0.4s 0.1s ease both;
+}
+table{width:100%;border-collapse:collapse;min-width:900px;}
+thead tr{background:linear-gradient(135deg,var(--navy),#1a2f47);}
+thead th{
+  padding:12px 10px;text-align:left;font-size:13px;font-weight:700;
+  color:rgba(255,255,255,0.9);border:none;white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
+tbody tr:hover{background:#f8fafc;}
+tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
 
-/* FORMS & TABLES */
-.form-control { width:100%; padding:8px 12px; font-family:"Sarabun"; border:1px solid var(--border); border-radius:var(--radius-sm); outline:none; font-size:14px; }
-.form-control:focus { border-color:var(--teal); }
+.status-badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+.st-done { background: #d1fae5; color: #065f46; }
+.st-ready { background: #fefcbf; color: #744210; }
+.st-progress { background: #ebf8ff; color: #2b6cb0; }
 
-.staff-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f0f4f8; padding:16px; border-radius:var(--radius-sm); margin-bottom:16px; }
+.btn-report {
+  background: var(--teal); color: #fff; border: none; padding: 6px 12px;
+  border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; font-family:"Sarabun";
+}
+.btn-report:hover { background: var(--teal-light); }
 
-.vital-table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:13px; }
-.vital-table th { background:var(--bg); padding:10px; border:1px solid var(--border); text-align:left; color:var(--text-muted); font-weight: 600; position: sticky; top: 0;}
-.vital-table td { padding:10px; border:1px solid var(--border); text-align:center; }
-.vital-form { display:flex; gap:6px; background:#fff; padding:12px; border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:16px; flex-wrap:wrap; align-items: center; }
-.vital-form input { flex:1; min-width:70px; padding:8px; font-size:13px; border:1px solid var(--border); border-radius:4px; text-align: center; }
-
-/* BUTTONS */
-.btn { padding:10px 16px; font-size:14px; font-weight:700; font-family:"Sarabun"; border:none; border-radius:6px; cursor:pointer; transition: 0.2s;}
-.btn-primary { background:var(--teal); color:#fff; }
-.btn-primary:hover { background:var(--teal-light); }
-.btn-success { background:var(--success); color:#fff; }
-.btn-success:hover { background:#2f855a; }
-.btn-warning { background:var(--warning); color:#fff; }
-.btn-warning:hover { background:#b7791f; }
-.btn-danger { background:#fee2e2; color:var(--danger); }
-.btn-danger:hover { background:var(--danger); color:#fff; }
-.action-bar { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
-
-/* ─── MODAL ADD RX (รูปแบบเดียวกับ Anesthesia) ─── */
+/* MODAL REPORT (PRINTABLE) */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(13, 27, 42, 0.7); z-index: 1000;
-  display: none; justify-content: center; align-items: center;
-  padding: 20px; backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.6); z-index: 1000;
+  display: none; justify-content: center; align-items: flex-start;
+  padding: 40px 20px; overflow-y: auto; backdrop-filter: blur(2px);
 }
 .modal-overlay.active { display: flex; }
 .modal-content {
-  background: var(--surface); width: 100%; max-width: 700px;
+  background: #fff; width: 100%; max-width: 850px;
   border-radius: var(--radius); box-shadow: var(--shadow-lg);
-  animation: fadeUp 0.3s ease both; max-height: 90vh; display: flex; flex-direction: column;
+  padding: 40px; position: relative; margin-bottom: 40px;
 }
-.modal-header {
-  padding: 18px 24px; border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center; background: #fafbfc; border-radius: var(--radius) var(--radius) 0 0;
+.btn-close-modal {
+  position: absolute; top: 20px; right: 20px; background: #e2e8f0; border: none;
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;
 }
-.modal-header h3 { font-size: 18px; color: var(--navy); margin: 0; display:flex; align-items:center; gap:8px;}
-.btn-close-modal { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding:4px;}
-.btn-close-modal:hover { color: var(--danger); }
-.modal-body { padding: 24px; overflow-y: auto; background:#f8fafc; }
-.modal-footer {
-  padding: 16px 24px; border-top: 1px solid var(--border);
-  display: flex; justify-content: flex-end; gap: 10px; background: #fff; border-radius: 0 0 var(--radius) var(--radius);
-}
+.btn-close-modal:hover { background: var(--danger); color: white; }
 
-/* ─── RX GRID ─── */
-.rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media(max-width:560px){.rx-grid{grid-template-columns:1fr;}}
-.rx-card-item{background:#fff; border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;
-  cursor:pointer;transition:all 0.2s;}
-.rx-card-item.selected{border-color:var(--teal-light);background:#e6f6f4;box-shadow:0 2px 8px rgba(34,145,154,0.15);}
-.rx-card-item label{display:flex;align-items:flex-start;gap:10px;cursor:pointer; margin:0;}
-.rx-card-item input[type="checkbox"]{width:18px;height:18px;accent-color:var(--teal-light);flex-shrink:0;margin-top:2px;}
-.rx-cat{font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;}
-.rx-name{font-size:14px;font-weight:700;color:var(--navy);}
-.rx-custom-inputs { display: none; flex-direction: column; gap: 8px; margin-top: 12px; padding-top:12px; border-top:1px dashed #cbd5e0;}
-.rx-input-group { display: flex; align-items: center; gap: 8px; }
-.rx-input-group label { font-size: 12px; color: var(--teal); font-weight:600; width: 50px; flex-shrink: 0; }
-.rx-input-group input { flex: 1; padding: 6px 10px; font-size: 13px; font-family:"Sarabun",sans-serif; border: 1px solid var(--border); border-radius: 4px; outline:none; }
-.rx-input-group input:focus{border-color:var(--teal-light);}
+.report-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--navy); padding-bottom: 16px; }
+.report-header h2 { font-size: 24px; color: var(--navy); margin-bottom: 4px; }
+.report-header p { color: var(--text-muted); font-size: 14px; }
+
+.report-section { margin-bottom: 24px; }
+.report-section h3 { font-size: 16px; color: var(--teal); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; }
+.info-grid div { background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
+.info-grid strong { color: var(--navy); display: inline-block; width: 100px; }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 10px; }
+.data-table th, .data-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+.data-table th { background: #f1f5f9; color: var(--navy); font-weight: 600; }
+
+.print-bar { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
+.btn-print { background: var(--navy); color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-family:"Sarabun"; }
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* =========================================
+   PRINT STYLES - สำหรับกระดาษ A4
+   ========================================= */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm; /* ตั้งขอบกระดาษให้สมดุล */
+  }
+
+  /* ซ่อนสิ่งที่ไม่จำเป็นตอนพิมพ์ */
+  body > header, .page-header, .card, .btn-close-modal, .print-bar { 
+    display: none !important; 
+  }
+
+  /* ปลดล็อก Overlay เพื่อให้พิมพ์เนื้อหาข้างในได้เต็มที่ */
+  .modal-overlay { 
+    position: static; 
+    display: block !important; 
+    background: transparent !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+  }
+  
+  .modal-content { 
+    position: static; 
+    width: 100% !important; 
+    max-width: 100% !important; 
+    box-shadow: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+    border: none !important; 
+  }
+
+  /* บังคับสีพื้นหลังของตารางและกล่องข้อมูลให้ออกตอนปริ้น */
+  .info-grid div {
+    background-color: #f8fafc !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .data-table th {
+    background-color: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ป้องกันตารางและส่วนต่างๆ โดนตัดครึ่งหน้า */
+  .report-section {
+    page-break-inside: avoid;
+  }
+  .data-table tr {
+    page-break-inside: avoid;
+  }
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-brand">
-    <div class="brand-icon">🔬</div>
+    <div class="brand-icon">📊</div>
     <div class="brand-text">
-      <h1>ระบบจัดการโต๊ะผ่าตัด (Surgery)</h1>
+      <h1>รายงานสรุปการรักษา (Report)</h1>
       <span>RMUTTO – Veterinary Academic Service Division</span>
     </div>
   </div>
   <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
 </header>
 
-<div class="main-content">
-  <div class="section-title">📋 สัตว์ที่อยู่ในห้องผ่าตัด / กำลังวางยาสลบ</div>
-  <div class="grid-surgery" id="surgeryGrid">
-    <p style="color:var(--text-muted);">กำลังโหลดข้อมูล...</p>
+<div class="container">
+  <div class="page-header">
+    <h2>สรุปข้อมูลสัตว์ประจำวัน</h2>
+  </div>
+  
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>คิว</th>
+          <th>ชื่อสัตว์ / ชนิด</th>
+          <th>เจ้าของ / เบอร์โทร</th>
+          <th>ทีมผ่าตัด</th>
+          <th>สถานะ</th>
+          <th style="text-align:center;">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody id="report-tbody">
+        <tr><td colspan="6" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
-<div class="modal-overlay" id="rxModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>💊 สั่งจ่ายยา (Prescription)</h3>
-      <button class="btn-close-modal" onclick="closeRxModal()">✖</button>
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-content" id="printArea">
+    <button class="btn-close-modal" onclick="closeModal()">✖</button>
+    
+    <div class="report-header">
+      <h2>รายงานสรุปการรักษา (Medical Record)</h2>
+      <p>หน่วยบริการวิชาการสัตวแพทย์ มทร.ตะวันออก</p>
+      <p id="r-date" style="font-weight:bold; margin-top:4px;"></p>
     </div>
-    <div class="modal-body">
-      <div style="margin-bottom: 14px; font-size:13px; color:var(--text-muted);" id="rxModalAnimalName"></div>
-      <div class="rx-grid" id="rxModalGrid">
-        </div>
+
+    <div class="report-section">
+      <h3>🐾 ข้อมูลทั่วไป (General Info)</h3>
+      <div class="info-grid">
+        <div><strong>คิวที่:</strong> <span id="r-queue"></span></div>
+        <div><strong>ชื่อสัตว์:</strong> <span id="r-name"></span></div>
+        <div><strong>ชนิด/เพศ:</strong> <span id="r-species"></span></div>
+        <div><strong>น้ำหนักจริง:</strong> <span id="r-weight"></span> กก.</div>
+        <div><strong>เจ้าของ:</strong> <span id="r-owner"></span></div>
+        <div><strong>เบอร์โทร:</strong> <span id="r-phone"></span></div>
+        <div style="grid-column: 1 / -1;"><strong>บริการที่รับ:</strong> <span id="r-services" style="color:var(--teal); font-weight:bold;"></span></div>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="closeRxModal()" style="background:#e2e8f0; color:var(--text);">ยกเลิก</button>
-      <button class="btn btn-success" onclick="saveNewRx()">💾 บันทึกการสั่งยา</button>
+
+    <div class="report-section">
+      <h3>🔬 ข้อมูลทีมผ่าตัด (Surgery Staff)</h3>
+      <div class="info-grid">
+        <div><strong>ศัลยแพทย์:</strong> <span id="r-surgeon"></span></div>
+        <div><strong>วิสัญญีแพทย์:</strong> <span id="r-anes"></span></div>
+        <div style="grid-column: 1 / -1;"><strong>ผู้ช่วย/พยาบาล:</strong> <span id="r-notes"></span></div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h3>📈 สัญญาณชีพ & ยาสลบ (Vital Signs & Anesthesia)</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>เวลา</th><th>HR</th><th>RR</th><th>Temp</th><th>SpO2</th><th>Zoletil Top</th><th>Note</th>
+          </tr>
+        </thead>
+        <tbody id="r-vitals"></tbody>
+      </table>
+    </div>
+
+    <div class="report-section">
+      <h3>💊 การสั่งจ่ายยา (Prescription)</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>รายการยา</th><th>ปริมาณ</th><th>ความถี่</th><th>จำนวนวัน</th><th>รวม</th>
+          </tr>
+        </thead>
+        <tbody id="r-rx"></tbody>
+      </table>
+    </div>
+
+    <div class="print-bar">
+      <button class="btn-print" onclick="window.print()">🖨️ พิมพ์รายงานฉบับนี้ (A4)</button>
     </div>
   </div>
 </div>
@@ -159,325 +274,159 @@ header{
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-let currentEventId = null;
+let allData = [];
 
-async function init() {
-  const { data: eventId } = await supabase.rpc("get_today_event");
-  currentEventId = eventId;
-  loadSurgeryCases();
-}
-
-// โหลดข้อมูลเคสผ่าตัด (โค้ดเดิม)
-async function loadSurgeryCases() {
-  const grid = document.getElementById("surgeryGrid");
+async function loadReport() {
   try {
-    const { data: queues, error: qError } = await supabase
-      .from("vasd_queue")
-      .select("*")
-      .in("status", ["anesthesia", "surgery"]);
+    const { data: eventId } = await supabase.rpc("get_today_event");
 
-    if (qError) throw qError;
-    if (!queues || queues.length === 0) {
-      grid.innerHTML = `<div style="text-align:center; padding:40px; background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-muted);">ไม่มีเคสรอผ่าตัดหรือกำลังผ่าตัดในขณะนี้</div>`;
+    // ดึงข้อมูลทั้งหมดที่เกี่ยวข้อง รวมถึง staff จาก vasd_queue และ vital signs ทั้งหมด
+    const { data, error } = await supabase
+      .from("vasd_animal")
+      .select(`
+        id, queue_number, animal_name, species, sex, est_weight, actual_weight,
+        vasd_owner(owner_name, phone),
+        vasd_service(service_type),
+        vasd_queue(status, surgeon_name, anesthesiologist_name, notes),
+        vasd_vital_signs(time_recorded, created_at, hr, rr, temp, spo2, zoletil_top, note),
+        vasd_prescription(drug_id, dose, freq, days, total_pills)
+      `)
+      .eq("event_id", eventId)
+      .order("queue_number");
+
+    if (error) throw error;
+
+    allData = data || [];
+    const tbody = document.getElementById("report-tbody");
+    tbody.innerHTML = "";
+
+    if (allData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ยังไม่มีข้อมูลสัตว์ในระบบสำหรับวันนี้</td></tr>`;
       return;
     }
 
-    const animalIds = queues.map(q => q.animal_id);
-    const { data: animals, error: aError } = await supabase
-      .from("vasd_animal")
-      .select(`
-        id, queue_number, animal_name, species, sex, actual_weight, health_note,
-        vasd_owner(owner_name, phone),
-        vasd_service(service_type),
-        vasd_vital_signs(*)
-      `)
-      .in("id", animalIds);
-
-    if (aError) throw aError;
-
-    const activeCases = animals.map(animal => {
-      const matchedQueue = queues.find(x => x.animal_id === animal.id);
-      return { ...animal, vasd_queue: [matchedQueue] };
-    });
-
-    activeCases.sort((a, b) => a.queue_number - b.queue_number);
-
-    grid.innerHTML = activeCases.map(a => {
-      const q = a.vasd_queue[0];
-      const ownerName = a.vasd_owner?.owner_name || 'ไม่ระบุ';
-      const phone = a.vasd_owner?.phone || '-';
-      const services = (a.vasd_service || []).map(s => s.service_type).join(', ') || '<span style="color:#aaa;">ไม่มีข้อมูลบริการ</span>';
+    allData.forEach(a => {
+      const q = a.vasd_queue && a.vasd_queue.length > 0 ? a.vasd_queue[0] : {};
+      const status = q.status || 'waiting';
       
-      let extraNotes = { assistant: '', nurse: '' };
-      try { if(q.notes) extraNotes = JSON.parse(q.notes); } catch(e){}
+      // แปลงสถานะเป็นข้อความและสี
+      let statusHtml = "";
+      if(status === 'done') statusHtml = `<span class="status-badge st-done">✅ กลับบ้านแล้ว</span>`;
+      else if(status === 'ready_to_go_home') statusHtml = `<span class="status-badge st-ready">🕒 รอรับกลับ/รอจัดยา</span>`;
+      else statusHtml = `<span class="status-badge st-progress">⏳ อยู่ระหว่างดำเนินการ</span>`;
 
-      let tableOptions = '<option value="">-- เลือกโต๊ะ --</option>';
-      for(let i=1; i<=20; i++) {
-        let selected = (q.table_number === i) ? 'selected' : '';
-        tableOptions += `<option value="${i}" ${selected}>โต๊ะผ่าตัดที่ ${i}</option>`;
-      }
+      const ownerName = a.vasd_owner ? a.vasd_owner.owner_name : '-';
+      const phone = a.vasd_owner ? a.vasd_owner.phone : '-';
+      const species = a.species === 'ส' ? 'สุนัข' : 'แมว';
+      const surgeon = q.surgeon_name || '-';
 
-      const vitals = (a.vasd_vital_signs || []).sort((x, y) => (x.time_recorded || '').localeCompare(y.time_recorded || ''));
-      let vitalRows = vitals.map(v => `<tr>
-          <td>${v.time_recorded ? v.time_recorded.substring(0,5) : '-'}</td>
-          <td>${v.hr||'-'}</td><td>${v.rr||'-'}</td><td>${v.temp||'-'}</td>
-          <td>${v.spo2||'-'}</td><td>${v.zoletil_top||'-'}</td><td style="text-align:left;">${v.note||'-'}</td>
-        </tr>`).join("");
-      if(vitals.length === 0) vitalRows = `<tr><td colspan="7" style="text-align:center; color:#aaa; padding: 20px;">ยังไม่มีข้อมูลบันทึกสัญญาณชีพ</td></tr>`;
-
-      const isAnesthesia = (q.status === 'anesthesia');
-      const cardBorderColor = isAnesthesia ? 'var(--warning)' : 'var(--teal)';
-      const headerTitle = isAnesthesia ? '💉 กำลังวางยาสลบ (รอเลือกโต๊ะ)' : `🔬 โต๊ะผ่าตัดที่ ${q.table_number}`;
-      const currentTime = new Date().toTimeString().substring(0,5);
-
-      return `
-        <div class="card" style="border-top: 4px solid ${cardBorderColor};">
-          <div class="card-header" style="background:#f7fafc; padding:16px; margin:-20px -20px 20px -20px; border-radius:10px 10px 0 0;">
-            <div style="font-size:18px; font-weight:700; color:${cardBorderColor};">${headerTitle}</div>
-            <span class="badge-q">คิว ${a.queue_number}</span>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
-            <div>
-              <div style="background:#fff; border:1px solid var(--border); padding:16px; border-radius:var(--radius-sm); margin-bottom:16px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-                  <strong>ชื่อสัตว์: <span style="color:var(--navy); font-size:16px;">${a.animal_name}</span></strong>
-                  <span>${a.species === 'ส' ? 'สุนัข 🐶' : 'แมว 🐱'} | ${a.sex} | ${a.actual_weight} kg</span>
-                </div>
-                <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; font-size:14px;">
-                  <strong>เจ้าของ:</strong> ${ownerName} (โทร: ${phone})<br>
-                  <strong>บริการ:</strong> <span style="color:var(--teal);">${services}</span><br>
-                  <strong>Note:</strong> <span style="color:var(--danger);">${a.health_note || '-'}</span>
-                </div>
-              </div>
-
-              <h4 style="font-size:14px; color:var(--navy); margin-bottom: 10px;">👨‍⚕️ ทีมผ่าตัด</h4>
-              <div class="staff-grid">
-                <div style="grid-column: 1 / -1;"><label style="font-size:12px;">หมายเลขโต๊ะผ่าตัด *</label><select class="form-control" id="table-sel-${a.id}">${tableOptions}</select></div>
-                <div><label style="font-size:12px;">Surgeon *</label><input type="text" class="form-control" id="surg-${a.id}" value="${q.surgeon_name || ''}"></div>
-                <div><label style="font-size:12px;">Assistant</label><input type="text" class="form-control" id="asst-${a.id}" value="${extraNotes.assistant || ''}"></div>
-                <div><label style="font-size:12px;">Anesthetist</label><input type="text" class="form-control" id="anes-${a.id}" value="${q.anesthesiologist_name || ''}"></div>
-                <div><label style="font-size:12px;">Nurse</label><input type="text" class="form-control" id="nurs-${a.id}" value="${extraNotes.nurse || ''}"></div>
-              </div>
-              <button class="btn btn-primary" style="width:100%; margin-bottom:10px; background:var(--navy);" onclick="saveSurgeryInfo('${a.id}')">💾 บันทึกข้อมูล</button>
-            </div>
-
-            <div>
-              <h4 style="font-size:14px; color:var(--navy); margin-bottom:8px;">🩺 Vitals (ทุก 5 นาที)</h4>
-              <div class="vital-form" style="background:#f7fafc;">
-                <input type="time" id="v-time-${a.id}" value="${currentTime}" style="flex:0.8; font-weight:bold;">
-                <input type="number" id="v-hr-${a.id}" placeholder="HR"><input type="number" id="v-rr-${a.id}" placeholder="RR">
-                <input type="number" id="v-temp-${a.id}" placeholder="Temp"><input type="number" id="v-spo2-${a.id}" placeholder="O2%">
-                <input type="text" id="v-zol-${a.id}" placeholder="Zol"><input type="text" id="v-note-${a.id}" placeholder="Note" style="flex:2; text-align:left;">
-                <button class="btn btn-primary" onclick="addVital('${a.id}')">➕</button>
-              </div>
-              <div style="max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:6px;">
-                <table class="vital-table" style="margin:0;">
-                  <thead><tr><th>เวลา</th><th>HR</th><th>RR</th><th>Temp</th><th>O2%</th><th>Zol</th><th>Note</th></tr></thead>
-                  <tbody>${vitalRows}</tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="action-bar" style="background:#f0f4f8; margin:-20px -20px; padding:16px 20px; margin-top:20px; border-radius:0 0 10px 10px;">
-            <button class="btn btn-warning" onclick="openRxModal('${a.id}', '${a.animal_name}', ${a.actual_weight}, '${a.species}')">💊 จ่ายยา</button>
-            <button class="btn btn-success" onclick="finishSurgery('${a.id}')">✅ เสร็จสิ้นการผ่าตัด</button>
-          </div>
-        </div>
+      tbody.innerHTML += `
+        <tr>
+          <td><strong>#${a.queue_number}</strong></td>
+          <td>${a.animal_name} <br><span style="font-size:12px;color:var(--text-muted);">${species} (${a.sex})</span></td>
+          <td>${ownerName} <br><span style="font-size:12px;color:var(--text-muted);">${phone}</span></td>
+          <td>${surgeon}</td>
+          <td>${statusHtml}</td>
+          <td style="text-align:center;">
+            <button class="btn-report" onclick="openReportModal('${a.id}')">📄 ดูสรุป / พิมพ์</button>
+          </td>
+        </tr>
       `;
-    }).join("");
-  } catch (err) { console.error(err); grid.innerHTML = `<div style="text-align:center; color:red;">Error: ${err.message}</div>`; }
-}
-
-window.saveSurgeryInfo = async function(animalId) {
-  const tableNum = document.getElementById(`table-sel-${animalId}`).value;
-  const surg = document.getElementById(`surg-${animalId}`).value;
-  const asst = document.getElementById(`asst-${animalId}`).value;
-  const anes = document.getElementById(`anes-${animalId}`).value;
-  const nurs = document.getElementById(`nurs-${animalId}`).value;
-  const extraNotes = JSON.stringify({ assistant: asst, nurse: nurs });
-  const { error } = await supabase.from('vasd_queue').update({
-    status: 'surgery', table_number: tableNum ? parseInt(tableNum) : null,
-    surgeon_name: surg, anesthesiologist_name: anes, notes: extraNotes, updated_at: new Date()
-  }).eq('animal_id', animalId);
-  if(error) alert("บันทึกผิดพลาด: " + error.message); else { alert("บันทึกเรียบร้อย"); loadSurgeryCases(); }
-};
-
-window.addVital = async function(animalId) {
-  const timeInput = document.getElementById(`v-time-${animalId}`).value;
-  if (!timeInput) return alert("กรุณาระบุเวลา");
-  const { error } = await supabase.from('vasd_vital_signs').insert({
-    animal_id: animalId, time_recorded: timeInput,
-    hr: document.getElementById(`v-hr-${animalId}`).value || null, rr: document.getElementById(`v-rr-${animalId}`).value || null,
-    temp: document.getElementById(`v-temp-${animalId}`).value || null, spo2: document.getElementById(`v-spo2-${animalId}`).value || null,
-    zoletil_top: document.getElementById(`v-zol-${animalId}`).value || null, note: document.getElementById(`v-note-${animalId}`).value || null
-  });
-  if (error) alert("บันทึกไม่สำเร็จ: " + error.message);
-  else {
-    document.querySelectorAll(`#v-hr-${animalId}, #v-rr-${animalId}, #v-temp-${animalId}, #v-spo2-${animalId}, #v-zol-${animalId}, #v-note-${animalId}`).forEach(e => e.value = '');
-    loadSurgeryCases();
-  }
-};
-
-window.finishSurgery = async function(animalId) {
-  const surgInput = document.getElementById(`surg-${animalId}`).value;
-  const tableInput = document.getElementById(`table-sel-${animalId}`).value;
-  if(!tableInput || !surgInput) return alert("กรุณาระบุโต๊ะและชื่อ Surgeon ก่อน");
-  if(!confirm("ยืนยันการเสร็จสิ้นผ่าตัด?")) return;
-  await saveSurgeryInfo(animalId);
-  await supabase.from("vasd_queue").update({ status: "recovery", table_number: null, updated_at: new Date() }).eq("animal_id", animalId);
-  loadSurgeryCases();
-};
-
-
-/* ── ฟังก์ชันช่วยคำนวณและสร้างฟอร์มยา สำหรับ Modal Rx (รูปแบบเดียวกับหน้า Anesthesia) ── */
-function round(val) { 
-  let num = Math.ceil(val * 4) / 4; 
-  return num < 0.25 ? 0.25 : num;
-}
-
-window.recalcTotalRxNew = function(did) {
-  const doseStr = document.getElementById(`newrxdose-${did}`).value;
-  const freqStr = document.getElementById(`newrxfreq-${did}`).value;
-  const daysStr = document.getElementById(`newrxdays-${did}`).value;
-
-  const doseMatch = doseStr.match(/[\d.]+/);
-  const dose = doseMatch ? parseFloat(doseMatch[0]) : 0;
-  
-  const freqMatch = freqStr.match(/[\d.]+/);
-  const freq = freqMatch ? parseFloat(freqMatch[0]) : 0;
-  
-  const days = parseFloat(daysStr) || 0;
-
-  const total = Math.ceil(dose * freq * days);
-  document.getElementById(`newrxtotal-${did}`).value = total;
-};
-
-window.toggleNewRx = function(chk, did) {
-  const card = document.getElementById(`newrxcard-${did}`);
-  const inputs = document.getElementById(`newrxcustom-${did}`);
-  if(chk.checked) {
-    card.classList.add("selected");
-    inputs.style.display = "flex";
-  } else {
-    card.classList.remove("selected");
-    inputs.style.display = "none";
-  }
-};
-
-let currentRxAnimalId = null;
-
-// เปิด Modal สั่งยา
-window.openRxModal = function(animalId, animalName, w, species) {
-  currentRxAnimalId = animalId;
-  w = parseFloat(w) || 0;
-  
-  document.getElementById("rxModalAnimalName").innerHTML = `สั่งยาให้: <strong>${animalName}</strong> (น้ำหนัก: ${w} กก.)`;
-  const grid = document.getElementById("rxModalGrid");
-  
-  // ลิสต์ยาเหมือนหน้า Anesthesia
-  const drugs = [
-    {id:"dox",    cat:"Antibiotic",    name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:14},
-    {id:"nor200", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 200 mg",  tabs: round((w*20)/200), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
-    {id:"nor100", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 100 mg",  tabs: round((w*20)/100), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
-    {id:"tolf60", cat:"NSAID",         name:"แก้ปวด Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
-    {id:"tolf6",  cat:"NSAID",         name:"แก้ปวด Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
-    {id:"fbc",    cat:"Blood support", name:"บำรุงเลือด FBC",              tabs: (w>=10?1:0.5),     freq:"วันละ 1 ครั้ง หลังอาหารเช้า", f_num:1, days:14},
-    {id:"custom1",cat:"อื่นๆ",         name:"ระบุยาเอง...",                tabs: 1, freq:"วันละ 1 ครั้ง", f_num:1, days:5, isCustom:true}
-  ];
-
-  grid.innerHTML = drugs.map(d => `
-    <div class="rx-card-item" id="newrxcard-${d.id}">
-      <label>
-        <input type="checkbox" id="newrxchk-${d.id}" data-name="${d.name}" onchange="toggleNewRx(this, '${d.id}')">
-        <div style="width:100%;">
-          <div class="rx-cat">${d.cat}</div>
-          ${d.isCustom ? 
-            `<input type="text" id="custom-name-${d.id}" placeholder="พิมพ์ชื่อยา..." class="rx-input" style="border:1px solid #cbd5e0; background:#fff; margin-top:4px;" onclick="event.preventDefault();">` : 
-            `<div class="rx-name">${d.name}</div>`
-          }
-        </div>
-      </label>
-      <div class="rx-custom-inputs" id="newrxcustom-${d.id}">
-        <div class="rx-input-group">
-          <label>ปริมาณ</label>
-          <input type="text" id="newrxdose-${d.id}" value="ป้อนครั้งละ ${d.tabs} เม็ด" oninput="recalcTotalRxNew('${d.id}')">
-        </div>
-        <div class="rx-input-group">
-          <label>ความถี่</label>
-          <input type="text" id="newrxfreq-${d.id}" value="${d.freq}" oninput="recalcTotalRxNew('${d.id}')">
-        </div>
-        <div class="rx-input-group" style="display:flex; gap:10px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <label>จน.วัน</label>
-            <input type="number" id="newrxdays-${d.id}" value="${d.days}" style="width:60px;" oninput="recalcTotalRxNew('${d.id}')">
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <label style="color:var(--danger);">รวม</label>
-            <input type="number" step="1" id="newrxtotal-${d.id}" value="${Math.ceil(d.tabs * d.f_num * d.days)}" style="width:60px; font-weight:bold; color:var(--danger);">
-          </div>
-        </div>
-      </div>
-    </div>`).join("");
-
-  document.getElementById("rxModal").classList.add("active");
-};
-
-window.closeRxModal = function() {
-  document.getElementById("rxModal").classList.remove("active");
-  currentRxAnimalId = null;
-};
-
-// บันทึกยาลงฐานข้อมูล
-window.saveNewRx = async function() {
-  if(!currentRxAnimalId) return;
-  const rxInserts = [];
-  
-  Array.from(document.querySelectorAll(`input[id^="newrxchk-"]:checked`)).forEach(el => {
-    const did = el.id.replace("newrxchk-", "");
-    
-    let drugName = el.dataset.name;
-    if(did.startsWith("custom")) {
-      const customNameInput = document.getElementById(`custom-name-${did}`);
-      if(customNameInput && customNameInput.value.trim() !== "") {
-        drugName = customNameInput.value.trim();
-      } else {
-        drugName = "ยาเพิ่มเติม";
-      }
-    }
-
-    rxInserts.push({
-      animal_id:    currentRxAnimalId,
-      drug_id:      drugName, 
-      dose:         document.getElementById(`newrxdose-${did}`).value,
-      freq:         document.getElementById(`newrxfreq-${did}`).value,
-      days:         parseInt(document.getElementById(`newrxdays-${did}`).value) || 5,
-      total_pills:  parseFloat(document.getElementById(`newrxtotal-${did}`).value) || 0 
     });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("report-tbody").innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error: ${err.message}</td></tr>`;
+  }
+}
+
+window.openReportModal = function(animalId) {
+  const a = allData.find(x => x.id === animalId);
+  if(!a) return;
+
+  const q = a.vasd_queue && a.vasd_queue.length > 0 ? a.vasd_queue[0] : {};
+  
+  // ✅ วิธีการ Parse JSON อย่างปลอดภัยสำหรับข้อมูล Notes (ผช. และ พยาบาล)
+  let extraNotes = { assistant: '-', nurse: '-' };
+  if (q.notes) {
+    if (typeof q.notes === 'string') {
+      try { extraNotes = JSON.parse(q.notes); } catch(e) {}
+    } else if (typeof q.notes === 'object') {
+      extraNotes = q.notes;
+    }
+  }
+
+  const now = new Date();
+  document.getElementById("r-date").innerText = `วันที่พิมพ์: ${now.toLocaleDateString('th-TH', {year:'numeric', month:'long', day:'numeric'})}`;
+
+  // ทั่วไป
+  document.getElementById("r-queue").innerText = a.queue_number;
+  document.getElementById("r-name").innerText = a.animal_name;
+  document.getElementById("r-species").innerText = `${a.species === 'ส' ? 'สุนัข' : 'แมว'} / ${a.sex}`;
+  document.getElementById("r-weight").innerText = a.actual_weight || a.est_weight || '-';
+  document.getElementById("r-owner").innerText = a.vasd_owner ? a.vasd_owner.owner_name : '-';
+  document.getElementById("r-phone").innerText = a.vasd_owner ? a.vasd_owner.phone : '-';
+  document.getElementById("r-services").innerText = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
+
+  // ✅ ทีมผ่าตัด
+  document.getElementById("r-surgeon").innerText = q.surgeon_name || '-';
+  document.getElementById("r-anes").innerText = q.anesthesiologist_name || '-';
+  document.getElementById("r-notes").innerText = `ผช: ${extraNotes.assistant || '-'} | พยาบาล: ${extraNotes.nurse || '-'}`;
+
+  // ✅ Vitals (ดึงมาครบทั้งตอนผ่าตัดและพักฟื้น เรียงตามเวลา)
+  const vBody = document.getElementById("r-vitals");
+  const vitals = (a.vasd_vital_signs || []).sort((x, y) => {
+    const t1 = x.time_recorded || x.created_at || "";
+    const t2 = y.time_recorded || y.created_at || "";
+    return t1.localeCompare(t2);
   });
-
-  if(rxInserts.length === 0) {
-    alert("กรุณาเลือกยาที่ต้องการสั่งจ่ายอย่างน้อย 1 รายการ");
-    return;
-  }
-
-  const { error } = await supabase.from("vasd_prescription").insert(rxInserts);
-  if(error) {
-    alert("❌ บันทึกไม่สำเร็จ: " + error.message);
+  
+  if(vitals.length === 0) {
+    vBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#aaa;">ไม่มีข้อมูลสัญญาณชีพ</td></tr>`;
   } else {
-    alert("บันทึกการสั่งจ่ายยาเรียบร้อย ข้อมูลถูกส่งไปที่ห้องจ่ายยา");
-    closeRxModal();
+    vBody.innerHTML = vitals.map(v => {
+      // ดึงเวลาที่กรอกมาแสดง ถ้าไม่มีให้ใช้วันที่ที่สร้าง
+      let t = v.time_recorded ? v.time_recorded.substring(0,5) : (v.created_at ? new Date(v.created_at).toLocaleTimeString('th-TH', {hour12:false}).substring(0,5) : '-');
+      // รองรับ temp
+      let temp = v.temp || v.bt || '-';
+      let spo2 = v.spo2 ? v.spo2 + '%' : '-';
+      
+      return `<tr>
+        <td>${t}</td><td>${v.hr||'-'}</td><td>${v.rr||'-'}</td>
+        <td>${temp}</td><td>${spo2}</td>
+        <td>${v.zoletil_top||'-'}</td><td>${v.note||'-'}</td>
+      </tr>`;
+    }).join("");
   }
+
+  // ✅ RX (ข้อมูลจ่ายยา)
+  const rxBody = document.getElementById("r-rx");
+  const rxs = a.vasd_prescription || [];
+  if(rxs.length === 0) {
+    rxBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#aaa;">ไม่มีข้อมูลการจ่ายยา</td></tr>`;
+  } else {
+    rxBody.innerHTML = rxs.map(rx => `<tr>
+      <td>${rx.drug_id||'-'}</td><td>${rx.dose||'-'}</td>
+      <td>${rx.freq||'-'}</td><td>${rx.days ? rx.days + ' วัน' : '-'}</td>
+      <td style="font-weight:bold;">${rx.total_pills ? rx.total_pills + ' เม็ด' : '-'}</td>
+    </tr>`).join("");
+  }
+
+  document.getElementById("reportModal").classList.add("active");
 };
 
-// Real-time Update
-supabase.channel("surgery-live")
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadSurgeryCases)
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_vital_signs" }, loadSurgeryCases)
+window.closeModal = function() {
+  document.getElementById("reportModal").classList.remove("active");
+};
+
+// Initial load
+loadReport();
+
+// Auto update
+supabase.channel("report-live")
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadReport)
   .subscribe();
 
-init();
 </script>
 </body>
 </html>
