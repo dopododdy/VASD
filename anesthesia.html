@@ -59,13 +59,14 @@ header{
 /* DRUG CALC BOX */
 .calc-box { background:#f7fafc; border-left:4px solid var(--teal-light); padding:12px; margin-bottom:16px; border-radius:4px; font-size:13px; }
 .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
-.calc-item { background:#fff; padding:8px; border:1px solid var(--border); border-radius:4px; display:flex; justify-content:space-between; }
+.calc-item { background:#fff; padding:8px; border:1px solid var(--border); border-radius:4px; display:flex; justify-content:space-between; align-items:center; }
 .calc-item span.vol { font-weight:700; color:var(--danger); }
 
 /* FORMS & TABLES */
 .form-group { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
 .form-group label { width:100px; font-size:13px; font-weight:600; color:var(--text-muted); }
 .form-control { flex:1; padding:8px 12px; font-family:"Sarabun"; border:1px solid var(--border); border-radius:var(--radius-sm); outline:none; font-size:14px; }
+.form-control:focus { border-color:var(--teal); }
 
 .staff-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f0f4f8; padding:16px; border-radius:var(--radius-sm); margin-bottom:20px; }
 
@@ -139,12 +140,12 @@ import { supabase } from "./js/supabase.js";
 let currentEventId = null;
 let currentRxAnimalId = null;
 
-// ตั้งค่าโปรโตคอลการคำนวณยา (ปรับแก้ตัวเลข mg/kg ได้ที่นี่)
+// ตั้งค่าโปรโตคอลการคำนวณยา
 const DRUG_PROTOCOL = {
   xylazine: { dose_mg_kg: 2, conc_mg_ml: 20, name: "Xylazine 20mg/ml" },
   zoletil:  { dose_mg_kg: 5, conc_mg_ml: 100, name: "Zoletil 100mg/ml" },
   tolfedine:{ dose_mg_kg: 4, conc_mg_ml: 40, name: "Tolfedine 40mg/ml" },
-  penstrep: { dose_ml_kg: 1, name: "Pen-Strep" } // ใช้เป็น ml/kg โดยตรง
+  penstrep: { dose_ml_kg: 0.1, name: "Pen-Strep (1ml/10kg)" } // 1 ml ต่อ 10 kg เท่ากับ 0.1 ml ต่อ kg
 };
 
 window.switchTab = function(tabId, btn) {
@@ -189,7 +190,7 @@ async function loadWaiting() {
     const a = q.vasd_animal;
     const w = parseFloat(a.actual_weight) || 0;
     
-    // คำนวณปริมาณยา (Volume ml)
+    // คำนวณปริมาณยาเริ่มต้น
     const volXyl = ((w * DRUG_PROTOCOL.xylazine.dose_mg_kg) / DRUG_PROTOCOL.xylazine.conc_mg_ml).toFixed(2);
     const volZol = ((w * DRUG_PROTOCOL.zoletil.dose_mg_kg) / DRUG_PROTOCOL.zoletil.conc_mg_ml).toFixed(2);
     const volTol = ((w * DRUG_PROTOCOL.tolfedine.dose_mg_kg) / DRUG_PROTOCOL.tolfedine.conc_mg_ml).toFixed(2);
@@ -204,17 +205,19 @@ async function loadWaiting() {
           <div style="font-size:16px; font-weight:700;">${a.animal_name}</div>
           <span class="badge-q">คิว ${a.queue_number}</span>
         </div>
-        <div style="font-size:14px; margin-bottom:12px;">
-          ${a.species === 'ส' ? 'สุนัข' : 'แมว'} | เพศ: ${a.sex} | <strong style="color:var(--teal);">น้ำหนักจริง: ${w} kg</strong>
+        <div style="font-size:14px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          ${a.species === 'ส' ? 'สุนัข' : 'แมว'} | เพศ: ${a.sex} | 
+          <strong style="color:var(--teal);">น้ำหนักจริง:</strong>
+          <input type="number" id="weight-${a.id}" value="${w}" step="0.01" class="form-control" style="width: 80px; padding: 4px 8px;" oninput="recalcDrugs('${a.id}')"> kg
         </div>
         
         <div class="calc-box">
           <div style="font-weight:700; margin-bottom:4px;">💉 คำนวณยาฉีด (Pre-med & Anesthesia)</div>
           <div class="calc-grid">
-            <div class="calc-item"><span>${DRUG_PROTOCOL.xylazine.name}</span> <span class="vol">${volXyl} ml</span></div>
-            <div class="calc-item"><span>${DRUG_PROTOCOL.zoletil.name}</span> <span class="vol">${volZol} ml</span></div>
-            <div class="calc-item"><span>${DRUG_PROTOCOL.tolfedine.name}</span> <span class="vol">${volTol} ml</span></div>
-            <div class="calc-item"><span>${DRUG_PROTOCOL.penstrep.name}</span> <span class="vol">${volPen} ml</span></div>
+            <div class="calc-item"><span>${DRUG_PROTOCOL.xylazine.name}</span> <span class="vol" id="vol-xyl-${a.id}">${volXyl} ml</span></div>
+            <div class="calc-item"><span>${DRUG_PROTOCOL.zoletil.name}</span> <span class="vol" id="vol-zol-${a.id}">${volZol} ml</span></div>
+            <div class="calc-item"><span>${DRUG_PROTOCOL.tolfedine.name}</span> <span class="vol" id="vol-tol-${a.id}">${volTol} ml</span></div>
+            <div class="calc-item"><span>${DRUG_PROTOCOL.penstrep.name}</span> <span class="vol" id="vol-pen-${a.id}">${volPen} ml</span></div>
           </div>
         </div>
 
@@ -233,17 +236,47 @@ async function loadWaiting() {
   }).join("");
 }
 
-// ย้ายขึ้นโต๊ะ
+// คำนวณยาใหม่ทันทีเมื่อมีการพิมพ์แก้ไขน้ำหนัก
+window.recalcDrugs = function(animalId) {
+  const w = parseFloat(document.getElementById(`weight-${animalId}`).value) || 0;
+  
+  const volXyl = ((w * DRUG_PROTOCOL.xylazine.dose_mg_kg) / DRUG_PROTOCOL.xylazine.conc_mg_ml).toFixed(2);
+  const volZol = ((w * DRUG_PROTOCOL.zoletil.dose_mg_kg) / DRUG_PROTOCOL.zoletil.conc_mg_ml).toFixed(2);
+  const volTol = ((w * DRUG_PROTOCOL.tolfedine.dose_mg_kg) / DRUG_PROTOCOL.tolfedine.conc_mg_ml).toFixed(2);
+  const volPen = (w * DRUG_PROTOCOL.penstrep.dose_ml_kg).toFixed(2);
+
+  document.getElementById(`vol-xyl-${animalId}`).innerText = volXyl + " ml";
+  document.getElementById(`vol-zol-${animalId}`).innerText = volZol + " ml";
+  document.getElementById(`vol-tol-${animalId}`).innerText = volTol + " ml";
+  document.getElementById(`vol-pen-${animalId}`).innerText = volPen + " ml";
+};
+
+// ย้ายขึ้นโต๊ะผ่าตัด
 window.moveToTable = async function(animalId) {
   const tableNum = document.getElementById(`table-sel-${animalId}`).value;
-  if (!tableNum) return alert("กรุณาเลือกโต๊ะผ่าตัด");
+  const newWeight = parseFloat(document.getElementById(`weight-${animalId}`).value) || 0;
 
+  if (!tableNum) return alert("กรุณาเลือกโต๊ะผ่าตัด");
+  if (newWeight <= 0) return alert("กรุณาระบุน้ำหนักที่ถูกต้อง");
+
+  // 1. อัปเดตน้ำหนักล่าสุดกลับไปที่ตาราง vasd_animal
+  await supabase.from("vasd_animal").update({ actual_weight: newWeight }).eq("id", animalId);
+
+  // 2. อัปเดตสถานะเป็นกำลังผ่าตัด
   const { error } = await supabase
     .from("vasd_queue")
     .update({ status: "surgery", table_number: parseInt(tableNum), updated_at: new Date() })
     .eq("animal_id", animalId);
 
-  if (!error) loadData();
+  if (!error) {
+    // โหลดข้อมูลให้เป็นปัจจุบัน
+    await loadData();
+    // สลับไปยังหน้า Tab ที่ 2 อัตโนมัติ (กำลังผ่าตัด)
+    const tab2Btn = document.querySelectorAll('.tab-btn')[1];
+    switchTab('tab-surgery', tab2Btn);
+  } else {
+    alert("เกิดข้อผิดพลาด: " + error.message);
+  }
 };
 
 // ==========================================
@@ -400,7 +433,7 @@ window.openRxModal = function(animalId, animalName) {
   currentRxAnimalId = animalId;
   document.getElementById("rxAnimalName").innerText = `- ${animalName}`;
   
-  // สร้าง Form เปล่าๆ 3 แถวให้คลินิกพิมพ์จัดยา (ปรับให้ตรงกับการใช้งานจริง)
+  // สร้าง Form เปล่าๆ 3 แถวให้คลินิกพิมพ์จัดยา
   let formHtml = '';
   for(let i=1; i<=3; i++) {
     formHtml += `
