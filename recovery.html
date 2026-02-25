@@ -126,19 +126,23 @@ async function loadRecoveryAnimals() {
 
   const { data:eventId } = await supabase.rpc("get_today_event");
   
-  // ดึงสัตว์ที่มีสถานะ recovery และดึงประวัติ vital signs มาด้วย
+  // ✅ เปลี่ยนมาใช้ (*) เพื่อดึงข้อมูล Vital Signs ทั้งหมด ป้องกัน error กรณีชื่อคอลัมน์ไม่ตรง
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`
       id, queue_number, animal_name, species, sex, actual_weight,
       vasd_queue!inner(status),
-      vasd_vital_signs(id, time_recorded, temp, hr, rr, spo2)
+      vasd_vital_signs(*)
     `)
     .eq("event_id", eventId)
     .eq("vasd_queue.status", "recovery")
     .order("queue_number");
 
-  if (error) { console.error(error); grid.innerHTML = "<p style='color:red;'>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>"; return; }
+  if (error) { 
+    console.error(error); 
+    grid.innerHTML = `<p style='color:var(--danger);'>เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`; 
+    return; 
+  }
   
   if (data.length === 0) {
     grid.innerHTML = "<p style='color:var(--text-muted);'>ขณะนี้ไม่มีสัตว์ในห้องพักฟื้น</p>";
@@ -148,21 +152,40 @@ async function loadRecoveryAnimals() {
   grid.innerHTML = "";
 
   data.forEach(a => {
-    // เรียงเวลา vital signs
-    const vitals = (a.vasd_vital_signs || []).sort((x, y) => x.time_recorded.localeCompare(y.time_recorded));
+    // ✅ จัดเรียงเวลาแบบปลอดภัย แม้ว่าข้อมูลจะไม่มีเวลา (null) เพื่อไม่ให้เว็บค้าง
+    const vitals = (a.vasd_vital_signs || []).sort((x, y) => {
+        const t1 = x.time_recorded || x.created_at || x.recorded_at || "";
+        const t2 = y.time_recorded || y.created_at || y.recorded_at || "";
+        return t1.localeCompare(t2);
+    });
     
-    let vitalRows = vitals.map(v => `
-      <tr>
-        <td>${v.time_recorded.substring(0,5)}</td>
-        <td>${v.hr || '-'}</td>
-        <td>${v.rr || '-'}</td>
-        <td>${v.temp || '-'}</td>
-        <td>${v.spo2 || '-'}%</td>
-      </tr>
-    `).join("");
+    let vitalRows = vitals.map(v => {
+      // ✅ สร้างเวลาแสดงผลที่ปลอดภัยที่สุด
+      let timeStr = "-";
+      if (v.time_recorded) {
+          timeStr = v.time_recorded.substring(0,5);
+      } else if (v.created_at || v.recorded_at) {
+          const d = new Date(v.created_at || v.recorded_at);
+          timeStr = d.toLocaleTimeString("th-TH", {hour12:false}).substring(0,5);
+      }
+
+      // รองรับอุณหภูมิทั้งคอลัมน์ใหม่ (temp) และคอลัมน์เก่า (bt)
+      const tempVal = v.temp || v.bt || '-';
+      const spo2Val = v.spo2 ? v.spo2 + '%' : '-';
+
+      return `
+        <tr>
+          <td>${timeStr}</td>
+          <td>${v.hr || '-'}</td>
+          <td>${v.rr || '-'}</td>
+          <td>${tempVal}</td>
+          <td>${spo2Val}</td>
+        </tr>
+      `;
+    }).join("");
 
     if(vitals.length === 0) {
-      vitalRows = `<tr><td colspan="5" style="color:#aaa;">ยังไม่มีการบันทึก</td></tr>`;
+      vitalRows = `<tr><td colspan="5" style="color:#aaa; text-align:center;">ยังไม่มีการบันทึก</td></tr>`;
     }
 
     const card = document.createElement("div");
@@ -241,9 +264,8 @@ window.closeRecoveryJob = async function(animalId) {
     .eq('animal_id', animalId);
 
   if (error) {
-    alert("อัปเดตสถานะไม่สำเร็จ");
+    alert("อัปเดตสถานะไม่สำเร็จ: " + error.message);
   } else {
-    // เมื่อปิด Job สำเร็จ สามารถเด้งไปหน้ารายงาน หรือโหลดหน้าเดิมใหม่
     alert("✅ ปิด Job พักฟื้นเรียบร้อยแล้ว ข้อมูลพร้อมสำหรับสรุปรายงาน");
     loadRecoveryAnimals();
   }
