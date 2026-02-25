@@ -464,7 +464,7 @@ async function loadPrescriptions() {
             ${vaccineBtnHTML}
             <button class="btn btn-print-all" onclick="printMultipleRx('${allRxIds}')">🖨️ ซองยาทั้งหมด</button>
             
-            <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ จัดยาเสร็จสิ้น</button>
+            <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ ส่งกลับบ้าน</button>
           </div>
         </div>
         <div class="table-responsive">
@@ -494,9 +494,9 @@ async function loadPrescriptions() {
   }
 }
 
-// จัดยาเสร็จสิ้น
+// ส่งกลับบ้าน
 window.markAsDispensed = async function(animalId) {
-  if(confirm("ยืนยันว่าทำการจัดยาและจ่ายยานี้เรียบร้อยแล้ว?\n(ระบบจะเปลี่ยนสถานะเป็น 'รับกลับแล้ว')")) {
+  if(confirm("ยืนยันว่าทำการจัดยาเรียบร้อย และต้องการส่งสัตว์กลับบ้าน?\n(ระบบจะเปลี่ยนสถานะเป็น 'รับกลับแล้ว')")) {
     const { error } = await supabase.from("vasd_queue").update({ status: "done", updated_at: new Date() }).eq("animal_id", animalId);
     if (error) { alert("❌ เกิดข้อผิดพลาด"); } else { loadPrescriptions(); }
   }
