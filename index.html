@@ -570,10 +570,10 @@ async function loadSummary() {
 
   const total    = (await supabase.from("vasd_animal").select("*",{count:"exact",head:true}).eq("event_id",eventId)).count;
   
-  // ✅ อัปเดตสถานะให้ตรงกับตารางภาษาอังกฤษ เพื่อให้ตัวเลขสรุปทำงานได้อย่างถูกต้อง
+  // ✅ อัปเดตการนับ "กลับบ้านแล้ว" เป็นสถานะ "done" ให้ตรงกับตอนกดปุ่มในหน้าจัดยา
   const surgery  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","surgery")).count;
   const recovery = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","recovery")).count;
-  const done     = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home")).count;
+  const done     = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","done")).count;
 
   document.getElementById("totalAnimal").innerText = total    ?? 0;
   document.getElementById("inSurgery").innerText   = surgery  ?? 0;
@@ -584,7 +584,7 @@ async function loadSummary() {
 // โหลดข้อมูล Dashboard
 loadSummary();
 
-// Real-time Dashboard Update (Optional แต่ช่วยให้ตัวเลขเปลี่ยนแบบเรียลไทม์)
+// Real-time Dashboard Update
 supabase.channel('dashboard-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
