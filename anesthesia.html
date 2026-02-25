@@ -260,7 +260,7 @@ window.openRxModal = function(animalId, animalName, w, species) {
   document.getElementById("rxModalAnimalName").innerHTML = `สั่งยาให้: <strong>${animalName}</strong> (น้ำหนักอ้างอิง: ${w} กก.)`;
   const grid = document.getElementById("rxModalGrid");
   
-  // ลิสต์ยาและปรับรูปแบบให้เอาวงเล็บออก
+  // ลิสต์ยาเหมือนหน้า Anesthesia และเพิ่ม Custom ให้กรอกเอง (ปรับเอาวงเล็บออก)
   const drugs = [
     {id:"dox",    cat:"Antibiotic",    name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:14},
     {id:"nor200", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 200 mg",  tabs: round((w*10)/200), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
