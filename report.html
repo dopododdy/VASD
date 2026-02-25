@@ -264,7 +264,7 @@ async function loadReport() {
         id, queue_number, animal_name, species, sex, est_weight, actual_weight,
         vasd_owner(owner_name, phone),
         vasd_service(service_type),
-        vasd_queue(status, surgeon_name, anesthesiologist_name),
+        vasd_queue(status, surgeon_name, anesthesiologist_name, notes),
         vasd_vital_signs(time_recorded, created_at, hr, rr, temp, spo2, zoletil_top, note),
         vasd_prescription(drug_id, dose, freq, days, total_pills)
       `)
@@ -283,7 +283,18 @@ async function loadReport() {
     }
 
     allData.forEach(a => {
-      const q = a.vasd_queue && a.vasd_queue.length > 0 ? a.vasd_queue[0] : {};
+      // ✅ วิธีดึง Queue ที่ถูกต้อง (รองรับทั้ง Object เดี่ยว และ Array)
+      let q = {};
+      if (a.vasd_queue) {
+        q = Array.isArray(a.vasd_queue) ? (a.vasd_queue[0] || {}) : a.vasd_queue;
+      }
+
+      // ป้องกันการ Error เผื่อชื่อหมอถูกบันทึกไว้ใน JSON notes
+      let extraNotes = {};
+      if (q.notes) {
+        try { extraNotes = typeof q.notes === 'string' ? JSON.parse(q.notes) : q.notes; } catch(e) {}
+      }
+
       const status = q.status || 'waiting';
       
       let statusHtml = "";
@@ -295,9 +306,9 @@ async function loadReport() {
       const phone = a.vasd_owner ? a.vasd_owner.phone : '-';
       const species = a.species === 'ส' ? 'สุนัข' : 'แมว';
       
-      // ดึงข้อมูลตามชื่อคอลัมน์ใน SQL เป๊ะๆ
-      const surgeon = q.surgeon_name || '-';
-      const anes = q.anesthesiologist_name || '-';
+      // ✅ อ่านชื่อหมอจากคอลัมน์หลัก หรือจาก Notes (เผื่อไว้)
+      const surgeon = q.surgeon_name || extraNotes.surgeon_name || extraNotes.surgeon || '-';
+      const anes = q.anesthesiologist_name || extraNotes.anesthesiologist_name || extraNotes.anesthesiologist || '-';
 
       let staffHtml = `
         <div style="line-height:1.4;">
@@ -332,7 +343,16 @@ window.openReportModal = function(animalId) {
   const a = allData.find(x => x.id === animalId);
   if(!a) return;
 
-  const q = a.vasd_queue && a.vasd_queue.length > 0 ? a.vasd_queue[0] : {};
+  // ✅ ใช้วิธีดึง Queue แบบเดียวกัน
+  let q = {};
+  if (a.vasd_queue) {
+    q = Array.isArray(a.vasd_queue) ? (a.vasd_queue[0] || {}) : a.vasd_queue;
+  }
+
+  let extraNotes = {};
+  if (q.notes) {
+    try { extraNotes = typeof q.notes === 'string' ? JSON.parse(q.notes) : q.notes; } catch(e) {}
+  }
 
   const now = new Date();
   document.getElementById("r-date").innerText = `วันที่พิมพ์: ${now.toLocaleDateString('th-TH', {year:'numeric', month:'long', day:'numeric'})}`;
@@ -345,9 +365,9 @@ window.openReportModal = function(animalId) {
   document.getElementById("r-phone").innerText = a.vasd_owner ? a.vasd_owner.phone : '-';
   document.getElementById("r-services").innerText = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
 
-  // ใส่ข้อมูลใน Modal ตามคอลัมน์เดิมใน DB
-  document.getElementById("r-surgeon").innerText = q.surgeon_name || '-';
-  document.getElementById("r-anes").innerText = q.anesthesiologist_name || '-';
+  // ✅ ใส่ข้อมูลใน Modal ตามคอลัมน์หลัก หรือเผื่อใน notes
+  document.getElementById("r-surgeon").innerText = q.surgeon_name || extraNotes.surgeon_name || extraNotes.surgeon || '-';
+  document.getElementById("r-anes").innerText = q.anesthesiologist_name || extraNotes.anesthesiologist_name || extraNotes.anesthesiologist || '-';
 
   // Vitals
   const vBody = document.getElementById("r-vitals");
