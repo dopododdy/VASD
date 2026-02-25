@@ -126,6 +126,7 @@ async function init() {
 // โหลดเคสทั้งหมด (มาจากห้องดมยา หรือ กำลังผ่าตัดอยู่)
 // ==========================================
 async function loadSurgeryCases() {
+  // ดึงข้อมูลทั้งหมดของ Event วันนี้มาก่อน เพื่อป้องกัน Error จาก .in() ใน PostgREST บางเวอร์ชัน
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`
@@ -136,19 +137,28 @@ async function loadSurgeryCases() {
       vasd_vital_signs(*)
     `)
     .eq("event_id", currentEventId)
-    .in("vasd_queue.status", ["anesthesia", "surgery"]) // ดึงทั้งสถานะดมยาเสร็จแล้ว และ กำลังผ่าตัด
     .order("queue_number");
 
   const grid = document.getElementById("surgeryGrid");
-  if (error || !data || data.length === 0) {
+
+  if (error) {
+    console.error("Supabase Query Error:", error);
+    grid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--danger);">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</div>`;
+    return;
+  }
+
+  // กรองด้วย JavaScript เพื่อเอาเฉพาะคนที่สถานะ 'anesthesia' (วางยา) และ 'surgery' (ผ่าตัด)
+  const activeCases = data.filter(a => {
+    const status = a.vasd_queue[0]?.status;
+    return status === 'anesthesia' || status === 'surgery';
+  });
+
+  if (!activeCases || activeCases.length === 0) {
     grid.innerHTML = `<div style="text-align:center; padding:40px; background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); color:var(--text-muted);">ไม่มีเคสรอผ่าตัดหรือกำลังผ่าตัดในขณะนี้</div>`;
     return;
   }
 
-  // เรียงลำดับตามหมายเลขคิว
-  data.sort((a, b) => a.queue_number - b.queue_number);
-
-  grid.innerHTML = data.map(a => {
+  grid.innerHTML = activeCases.map(a => {
     const q = a.vasd_queue[0];
     const ownerName = a.vasd_owner?.owner_name || 'ไม่ระบุ';
     const phone = a.vasd_owner?.phone || '-';
