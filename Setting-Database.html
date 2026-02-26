@@ -2,279 +2,68 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<title>Database Management – RMUTTO VASD</title>
+<title>DB Manage – RMUTTO VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════
-   DESIGN TOKENS (Match with index.html)
-═══════════════════════════════════════════ */
 :root {
-  --navy:       #0b1929;
-  --navy-mid:   #112240;
-  --navy-card:  #162d4a;
-  --teal:       #0ea5a0;
-  --teal-light: #14c4bc;
-  --teal-glow:  rgba(14,165,160,0.25);
-  --danger:     #ef4444;
-  --surface:    rgba(255,255,255,0.04);
-  --surface-2:  rgba(255,255,255,0.08);
-  --border:     rgba(255,255,255,0.08);
-  --border-2:   rgba(255,255,255,0.14);
-  --text:       #e2e8f0;
-  --text-dim:   #94a3b8;
-  --radius:     20px;
-  --radius-sm:  12px;
+  --navy: #0b1929; --navy-mid: #112240; --teal: #0ea5a0; --danger: #ef4444;
+  --surface: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1); --text: #e2e8f0;
 }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Sarabun", sans-serif; background: var(--navy); color: var(--text); padding-bottom: 40px; }
+header { padding: 15px; display: flex; align-items: center; gap: 15px; background: rgba(11,25,41,0.8); backdrop-filter: blur(10px); sticky; top: 0; }
+.btn-back { width: 40px; height: 40px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.container { padding: 20px; max-width: 600px; margin: 0 auto; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-item { background: var(--navy-mid); padding: 15px; border-radius: 15px; border: 1px solid var(--border); text-align: center; }
+.stat-val { font-family: "Outfit", sans-serif; font-size: 26px; font-weight: 700; color: var(--teal); }
+.stat-label { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 
-body {
-  font-family: "Sarabun", "Outfit", sans-serif;
-  background: var(--navy);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  padding-bottom: 90px; /* Space for bottom nav */
-}
-
-/* Background Mesh Gradient */
-body::before {
-  content: "";
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%);
-}
-
-/* ═══════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════ */
-header {
-  position: sticky; top: 0; z-index: 200;
-  background: rgba(11,25,41,0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 15px 20px;
-  display: flex; align-items: center; gap: 15px;
-}
-.btn-back {
-  background: var(--surface-2); border: 1px solid var(--border-2);
-  color: #fff; width: 40px; height: 40px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; text-decoration: none; transition: 0.2s;
-}
-.btn-back:hover { background: var(--border-2); }
-.header-title { font-family: "Outfit", sans-serif; font-size: 18px; font-weight: 700; }
-
-/* ═══════════════════════════════════════════
-   MAIN CONTENT
-═══════════════════════════════════════════ */
-.container {
-  position: relative; z-index: 1;
-  max-width: 800px; margin: 30px auto;
-  padding: 0 20px; width: 100%;
-}
-
-.card {
-  background: var(--surface);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 25px;
-  margin-bottom: 25px;
-}
-
-.section-label {
-  font-family: "Outfit", sans-serif; font-size: 12px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1.5px; color: var(--teal-light);
-  margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
-}
-
-/* Statistics Grid */
-.stat-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
-}
-.stat-item {
-  background: var(--navy-mid);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 20px;
-  display: flex; flex-direction: column; gap: 5px;
-}
-.stat-val {
-  font-family: "Outfit", sans-serif; font-size: 28px; font-weight: 700; color: #fff;
-}
-.stat-label { font-size: 12px; color: var(--text-dim); }
-
-/* Danger Zone */
-.danger-box {
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  background: rgba(239, 68, 68, 0.03);
-  border-radius: var(--radius);
-  padding: 25px;
-}
-.danger-title { color: var(--danger); font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-.danger-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 20px; }
-
-.btn-danger {
-  width: 100%; padding: 16px; background: rgba(239, 68, 68, 0.1);
-  color: var(--danger); border: 1px solid var(--danger);
-  border-radius: var(--radius-sm); cursor: pointer; font-weight: 700;
-  font-family: "Sarabun", sans-serif; transition: 0.3s;
-}
-.btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
-
-/* ═══════════════════════════════════════════
-   BOTTOM NAVIGATION
-═══════════════════════════════════════════ */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(11, 25, 41, 0.85); backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border); display: flex; justify-content: space-around;
-  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
-}
-.nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  text-decoration: none; color: var(--text-dim); transition: 0.3s; flex: 1;
-}
-.nav-icon { font-size: 20px; }
-.nav-label { font-size: 10px; font-weight: 600; font-family: "Sarabun", sans-serif; }
-.nav-item.active { color: var(--teal-light); }
-
-@media (max-width: 500px) {
-  .stat-grid { grid-template-columns: 1fr; }
-}
+.danger-zone { border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); }
+.btn-clear { width: 100%; padding: 18px; background: var(--danger); border: none; color: #fff; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
 </style>
 </head>
 <body>
 
 <header>
   <a href="settings.html" class="btn-back">←</a>
-  <div class="header-title">Database Management</div>
+  <h2 style="font-family:'Outfit'; font-size:18px;">Database</h2>
 </header>
 
 <div class="container">
-  <section class="card">
-    <div class="section-label"><span>📊</span> System Overview</div>
+  <div class="card">
+    <h3 style="margin-bottom:15px; font-size:16px;">📊 ข้อมูลปัจจุบัน</h3>
     <div class="stat-grid">
-      <div class="stat-item">
-        <div class="stat-val" id="count-animal">0</div>
-        <div class="stat-label">สัตว์ที่ลงทะเบียนทั้งหมด</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-val" id="count-queue">0</div>
-        <div class="stat-label">รายการในคิวปัจจุบัน</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-val" id="count-service">0</div>
-        <div class="stat-label">หัตถการที่บันทึกไว้</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-val" id="count-rx">0</div>
-        <div class="stat-label">รายการสั่งจ่ายยา</div>
-      </div>
+      <div class="stat-item"><div class="stat-val" id="c-animal">0</div><div class="stat-label">สัตว์ทั้งหมด</div></div>
+      <div class="stat-item"><div class="stat-val" id="c-queue">0</div><div class="stat-label">รายการคิว</div></div>
     </div>
-  </section>
+  </div>
 
-  <section class="card danger-box">
-    <div class="danger-title"><span>⚠️</span> DANGER ZONE</div>
-    <p class="danger-desc">
-      การล้างข้อมูลจะลบรายการสัตว์ (Animal), เจ้าของ (Owner), คิว (Queue), สัญญาณชีพ และใบสั่งยาทั้งหมดออกถาวร 
-      เหมาะสำหรับใช้ก่อนเริ่มโครงการค่ายอาสาครั้งใหม่ <br>
-      <i>* แม่แบบสติ๊กเกอร์ (Print Templates) จะไม่ถูกลบ</i>
-    </p>
-    
-    <button class="btn-danger" onclick="handleClearDatabase()">
-      🔥 ล้างข้อมูลสัตว์และคิวทั้งหมด
-    </button>
-  </section>
-  
-  <div style="text-align: center; color: var(--text-dim); font-size: 11px;">
-    Database Status: <span style="color: var(--teal-light);">Connected to Supabase</span>
+  <div class="card danger-zone">
+    <h3 style="color:var(--danger); font-size:16px;">⚠️ Danger Zone</h3>
+    <p style="font-size:12px; color:#94a3b8; margin-top:8px; line-height:1.5;">การล้างข้อมูลจะลบรายการสัตว์และคิวทั้งหมดถาวรเพื่อเริ่มรอบใหม่ (รหัสยืนยัน: 2500)</p>
+    <button class="btn-clear" onclick="clearDB()">🔥 ล้างข้อมูลสัตว์และคิว</button>
   </div>
 </div>
 
-<nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <span class="nav-icon">📊</span>
-    <span class="nav-label">แดชบอร์ด</span>
-  </a>
-  <a href="queue.html" class="nav-item">
-    <span class="nav-icon">⏳</span>
-    <span class="nav-label">จัดการคิว</span>
-  </a>
-  <a href="opd.html" class="nav-item">
-    <span class="nav-icon">🩺</span>
-    <span class="nav-label">ห้องตรวจ</span>
-  </a>
-  <a href="settings.html" class="nav-item active">
-    <span class="nav-icon">⚙️</span>
-    <span class="nav-label">ตั้งค่า</span>
-  </a>
-</nav>
-
 <script type="module">
 import { supabase } from "./js/supabase.js";
-
-// 1. ฟังก์ชันดึงสถิติข้อมูล
-async function updateStats() {
-  const tables = [
-    { table: 'vasd_animal', id: 'count-animal' },
-    { table: 'vasd_queue', id: 'count-queue' },
-    { table: 'vasd_service', id: 'count-service' },
-    { table: 'vasd_prescription', id: 'count-rx' }
-  ];
-
-  for (const item of tables) {
-    const { count, error } = await supabase
-      .from(item.table)
-      .select('*', { count: 'exact', head: true });
-    
-    if (!error) {
-      document.getElementById(item.id).innerText = count.toLocaleString();
-    }
-  }
+async function loadStats() {
+  const { count: a } = await supabase.from('vasd_animal').select('*', { count: 'exact', head: true });
+  const { count: q } = await supabase.from('vasd_queue').select('*', { count: 'exact', head: true });
+  document.getElementById('c-animal').innerText = a || 0;
+  document.getElementById('c-queue').innerText = q || 0;
 }
-
-// 2. ฟังก์ชันล้างข้อมูล (Dangerous)
-window.handleClearDatabase = async function() {
-  // ยืนยันขั้นตอนที่ 1
-  if (!confirm("🚨 คำเตือนสูงสุด: คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลสัตว์และคิวทั้งหมด?\nการกระทำนี้ไม่สามารถย้อนคืนได้!")) {
-    return;
-  }
-
-  // ยืนยันขั้นตอนที่ 2: รหัสผ่าน
-  const password = prompt("กรุณาป้อนรหัสผ่านผู้ดูแลระบบ (Admin Password) เพื่อยืนยัน:");
-  if (password !== '2500') {
-    alert("❌ รหัสผ่านไม่ถูกต้อง");
-    return;
-  }
-
-  try {
-    // การลบ vasd_animal จะส่งผล Cascade Delete ไปยัง Queue, Service, Prescription, VitalSigns อัตโนมัติ (ตาม SQL Schema)
-    // เราลบสัตว์ที่อยู่ใน Event ทั้งหมด (ยกเว้น Template)
-    const { error } = await supabase
-      .from('vasd_animal')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
-
-    if (error) throw error;
-
-    alert("✅ ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว ระบบกำลังเริ่มใหม่...");
-    window.location.reload();
-
-  } catch (err) {
-    alert("❌ เกิดข้อผิดพลาด: " + err.message);
-  }
+window.clearDB = async () => {
+  if (prompt("ป้อนรหัสผ่านแอดมิน (2500):") !== "2500") return alert("รหัสผิด!");
+  if (!confirm("ยืนยันการลบข้อมูลทั้งหมด?")) return;
+  await supabase.from('vasd_animal').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  alert("ล้างข้อมูลแล้ว"); loadStats();
 };
-
-// Initial Load
-updateStats();
+loadStats();
 </script>
 </body>
 </html>
