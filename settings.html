@@ -24,8 +24,6 @@
   --border-2:   rgba(255,255,255,0.14);
   --text:       #e2e8f0;
   --text-dim:   #94a3b8;
-  --text-faint: #4a5568;
-
   --radius-sm:  10px;
   --radius:     16px;
   --radius-lg:  22px;
@@ -41,9 +39,10 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding-bottom: 80px; /* กันโดน Bottom Nav บังบนมือถือ */
 }
 
-/* Mesh background from index */
+/* Mesh background */
 body::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -81,7 +80,6 @@ header {
   display: flex; align-items: center; gap: 6px;
 }
 .btn-print { background: var(--teal); color: #fff; }
-.btn-home { background: var(--surface-2); color: var(--text); border: 1px solid var(--border-2); }
 
 /* ═══════════════════════════════════════════
    LAYOUT
@@ -91,7 +89,6 @@ header {
   flex: 1; position: relative; z-index: 1;
 }
 
-/* ── Sidebar (Editor) ── */
 .sidebar {
   background: rgba(11, 25, 41, 0.4);
   border-right: 1px solid var(--border);
@@ -101,12 +98,12 @@ header {
 .sidebar-scroll { flex: 1; overflow-y: auto; padding: 20px; }
 
 .section-title {
-  font-family: "Outfit", sans-serif; font-size: 12px; font-weight: 700;
+  font-family: "Outfit", sans-serif; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 1px; color: var(--teal-light);
   margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
 }
 
-/* ── Form Elements ── */
+/* Form Elements */
 .field-group { margin-bottom: 20px; }
 label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; display: block; }
 
@@ -114,16 +111,12 @@ input, select {
   width: 100%; padding: 10px 12px; font-size: 13px; font-family: "Sarabun", sans-serif;
   background: var(--navy-mid); border: 1px solid var(--border-2);
   border-radius: var(--radius-sm); color: var(--text); outline: none;
-  transition: border-color 0.2s;
 }
-input:focus, select:focus { border-color: var(--teal); }
 
 .line-block {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
-  position: relative; transition: 0.2s;
 }
-.line-block:hover { border-color: var(--border-2); background: var(--surface-2); }
 .line-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .line-num { font-size: 13px; font-weight: 700; color: #fff; }
 
@@ -135,47 +128,54 @@ input:focus, select:focus { border-color: var(--teal); }
 .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
 .prop-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
 
-/* ── Buttons ── */
 .btn-main {
   width: 100%; padding: 12px; font-weight: 700; border-radius: var(--radius-sm);
   border: none; cursor: pointer; font-family: "Sarabun", sans-serif; transition: 0.2s;
-  margin-top: 10px;
 }
 .btn-save { background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: #fff; }
-.btn-add { background: var(--surface-2); color: var(--text); border: 1px solid var(--border-2); }
+.btn-add { background: var(--surface-2); color: var(--text); border: 1px solid var(--border-2); margin-top: 10px; }
 
-/* ── Preview Pane ── */
+/* Preview Pane */
 .preview-pane {
   background: rgba(0,0,0,0.2); display: flex; flex-direction: column;
   align-items: center; justify-content: center; padding: 40px;
 }
-.preview-info { font-size: 12px; color: var(--text-dim); margin-bottom: 20px; }
-
 .sticker {
   position: relative; width: 80mm; height: 50mm; background: #fff;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-radius: 2px;
-  overflow: hidden; color: #000; /* Force black text on white sticker */
+  overflow: hidden; color: #000;
 }
 .line { position: absolute; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
 
-/* ── Hint Box ── */
-.hint-box {
-  background: rgba(14, 165, 160, 0.05); border: 1px solid var(--teal-glow);
-  border-radius: var(--radius); padding: 16px; margin-top: 20px;
+/* ═══════════════════════════════════════════
+   BOTTOM NAVIGATION (Same as index.html)
+═══════════════════════════════════════════ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(11, 25, 41, 0.8);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
 }
-.hint-box code {
-  background: var(--navy); color: var(--teal-light); padding: 2px 6px;
-  border-radius: 4px; font-size: 11px; display: inline-block; margin: 2px;
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-decoration: none; color: var(--text-dim); transition: 0.3s; flex: 1;
 }
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 10px; font-weight: 600; font-family: "Sarabun", sans-serif; }
+.nav-item.active { color: var(--teal-light); }
+.nav-item.active .nav-icon { transform: translateY(-2px); }
 
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
-  .sidebar { height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  .sidebar { height: auto; border-right: none; }
   .preview-pane { padding: 40px 10px; order: -1; }
-  .sticker { transform: scale(0.9); }
+  .sticker { transform: scale(0.8); }
+  header .btn-home { display: none; } /* ซ่อนปุ่มโฮมบน Header เพราะมี Bottom Nav แล้ว */
 }
 </style>
 </head>
@@ -188,14 +188,12 @@ input:focus, select:focus { border-color: var(--teal); }
   </div>
   <div class="header-actions">
     <button class="btn-header btn-print" onclick="window.printTest()">🖨️ ทดสอบพิมพ์</button>
-    <button class="btn-header btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
   </div>
 </header>
 
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-scroll">
-      
       <div class="field-group">
         <label>ประเภทสติ๊กเกอร์</label>
         <select id="templateType" onchange="loadTemplate()">
@@ -210,14 +208,7 @@ input:focus, select:focus { border-color: var(--teal); }
 
       <div class="section-title"><span>📝</span> รายละเอียดบรรทัด</div>
       <div id="lineEditor"></div>
-      
       <button class="btn-main btn-add" onclick="addLine()">➕ เพิ่มบรรทัดใหม่</button>
-
-      <div class="hint-box">
-        <div class="section-title" style="margin-bottom:8px"><span>💡</span> ตัวแปรที่ใช้ได้</div>
-        <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px">สัตว์: <code>{{animal_name}}</code> <code>{{species}}</code> <code>{{sex}}</code> <code>{{queue_number}}</code></div>
-        <div style="font-size:11px; color:var(--text-dim)">ยา: <code>{{drug_id}}</code> <code>{{dose}}</code> <code>{{freq}}</code> <code>{{total_pills}}</code></div>
-      </div>
 
       <div style="margin-top: 24px; padding-bottom: 40px;">
         <button class="btn-main btn-save" onclick="saveTemplate()">💾 บันทึกรูปแบบนี้</button>
@@ -226,31 +217,40 @@ input:focus, select:focus { border-color: var(--teal); }
   </aside>
 
   <main class="preview-pane">
-    <div class="preview-info">ตัวอย่างบนสติ๊กเกอร์ขนาด 80 x 50 mm</div>
     <div class="sticker" id="sticker"></div>
   </main>
 </div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">แดชบอร์ด</span>
+  </a>
+  <a href="queue.html" class="nav-item">
+    <span class="nav-icon">⏳</span>
+    <span class="nav-label">จัดการคิว</span>
+  </a>
+  <a href="opd.html" class="nav-item">
+    <span class="nav-icon">🩺</span>
+    <span class="nav-label">ห้องตรวจ</span>
+  </a>
+  <a href="settings.html" class="nav-item active">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">ตั้งค่า</span>
+  </a>
+</nav>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
 let currentConfig = [];
 
-// ฟังก์ชันจำลองข้อความพรีวิว
 function getPreviewText(template) {
   return template
-    .replace("{{queue_number}}","1")
-    .replace("{{animal_name}}","น้องถุงทอง")
-    .replace("{{species}}","แมว")
-    .replace("{{sex}}","ผู้")
-    .replace("{{owner_name}}","สมชาย ใจดี")
-    .replace("{{phone}}","081-234-5678")
-    .replace("{{services}}","ทำหมัน, วัคซีน")
-    .replace("{{drug_id}}","Amoxicillin 250mg")
-    .replace("{{dose}}","กินครั้งละ 1 เม็ด")
-    .replace("{{freq}}","วันละ 2 ครั้ง หลังอาหาร")
-    .replace("{{days}}","5 วัน")
-    .replace("{{total_pills}}","10");
+    .replace("{{queue_number}}","1").replace("{{animal_name}}","น้องถุงทอง")
+    .replace("{{species}}","แมว").replace("{{sex}}","ผู้")
+    .replace("{{owner_name}}","สมชาย ใจดี").replace("{{phone}}","081-234-5678")
+    .replace("{{drug_id}}","Amoxicillin").replace("{{total_pills}}","10");
 }
 
 function renderPreview() {
@@ -262,7 +262,7 @@ function renderPreview() {
     div.style.left = l.x + "px";
     div.style.top  = l.y + "px";
     div.style.fontSize   = l.size + "px";
-    div.style.fontWeight = l.weight;
+    div.style.fontWeight = l.weight || "normal";
     div.style.fontFamily = l.font || "Sarabun";
     div.style.textAlign  = l.align || "left";
     div.style.width      = `calc(100% - ${l.x}px)`;
@@ -280,34 +280,24 @@ function renderEditor() {
     block.innerHTML = `
       <div class="line-header">
         <span class="line-num">บรรทัดที่ ${i+1}</span>
-        <button class="btn-del" onclick="removeLine(${i})">ลบออก</button>
+        <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
       </div>
-      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="ใส่ข้อความหรือตัวแปร..." style="margin-bottom:10px">
-      
+      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="ข้อความ...">
       <div class="prop-grid">
-        <div>
-          <label>ฟอนต์</label>
-          <select onchange="updateLine(${i},'font',this.value)">
-            <option value="'Sarabun', sans-serif" ${l.font?.includes("Sarabun")?"selected":""}>Sarabun</option>
-            <option value="'Prompt', sans-serif" ${l.font?.includes("Prompt")?"selected":""}>Prompt</option>
-            <option value="'Outfit', sans-serif" ${l.font?.includes("Outfit")?"selected":""}>Outfit (EN)</option>
-            <option value="monospace" ${l.font==="monospace"?"selected":""}>Monospace</option>
-          </select>
-        </div>
-        <div>
-          <label>การจัดวาง</label>
-          <select onchange="updateLine(${i},'align',this.value)">
-            <option value="left"   ${l.align==="left"?"selected":""}>ชิดซ้าย</option>
-            <option value="center" ${l.align==="center"?"selected":""}>กึ่งกลาง</option>
-            <option value="right"  ${l.align==="right"?"selected":""}>ชิดขวา</option>
-          </select>
-        </div>
+        <select onchange="updateLine(${i},'font',this.value)">
+          <option value="'Sarabun', sans-serif" ${l.font?.includes("Sarabun")?"selected":""}>Sarabun</option>
+          <option value="'Prompt', sans-serif" ${l.font?.includes("Prompt")?"selected":""}>Prompt</option>
+        </select>
+        <select onchange="updateLine(${i},'align',this.value)">
+          <option value="left" ${l.align==="left"?"selected":""}>ชิดซ้าย</option>
+          <option value="center" ${l.align==="center"?"selected":""}>กลาง</option>
+          <option value="right" ${l.align==="right"?"selected":""}>ชิดขวา</option>
+        </select>
       </div>
-
       <div class="prop-3">
-        <div><label>ขนาด(px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
-        <div><label>แกน X</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
-        <div><label>แกน Y</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
+        <input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)">
+        <input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)">
+        <input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)">
       </div>
     `;
     area.appendChild(block);
@@ -316,19 +306,10 @@ function renderEditor() {
 
 window.updateLine = (i, key, val) => {
   if (["size","x","y"].includes(key)) val = parseInt(val)||0;
-  currentConfig[i][key] = val;
-  renderPreview();
+  currentConfig[i][key] = val; renderPreview();
 };
-
-window.removeLine = (i) => {
-  currentConfig.splice(i,1);
-  renderEditor(); renderPreview();
-};
-
-window.addLine = () => {
-  currentConfig.push({ text:"ข้อความใหม่", font:"'Sarabun', sans-serif", size:14, x:10, y:10, weight:"normal", align:"left" });
-  renderEditor(); renderPreview();
-};
+window.removeLine = (i) => { currentConfig.splice(i,1); renderEditor(); renderPreview(); };
+window.addLine = () => { currentConfig.push({ text:"ข้อความ", size:14, x:10, y:10 }); renderEditor(); renderPreview(); };
 
 window.loadTemplate = async () => {
   const type = document.getElementById("templateType").value;
@@ -340,23 +321,14 @@ window.loadTemplate = async () => {
 window.saveTemplate = async () => {
   const type = document.getElementById("templateType").value;
   const { error } = await supabase.from("vasd_print_template").upsert({ template_type:type, config:currentConfig },{ onConflict:"template_type" });
-  if (error) alert("❌ ผิดพลาด: " + error.message);
-  else alert("✅ บันทึกแม่แบบ \"" + type + "\" สำเร็จ");
+  if (error) alert("❌ " + error.message);
+  else alert("✅ บันทึกสำเร็จ");
 };
 
 window.printTest = () => {
   const contents = document.getElementById("sticker").innerHTML;
   const pw = window.open("","_blank","width=800,height=600");
-  pw.document.write(`<html><head>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-      body{margin:0; padding:0;}
-      .sticker{position:relative; width:80mm; height:50mm; background:#fff; overflow:hidden;}
-      .line{position:absolute; white-space:pre-wrap; word-break:break-word; color:#000;}
-      @page{size:80mm 50mm; margin:0;}
-    </style>
-    </head><body><div class="sticker">${contents}</div>
-    <script>window.onload=function(){setTimeout(()=>{window.print();window.close();},500);};<\/script></body></html>`);
+  pw.document.write(`<html><head><style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;color:#000}@page{size:80mm 50mm;margin:0}</style></head><body><div class="sticker">${contents}</div><script>window.onload=function(){setTimeout(()=>{window.print();window.close();},500);};<\/script></body></html>`);
   pw.document.close();
 };
 
