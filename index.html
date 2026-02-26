@@ -98,7 +98,7 @@ header {
   flex-shrink: 0;
 }
 .brand-logo {
-  width: 48px; /* ปรับให้กว้างขึ้นเพื่อรองรับ 2 ไอคอน */
+  width: 48px;
   height: 38px;
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
   border-radius: 10px;
@@ -168,13 +168,41 @@ header {
 .btn-logout:hover { background: var(--surface-2); color: var(--text); }
 
 /* ═══════════════════════════════════════════
-   MAIN CONTENT
+   MAIN CONTENT & CALL BUTTON
 ═══════════════════════════════════════════ */
 .wrap {
   position: relative; z-index: 1;
   max-width: 900px; margin: 0 auto;
   padding: 28px 18px 100px;
   width: 100%;
+}
+
+.btn-call {
+  width: 100%;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  font-size: 18px;
+  font-weight: 700;
+  font-family: "Sarabun", sans-serif;
+  margin-bottom: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: transform 0.2s;
+  animation: pulseAlert 2s infinite;
+}
+.btn-call:active { transform: scale(0.97); }
+
+@keyframes pulseAlert {
+  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70%  { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 /* ═══════════════════════════════════════════
@@ -205,7 +233,6 @@ header {
 }
 .menu-card:active { transform: scale(0.97); }
 
-/* Ripple dot top-right on hover */
 .menu-card::after {
   content: "›";
   position: absolute; bottom: 14px; right: 16px;
@@ -339,7 +366,6 @@ footer {
   #userRole  { width: 90px; font-size: 11px; }
 }
 
-/* Desktop refinements */
 @media (min-width: 641px) {
   .menu-grid { grid-template-columns: repeat(4, 1fr); }
 }
@@ -388,6 +414,10 @@ footer {
 </header>
 
 <div class="wrap">
+  <button class="btn-call" onclick="triggerEmergencyCall()">
+    <span style="font-size: 24px;">🚨</span> CALL (เรียกอาจารย์/สัตวแพทย์/Admin ด่วน)
+  </button>
+
   <div class="menu-grid">
     <a class="menu-card" href="registration.html">
       <span class="card-emoji">📝</span>
@@ -465,7 +495,7 @@ footer {
   ➕
 </button>
 
-<footer>RMUTTO – VASD © 2026 &nbsp;·&nbsp; Veterinary Academic Service Division</footer>
+<footer>RMUTTO – VASD © 2026  ·  Veterinary Academic Service Division</footer>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -528,9 +558,87 @@ async function loadSummary() {
 
 loadSummary();
 
-supabase.channel('dashboard-live')
+/* ── Broadcast & Realtime Logic ── */
+
+// ฟังก์ชันสร้างเสียงเตือนดังๆ ด้วย Web Audio API (ไม่ต้องพึ่งไฟล์)
+function playAlarmSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.type = 'sawtooth';
+    const now = ctx.currentTime;
+    
+    // ทำเสียงไซเรน วนขึ้นลง 2 วินาที
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.linearRampToValueAtTime(800, now + 0.5);
+    osc.frequency.linearRampToValueAtTime(400, now + 1.0);
+    osc.frequency.linearRampToValueAtTime(800, now + 1.5);
+    osc.frequency.linearRampToValueAtTime(400, now + 2.0);
+    
+    gain.gain.setValueAtTime(0.5, now);
+    osc.start(now);
+    osc.stop(now + 2.0);
+  } catch (err) {
+    console.log("Audio not supported or user hasn't interacted yet", err);
+  }
+}
+
+// ตั้งค่า Channel ให้รองรับการส่ง Broadcast ด้วย
+const dashboardChannel = supabase.channel('dashboard-live', {
+  config: {
+    broadcast: { self: true },
+  },
+});
+
+dashboardChannel
+  // 1. รับ Data Changes เพื่ออัปเดต Badge
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
+  
+  // 2. รับข้อความ Broadcast สำหรับ Emergency Call
+  .on('broadcast', { event: 'emergency_call' }, (payload) => {
+    const myRole = localStorage.getItem("vasd_role") || "";
+    
+    // ถ้าเครื่องเราเป็น Admin, อาจารย์ หรือ สัตวแพทย์ ให้แจ้งเตือน!
+    if (["admin", "อาจารย์", "สัตวแพทย์"].includes(myRole)) {
+      playAlarmSound();
+      
+      // Delay alert นิดหน่อยให้เสียงเริ่มทำงานก่อน
+      setTimeout(() => {
+        alert(`🚨 สัญญาณเรียกฉุกเฉิน!\nจาก: ${payload.payload.sender} (${payload.payload.role})\nเวลา: ${payload.payload.time}`);
+      }, 100);
+    }
+  })
   .subscribe();
+
+// ส่งข้อความ Broadcast เมื่อกดปุ่ม CALL
+window.triggerEmergencyCall = async function() {
+  const name = localStorage.getItem("vasd_user") || "ผู้ใช้งาน";
+  const role = localStorage.getItem("vasd_role") || "ไม่ได้ระบุ";
+
+  if (!confirm("🚨 ยืนยันการส่งสัญญาณเรียก สัตวแพทย์/อาจารย์/Admin ด่วน?")) return;
+
+  try {
+    await dashboardChannel.send({
+      type: 'broadcast',
+      event: 'emergency_call',
+      payload: { 
+        sender: name, 
+        role: role, 
+        time: new Date().toLocaleTimeString('th-TH') 
+      }
+    });
+    alert("✅ ส่งสัญญาณเรียกเรียบร้อยแล้วครับ");
+  } catch (error) {
+    alert("❌ ไม่สามารถส่งสัญญาณได้: " + error.message);
+  }
+};
+
 </script>
 
 </body>
