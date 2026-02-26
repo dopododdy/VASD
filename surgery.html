@@ -75,6 +75,7 @@ header {
   background: var(--surface); border: 1px solid var(--border-2);
   border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 16px;
   animation: slideUp 0.4s ease both;
+  display: flex; flex-direction: column;
 }
 .surg-card::before { content: ""; display: block; height: 3px; background: linear-gradient(90deg, var(--rose), #fb7185); }
 
@@ -101,7 +102,7 @@ header {
 }
 .tab-btn.active { color: var(--rose); border-bottom-color: var(--rose); background: rgba(239,68,68,0.05); }
 
-.tab-content { display: none; padding: 16px; }
+.tab-content { display: none; padding: 16px; flex: 1; }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
 /* ── Tab: Info & Team ── */
@@ -110,6 +111,8 @@ header {
 .info-label { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
 .info-val { font-size: 13px; font-weight: 600; color: var(--text); }
 
+.form-grid { display: grid; grid-template-columns: 80px 1fr; gap: 8px; margin-bottom: 8px; }
+
 .f-input {
   width: 100%; padding: 10px 12px; font-size: 14px; font-family: "Sarabun", sans-serif;
   background: var(--surface-2); border: 1px solid var(--border-2);
@@ -117,13 +120,13 @@ header {
 }
 .f-input:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
 .f-input::placeholder { color: var(--text-faint); }
+.f-input.error { border-color: var(--rose); background: rgba(239,68,68,0.05); }
 
 /* ── Tab: Monitoring ── */
 .monitor-inputs {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;
 }
 .monitor-inputs .wide { grid-column: span 3; }
-.monitor-inputs .half { grid-column: span 2; }
 .monitor-inputs .third { grid-column: span 1; }
 
 .btn {
@@ -133,7 +136,7 @@ header {
 }
 .btn:active { transform: scale(0.98); }
 .btn-rose { background: linear-gradient(135deg, var(--rose), #fb7185); color: #fff; box-shadow: 0 4px 12px rgba(239,68,68,0.25); }
-.btn-emerald { background: linear-gradient(135deg, var(--emerald), #34d399); color: #fff; margin-top: 16px; }
+.btn-emerald { background: linear-gradient(135deg, var(--emerald), #34d399); color: #fff; font-size: 14px; padding: 14px; }
 
 /* Responsive Table */
 .table-wrapper {
@@ -144,6 +147,11 @@ header {
 .vitals-table th { background: var(--surface-3); color: var(--text-dim); padding: 8px 6px; font-weight: 600; border-bottom: 1px solid var(--border); }
 .vitals-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
 .vitals-table tr:last-child td { border-bottom: none; }
+
+/* ── Card Footer ── */
+.sc-footer {
+  padding: 16px; background: var(--surface-2); border-top: 1px solid var(--border);
+}
 
 /* ═══════════════════════════════════════════
    BOTTOM NAV
@@ -241,8 +249,8 @@ async function loadSurgeryQueue() {
         </div>
 
         <div class="tabs-header">
-          <button class="tab-btn active" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูล & ทีมผ่าตัด</button>
-          <button class="tab-btn" onclick="switchTab(this, 'tab-monitor-${a.id}')">Monitoring</button>
+          <button class="tab-btn active" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูล & ทีมผ่าตัด</button>
+          <button class="tab-btn" id="btn-tab-monitor-${a.id}" onclick="switchTab(this, 'tab-monitor-${a.id}')">Monitoring</button>
         </div>
 
         <div id="tab-info-${a.id}" class="tab-content active">
@@ -251,10 +259,11 @@ async function loadSurgeryQueue() {
             <div class="info-item"><div class="info-label">สถานะ</div><div class="info-val">กำลังผ่าตัด 🛏️</div></div>
           </div>
           
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <input type="text" class="f-input" placeholder="สัตวแพทย์ผู้ผ่าตัด (Surgeon)">
-            <input type="text" class="f-input" placeholder="ผู้ช่วย / วิสัญญี (Anesthetist)">
+          <div class="form-grid">
+            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะผ่าตัด (เช่น 1, 2, A)">
+            <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *" oninput="this.classList.remove('error')">
           </div>
+          <input type="text" id="anes-${a.id}" class="f-input" placeholder="Anesthetist (ผู้ช่วย / วิสัญญี)">
         </div>
 
         <div id="tab-monitor-${a.id}" class="tab-content">
@@ -269,7 +278,7 @@ async function loadSurgeryQueue() {
             
             <input type="text" id="note-${a.id}" class="f-input wide" placeholder="บันทึกเพิ่มเติม (ยาที่ใช้เพิ่ม, เหตุการณ์)...">
           </div>
-          <button class="btn btn-rose" onclick="addVitalSign('${a.id}')">+ บันทึกข้อมูล</button>
+          <button class="btn btn-rose" onclick="addVitalSign('${a.id}')">+ บันทึก Monitoring</button>
 
           <div class="table-wrapper">
             <table class="vitals-table">
@@ -283,7 +292,9 @@ async function loadSurgeryQueue() {
               </tbody>
             </table>
           </div>
-          
+        </div>
+
+        <div class="sc-footer">
           <button class="btn btn-emerald" onclick="finishSurgery('${a.id}')">✅ เสร็จสิ้นการผ่าตัด (ย้ายไปพักฟื้น)</button>
         </div>
       `;
@@ -360,10 +371,31 @@ window.renderVitalsTable = function(animalId) {
 
 // ── ส่งไปพักฟื้น ──
 window.finishSurgery = async function(animalId) {
-  if (!confirm("ยืนยันเสร็จสิ้นการผ่าตัดและส่งไปยังห้องพักฟื้น?")) return;
+  const surgeonInput = document.getElementById(`surgeon-${animalId}`);
+  
+  // Validate บังคับใส่ Surgeon
+  if (!surgeonInput || !surgeonInput.value.trim()) {
+    // สลับกลับมาหน้า Tab ข้อมูลอัตโนมัติเพื่อให้ผู้ใช้กรอก
+    const infoTabBtn = document.getElementById(`btn-tab-info-${animalId}`);
+    if (infoTabBtn) infoTabBtn.click();
+    
+    surgeonInput.classList.add('error');
+    surgeonInput.focus();
+    alert("⚠️ กรุณาระบุชื่อ สัตวแพทย์ผู้ผ่าตัด (Surgeon) ก่อนเสร็จสิ้นการผ่าตัดครับ");
+    return;
+  }
+
+  if (!confirm("ยืนยันเสร็จสิ้นการผ่าตัดและส่งไปยังห้องพักฟื้น?\n(ข้อมูลทั้งหมดจะถูกบันทึกในเคสนี้)")) return;
+
   try {
+    // Note: ในระบบจริง ตรงนี้อาจจะต้อง Update ชื่อหมอ, หมายเลขโต๊ะ ลงใน Database ด้วย
+    // const tableNo = document.getElementById(`table-${animalId}`).value;
+    // const anesName = document.getElementById(`anes-${animalId}`).value;
+    
+    // อัปเดตสถานะคิวเป็น recovery
     const { error } = await supabase.from("vasd_queue").update({ status: "recovery", updated_at: new Date() }).eq("animal_id", animalId);
     if (error) throw error;
+    
     loadSurgeryQueue();
   } catch (err) {
     alert("❌ เกิดข้อผิดพลาด: " + err.message);
