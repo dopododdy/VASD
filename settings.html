@@ -23,7 +23,7 @@ body::before {
 }
 header {
   padding: 25px 20px; text-align: center; border-bottom: 1px solid var(--border);
-  background: rgba(11,25,41,0.7); backdrop-filter: blur(10px); sticky; top: 0; z-index: 10;
+  background: rgba(11,25,41,0.7); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10;
 }
 .brand-title { font-family: "Outfit", sans-serif; font-size: 22px; font-weight: 700; color: #fff; }
 
@@ -77,10 +77,14 @@ header {
 </div>
 
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-label">แดชบอร์ด</span></a>
-  <a href="queue.html" class="nav-item"><span class="nav-icon">⏳</span><span class="nav-label">คิว</span></a>
-  <a href="opd.html" class="nav-item"><span class="nav-icon">🩺</span><span class="nav-label">ห้องตรวจ</span></a>
-  <a href="settings.html" class="nav-item active"><span class="nav-icon">⚙️</span><span class="nav-label">ตั้งค่า</span></a>
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">แดชบอร์ด</span>
+  </a>
+  <a href="settings.html" class="nav-item active">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">ตั้งค่า</span>
+  </a>
 </nav>
 
 </body>
