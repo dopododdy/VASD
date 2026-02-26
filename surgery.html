@@ -8,19 +8,19 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   TOKENS & BASE
+   TOKENS & BASE (คงเดิมตาม Design System)
 ═══════════════════════════════════════════ */
 :root {
   --navy:         #0b1929;
-  --navy-mid:     #112240;
-  --primary:      #3b82f6; /* สีฟ้าสว่าง (Electric Blue) เป็นธีมหลัก */
-  --primary-light:#60a5fa;
-  --teal:         #0ea5a0;
-  --teal-light:   #14c4bc;
-  --amber:        #f59e0b;
-  --rose:         #ef4444; /* ยังเก็บไว้ใช้กับ Error / Emergency */
-  --emerald:      #10b981;
-  --violet:       #8b5cf6;
+  --navy-mid:      #112240;
+  --primary:       #3b82f6; 
+  --primary-light: #60a5fa;
+  --teal:          #0ea5a0;
+  --teal-light:    #14c4bc;
+  --amber:         #f59e0b;
+  --rose:          #ef4444; 
+  --emerald:       #10b981;
+  --violet:        #8b5cf6;
 
   --surface:    rgba(255,255,255,0.04);
   --surface-2:  rgba(255,255,255,0.07);
@@ -46,7 +46,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════
-   HEADER
+   HEADER & LAYOUT
 ═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 200;
@@ -65,9 +65,6 @@ header {
 .brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1; }
 .brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
-/* ═══════════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════════ */
 .wrap { max-width: 900px; margin: 0 auto; padding: 16px 12px 100px; width: 100%; }
 
 /* ═══════════════════════════════════════════
@@ -107,26 +104,34 @@ header {
 .tab-content { display: none; padding: 16px; flex: 1; }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
-/* ── Tab: Info & Team ── */
+/* ── Tab: Info (หัตถการ Checklist) ── */
 .info-item { background: var(--surface-2); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px; }
-.info-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.info-val { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.info-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+
+/* Checklist Style */
+.service-list { display: flex; flex-direction: column; gap: 8px; }
+.svc-check {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface-3); padding: 10px 14px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: background 0.2s; border: 1px solid transparent;
+}
+.svc-check:hover { background: rgba(59,130,246,0.1); }
+.svc-check input[type="checkbox"] {
+  width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);
+}
+.svc-check span { font-size: 14px; font-weight: 500; color: var(--text); }
+.svc-check input:checked + span { color: var(--primary-light); text-decoration: none; }
 
 .form-grid { display: grid; grid-template-columns: 80px 1fr; gap: 8px; margin-bottom: 8px; }
-
 .f-input {
   width: 100%; padding: 10px 12px; font-size: 14px; font-family: "Sarabun", sans-serif;
   background: var(--surface-2); border: 1px solid var(--border-2);
   border-radius: var(--radius-sm); color: var(--text); outline: none; transition: 0.2s;
 }
 .f-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
-.f-input::placeholder { color: var(--text-faint); }
-.f-input.error { border-color: var(--rose); background: rgba(239,68,68,0.05); }
 
 /* ── Tab: Monitoring ── */
-.monitor-inputs {
-  display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px;
-}
+.monitor-inputs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
 .monitor-inputs .wide { grid-column: span 6; }
 .monitor-inputs .half { grid-column: span 3; }
 .monitor-inputs .third { grid-column: span 2; }
@@ -134,26 +139,20 @@ header {
 .btn {
   padding: 10px 16px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
   border: none; border-radius: var(--radius-sm); cursor: pointer; text-align: center;
-  transition: opacity 0.2s, transform 0.1s; width: 100%;
+  transition: 0.2s; width: 100%;
 }
-.btn:active { transform: scale(0.98); }
 .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.25); }
 .btn-emerald { background: linear-gradient(135deg, var(--emerald), #34d399); color: #fff; font-size: 14px; padding: 14px; }
 
-/* Responsive Table */
 .table-wrapper {
   margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-  overflow-x: auto; background: var(--surface-2); -webkit-overflow-scrolling: touch;
+  overflow-x: auto; background: var(--surface-2);
 }
 .vitals-table { width: 100%; min-width: 440px; border-collapse: collapse; font-size: 12px; text-align: center; }
-.vitals-table th { background: var(--surface-3); color: var(--text-dim); padding: 8px 6px; font-weight: 600; border-bottom: 1px solid var(--border); }
+.vitals-table th { background: var(--surface-3); color: var(--text-dim); padding: 8px 6px; border-bottom: 1px solid var(--border); }
 .vitals-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
-.vitals-table tr:last-child td { border-bottom: none; }
 
-/* ── Card Footer ── */
-.sc-footer {
-  padding: 16px; background: var(--surface-2); border-top: 1px solid var(--border);
-}
+.sc-footer { padding: 16px; background: var(--surface-2); border-top: 1px solid var(--border); }
 
 /* ═══════════════════════════════════════════
    BOTTOM NAV
@@ -165,16 +164,10 @@ header {
   display: flex; justify-content: space-around; align-items: center;
   padding-bottom: env(safe-area-inset-bottom);
 }
-.nav-item {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  color: var(--text-dim); text-decoration: none; font-size: 10px; font-weight: 600; width: 60px; height: 100%; transition: 0.2s;
-}
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim); text-decoration: none; font-size: 10px; font-weight: 600; width: 60px; }
 .nav-item.active { color: var(--primary); }
 .nav-icon { font-size: 20px; }
-.nav-item:hover { color: var(--text); }
-.nav-item.active:hover { color: var(--primary); }
 
-/* ANIMATIONS */
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
@@ -215,7 +208,8 @@ async function loadSurgeryQueue() {
     const { data: queueData, error } = await supabase
       .from("vasd_queue")
       .select(`id, animal_id, status,
-        vasd_animal(id, event_id, queue_number, animal_name, species, sex, actual_weight, vasd_service(service_type))
+        vasd_animal(id, event_id, queue_number, animal_name, species, sex, actual_weight, 
+        vasd_service(id, service_type, is_done))
       `)
       .eq("status", "surgery")
       .order("updated_at", { ascending: true });
@@ -233,21 +227,23 @@ async function loadSurgeryQueue() {
     animals.forEach((q, idx) => {
       const a = q.vasd_animal;
       const spText = a.species === "ส" ? "🐶 สุนัข" : "🐱 แมว";
-      const services = (a.vasd_service || []).map(s => s.service_type).join(", ") || "–";
       
+      // สร้าง Checklist หัตถการ
+      const servicesHtml = (a.vasd_service || []).map(s => `
+        <label class="svc-check">
+          <input type="checkbox" ${s.is_done ? 'checked' : ''} onchange="toggleServiceStatus('${s.id}', this.checked)">
+          <span>${s.service_type}</span>
+        </label>
+      `).join('') || '<div style="color:var(--text-faint);">ไม่มีข้อมูลหัตถการ</div>';
+
       if(!vitalsData[a.id]) vitalsData[a.id] = [];
 
-      // คำนวณปริมาตรยาฉุกเฉิน
       const weight = parseFloat(a.actual_weight) || 0;
       let adrVol = "N/A", atrVol = "N/A", atipVol = "N/A";
-      
       if (weight > 0) {
-        adrVol = ((weight * 0.01) / 1).toFixed(2) + " ml";   // Adrenaline 1 mg/ml
-        atrVol = ((weight * 0.02) / 1).toFixed(2) + " ml";   // Atropine 1 mg/ml
-        atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";   // Atipamezole 5 mg/ml
-      } else {
-        const errTxt = `<span style="font-size:12px; color:var(--text-faint);">ไม่มี นน.</span>`;
-        adrVol = atrVol = atipVol = errTxt;
+        adrVol = ((weight * 0.01) / 1).toFixed(2) + " ml";
+        atrVol = ((weight * 0.02) / 1).toFixed(2) + " ml";
+        atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";
       }
 
       const card = document.createElement("div");
@@ -257,84 +253,57 @@ async function loadSurgeryQueue() {
           <div class="queue-circle">#${a.queue_number || "-"}</div>
           <div class="sc-title-block">
             <div class="sc-animal-name">${a.animal_name}</div>
-            <div class="sc-meta">${spText} · ${a.sex} · น้ำหนักจริง: ${a.actual_weight || "-"} kg</div>
+            <div class="sc-meta">${spText} · ${a.sex} · นน.: ${a.actual_weight || "-"} kg</div>
           </div>
         </div>
 
         <div class="tabs-header">
-          <button class="tab-btn active" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูลทีม</button>
+          <button class="tab-btn active" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูล</button>
           <button class="tab-btn" id="btn-tab-monitor-${a.id}" onclick="switchTab(this, 'tab-monitor-${a.id}')">Monitoring</button>
           <button class="tab-btn" id="btn-tab-emergency-${a.id}" style="color:var(--rose);" onclick="switchTab(this, 'tab-emergency-${a.id}')">🚨 Emergency</button>
         </div>
 
         <div id="tab-info-${a.id}" class="tab-content active">
           <div class="info-item">
-            <div class="info-label">หัตถการ (Services)</div>
-            <div class="info-val" style="color:var(--primary);">${services}</div>
+            <div class="info-label">หัตถการที่ต้องทำ</div>
+            <div class="service-list">${servicesHtml}</div>
           </div>
           
           <div class="form-grid">
-            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะ (เช่น 1, A)">
-            <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *" oninput="this.classList.remove('error')">
+            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะ">
+            <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *">
           </div>
           <input type="text" id="anes-${a.id}" class="f-input" placeholder="Anesthetist (ผู้ช่วย / วิสัญญี)">
         </div>
 
         <div id="tab-monitor-${a.id}" class="tab-content">
           <div class="monitor-inputs">
-            <input type="number" id="hr-${a.id}" class="f-input third" placeholder="HR (bpm)">
-            <input type="number" id="rr-${a.id}" class="f-input third" placeholder="RR (bpm)">
-            <input type="number" id="spo2-${a.id}" class="f-input third" placeholder="SpO2 (%)">
-            
+            <input type="number" id="hr-${a.id}" class="f-input third" placeholder="HR">
+            <input type="number" id="rr-${a.id}" class="f-input third" placeholder="RR">
+            <input type="number" id="spo2-${a.id}" class="f-input third" placeholder="SpO2">
             <input type="number" id="temp-${a.id}" class="f-input half" placeholder="T (°F)">
             <input type="number" id="zol-${a.id}" class="f-input half" placeholder="Zol (ml)">
-            
-            <input type="text" id="note-${a.id}" class="f-input wide" placeholder="บันทึกเพิ่มเติม (ยาที่ใช้เพิ่ม, เหตุการณ์)...">
+            <input type="text" id="note-${a.id}" class="f-input wide" placeholder="บันทึกเพิ่มเติม...">
           </div>
           <button class="btn btn-primary" onclick="addVitalSign('${a.id}')">+ บันทึก Monitoring</button>
-
           <div class="table-wrapper">
             <table class="vitals-table">
-              <thead>
-                <tr>
-                  <th>เวลา</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th><th>Zol</th><th>Note</th>
-                </tr>
-              </thead>
-              <tbody id="vitals-tbody-${a.id}">
-                <tr><td colspan="7" style="color:var(--text-faint); font-style:italic;">ยังไม่มีการบันทึก</td></tr>
-              </tbody>
+              <thead><tr><th>เวลา</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th><th>Zol</th><th>Note</th></tr></thead>
+              <tbody id="vitals-tbody-${a.id}"></tbody>
             </table>
           </div>
         </div>
 
         <div id="tab-emergency-${a.id}" class="tab-content">
-          <div style="margin-bottom: 12px; font-size: 13px; color: var(--text-dim); text-align: center;">
-            คำนวณโดสยาฉุกเฉินจากน้ำหนักจริง: <span style="color:var(--text); font-weight:600; font-size:14px;">${weight > 0 ? weight + " kg" : "ไม่ได้ระบุ"}</span>
-          </div>
-          
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); padding: 12px 16px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <div style="color: var(--rose); font-weight: 700; font-size: 15px;">Adrenaline <span style="font-size: 12px; font-weight: 500; color:var(--text-dim);">(1 mg/ml)</span></div>
-                <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">Dose: 0.01 mg/kg IV</div>
-              </div>
-              <div style="font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">${adrVol}</div>
+            <div style="background: rgba(239,68,68,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
+              <span style="color:var(--rose); font-weight:700;">Adrenaline</span> <b style="font-size:18px;">${adrVol}</b>
             </div>
-
-            <div style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 12px 16px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <div style="color: var(--amber); font-weight: 700; font-size: 15px;">Atropine <span style="font-size: 12px; font-weight: 500; color:var(--text-dim);">(1 mg/ml)</span></div>
-                <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">Dose: 0.02 mg/kg IV</div>
-              </div>
-              <div style="font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">${atrVol}</div>
+            <div style="background: rgba(245,158,11,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
+              <span style="color:var(--amber); font-weight:700;">Atropine</span> <b style="font-size:18px;">${atrVol}</b>
             </div>
-
-            <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); padding: 12px 16px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <div style="color: var(--emerald); font-weight: 700; font-size: 15px;">Atipamezole <span style="font-size: 12px; font-weight: 500; color:var(--text-dim);">(5 mg/ml)</span></div>
-                <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">Dose: 0.1 mg/kg IM</div>
-              </div>
-              <div style="font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">${atipVol}</div>
+            <div style="background: rgba(16,185,129,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
+              <span style="color:var(--emerald); font-weight:700;">Atipamezole</span> <b style="font-size:18px;">${atipVol}</b>
             </div>
           </div>
         </div>
@@ -353,7 +322,21 @@ async function loadSurgeryQueue() {
   }
 }
 
-// ── UI Tab Switcher ──
+// ── ฟังก์ชันอัปเดตสถานะหัตถการ (Checkbox) ──
+window.toggleServiceStatus = async function(serviceId, isDone) {
+  try {
+    const { error } = await supabase
+      .from("vasd_service")
+      .update({ is_done: isDone })
+      .eq("id", serviceId);
+    
+    if (error) throw error;
+    console.log(`Service ${serviceId} updated: ${isDone}`);
+  } catch (err) {
+    alert("ไม่สามารถบันทึกสถานะได้: " + err.message);
+  }
+};
+
 window.switchTab = function(btn, targetId) {
   const card = btn.closest('.surg-card');
   card.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -362,7 +345,6 @@ window.switchTab = function(btn, targetId) {
   document.getElementById(targetId).classList.add('active');
 };
 
-// ── บันทึก Vitals ──
 window.addVitalSign = function(animalId) {
   const hr = document.getElementById(`hr-${animalId}`).value;
   const rr = document.getElementById(`rr-${animalId}`).value;
@@ -370,75 +352,50 @@ window.addVitalSign = function(animalId) {
   const temp = document.getElementById(`temp-${animalId}`).value;
   const zol = document.getElementById(`zol-${animalId}`).value;
   const note = document.getElementById(`note-${animalId}`).value;
-
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
   if(!hr && !rr && !spo2 && !temp && !zol && !note) return;
-
   vitalsData[animalId].push({ time: timeStr, hr, rr, spo2, temp, zol, note });
-  
-  ['hr', 'rr', 'spo2', 'temp', 'zol', 'note'].forEach(k => {
-    document.getElementById(`${k}-${animalId}`).value = '';
-  });
-
+  ['hr', 'rr', 'spo2', 'temp', 'zol', 'note'].forEach(k => document.getElementById(`${k}-${animalId}`).value = '');
   renderVitalsTable(animalId);
 };
 
-// ── แสดงตาราง Vitals ──
 window.renderVitalsTable = function(animalId) {
   const tbody = document.getElementById(`vitals-tbody-${animalId}`);
   if(!tbody) return;
   const logs = vitalsData[animalId];
-  
   if(!logs || logs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--text-faint); font-style:italic;">ยังไม่มีการบันทึก</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--text-faint);">ยังไม่มีการบันทึก</td></tr>`;
     return;
   }
-
   tbody.innerHTML = logs.map(l => `
     <tr>
       <td style="color:var(--primary); font-weight:600;">${l.time}</td>
-      <td>${l.hr || '-'}</td>
-      <td>${l.rr || '-'}</td>
-      <td>${l.spo2 || '-'}</td>
-      <td>${l.temp || '-'}</td>
-      <td style="color:var(--teal-light);">${l.zol || '-'}</td>
+      <td>${l.hr || '-'}</td><td>${l.rr || '-'}</td><td>${l.spo2 || '-'}</td>
+      <td>${l.temp || '-'}</td><td style="color:var(--teal-light);">${l.zol || '-'}</td>
       <td style="text-align:left; font-size:11px;">${l.note || '-'}</td>
     </tr>
   `).join('');
 };
 
-// ── ส่งไปพักฟื้น ──
 window.finishSurgery = async function(animalId) {
-  const surgeonInput = document.getElementById(`surgeon-${animalId}`);
-  
-  if (!surgeonInput || !surgeonInput.value.trim()) {
-    const infoTabBtn = document.getElementById(`btn-tab-info-${animalId}`);
-    if (infoTabBtn) infoTabBtn.click();
-    
-    surgeonInput.classList.add('error');
-    surgeonInput.focus();
-    alert("⚠️ กรุณาระบุชื่อ สัตวแพทย์ผู้ผ่าตัด (Surgeon) ก่อนเสร็จสิ้นการผ่าตัดครับ");
+  const surgeon = document.getElementById(`surgeon-${animalId}`).value.trim();
+  if (!surgeon) {
+    document.getElementById(`btn-tab-info-${animalId}`).click();
+    alert("⚠️ กรุณาระบุชื่อ Surgeon ก่อนครับ");
     return;
   }
-
-  if (!confirm("ยืนยันเสร็จสิ้นการผ่าตัดและส่งไปยังห้องพักฟื้น?\n(ข้อมูลทั้งหมดจะถูกบันทึกในเคสนี้)")) return;
-
+  if (!confirm("ยืนยันเสร็จสิ้นการผ่าตัดและส่งไปยังห้องพักฟื้น?")) return;
   try {
-    const { error } = await supabase.from("vasd_queue").update({ status: "recovery", updated_at: new Date() }).eq("animal_id", animalId);
+    const { error } = await supabase.from("vasd_queue").update({ 
+      status: "recovery", 
+      surgeon_name: surgeon,
+      updated_at: new Date() 
+    }).eq("animal_id", animalId);
     if (error) throw error;
-    
     loadSurgeryQueue();
-  } catch (err) {
-    alert("❌ เกิดข้อผิดพลาด: " + err.message);
-  }
+  } catch (err) { alert(err.message); }
 };
-
-/* ── Real-time ── */
-supabase.channel("vasd-surgery-live")
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadSurgeryQueue)
-  .subscribe();
 
 loadSurgeryQueue();
 </script>
