@@ -2,13 +2,13 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<title>ตั้งค่า Stickers – RMUTTO VASD</title>
+<title>Sticker Designer – RMUTTO VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<link href__="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS (Match with index.html)
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
@@ -17,51 +17,37 @@
   --teal:       #0ea5a0;
   --teal-light: #14c4bc;
   --teal-glow:  rgba(14,165,160,0.25);
-  --amber:      #f59e0b;
-  --rose:       #ef4444;
-  --violet:     #8b5cf6;
-  --sky:        #3b82f6;
-  --emerald:    #10b981;
-  --slate:      #64748b;
-
   --surface:    rgba(255,255,255,0.04);
-  --surface-2:  rgba(255,255,255,0.07);
-  --surface-3:  rgba(255,255,255,0.10);
+  --surface-2:  rgba(255,255,255,0.08);
   --border:     rgba(255,255,255,0.08);
   --border-2:   rgba(255,255,255,0.14);
   --text:       #e2e8f0;
   --text-dim:   #94a3b8;
-  --text-faint: #4a5568;
-
-  --radius-xs:  6px;
   --radius-sm:  10px;
   --radius:     16px;
   --radius-lg:  22px;
-
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
 
 body {
   font-family: "Sarabun", "Outfit", sans-serif;
   background: var(--navy);
   color: var(--text);
   min-height: 100vh;
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding-bottom: 80px; /* Space for bottom nav */
 }
 
+/* Background Mesh */
 body::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
     radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 90% 20%, rgba(245,158,11,0.05) 0%, transparent 50%);
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%);
 }
 
 /* ═══════════════════════════════════════════
@@ -75,414 +61,211 @@ header {
   border-bottom: 1px solid var(--border);
   padding: 10px 20px;
   min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
 }
-
-.brand {
-  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-}
-.brand-logo {
-  width: 48px; height: 38px;
-  background: linear-gradient(135deg, var(--teal), var(--teal-light));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  box-shadow: 0 0 20px var(--teal-glow);
-}
-.brand-name {
-  font-family: "Outfit", sans-serif;
-  font-size: 15px; font-weight: 700;
-  color: #fff; line-height: 1; letter-spacing: -0.3px;
-}
-.brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
-
-.header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.btn-header {
-  padding: 8px 14px; font-size: 12px; font-weight: 600;
-  font-family: "Sarabun", sans-serif;
-  border: none; border-radius: var(--radius-sm); cursor: pointer;
-  display: inline-flex; align-items: center; gap: 6px;
-  transition: opacity 0.2s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  white-space: nowrap;
-}
-.btn-header:active { opacity: 0.85; transform: scale(0.97); }
+.header-left { display: flex; align-items: center; gap: 15px; }
 .btn-back {
-  background: var(--surface-2); color: var(--text-dim);
-  border: 1px solid var(--border-2);
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  color: #fff; width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; text-decoration: none; transition: 0.2s;
 }
-.btn-back:hover { background: var(--surface); color: var(--text); }
-.btn-print-test {
-  background: linear-gradient(135deg, var(--emerald), #34d399);
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(16,185,129,0.3);
+.btn-back:hover { background: var(--border-2); }
+.brand-name { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 700; }
+
+.header-actions { display: flex; gap: 8px; }
+.btn-header {
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  border-radius: var(--radius-sm); border: none; cursor: pointer; transition: 0.2s;
 }
+.btn-print { background: var(--teal); color: #fff; }
 
 /* ═══════════════════════════════════════════
-   LAYOUT — Desktop: Sidebar + Preview
+   LAYOUT
 ═══════════════════════════════════════════ */
 .layout {
-  position: relative; z-index: 1;
-  flex: 1;
-  display: grid;
-  grid-template-columns: 400px 1fr;
-  overflow: hidden;
+  display: grid; grid-template-columns: 400px 1fr;
+  flex: 1; position: relative; z-index: 1;
 }
 
-/* ═══════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════ */
 .sidebar {
-  background: rgba(17,34,64,0.6);
+  background: rgba(11, 25, 41, 0.4);
   border-right: 1px solid var(--border);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
+  height: calc(100vh - 64px - 80px);
 }
-.sidebar-top {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-}
-.sidebar-section {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.sidebar-section:last-child { border-bottom: none; }
+.sidebar-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+
 .section-title {
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text-dim); margin-bottom: 12px;
+  font-family: "Outfit", sans-serif; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px; color: var(--teal-light);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
 }
 
-/* ═══════════════════════════════════════════
-   FORM FIELDS (dark)
-═══════════════════════════════════════════ */
-label.field-label {
-  font-size: 11px; font-weight: 600;
-  color: var(--text-dim); display: block; margin-bottom: 4px;
-  letter-spacing: 0.3px;
-}
-.dark-input, .dark-select {
-  width: 100%;
-  padding: 9px 12px; font-size: 13px;
-  font-family: "Sarabun", sans-serif;
-  background: var(--surface-2);
-  border: 1px solid var(--border-2);
-  border-radius: var(--radius-sm);
-  color: var(--text); outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  margin-bottom: 10px;
-}
-.dark-input::placeholder { color: var(--text-faint); }
-.dark-input:focus, .dark-select:focus {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--teal-glow);
-}
-.dark-select option { background: var(--navy-mid); color: var(--text); }
+/* Form Styles */
+.field-group { margin-bottom: 20px; }
+label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; display: block; }
 
-/* ═══════════════════════════════════════════
-   LINE BLOCK
-═══════════════════════════════════════════ */
+input, select {
+  width: 100%; padding: 10px 12px; font-size: 13px; font-family: "Sarabun", sans-serif;
+  background: var(--navy-mid); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--text); outline: none;
+}
+input:focus { border-color: var(--teal); }
+
 .line-block {
-  background: var(--surface-2);
-  border: 1px solid var(--border-2);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  margin-bottom: 10px;
-  position: relative;
-  transition: border-color 0.2s;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
 }
-.line-block:hover { border-color: rgba(255,255,255,0.2); }
-.line-block:last-child { margin-bottom: 0; }
-.line-block-header {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 12px;
-}
-.line-block-header strong {
-  font-size: 13px; color: var(--teal-light); font-weight: 600;
+.line-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.line-num { font-size: 13px; font-weight: 700; color: #fff; }
+
+.btn-del {
+  background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 4px 10px; font-size: 11px; border-radius: 6px; cursor: pointer;
 }
 
-.prop-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.prop-mini { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
-.prop-grid .dark-select, .prop-mini .dark-input, .prop-mini .dark-select { margin-bottom: 0; }
+.prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.prop-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
 
-/* ═══════════════════════════════════════════
-   VARS HINT
-═══════════════════════════════════════════ */
-.vars-hint {
-  background: rgba(14,165,160,0.08);
-  border: 1px solid rgba(14,165,160,0.2);
-  border-radius: var(--radius-sm);
-  padding: 14px; font-size: 12px;
-  line-height: 1.8; color: var(--text-dim);
+.btn-main {
+  width: 100%; padding: 12px; font-weight: 700; border-radius: var(--radius-sm);
+  border: none; cursor: pointer; font-family: "Sarabun", sans-serif; transition: 0.2s;
 }
-.vars-hint strong {
-  color: var(--teal-light); display: block;
-  margin-bottom: 4px; margin-top: 10px;
-  font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;
-}
-.vars-hint strong:first-child { margin-top: 0; }
-.vars-hint code {
-  background: rgba(255,255,255,0.08);
-  padding: 2px 6px; border-radius: 4px;
-  font-size: 11px; display: inline-block; margin-bottom: 4px;
-  color: var(--text); font-family: monospace;
-}
-
-/* ═══════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════ */
-.btn {
-  width: 100%;
-  padding: 10px; font-size: 13px; font-weight: 700;
-  font-family: "Sarabun", sans-serif;
-  border: none; border-radius: var(--radius-sm); cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  margin-bottom: 8px;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn:last-child { margin-bottom: 0; }
-.btn:active { opacity: 0.85; transform: scale(0.97); }
-.btn-load {
-  background: var(--surface-2); color: var(--text);
-  border: 1px solid var(--border-2);
-}
-.btn-load:hover { background: var(--surface-3); }
-.btn-add {
-  background: var(--surface-2); color: var(--text-dim);
-  border: 1px solid var(--border-2);
-}
-.btn-add:hover { background: var(--surface-3); color: var(--text); }
-.btn-save {
-  background: linear-gradient(135deg, var(--teal), var(--teal-light));
-  color: #fff;
-  box-shadow: 0 2px 16px var(--teal-glow);
-}
-.btn-del-line {
-  background: none;
-  border: 1px solid rgba(239,68,68,0.3);
-  color: var(--rose);
-  padding: 3px 8px; font-size: 11px;
-  border-radius: 5px; cursor: pointer; font-weight: 600;
-  transition: background 0.2s, color 0.2s;
-}
-.btn-del-line:hover { background: var(--rose); color: #fff; border-color: var(--rose); }
+.btn-save { background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: #fff; margin-top: 20px; }
+.btn-add { background: var(--surface-2); color: var(--text); border: 1px solid var(--border-2); margin-top: 10px; }
 
 /* ═══════════════════════════════════════════
    PREVIEW PANE
 ═══════════════════════════════════════════ */
 .preview-pane {
-  background: rgba(17,34,64,0.3);
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  gap: 20px; overflow: hidden;
-  min-height: 400px;
+  background: rgba(0,0,0,0.2); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 40px;
 }
-.preview-label {
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text-dim);
-}
+.preview-label { font-size: 12px; color: var(--text-dim); margin-bottom: 15px; }
+
+/* Sticker dimensions simulate 80x50mm scale */
 .sticker {
-  position: relative;
-  width: 80mm; height: 50mm;
-  background: #fff; color: #000;
-  box-shadow: 0 4px 32px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.2);
-  overflow: hidden; border-radius: 4px;
+  position: relative; width: 80mm; height: 50mm; background: #fff;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-radius: 2px;
+  overflow: hidden; color: #000;
 }
-.line {
-  position: absolute; white-space: pre-wrap; word-break: break-word;
-  padding-right: 5px; box-sizing: border-box;
-}
+.line { position: absolute; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
 
 /* ═══════════════════════════════════════════
-   BOTTOM NAV (Mobile)
+   BOTTOM NAV
 ═══════════════════════════════════════════ */
 .bottom-nav {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: rgba(11,25,41,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-2);
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-  grid-template-columns: repeat(5, 1fr);
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(11, 25, 41, 0.85); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
 }
 .nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 6px 4px;
-  font-size: 9px; color: var(--text-dim);
-  text-decoration: none; cursor: pointer;
-  transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-decoration: none; color: var(--text-dim); transition: 0.3s; flex: 1;
 }
-.nav-item:active { color: var(--teal); }
-.nav-icon { font-size: 21px; line-height: 1; }
-.nav-item.active { color: var(--teal); }
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 10px; font-weight: 600; font-family: "Sarabun", sans-serif; }
+.nav-item.active { color: var(--teal-light); }
 
-/* ═══════════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════════ */
-footer {
-  text-align: center;
-  font-size: 11px; color: var(--text-faint);
-  padding: 18px;
-  border-top: 1px solid var(--border);
-  position: relative; z-index: 1;
-}
-
-/* ═══════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════ */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE — Mobile
-═══════════════════════════════════════════ */
-@media (max-width: 768px) {
-  header { padding: 8px 14px; }
-  .brand-sub { display: none; }
-  .brand-name { font-size: 14px; }
-
-  .layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    overflow: visible;
-  }
-
-  .sidebar {
-    order: 2;
-    border-right: none;
-    border-top: 1px solid var(--border);
-  }
-
-  .preview-pane {
-    order: 1;
-    min-height: 260px;
-    padding: 24px 16px;
-  }
-
-  .sticker {
-    transform: scale(0.85);
-    transform-origin: center;
-  }
-
-  .prop-grid { grid-template-columns: 1fr 1fr; }
-
-  .bottom-nav { display: grid; }
-  footer { padding-bottom: 80px; }
-}
-
-@media (max-width: 420px) {
-  .sticker { transform: scale(0.72); }
-  .prop-grid { grid-template-columns: 1fr; }
-  .prop-mini { grid-template-columns: 1fr 1fr 1fr; }
-}
-
-/* PRINT */
-@media print {
-  body * { visibility: hidden; }
-  #sticker, #sticker * { visibility: visible; }
-  #sticker { position: absolute; left: 0; top: 0; box-shadow: none; }
-  @page { size: 80mm 50mm; margin: 0; }
+/* Responsive */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { height: auto; border-right: none; }
+  .preview-pane { padding: 40px 10px; order: -1; }
+  .sticker { transform: scale(0.85); }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">
-    <div class="brand-logo">🚐🐾</div>
-    <div>
-      <div class="brand-name">RMUTTO – VASD</div>
-      <div class="brand-sub">Veterinary Academic Service Division</div>
-    </div>
+  <div class="header-left">
+    <a href="settings.html" class="btn-back">←</a>
+    <div class="brand-name">Sticker Designer</div>
   </div>
   <div class="header-actions">
-    <button class="btn-header btn-print-test" onclick="window.printTest()">🖨️ ทดสอบพิมพ์</button>
-    <button class="btn-header btn-back" onclick="location.href__='settings.html'">⬅️ กลับตั้งค่า</button>
+    <button class="btn-header btn-print" onclick="window.printTest()">🖨️ ทดสอบพิมพ์</button>
   </div>
 </header>
 
 <div class="layout">
-
-  <div class="sidebar">
-
-    <div class="sidebar-top">
-      <label class="field-label">ประเภทสติ๊กเกอร์</label>
-      <select id="templateType" class="dark-select">
-        <option value="queue">🏷 คิว</option>
-        <option value="cage">🔒 ติดกรง</option>
-        <option value="envelope">✉️ ติดซองยา</option>
-        <option value="bag">💊 ติดถุงยา</option>
-        <option value="vaccine">📒 ติดหน้าสมุดวัคซีน</option>
-        <option value="microchip">💳 ติดใบรับรองไมโครชิฟ</option>
-      </select>
-      <button class="btn btn-load" onclick="loadTemplate()">🔄 โหลด Template</button>
-    </div>
-
-    <div class="sidebar-section" style="flex:1;overflow-y:auto;">
-      <div class="section-title">บรรทัดข้อความ</div>
-      <div id="lineEditor"></div>
-      <button class="btn btn-add" onclick="addLine()">➕ เพิ่มบรรทัด</button>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="vars-hint">
-        <strong>ข้อมูลสัตว์ / คิว</strong>
-        <code>{{queue_number}}</code> <code>{{animal_name}}</code> <code>{{species}}</code>
-        <code>{{sex}}</code> <code>{{owner_name}}</code> <code>{{phone}}</code> <code>{{services}}</code>
-
-        <strong>ข้อมูลยา (ฉลากยา)</strong>
-        <code>{{drug_id}}</code> <code>{{dose}}</code> <code>{{freq}}</code>
-        <code>{{days}}</code> <code>{{total_pills}}</code>
+  <aside class="sidebar">
+    <div class="sidebar-scroll">
+      
+      <div class="field-group">
+        <label>เลือกแม่แบบที่จะแก้ไข</label>
+        <select id="templateType" onchange="loadTemplate()">
+          <option value="queue">🏷 บัตรคิว (Queue)</option>
+          <option value="cage">🔒 ป้ายติดกรง (Cage)</option>
+          <option value="envelope">✉️ ฉลากซองยา (Envelope)</option>
+          <option value="bag">💊 ฉลากถุงยา (Bag)</option>
+          <option value="vaccine">📒 สติ๊กเกอร์เล่มวัคซีน</option>
+          <option value="microchip">💳 ใบรับรองไมโครชิฟ</option>
+        </select>
       </div>
+
+      <div class="section-title"><span>📝</span> เลย์เอาต์บรรทัด</div>
+      <div id="lineEditor"></div>
+      
+      <button class="btn-main btn-add" onclick="addLine()">➕ เพิ่มบรรทัดใหม่</button>
+
+      <div style="margin-top: 20px; background: rgba(14,165,160,0.05); padding: 15px; border-radius: 12px; border: 1px solid var(--teal-glow);">
+        <p style="font-size: 11px; color: var(--teal-light); font-weight: 700; margin-bottom: 5px;">ตัวแปรที่ใช้งานได้:</p>
+        <p style="font-size: 10px; color: var(--text-dim); line-height: 1.4;">
+          <code>{{queue_number}}</code>, <code>{{animal_name}}</code>, <code>{{species}}</code>, <code>{{sex}}</code>, 
+          <code>{{owner_name}}</code>, <code>{{drug_id}}</code>, <code>{{dose}}</code>, <code>{{freq}}</code>
+        </p>
+      </div>
+
+      <button class="btn-main btn-save" onclick="saveTemplate()">💾 บันทึกรูปแบบนี้</button>
+      <div style="height: 40px;"></div>
     </div>
+  </aside>
 
-    <div class="sidebar-section">
-      <button class="btn btn-save" onclick="saveTemplate()">💾 บันทึก Template</button>
-    </div>
-
-  </div>
-
-  <div class="preview-pane">
-    <span class="preview-label">ตัวอย่างสติ๊กเกอร์ (ขนาดจริง 80×50 mm)</span>
+  <main class="preview-pane">
+    <div class="preview-label">80mm x 50mm Real-time Preview</div>
     <div class="sticker" id="sticker"></div>
-  </div>
-
+  </main>
 </div>
 
 <nav class="bottom-nav">
-  <a class="nav-item" href__="index.html">
-    <span class="nav-icon">🏠</span>หน้าหลัก
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">แดชบอร์ด</span>
   </a>
-  <a class="nav-item" href__="animals.html">
-    <span class="nav-icon">🐾</span>สัตว์
+  <a href="queue.html" class="nav-item">
+    <span class="nav-icon">⏳</span>
+    <span class="nav-label">จัดการคิว</span>
   </a>
-  <a class="nav-item" href__="anesthesia.html">
-    <span class="nav-icon">💉</span>วางยา
+  <a href="opd.html" class="nav-item">
+    <span class="nav-icon">🩺</span>
+    <span class="nav-label">ห้องตรวจ</span>
   </a>
-  <a class="nav-item" href__="surgery.html">
-    <span class="nav-icon">🛏️</span>ผ่าตัด
-  </a>
-  <a class="nav-item active" href__="settings.html">
-    <span class="nav-icon">⚙️</span>ตั้งค่า
+  <a href="settings.html" class="nav-item active">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">ตั้งค่า</span>
   </a>
 </nav>
-
-<footer>RMUTTO – VASD © 2026  ·  Veterinary Academic Service Division</footer>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
 let currentConfig = [];
+
+// ฟังก์ชันจำลองข้อมูลสำหรับแสดงผล Preview
+function getPreviewText(template) {
+  return template
+    .replace("{{queue_number}}", "A01")
+    .replace("{{animal_name}}", "น้องแมวส้ม")
+    .replace("{{species}}", "แมว")
+    .replace("{{sex}}", "ผู้")
+    .replace("{{owner_name}}", "สมชาย ใจดี")
+    .replace("{{drug_id}}", "Amoxicillin")
+    .replace("{{dose}}", "1 เม็ด")
+    .replace("{{freq}}", "เช้า-เย็น หลังอาหาร");
+}
 
 function renderPreview() {
   const box = document.getElementById("sticker");
@@ -493,25 +276,11 @@ function renderPreview() {
     div.style.left = l.x + "px";
     div.style.top  = l.y + "px";
     div.style.fontSize   = l.size + "px";
-    div.style.fontWeight = l.weight;
-    div.style.fontFamily = l.font;
+    div.style.fontWeight = l.weight || "normal";
+    div.style.fontFamily = l.font || "Sarabun";
     div.style.textAlign  = l.align || "left";
     div.style.width      = `calc(100% - ${l.x}px)`;
-
-    div.innerText = l.text
-      .replace("{{queue_number}}","1")
-      .replace("{{animal_name}}","น้องถุงทอง")
-      .replace("{{species}}","แมว")
-      .replace("{{sex}}","ผู้")
-      .replace("{{owner_name}}","สมชาย ใจดี")
-      .replace("{{phone}}","081-234-5678")
-      .replace("{{services}}","ทำหมัน, วัคซีน")
-      .replace("{{drug_id}}","Amoxicillin 250mg")
-      .replace("{{dose}}","กินครั้งละ 1 เม็ด")
-      .replace("{{freq}}","วันละ 2 ครั้ง (เช้า-เย็น) หลังอาหาร")
-      .replace("{{days}}","5 วัน")
-      .replace("{{total_pills}}","10");
-
+    div.innerText = getPreviewText(l.text);
     box.appendChild(div);
   });
 }
@@ -523,85 +292,92 @@ function renderEditor() {
     const block = document.createElement("div");
     block.className = "line-block";
     block.innerHTML = `
-      <div class="line-block-header">
-        <strong>บรรทัดที่ ${i+1}</strong>
-        <button class="btn-del-line" onclick="removeLine(${i})">ลบ</button>
+      <div class="line-header">
+        <span class="line-num">บรรทัดที่ ${i+1}</span>
+        <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
       </div>
-      <label class="field-label">ข้อความ</label>
-      <input class="dark-input" value="${l.text}" oninput="updateLine(${i},'text',this.value)" style="margin-bottom:10px;">
+      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="ใส่ข้อความ...">
+      
       <div class="prop-grid">
-        <div>
-          <label class="field-label">Font</label>
-          <select class="dark-select" onchange="updateLine(${i},'font',this.value)" style="margin-bottom:0">
-            <option value="monospace" ${l.font==="monospace"?"selected":""}>Monospace</option>
-            <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
-            <option value="'Segoe UI'" ${l.font==="'Segoe UI'"?"selected":""}>Segoe UI</option>
-            <option value="'Prompt', sans-serif" ${l.font==="'Prompt', sans-serif"?"selected":""}>Prompt</option>
-            <option value="'Kanit', sans-serif" ${l.font==="'Kanit', sans-serif"?"selected":""}>Kanit</option>
-            <option value="'Sarabun', sans-serif" ${l.font==="'Sarabun', sans-serif"?"selected":""}>Sarabun</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">น้ำหนัก</label>
-          <select class="dark-select" onchange="updateLine(${i},'weight',this.value)" style="margin-bottom:0">
-            <option value="normal" ${l.weight==="normal"?"selected":""}>ปกติ</option>
-            <option value="bold"   ${l.weight==="bold"  ?"selected":""}>หนา</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">จัดตำแหน่ง</label>
-          <select class="dark-select" onchange="updateLine(${i},'align',this.value)" style="margin-bottom:0">
-            <option value="left"   ${!l.align||l.align==="left"  ?"selected":""}>ซ้าย</option>
-            <option value="center" ${l.align==="center"?"selected":""}>กลาง</option>
-            <option value="right"  ${l.align==="right" ?"selected":""}>ขวา</option>
-          </select>
-        </div>
+        <select onchange="updateLine(${i},'font',this.value)">
+          <option value="'Sarabun', sans-serif" ${l.font?.includes("Sarabun")?"selected":""}>Sarabun (TH)</option>
+          <option value="'Prompt', sans-serif" ${l.font?.includes("Prompt")?"selected":""}>Prompt (TH)</option>
+          <option value="'Outfit', sans-serif" ${l.font?.includes("Outfit")?"selected":""}>Outfit (EN)</option>
+        </select>
+        <select onchange="updateLine(${i},'align',this.value)">
+          <option value="left" ${l.align==="left"?"selected":""}>ชิดซ้าย</option>
+          <option value="center" ${l.align==="center"?"selected":""}>กึ่งกลาง</option>
+          <option value="right" ${l.align==="right"?"selected":""}>ชิดขวา</option>
+        </select>
       </div>
-      <div class="prop-mini">
-        <div><label class="field-label">ขนาด (px)</label><input class="dark-input" type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)" style="margin-bottom:0"></div>
-        <div><label class="field-label">X (ซ้าย)</label><input class="dark-input" type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)" style="margin-bottom:0"></div>
-        <div><label class="field-label">Y (บน)</label><input class="dark-input" type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)" style="margin-bottom:0"></div>
+
+      <div class="prop-3">
+        <div><label>ขนาด(px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
+        <div><label>แกน X</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
+        <div><label>แกน Y</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
       </div>
     `;
     area.appendChild(block);
   });
 }
 
-window.updateLine = function(i, key, val) {
+window.updateLine = (i, key, val) => {
   if (["size","x","y"].includes(key)) val = parseInt(val)||0;
   currentConfig[i][key] = val;
   renderPreview();
 };
-window.removeLine = function(i) {
+
+window.removeLine = (i) => {
   currentConfig.splice(i,1);
   renderEditor(); renderPreview();
 };
-window.addLine = function() {
-  currentConfig.push({ text:"ข้อความใหม่", font:"'Prompt', sans-serif", size:16, x:10, y:10, weight:"normal", align:"left" });
+
+window.addLine = () => {
+  currentConfig.push({ text:"ข้อความใหม่", font:"'Sarabun', sans-serif", size:14, x:10, y:10, align:"left" });
   renderEditor(); renderPreview();
 };
-window.loadTemplate = async function() {
-  const { data } = await supabase.from("vasd_print_template").select("*").eq("template_type", document.getElementById("templateType").value).single();
+
+window.loadTemplate = async () => {
+  const type = document.getElementById("templateType").value;
+  const { data, error } = await supabase.from("vasd_print_template").select("*").eq("template_type", type).single();
+  
+  if (error && error.code !== 'PGRST116') {
+    console.error(error);
+  }
+  
   currentConfig = data?.config || [];
   renderEditor(); renderPreview();
 };
-window.saveTemplate = async function() {
+
+window.saveTemplate = async () => {
   const type = document.getElementById("templateType").value;
-  const { error } = await supabase.from("vasd_print_template").upsert({ template_type:type, config:currentConfig },{ onConflict:"template_type" });
-  if (error) alert("❌ เกิดข้อผิดพลาด: "+error.message);
-  else alert("✅ บันทึก Template \""+type+"\" เรียบร้อยแล้ว");
+  const { error } = await supabase.from("vasd_print_template").upsert({ 
+    template_type: type, 
+    config: currentConfig,
+    updated_at: new Date()
+  }, { onConflict: "template_type" });
+
+  if (error) alert("❌ ผิดพลาด: " + error.message);
+  else alert("✅ บันทึกรูปแบบ \"" + type + "\" สำเร็จ");
 };
-window.printTest = function() {
+
+window.printTest = () => {
   const contents = document.getElementById("sticker").innerHTML;
   const pw = window.open("","_blank","width=800,height=600");
-  pw.document.write(`<html><head><title>Print Test</title>
-    <link href__="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;}@page{size:80mm 50mm;margin:0}</style>
+  pw.document.write(`<html><head>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt&family=Sarabun&display=swap" rel="stylesheet">
+    <style>
+      body{margin:0; padding:0;}
+      .sticker{position:relative; width:80mm; height:50mm; background:#fff; overflow:hidden;}
+      .line{position:absolute; white-space:pre-wrap; word-break:break-word; color:#000;}
+      @page{size:80mm 50mm; margin:0;}
+    </style>
     </head><body><div class="sticker">${contents}</div>
-    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},300);});}<\/script></body></html>`);
+    <script>window.onload=function(){setTimeout(()=>{window.print();window.close();},500);};<\/script></body></html>`);
   pw.document.close();
 };
 
+// Initial Load
 loadTemplate();
 </script>
 </body>
