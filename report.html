@@ -1,458 +1,279 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>รายงานสรุป (Report)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<title>รายงานสรุปผล – RMUTTO VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS (Shared with index.html)
+═══════════════════════════════════════════ */
 :root {
-  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
-  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
-  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --radius:14px; --radius-sm:8px;
+  --navy:       #0b1929;
+  --navy-mid:   #112240;
+  --navy-card:  #162d4a;
+  --teal:       #0ea5a0;
+  --teal-light: #14c4bc;
+  --teal-glow:  rgba(14,165,160,0.25);
+  --surface:    rgba(255,255,255,0.04);
+  --border:     rgba(255,255,255,0.08);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --radius-lg:  22px;
+  --radius-sm:  10px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* HEADER */
-header{
-  background:var(--navy);padding:0 32px;display:flex;
-  justify-content:space-between;align-items:center;height:68px;
-  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Sarabun", "Outfit", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
 }
-.header-brand{display:flex;align-items:center;gap:14px;}
-.brand-icon{
-  width:40px;height:40px;background:linear-gradient(135deg,var(--text-muted),#a0aec0);
-  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
+
+/* Mesh background */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%);
 }
-.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
-.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
 
-.btn-home{
-  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-  cursor:pointer;transition:background 0.2s;
+/* ═══════════════════════════════════════════
+   HEADER & LAYOUT
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.85);
+  backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+  padding: 10px 20px; display: flex; align-items: center; justify-content: space-between;
 }
-.btn-home:hover{background:rgba(255,255,255,0.18);}
-
-/* MAIN */
-.container{max-width:1200px;margin:0 auto;padding:28px 24px;}
-
-.page-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:24px;animation:fadeUp 0.4s ease both;
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo {
+  width: 42px; height: 34px; background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
 }
-.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
+.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
 
-/* TABLE (สำหรับหน้าจอหลัก) */
-.card {
-  background:var(--surface);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  padding:20px;overflow-x:auto;animation:fadeUp 0.4s 0.1s ease both;
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto;
+  padding: 24px 18px 100px; width: 100%;
 }
-table{width:100%;border-collapse:collapse;min-width:900px;}
-thead tr{background:linear-gradient(135deg,var(--navy),#1a2f47);}
-thead th{
-  padding:12px 10px;text-align:left;font-size:13px;font-weight:700;
-  color:rgba(255,255,255,0.9);border:none;white-space:nowrap;
+
+.section-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
 }
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
-tbody tr:hover{background:#f8fafc;}
-tbody td{padding:12px 10px;font-size:14px;border:none;vertical-align:middle;}
+.title-group h2 { font-family: "Outfit", sans-serif; font-size: 22px; color: #fff; }
+.title-group p { font-size: 13px; color: var(--text-dim); }
 
-.status-badge {
-  padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+/* ═══════════════════════════════════════════
+   REPORT CARDS
+═══════════════════════════════════════════ */
+.report-list { display: flex; flex-direction: column; gap: 16px; }
+
+.report-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px;
+  animation: slideUp 0.4s ease both;
 }
-.st-done { background: #d1fae5; color: #065f46; }
-.st-ready { background: #fefcbf; color: #744210; }
-.st-progress { background: #ebf8ff; color: #2b6cb0; }
 
-.btn-report {
-  background: var(--teal); color: #fff; border: none; padding: 6px 12px;
-  border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; font-family:"Sarabun";
+.card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;
 }
-.btn-report:hover { background: var(--teal-light); }
-
-/* MODAL REPORT (PRINTABLE) */
-.modal-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.6); z-index: 1000;
-  display: none; justify-content: center; align-items: flex-start;
-  padding: 40px 20px; overflow-y: auto; backdrop-filter: blur(2px);
+.animal-info h3 { color: var(--teal-light); font-size: 18px; margin-bottom: 2px; }
+.q-badge {
+  background: var(--teal); color: #fff; padding: 4px 12px;
+  border-radius: 30px; font-weight: 700; font-family: "Outfit"; font-size: 14px;
 }
-.modal-overlay.active { display: flex; }
-.modal-content {
-  background: #fff; width: 100%; max-width: 850px;
-  border-radius: var(--radius); box-shadow: var(--shadow-lg);
-  padding: 40px; position: relative; margin-bottom: 40px;
+
+.data-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 16px;
 }
-.btn-close-modal {
-  position: absolute; top: 20px; right: 20px; background: #e2e8f0; border: none;
-  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;
+.data-item label { display: block; font-size: 11px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; }
+.data-item span { font-size: 14px; color: var(--text); }
+
+/* Vitals Table Style */
+.vitals-scroll { overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; margin-top: 10px; }
+.vitals-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; }
+.vitals-table th { color: var(--teal-light); padding: 8px; border-bottom: 1px solid var(--border); }
+.vitals-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+.tag-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.tag { background: var(--navy-mid); border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+
+/* ═══════════════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════════════ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95); backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  display: grid; grid-template-columns: repeat(5, 1fr);
 }
-.btn-close-modal:hover { background: var(--danger); color: white; }
-
-.report-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--navy); padding-bottom: 16px; }
-.report-header h2 { font-size: 24px; color: var(--navy); margin-bottom: 4px; }
-.report-header p { color: var(--text-muted); font-size: 14px; }
-
-.report-section { margin-bottom: 24px; break-inside: avoid; }
-.report-section h3 { font-size: 16px; color: var(--teal); border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 12px; }
-
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; }
-.info-grid div { background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
-.info-grid strong { color: var(--navy); display: inline-block; width: 100px; }
-
-/* ✅ ตารางสำหรับ Modal/Print โดยเฉพาะ */
-.data-table { 
-  width: 100%; 
-  border-collapse: collapse; 
-  font-size: 13px; 
-  margin-bottom: 10px; 
-  table-layout: fixed; /* ล็อคความกว้าง */
-  min-width: 0 !important; /* ✅ ลบล้างค่า min-width: 900px ออก ทำให้ตารางหดเข้าพอดีกรอบได้ */
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 9px; color: var(--text-dim); text-decoration: none;
 }
-.data-table th, .data-table td { 
-  border: 1px solid var(--border); 
-  padding: 6px; 
-  text-align: left; 
-  vertical-align: top;
-  word-wrap: break-word; 
-  word-break: break-word; /* ✅ บังคับตัดคำยาวๆ (เช่น ชื่อยา) ขึ้นบรรทัดใหม่ */
-  overflow-wrap: break-word;
-}
-.data-table th { background: #f1f5f9; color: var(--navy); font-weight: 600; }
+.nav-item.active { color: var(--teal); }
+.nav-icon { font-size: 21px; }
 
-/* สัดส่วนความกว้างคอลัมน์ ตารางสัญญาณชีพ */
-.vitals-table th:nth-child(1) { width: 10%; } /* เวลา */
-.vitals-table th:nth-child(2) { width: 10%; } /* HR */
-.vitals-table th:nth-child(3) { width: 10%; } /* RR */
-.vitals-table th:nth-child(4) { width: 10%; } /* Temp */
-.vitals-table th:nth-child(5) { width: 12%; } /* SpO2 */
-.vitals-table th:nth-child(6) { width: 18%; } /* Zoletil Top */
-.vitals-table th:nth-child(7) { width: 30%; } /* Note */
-
-/* สัดส่วนความกว้างคอลัมน์ ตารางสั่งจ่ายยา */
-.rx-table th:nth-child(1) { width: 30%; } /* รายการยา */
-.rx-table th:nth-child(2) { width: 20%; } /* ปริมาณ */
-.rx-table th:nth-child(3) { width: 25%; } /* ความถี่ */
-.rx-table th:nth-child(4) { width: 10%; } /* วัน */
-.rx-table th:nth-child(5) { width: 15%; } /* รวม */
-
-.print-bar { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
-.btn-print { background: var(--navy); color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-family:"Sarabun"; }
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-
-/* =========================================
-   PRINT STYLES - สำหรับกระดาษ A4
-   ========================================= */
-@media print {
-  @page { size: A4 portrait; margin: 10mm 15mm; } /* ✅ ปรับขอบกระดาษให้มีพื้นที่ซ้ายขวาเพิ่มขึ้น */
-  body * { visibility: hidden; }
-  header, .page-header, .card, .btn-close-modal, .print-bar { display: none !important; }
-  
-  .modal-overlay { 
-    position: static; display: block !important; 
-    background: transparent !important; padding: 0 !important; margin: 0 !important;
-  }
-  
-  .modal-content, .modal-content * { visibility: visible; }
-  
-  .modal-content { 
-    position: relative; left: 0; top: 0; width: 100% !important; max-width: 100% !important; 
-    box-shadow: none !important; padding: 0 !important; margin: 0 !important; border: none !important; 
-    border-radius: 0; background: white !important; 
-  }
-
-  .info-grid div {
-    background-color: #f8fafc !important; border: 1px solid #ccc;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  
-  .data-table { 
-    font-size: 11px; /* ลดฟอนต์ลงนิดนึงให้อ่านง่ายและไม่เบียด */
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-
-  .data-table th {
-    background-color: #f1f5f9 !important;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  
-  .report-section, .data-table tr { page-break-inside: avoid; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-brand">
-    <div class="brand-icon">📊</div>
-    <div class="brand-text">
-      <h1>รายงานสรุปการรักษา (Report)</h1>
-      <span>RMUTTO – Veterinary Academic Service Division</span>
-    </div>
+  <div class="brand">
+    <div class="brand-logo">📊</div>
+    <div class="brand-name">VASD REPORT</div>
   </div>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+  <button class="btn-logout" onclick="location.href='index.html'" style="background:none; border:1px solid var(--border); color:var(--text-dim); padding:5px 12px; border-radius:8px; cursor:pointer;">Back</button>
 </header>
 
-<div class="container">
-  <div class="page-header">
-    <h2>สรุปข้อมูลสัตว์ประจำวัน</h2>
+<div class="wrap">
+  <div class="section-header">
+    <div class="title-group">
+      <h2>สรุปข้อมูลเคส</h2>
+      <p>รายการสัตว์ที่รักษาเสร็จสิ้นและรับกลับบ้านแล้ว</p>
+    </div>
   </div>
-  
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>คิว</th>
-          <th>ชื่อสัตว์ / ชนิด</th>
-          <th>เจ้าของ / เบอร์โทร</th>
-          <th>ทีมผ่าตัด</th>
-          <th>สถานะ</th>
-          <th style="text-align:center;">จัดการ</th>
-        </tr>
-      </thead>
-      <tbody id="report-tbody">
-        <tr><td colspan="6" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>
-      </tbody>
-    </table>
+
+  <div id="reportContainer" class="report-list">
+    <div style="text-align:center; padding:40px; color:var(--text-dim);">กำลังโหลดข้อมูลรายงาน...</div>
   </div>
 </div>
 
-<div class="modal-overlay" id="reportModal">
-  <div class="modal-content" id="printArea">
-    <button class="btn-close-modal" onclick="closeModal()">✖</button>
-    
-    <div class="report-header">
-      <h2>รายงานสรุปการรักษา (Medical Record)</h2>
-      <p>หน่วยบริการวิชาการสัตวแพทย์ มทร.ตะวันออก</p>
-      <p id="r-date" style="font-weight:bold; margin-top:4px;"></p>
-    </div>
-
-    <div class="report-section">
-      <h3>🐾 ข้อมูลทั่วไป (General Info)</h3>
-      <div class="info-grid">
-        <div><strong>คิวที่:</strong> <span id="r-queue"></span></div>
-        <div><strong>ชื่อสัตว์:</strong> <span id="r-name"></span></div>
-        <div><strong>ชนิด/เพศ:</strong> <span id="r-species"></span></div>
-        <div><strong>น้ำหนักจริง:</strong> <span id="r-weight"></span> กก.</div>
-        <div><strong>เจ้าของ:</strong> <span id="r-owner"></span></div>
-        <div><strong>เบอร์โทร:</strong> <span id="r-phone"></span></div>
-        <div style="grid-column: 1 / -1;"><strong>บริการที่รับ:</strong> <span id="r-services" style="color:var(--teal); font-weight:bold;"></span></div>
-      </div>
-    </div>
-
-    <div class="report-section">
-      <h3>🔬 ข้อมูลทีมผ่าตัด (Surgery Staff)</h3>
-      <div class="info-grid">
-        <div><strong>ศัลยแพทย์:</strong> <span id="r-surgeon"></span></div>
-        <div><strong>วิสัญญีแพทย์:</strong> <span id="r-anes"></span></div>
-      </div>
-    </div>
-
-    <div class="report-section">
-      <h3>📈 สัญญาณชีพ & ยาสลบ (Vital Signs & Anesthesia)</h3>
-      <table class="data-table vitals-table">
-        <thead>
-          <tr>
-            <th>เวลา</th><th>HR</th><th>RR</th><th>Temp</th><th>SpO2</th><th>Zoletil Top</th><th>Note</th>
-          </tr>
-        </thead>
-        <tbody id="r-vitals"></tbody>
-      </table>
-    </div>
-
-    <div class="report-section">
-      <h3>💊 การสั่งจ่ายยา (Prescription)</h3>
-      <table class="data-table rx-table">
-        <thead>
-          <tr>
-            <th>รายการยา</th><th>ปริมาณ</th><th>ความถี่</th><th>วัน</th><th>รวม</th>
-          </tr>
-        </thead>
-        <tbody id="r-rx"></tbody>
-      </table>
-    </div>
-
-    <div class="print-bar">
-      <button class="btn-print" onclick="window.print()">🖨️ พิมพ์รายงานฉบับนี้ (A4)</button>
-    </div>
-  </div>
-</div>
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html"><span class="nav-icon">🏠</span>หน้าหลัก</a>
+  <a class="nav-item" href="animals.html"><span class="nav-icon">🐾</span>สัตว์</a>
+  <a class="nav-item" href="anesthesia.html"><span class="nav-icon">💉</span>วางยา</a>
+  <a class="nav-item" href="surgery.html"><span class="nav-icon">🛏️</span>ผ่าตัด</a>
+  <a class="nav-item active" href="report.html"><span class="nav-icon">📊</span>รายงาน</a>
+</nav>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-let allData = [];
-
 async function loadReport() {
-  try {
-    const { data: eventId } = await supabase.rpc("get_today_event");
+  const container = document.getElementById("reportContainer");
+  
+  // 1. ดึงข้อมูลสัตว์ที่มีคิวสถานะ 'done'
+  const { data: animals, error } = await supabase
+    .from('vasd_animal')
+    .select(`
+      *,
+      vasd_owner(owner_name, phone),
+      vasd_queue!inner(status, surgeon_name, anesthesiologist_name),
+      vasd_service(*),
+      vasd_vital_signs(*),
+      vasd_prescription(*)
+    `)
+    .eq('vasd_queue.status', 'done')
+    .order('queue_number', { ascending: true });
 
-    const { data, error } = await supabase
-      .from("vasd_animal")
-      .select(`
-        id, queue_number, animal_name, species, sex, est_weight, actual_weight,
-        vasd_owner(owner_name, phone),
-        vasd_service(service_type),
-        vasd_queue(status, surgeon_name, anesthesiologist_name, notes),
-        vasd_vital_signs(time_recorded, created_at, hr, rr, temp, spo2, zoletil_top, note),
-        vasd_prescription(drug_id, dose, freq, days, total_pills)
-      `)
-      .eq("event_id", eventId)
-      .order("queue_number");
+  if (error) {
+    container.innerHTML = `<div style="color:var(--rose)">Error: ${error.message}</div>`;
+    return;
+  }
 
-    if (error) throw error;
+  if (!animals || animals.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-dim);">ไม่พบข้อมูลสัตว์ที่ทำรายการเสร็จสิ้น</div>`;
+    return;
+  }
 
-    allData = data || [];
-    const tbody = document.getElementById("report-tbody");
-    tbody.innerHTML = "";
+  container.innerHTML = "";
 
-    if (allData.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">ยังไม่มีข้อมูลสัตว์ในระบบสำหรับวันนี้</td></tr>`;
-      return;
-    }
+  animals.forEach(ani => {
+    const card = document.createElement("div");
+    card.className = "report-card";
 
-    allData.forEach(a => {
-      let q = {};
-      if (a.vasd_queue) {
-        q = Array.isArray(a.vasd_queue) ? (a.vasd_queue[0] || {}) : a.vasd_queue;
-      }
+    // จัดการหัตถการ
+    const services = ani.vasd_service.map(s => `<span class="tag">${s.service_type} ${s.is_done ? '✅' : ''}</span>`).join("");
+    
+    // จัดการยากลับบ้าน
+    const meds = ani.vasd_prescription.map(m => `<div class="tag" style="display:block; margin-bottom:4px;">💊 ${m.drug_id}: ${m.dose} (${m.freq}) x ${m.days} วัน</div>`).join("");
 
-      let extraNotes = {};
-      if (q.notes) {
-        try { extraNotes = typeof q.notes === 'string' ? JSON.parse(q.notes) : q.notes; } catch(e) {}
-      }
-
-      const status = q.status || 'waiting';
-      
-      let statusHtml = "";
-      if(status === 'done') statusHtml = `<span class="status-badge st-done">✅ กลับบ้านแล้ว</span>`;
-      else if(status === 'ready_to_go_home') statusHtml = `<span class="status-badge st-ready">🕒 รอรับกลับ/รอจัดยา</span>`;
-      else statusHtml = `<span class="status-badge st-progress">⏳ อยู่ระหว่างดำเนินการ</span>`;
-
-      const ownerName = a.vasd_owner ? a.vasd_owner.owner_name : '-';
-      const phone = a.vasd_owner ? a.vasd_owner.phone : '-';
-      const species = a.species === 'ส' ? 'สุนัข' : 'แมว';
-      
-      const surgeon = q.surgeon_name || extraNotes.surgeon_name || extraNotes.surgeon || '-';
-      const anes = q.anesthesiologist_name || extraNotes.anesthesiologist_name || extraNotes.anesthesiologist || '-';
-
-      let staffHtml = `
-        <div style="line-height:1.4;">
-          <strong>ศัลยแพทย์:</strong> ${surgeon}<br>
-          <span style="font-size:12px; color:var(--text-muted);">
-            <strong>วิสัญญีแพทย์:</strong> ${anes}
-          </span>
+    // จัดการตาราง Vitals
+    let vitalsHtml = "";
+    if (ani.vasd_vital_signs.length > 0) {
+      vitalsHtml = `
+        <div class="vitals-scroll">
+          <table class="vitals-table">
+            <thead>
+              <tr>
+                <th>เวลา</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th><th>CRT/MM</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ani.vasd_vital_signs.map(v => `
+                <tr>
+                  <td>${v.time_recorded || '-'}</td>
+                  <td>${v.hr || '-'}</td>
+                  <td>${v.rr || '-'}</td>
+                  <td>${v.spo2 || '-'}</td>
+                  <td>${v.temp || '-'}</td>
+                  <td>${v.crt || '-'}/${v.mm || '-'}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
         </div>
       `;
+    }
 
-      tbody.innerHTML += `
-        <tr>
-          <td><strong>#${a.queue_number}</strong></td>
-          <td>${a.animal_name} <br><span style="font-size:12px;color:var(--text-muted);">${species} (${a.sex})</span></td>
-          <td>${ownerName} <br><span style="font-size:12px;color:var(--text-muted);">${phone}</span></td>
-          <td>${staffHtml}</td>
-          <td>${statusHtml}</td>
-          <td style="text-align:center;">
-            <button class="btn-report" onclick="openReportModal('${a.id}')">📄 ดูสรุป / พิมพ์</button>
-          </td>
-        </tr>
-      `;
-    });
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="animal-info">
+          <h3>${ani.animal_name} (${ani.species === 'ส' ? 'สุนัข' : 'แมว'})</h3>
+          <p style="font-size:13px; color:var(--text-dim)">เพศ ${ani.sex} | น้ำหนักจริง: ${ani.actual_weight || ani.est_weight || '-'} kg</p>
+        </div>
+        <div class="q-badge">Q-${ani.queue_number}</div>
+      </div>
 
-  } catch (err) {
-    console.error(err);
-    document.getElementById("report-tbody").innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error: ${err.message}</td></tr>`;
-  }
+      <div class="data-grid">
+        <div class="data-item">
+          <label>ข้อมูลเจ้าของ</label>
+          <span>${ani.vasd_owner?.owner_name || '-'} (${ani.vasd_owner?.phone || '-'})</span>
+        </div>
+        <div class="data-item">
+          <label>ทีมผ่าตัด/วางยา</label>
+          <span>หมอ: ${ani.vasd_queue[0]?.surgeon_name || '-'}<br>ดมยา: ${ani.vasd_queue[0]?.anesthesiologist_name || '-'}</span>
+        </div>
+        <div class="data-item">
+          <label>หัตถการที่ดำเนินการ</label>
+          <div class="tag-container">${services || 'ไม่มีข้อมูล'}</div>
+        </div>
+        <div class="data-item">
+          <label>ยากลับบ้าน (RX)</label>
+          <div style="margin-top:5px;">${meds || '<span style="color:var(--text-faint)">ไม่มีการจ่ายยา</span>'}</div>
+        </div>
+      </div>
+
+      <label style="font-size:11px; color:var(--teal-light); font-weight:700; text-transform:uppercase;">บันทึกสัญญาณชีพ (Vitals History)</label>
+      ${vitalsHtml || '<div style="font-size:12px; color:var(--text-faint); margin-top:5px;">ไม่มีบันทึกสัญญาณชีพ</div>'}
+      
+      ${ani.health_note ? `
+        <div style="margin-top:15px; padding:10px; background:rgba(245,158,11,0.1); border-radius:8px; font-size:13px;">
+          <strong style="color:var(--amber)">Note:</strong> ${ani.health_note}
+        </div>
+      ` : ''}
+    `;
+
+    container.appendChild(card);
+  });
 }
 
-window.openReportModal = function(animalId) {
-  const a = allData.find(x => x.id === animalId);
-  if(!a) return;
-
-  let q = {};
-  if (a.vasd_queue) {
-    q = Array.isArray(a.vasd_queue) ? (a.vasd_queue[0] || {}) : a.vasd_queue;
-  }
-
-  let extraNotes = {};
-  if (q.notes) {
-    try { extraNotes = typeof q.notes === 'string' ? JSON.parse(q.notes) : q.notes; } catch(e) {}
-  }
-
-  const now = new Date();
-  document.getElementById("r-date").innerText = `วันที่พิมพ์: ${now.toLocaleDateString('th-TH', {year:'numeric', month:'long', day:'numeric'})}`;
-
-  document.getElementById("r-queue").innerText = a.queue_number;
-  document.getElementById("r-name").innerText = a.animal_name;
-  document.getElementById("r-species").innerText = `${a.species === 'ส' ? 'สุนัข' : 'แมว'} / ${a.sex}`;
-  document.getElementById("r-weight").innerText = a.actual_weight || a.est_weight || '-';
-  document.getElementById("r-owner").innerText = a.vasd_owner ? a.vasd_owner.owner_name : '-';
-  document.getElementById("r-phone").innerText = a.vasd_owner ? a.vasd_owner.phone : '-';
-  document.getElementById("r-services").innerText = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
-
-  document.getElementById("r-surgeon").innerText = q.surgeon_name || extraNotes.surgeon_name || extraNotes.surgeon || '-';
-  document.getElementById("r-anes").innerText = q.anesthesiologist_name || extraNotes.anesthesiologist_name || extraNotes.anesthesiologist || '-';
-
-  // Vitals
-  const vBody = document.getElementById("r-vitals");
-  const vitals = (a.vasd_vital_signs || []).sort((x, y) => {
-    const t1 = x.time_recorded || x.created_at || "";
-    const t2 = y.time_recorded || y.created_at || "";
-    return t1.localeCompare(t2);
-  });
-  if(vitals.length === 0) {
-    vBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#aaa;">ไม่มีข้อมูลสัญญาณชีพ</td></tr>`;
-  } else {
-    vBody.innerHTML = vitals.map(v => {
-      let t = v.time_recorded ? v.time_recorded.substring(0,5) : (v.created_at ? new Date(v.created_at).toLocaleTimeString('th-TH', {hour12:false}).substring(0,5) : '-');
-      let temp = v.temp || v.bt || '-';
-      let spo2 = v.spo2 ? v.spo2 + '%' : '-';
-      
-      return `<tr>
-        <td>${t}</td><td>${v.hr||'-'}</td><td>${v.rr||'-'}</td>
-        <td>${temp}</td><td>${spo2}</td>
-        <td>${v.zoletil_top||'-'}</td><td>${v.note||'-'}</td>
-      </tr>`;
-    }).join("");
-  }
-
-  // RX
-  const rxBody = document.getElementById("r-rx");
-  const rxs = a.vasd_prescription || [];
-  if(rxs.length === 0) {
-    rxBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#aaa;">ไม่มีข้อมูลการจ่ายยา</td></tr>`;
-  } else {
-    rxBody.innerHTML = rxs.map(rx => `<tr>
-      <td>${rx.drug_id||'-'}</td><td>${rx.dose||'-'}</td>
-      <td>${rx.freq||'-'}</td><td>${rx.days ? rx.days + '' : '-'}</td>
-      <td style="font-weight:bold;">${rx.total_pills ? rx.total_pills + '' : '-'}</td>
-    </tr>`).join("");
-  }
-
-  document.getElementById("reportModal").classList.add("active");
-};
-
-window.closeModal = function() {
-  document.getElementById("reportModal").classList.remove("active");
-};
-
-// Initial load
+// โหลดข้อมูลเมื่อเปิดหน้า
 loadReport();
-
-// Auto update
-supabase.channel("report-live")
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadReport)
-  .subscribe();
-
 </script>
+
 </body>
 </html>
