@@ -441,7 +441,6 @@ footer {
 </head>
 <body>
 
-<!-- ── HEADER ── -->
 <header>
   <div class="brand">
     <div class="brand-logo">🐾</div>
@@ -478,10 +477,8 @@ footer {
   </div>
 </header>
 
-<!-- ── MAIN ── -->
 <div class="wrap">
 
-  <!-- Page Header -->
   <div class="page-header">
     <div>
       <div class="page-title">ภาพรวมวันนี้</div>
@@ -490,7 +487,6 @@ footer {
     <div class="date-pill" id="todayDate">–</div>
   </div>
 
-  <!-- Summary -->
   <div class="section-title">สรุปสถานะ</div>
   <div class="summary-grid">
     <div class="stat-card sc-total">
@@ -504,7 +500,7 @@ footer {
       <div class="stat-label">รอคิวผ่าตัด</div>
     </div>
     <div class="stat-card sc-surg">
-      <div class="stat-icon">🔬</div>
+      <div class="stat-icon">🔪</div>
       <div class="stat-value" id="inSurgery">–</div>
       <div class="stat-label">กำลังผ่าตัด</div>
     </div>
@@ -525,7 +521,6 @@ footer {
     </div>
   </div>
 
-  <!-- Menu -->
   <div class="section-title">เมนูหลัก</div>
   <div class="menu-grid">
 
@@ -542,14 +537,14 @@ footer {
     </a>
 
     <a class="menu-card" href="surgery.html">
-      <div class="notif-badge nb-waiting" id="badge-surgery-menu"></div>
+      <div class="notif-badge nb-surgery" id="badge-surgery-menu"></div>
       <span class="card-emoji">📋</span>
       <div class="card-title">โต๊ะผ่าตัด</div>
       <div class="card-desc">รับเคสเข้าห้องผ่าตัด</div>
     </a>
 
     <a class="menu-card" href="anesthesia.html">
-      <div class="notif-badge nb-surgery" id="badge-anes-menu"></div>
+      <div class="notif-badge nb-waiting" id="badge-anes-menu"></div>
       <span class="card-emoji">🩺</span>
       <div class="card-title">วางยาสลบ</div>
       <div class="card-desc">คำนวณยา · วางยา · Vitals</div>
@@ -584,7 +579,6 @@ footer {
   </div>
 </div>
 
-<!-- ── BOTTOM NAV (Mobile) ── -->
 <nav class="bottom-nav">
   <a class="nav-item active" href="index.html">
     <span class="nav-icon">🏠</span>หน้าหลัก
@@ -603,16 +597,12 @@ footer {
   </a>
 </nav>
 
-<!-- ── FAB (Mobile quick register) ── -->
 <button class="fab" onclick="location.href='registration.html'" title="ลงทะเบียน">
   ➕
 </button>
 
 <footer>RMUTTO – VASD © 2026 &nbsp;·&nbsp; Veterinary Academic Service Division</footer>
 
-<!-- ════════════════════════════════════════
-     SCRIPT (logic identical to original)
-════════════════════════════════════════ -->
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
@@ -677,11 +667,15 @@ async function loadSummary() {
 
   const setBadge = (id, count, label) => {
     const el = document.getElementById(id);
-    el.innerText = `${count} ${label}`;
-    el.style.display = count > 0 ? "block" : "none";
+    if (el) {
+      el.innerText = `${count} ${label}`;
+      el.style.display = count > 0 ? "block" : "none";
+    }
   };
-  setBadge("badge-surgery-menu",  waiting,  "รอคิว");
-  setBadge("badge-anes-menu",     surgery,  "กำลังผ่า");
+  
+  // สลับข้อมูลเพื่อความถูกต้องของ Workflow ตามที่แก้ไข
+  setBadge("badge-anes-menu",     waiting,  "รอคิว");
+  setBadge("badge-surgery-menu",  surgery,  "กำลังผ่า");
   setBadge("badge-recovery-menu", recovery, "พักฟื้น");
   setBadge("badge-rx-menu",       ready,    "รอจัดยา");
 }
