@@ -236,6 +236,20 @@ async function loadSurgeryQueue() {
       
       if(!vitalsData[a.id]) vitalsData[a.id] = [];
 
+      // คำนวณปริมาตรยาฉุกเฉิน
+      const weight = parseFloat(a.actual_weight) || 0;
+      let adrVol = "N/A", atrVol = "N/A", atipVol = "N/A";
+      
+      if (weight > 0) {
+        // สูตร: (น้ำหนัก * โดส) / ความเข้มข้น
+        adrVol = ((weight * 0.01) / 1).toFixed(2) + " ml";   // Adrenaline 1 mg/ml
+        atrVol = ((weight * 0.02) / 1).toFixed(2) + " ml";   // Atropine 1 mg/ml
+        atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";   // Atipamezole 5 mg/ml
+      } else {
+        const errTxt = `<span style="font-size:12px; color:var(--text-faint);">ไม่มี นน.</span>`;
+        adrVol = atrVol = atipVol = errTxt;
+      }
+
       const card = document.createElement("div");
       card.className = "surg-card";
       card.innerHTML = `
@@ -243,13 +257,14 @@ async function loadSurgeryQueue() {
           <div class="queue-circle">#${a.queue_number || "-"}</div>
           <div class="sc-title-block">
             <div class="sc-animal-name">${a.animal_name}</div>
-            <div class="sc-meta">${spText} · ${a.sex} · น้ำหนักจริง: ${a.actual_weight || "-"} กก.</div>
+            <div class="sc-meta">${spText} · ${a.sex} · น้ำหนักจริง: ${a.actual_weight || "-"} kg</div>
           </div>
         </div>
 
         <div class="tabs-header">
-          <button class="tab-btn active" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูล & ทีมผ่าตัด</button>
+          <button class="tab-btn active" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูลทีม</button>
           <button class="tab-btn" id="btn-tab-monitor-${a.id}" onclick="switchTab(this, 'tab-monitor-${a.id}')">Monitoring</button>
+          <button class="tab-btn" id="btn-tab-emergency-${a.id}" style="color:var(--rose);" onclick="switchTab(this, 'tab-emergency-${a.id}')">🚨 Emergency</button>
         </div>
 
         <div id="tab-info-${a.id}" class="tab-content active">
@@ -259,7 +274,7 @@ async function loadSurgeryQueue() {
           </div>
           
           <div class="form-grid">
-            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะผ่าตัด (เช่น 1, 2, A)">
+            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะ (เช่น 1, A)">
             <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *" oninput="this.classList.remove('error')">
           </div>
           <input type="text" id="anes-${a.id}" class="f-input" placeholder="Anesthetist (ผู้ช่วย / วิสัญญี)">
@@ -271,7 +286,7 @@ async function loadSurgeryQueue() {
             <input type="number" id="rr-${a.id}" class="f-input third" placeholder="RR (bpm)">
             <input type="number" id="spo2-${a.id}" class="f-input third" placeholder="SpO2 (%)">
             
-            <input type="number" id="temp-${a.id}" class="f-input half" placeholder="T (°C)">
+            <input type="number" id="temp-${a.id}" class="f-input half" placeholder="T (°F)">
             <input type="number" id="zol-${a.id}" class="f-input half" placeholder="Zol (ml)">
             
             <input type="text" id="note-${a.id}" class="f-input wide" placeholder="บันทึกเพิ่มเติม (ยาที่ใช้เพิ่ม, เหตุการณ์)...">
@@ -289,6 +304,38 @@ async function loadSurgeryQueue() {
                 <tr><td colspan="7" style="color:var(--text-faint); font-style:italic;">ยังไม่มีการบันทึก</td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <div id="tab-emergency-${a.id}" class="tab-content">
+          <div style="margin-bottom: 12px; font-size: 13px; color: var(--text-dim); text-align: center;">
+            คำนวณโดสยาฉุกเฉินจากน้ำหนักจริง: <span style="color:var(--text); font-weight:600; font-size:14px;">${weight > 0 ? weight + " kg" : "ไม่ได้ระบุ"}</span>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); padding: 12px 16px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="color: var(--rose); font-weight: 700; font-size: 15px;">Adrenaline <span style="font-size: 12px; font-weight: 500; color:var(--text-dim);">(1 mg/ml)</span></div>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">Dose: 0.01 mg/kg IV</div>
+              </div>
+              <div style="font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">${adrVol}</div>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 12px 16px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="color: var(--amber); font-weight: 700; font-size: 15px;">Atropine <span style="font-size: 12px; font-weight: 500; color:var(--text-dim);">(1 mg/ml)</span></div>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">Dose: 0.02 mg/kg IV</div>
+              </div>
+              <div style="font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">${atrVol}</div>
+            </div>
+
+            <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); padding: 12px 16px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="color: var(--emerald); font-weight: 700; font-size: 15px;">Atipamezole <span style="font-size: 12px; font-weight: 500; color:var(--text-dim);">(5 mg/ml)</span></div>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">Dose: 0.1 mg/kg IM</div>
+              </div>
+              <div style="font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">${atipVol}</div>
+            </div>
           </div>
         </div>
 
