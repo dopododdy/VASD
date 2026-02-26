@@ -97,19 +97,10 @@ header {
 .wrap {
   position: relative; z-index: 1;
   max-width: 900px; margin: 0 auto;
-  padding: 24px 16px 60px; width: 100%;
+  /* เพิ่ม padding ล่าง เผื่อพื้นที่ให้ Bottom Nav */
+  padding: 24px 16px 100px; 
+  width: 100%;
 }
-
-.page-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 22px; flex-wrap: wrap; gap: 10px;
-  animation: slideUp 0.4s ease both;
-}
-.page-title {
-  font-family: "Outfit", sans-serif;
-  font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
-}
-.page-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
 
 .section-title {
   font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
@@ -179,7 +170,6 @@ header {
 .info-chip .ic-label { color: var(--text-dim); margin-right: 2px; }
 .info-chip .ic-val   { color: var(--text); font-weight: 600; }
 .info-chip .ic-val.teal   { color: var(--teal-light); }
-.info-chip .ic-val.amber  { color: var(--amber); }
 
 /* est weight strip */
 .est-weight-strip {
@@ -262,12 +252,6 @@ header {
 .btn:active { transform: scale(0.96); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
-.btn-rx {
-  background: var(--amber-soft); color: var(--amber);
-  border: 1px solid rgba(245,158,11,0.3); flex: 1; justify-content: center;
-}
-.btn-rx:hover { background: rgba(245,158,11,0.22); }
-
 .btn-send {
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
   color: #fff; flex: 1; justify-content: center; font-size: 13px;
@@ -285,111 +269,30 @@ header {
 .empty-state-sub  { font-size: 12px; margin-top: 6px; }
 
 /* ═══════════════════════════════════════════
-   MODAL (RX) — bottom sheet on mobile
+   BOTTOM NAV
 ═══════════════════════════════════════════ */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  display: none; justify-content: center; align-items: flex-end;
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: rgba(11,25,41,0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around; align-items: center;
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom);
 }
-@media (min-width: 600px) {
-  .modal-overlay { align-items: center; padding: 20px; }
-}
-.modal-overlay.active { display: flex; }
-
-.modal-box {
-  background: var(--navy-mid);
-  border: 1px solid var(--border-2);
-  width: 100%; max-width: 680px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  max-height: 90vh; display: flex; flex-direction: column;
-  animation: slideUp 0.3s ease both;
-}
-@media (min-width: 600px) {
-  .modal-box { border-radius: var(--radius-lg); max-height: 85vh; }
-}
-
-.modal-header {
-  padding: 16px 18px; border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
-}
-.modal-title    { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 700; color: #fff; }
-.modal-subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-.btn-close {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--surface-3); border: 1px solid var(--border-2);
-  color: var(--text-dim); cursor: pointer; font-size: 16px;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s, color 0.2s;
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; color: var(--text-dim); text-decoration: none;
+  font-size: 10px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  width: 60px; height: 100%; transition: color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.btn-close:hover { background: var(--rose-soft); color: var(--rose); }
-
-.modal-body { padding: 16px; overflow-y: auto; flex: 1; }
-
-.rx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media (max-width: 480px) { .rx-grid { grid-template-columns: 1fr; } }
-
-.rx-card {
-  background: var(--surface);
-  border: 1px solid var(--border-2);
-  border-radius: var(--radius-sm); padding: 13px;
-  cursor: pointer; transition: border-color 0.2s, background 0.2s;
-}
-.rx-card:hover { border-color: rgba(14,165,160,0.4); }
-.rx-card.selected { border-color: var(--teal); background: rgba(14,165,160,0.08); }
-
-.rx-card-top { display: flex; align-items: flex-start; gap: 9px; }
-.rx-card input[type="checkbox"] { display: none; }
-.rx-checkbox {
-  width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
-  border: 2px solid var(--border-2); background: var(--surface-2);
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s, border-color 0.2s;
-  font-size: 11px; color: transparent;
-}
-.rx-card.selected .rx-checkbox { background: var(--teal); border-color: var(--teal); color: #fff; }
-.rx-drug-info { flex: 1; }
-.rx-cat  { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 3px; }
-.rx-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
-
-.rx-fields {
-  display: none; flex-direction: column; gap: 7px;
-  margin-top: 11px; padding-top: 11px; border-top: 1px dashed var(--border-2);
-}
-.rx-card.selected .rx-fields { display: flex; }
-
-.rx-field-row { display: flex; align-items: center; gap: 8px; }
-.rx-field-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--teal-light); width: 54px; flex-shrink: 0; }
-.rx-field-input {
-  flex: 1; padding: 6px 9px; font-size: 12px; font-family: "Sarabun", sans-serif;
-  background: var(--surface-2); border: 1px solid var(--border-2);
-  border-radius: var(--radius-xs); color: var(--text); outline: none;
-  transition: border-color 0.2s;
-}
-.rx-field-input:focus { border-color: var(--teal); }
-.rx-field-sm    { width: 58px; flex: none; }
-.rx-field-total { width: 58px; flex: none; font-weight: 700; color: var(--rose); }
-
-.modal-footer {
-  padding: 12px 16px; border-top: 1px solid var(--border);
-  display: flex; gap: 8px; flex-shrink: 0;
-}
-.btn-modal-cancel {
-  padding: 10px 18px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
-  background: var(--surface-3); color: var(--text-dim);
-  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn-modal-save {
-  flex: 1; padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: "Sarabun", sans-serif;
-  background: linear-gradient(135deg, var(--teal), var(--teal-light));
-  color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  box-shadow: 0 4px 16px var(--teal-glow);
-  -webkit-tap-highlight-color: transparent;
-}
+.nav-item.active { color: var(--amber); }
+.nav-icon { font-size: 20px; margin-bottom: 2px; }
+.nav-item:hover { color: var(--text); }
+.nav-item.active:hover { color: var(--amber); }
 
 /* ═══════════════════════════════════════════
    ANIMATIONS
@@ -405,15 +308,13 @@ header {
 @media (max-width: 640px) {
   header { height: 56px; padding: 0 14px; }
   .brand-sub { display: none; }
-  .wrap { padding: 18px 12px 50px; }
-  .page-title { font-size: 18px; }
+  .wrap { padding: 18px 12px 100px; }
   .ac-animal-name { font-size: 15px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ── HEADER ── -->
 <header>
   <div class="brand">
     <div class="brand-logo">💉</div>
@@ -425,15 +326,7 @@ header {
   <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
 
-<!-- ── CONTENT ── -->
 <div class="wrap">
-
-  <div class="page-header">
-    <div>
-      <div class="page-title">รายการรอเตรียมตัว / วางยา</div>
-      <div class="page-sub">ชั่งน้ำหนักจริงและคำนวณยาก่อนส่งเข้าห้องผ่าตัด</div>
-    </div>
-  </div>
 
   <div class="section-title">คิวรอดำเนินการ</div>
   <div id="anesthesia-container">
@@ -445,30 +338,23 @@ header {
 
 </div>
 
-<!-- ── RX MODAL ── -->
-<div class="modal-overlay" id="rxModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">💊 สั่งจ่ายยา</div>
-        <div class="modal-subtitle" id="rxModalSub"></div>
-      </div>
-      <button class="btn-close" onclick="closeRxModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="rx-grid" id="rxModalGrid"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-modal-cancel" onclick="closeRxModal()">ยกเลิก</button>
-      <button class="btn-modal-save"   onclick="saveNewRx()">💾 บันทึกการสั่งยา</button>
-    </div>
-  </div>
-</div>
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span>
+    <span>หน้าหลัก</span>
+  </a>
+  <a href="#" class="nav-item active">
+    <span class="nav-icon">💉</span>
+    <span>วางยา</span>
+  </a>
+  <a href="surgery.html" class="nav-item">
+    <span class="nav-icon">🩺</span>
+    <span>ผ่าตัด</span>
+  </a>
+</nav>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
-
-let currentRxAnimalId = null;
 
 /* ── helper ── */
 function round(val) {
@@ -522,7 +408,6 @@ async function loadAnesthesiaQueue() {
       card.style.animationDelay = `${idx * 0.07}s`;
 
       card.innerHTML = `
-        <!-- Header -->
         <div class="ac-header">
           <div class="queue-circle">#${a.queue_number || "-"}</div>
           <div class="ac-title-block">
@@ -532,10 +417,8 @@ async function loadAnesthesiaQueue() {
           <span class="ac-status-pill">⏳ รอวางยา</span>
         </div>
 
-        <!-- Body -->
         <div class="ac-body">
 
-          <!-- Info chips -->
           <div class="info-chips">
             <div class="info-chip">
               <span class="ic-label">👤</span>
@@ -547,12 +430,10 @@ async function loadAnesthesiaQueue() {
             </div>
           </div>
 
-          <!-- Est weight strip -->
           <div class="est-weight-strip">
             ⚖️ น้ำหนักประเมิน (จากจุดลงทะเบียน): <strong style="margin-left:4px;">${a.est_weight || "–"} กก.</strong>
           </div>
 
-          <!-- Real weight input -->
           <div class="weight-row">
             <div class="field-group">
               <span class="field-label">⚖️ ชั่งน้ำหนักจริง (กก.) *</span>
@@ -567,9 +448,8 @@ async function loadAnesthesiaQueue() {
             </div>
           </div>
 
-          <!-- Dose calc -->
           <div class="calc-box">
-            <div class="calc-box-header">🧪 ปริมาณยาเบื้องต้น (อ้างอิง)</div>
+            <div class="calc-box-header">🧪 Pre-med (ไม่รวม ATB, NSAIDs)</div>
             <div class="calc-row">
               <span class="calc-drug">Atropine 0.6 mg/ml <small style="color:var(--text-faint);">(0.04 mg/kg)</small></span>
               <span class="calc-dose pending" id="calc-atro-${a.id}">รอน้ำหนัก</span>
@@ -584,16 +464,9 @@ async function loadAnesthesiaQueue() {
             </div>
           </div>
 
-        </div><!-- /.ac-body -->
-
-        <!-- Footer -->
-        <div class="ac-footer">
-          <button class="btn btn-rx"
-            onclick="openRxModal('${a.id}', '${a.animal_name}', document.getElementById('weight-${a.id}').value || '${defW}', '${a.species}')">
-            💊 สั่งจ่ายยา (Rx)
-          </button>
+        </div><div class="ac-footer">
           <button class="btn btn-send" onclick="sendToSurgery('${a.id}')">
-            🩺 ส่งเข้าห้องผ่าตัด
+            🩺 ส่งต่อโต๊ะผ่าตัด
           </button>
         </div>
       `;
@@ -637,11 +510,11 @@ window.calculateDose = function(animalId, weightStr) {
 window.sendToSurgery = async function(animalId) {
   const weightInput = document.getElementById(`weight-${animalId}`).value;
   if (!weightInput) {
-    alert("กรุณากรอกน้ำหนักจริงก่อนส่งเข้าห้องผ่าตัด");
+    alert("กรุณากรอกน้ำหนักจริงก่อนส่งต่อโต๊ะผ่าตัด");
     document.getElementById(`weight-${animalId}`).focus();
     return;
   }
-  if (!confirm("ยืนยันการส่งสัตว์เข้าห้องผ่าตัด?\nระบบจะอัปเดตน้ำหนักจริงและเปลี่ยนสถานะ")) return;
+  if (!confirm("ยืนยันการส่งสัตว์เข้าโต๊ะผ่าตัด?\nระบบจะอัปเดตน้ำหนักจริงและเปลี่ยนสถานะ")) return;
 
   try {
     await supabase.from("vasd_animal").update({ actual_weight: parseFloat(weightInput) }).eq("id", animalId);
@@ -651,103 +524,6 @@ window.sendToSurgery = async function(animalId) {
   } catch (err) {
     alert("❌ เกิดข้อผิดพลาด: " + err.message);
   }
-};
-
-/* ══════════════════════════════════════════
-   RX MODAL
-══════════════════════════════════════════ */
-window.openRxModal = function(animalId, animalName, w, species) {
-  currentRxAnimalId = animalId;
-  w = parseFloat(w) || 0;
-  document.getElementById("rxModalSub").textContent = `${animalName} · น้ำหนัก ${w} กก.`;
-
-  const drugs = [
-    { id:"dox",   cat:"Antibiotic",    name:"Doxycycline 100 mg",   tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง หลังอาหาร",   f_num:1, days:14 },
-    { id:"n200",  cat:"Antibiotic",    name:"Norfloxacin 200 mg",   tabs: round((w*20)/200), freq:"วันละ 2 ครั้ง เช้า-เย็น",   f_num:2, days:7  },
-    { id:"n100",  cat:"Antibiotic",    name:"Norfloxacin 100 mg",   tabs: round((w*20)/100), freq:"วันละ 2 ครั้ง เช้า-เย็น",   f_num:2, days:7  },
-    { id:"t60",   cat:"NSAID",         name:"Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง หลังอาหาร",   f_num:1, days:3  },
-    { id:"t6",    cat:"NSAID",         name:"Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง หลังอาหาร",   f_num:1, days:3  },
-    { id:"fbc",   cat:"Blood support", name:"FBC บำรุงเลือด",       tabs: w >= 10 ? 1 : 0.5, freq:"วันละ 1 ครั้ง หลังอาหาร",   f_num:1, days:14 },
-    { id:"cstm",  cat:"อื่นๆ",         name:"",                     tabs: 1,                 freq:"วันละ 1 ครั้ง",              f_num:1, days:5, isCustom: true },
-  ];
-
-  document.getElementById("rxModalGrid").innerHTML = drugs.map(d => `
-    <div class="rx-card" id="rxcard-${d.id}" onclick="toggleRx('${d.id}')">
-      <div class="rx-card-top">
-        <input type="checkbox" id="rxchk-${d.id}" data-name="${d.name}">
-        <div class="rx-checkbox" id="rxbox-${d.id}">✓</div>
-        <div class="rx-drug-info">
-          <div class="rx-cat">${d.cat}</div>
-          ${d.isCustom
-            ? `<input class="f-input" type="text" id="custom-name-${d.id}" placeholder="พิมพ์ชื่อยา..." style="font-size:12px;margin-top:4px;padding:7px 9px;" onclick="event.stopPropagation()">`
-            : `<div class="rx-name">${d.name}</div>`}
-        </div>
-      </div>
-      <div class="rx-fields">
-        <div class="rx-field-row">
-          <span class="rx-field-label">ปริมาณ</span>
-          <input class="rx-field-input" id="rxdose-${d.id}" value="ป้อนครั้งละ ${d.tabs} เม็ด" oninput="recalcRx('${d.id}',${d.f_num})">
-        </div>
-        <div class="rx-field-row">
-          <span class="rx-field-label">ความถี่</span>
-          <input class="rx-field-input" id="rxfreq-${d.id}" value="${d.freq}" oninput="recalcRx('${d.id}',${d.f_num})">
-        </div>
-        <div class="rx-field-row">
-          <span class="rx-field-label">จน.วัน</span>
-          <input class="rx-field-input rx-field-sm" type="number" id="rxdays-${d.id}" value="${d.days}" oninput="recalcRx('${d.id}',${d.f_num})">
-          <span class="rx-field-label" style="color:var(--text-dim);margin-left:6px;">รวม</span>
-          <input class="rx-field-input rx-field-total" type="number" id="rxtotal-${d.id}" value="${Math.ceil(d.tabs * d.f_num * d.days)}">
-        </div>
-      </div>
-    </div>`).join("");
-
-  document.getElementById("rxModal").classList.add("active");
-};
-
-window.toggleRx = function(did) {
-  const card = document.getElementById(`rxcard-${did}`);
-  const chk  = document.getElementById(`rxchk-${did}`);
-  chk.checked = !chk.checked;
-  card.classList.toggle("selected", chk.checked);
-};
-
-window.recalcRx = function(did, fNum) {
-  const dose = parseFloat((document.getElementById(`rxdose-${did}`).value || "").match(/[\d.]+/)?.[0]) || 0;
-  const freq = parseFloat((document.getElementById(`rxfreq-${did}`).value || "").match(/[\d.]+/)?.[0]) || fNum || 1;
-  const days = parseFloat(document.getElementById(`rxdays-${did}`).value) || 0;
-  document.getElementById(`rxtotal-${did}`).value = Math.ceil(dose * freq * days);
-};
-
-window.closeRxModal = function() {
-  document.getElementById("rxModal").classList.remove("active");
-  currentRxAnimalId = null;
-};
-
-window.saveNewRx = async function() {
-  if (!currentRxAnimalId) return;
-  const checked = [...document.querySelectorAll(`input[id^="rxchk-"]:checked`)];
-  if (checked.length === 0) return alert("กรุณาเลือกยาอย่างน้อย 1 รายการ");
-
-  const rxInserts = checked.map(el => {
-    const did = el.id.replace("rxchk-", "");
-    let drugName = el.dataset.name;
-    if (did === "cstm") {
-      const cn = document.getElementById(`custom-name-${did}`);
-      drugName = cn?.value.trim() || "ยาเพิ่มเติม";
-    }
-    return {
-      animal_id:   currentRxAnimalId,
-      drug_id:     drugName,
-      dose:        document.getElementById(`rxdose-${did}`).value,
-      freq:        document.getElementById(`rxfreq-${did}`).value,
-      days:        parseInt(document.getElementById(`rxdays-${did}`).value) || 5,
-      total_pills: parseFloat(document.getElementById(`rxtotal-${did}`).value) || 0,
-    };
-  });
-
-  const { error } = await supabase.from("vasd_prescription").insert(rxInserts);
-  if (error) alert("❌ บันทึกไม่สำเร็จ: " + error.message);
-  else { alert("✅ บันทึกการสั่งยาเรียบร้อย ส่งไปที่ห้องจ่ายยาแล้ว"); closeRxModal(); }
 };
 
 /* ── Real-time ── */
