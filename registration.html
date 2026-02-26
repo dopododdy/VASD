@@ -106,7 +106,7 @@ header {
 .wrap {
   position: relative; z-index: 1;
   max-width: 960px; margin: 0 auto;
-  padding: 24px 16px 100px;
+  padding: 24px 16px 100px; /* Padding bottom allows space for nav */
   width: 100%; display: flex; flex-direction: column; gap: 16px;
 }
 
@@ -356,6 +356,32 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 }
 
 /* ═══════════════════════════════════════════
+   MOBILE BOTTOM NAV (≤ 640px)
+═══════════════════════════════════════════ */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  grid-template-columns: repeat(5, 1fr);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px;
+  font-size: 9px; color: var(--text-dim);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item:active { color: var(--teal); }
+.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item.active { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
+
+/* ═══════════════════════════════════════════
    PRINT
 ═══════════════════════════════════════════ */
 #printArea { display: none; }
@@ -389,23 +415,22 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   header { height: 56px; padding: 0 14px; }
   .brand-sub { display: none; }
   .brand-name { font-size: 14px; }
-  .wrap { padding: 18px 12px 80px; }
+  .wrap { padding: 18px 12px 90px; } /* Increased bottom padding for nav */
   .page-title { font-size: 18px; }
   .card-body { padding: 14px; }
   .card-footer { padding: 10px 14px; }
+  .bottom-nav { display: grid; }
 }
 </style>
 </head>
 <body>
 
-<!-- font preload -->
 <div class="font-preload">
   <span style="font-family:'Kanit',sans-serif;">โหลด</span>
   <span style="font-family:'Prompt',sans-serif;">โหลด</span>
   <span style="font-family:'Sarabun',sans-serif;">โหลด</span>
 </div>
 
-<!-- ── HEADER ── -->
 <header>
   <div class="brand">
     <div class="brand-logo">📝</div>
@@ -417,10 +442,8 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
 
-<!-- ── CONTENT ── -->
 <div class="wrap">
 
-  <!-- Page title -->
   <div class="page-title-row">
     <div>
       <div class="page-title">ลงทะเบียนสัตว์เข้ารับบริการ</div>
@@ -428,7 +451,6 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
     </div>
   </div>
 
-  <!-- ── OWNER CARD ── -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">👤</div>
@@ -452,7 +474,6 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
     </div>
   </div>
 
-  <!-- ── ANIMALS CARD ── -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">🐾</div>
@@ -472,7 +493,6 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
     </div>
   </div>
 
-  <!-- ── SUBMIT ── -->
   <div class="submit-card">
     <button type="button" id="btnSaveAll" class="btn btn-submit" onclick="window.saveAll()">
       💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว
@@ -481,11 +501,26 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 
 </div>
 
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item" href="anesthesia.html">
+    <span class="nav-icon">🩺</span>วางยา
+  </a>
+  <a class="nav-item" href="surgery.html">
+    <span class="nav-icon">📋</span>ผ่าตัด
+  </a>
+  <a class="nav-item" href="recovery.html">
+    <span class="nav-icon">🛏️</span>พักฟื้น
+  </a>
+</nav>
+
 <div id="printArea"></div>
 
-<!-- ════════════════════════════════════════
-     SCRIPT – logic identical to original
-════════════════════════════════════════ -->
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
