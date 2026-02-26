@@ -2,135 +2,398 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>พักฟื้น</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>ห้องพักฟื้น – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
 :root {
-  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
-  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
-  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --radius:14px; --radius-sm:8px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);}
+  --navy:         #0b1929;
+  --navy-mid:     #112240;
+  --teal:         #0ea5a0;
+  --teal-light:   #14c4bc;
+  --teal-glow:    rgba(14,165,160,0.25);
+  --violet:       #8b5cf6;
+  --violet-soft:  rgba(139,92,246,0.14);
+  --violet-glow:  rgba(139,92,246,0.25);
+  --rose:         #ef4444;
+  --rose-soft:    rgba(239,68,68,0.12);
+  --emerald:      #10b981;
+  --emerald-soft: rgba(16,185,129,0.14);
 
-header{
-  background:var(--navy);padding:0 32px;display:flex;
-  justify-content:space-between;align-items:center;height:68px;
-  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
-}
-.header-brand{display:flex;align-items:center;gap:14px;}
-.brand-icon{
-  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
-  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
-}
-.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
-.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
-.btn-home{
-  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-  cursor:pointer;transition:background 0.2s;
-}
-.btn-home:hover{background:rgba(255,255,255,0.18);}
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --surface-3:  rgba(255,255,255,0.11);
+  --border:     rgba(255,255,255,0.08);
+  --border-2:   rgba(255,255,255,0.14);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #4a5568;
 
-.container{max-width:1200px;margin:0 auto;padding:28px 24px;}
-.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
-
-.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(500px, 1fr));gap:20px;}
-
-/* RECOVERY CARD */
-.card{
-  background:var(--surface);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  overflow:hidden;animation:fadeUp 0.4s ease both;
-  display:flex;flex-direction:column;
-}
-.card-header{
-  background:#faf5ff;border-bottom:1px solid var(--border);
-  padding:16px 20px;display:flex;justify-content:space-between;align-items:center;
-}
-.card-title{font-size:16px;font-weight:700;color:#6b46c1;display:flex;align-items:center;gap:8px;}
-.queue-badge{background:#6b46c1;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;}
-
-.card-body{padding:20px;flex:1;}
-.info-row{display:flex;gap:16px;margin-bottom:16px;font-size:14px;}
-.info-row div{background:var(--bg);padding:8px 12px;border-radius:var(--radius-sm);flex:1;}
-.info-row span{display:block;font-size:11px;color:var(--text-muted);margin-bottom:2px;}
-
-/* VITAL SIGNS TABLE */
-.vital-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px;}
-.vital-table th{background:var(--bg);text-align:left;padding:8px;border:1px solid var(--border);color:var(--text-muted);}
-.vital-table td{padding:8px;border:1px solid var(--border);text-align:center;}
-
-/* FORM INPUTS */
-.vital-form{display:flex;gap:8px;flex-wrap:wrap;background:var(--bg);padding:12px;border-radius:var(--radius-sm);margin-bottom:16px;}
-.vital-form input{
-  flex:1;min-width:60px;padding:6px 8px;font-size:12px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:6px;outline:none;
-}
-.vital-form input:focus{border-color:#6b46c1;}
-.btn-add-vital{
-  background:#6b46c1;color:#fff;border:none;border-radius:6px;
-  padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius:    16px;
+  --radius-lg: 22px;
 }
 
-/* ACTIONS */
-.card-footer{
-  padding:16px 20px;border-top:1px solid var(--border);
-  display:flex;justify-content:space-between;background:#fafbfc;
-}
-.btn{
-  padding:8px 16px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  border:none;border-radius:6px;cursor:pointer;transition:opacity 0.2s;
-  display:inline-flex;align-items:center;gap:6px;
-}
-.btn:hover{opacity:0.85;}
-.btn-rx{background:var(--teal-light);color:#fff;}
-.btn-close{background:var(--success);color:#fff;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(139,92,246,0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(14,165,160,0.07) 0%, transparent 60%);
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--violet), #a78bfa);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 0 20px var(--violet-glow);
+}
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.3px;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.btn-home {
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-home:hover { background: var(--surface-3); color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   WRAP
+═══════════════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 960px; margin: 0 auto;
+  padding: 24px 16px 60px; width: 100%;
+}
+
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 22px; flex-wrap: wrap; gap: 10px;
+  animation: slideUp 0.4s ease both;
+}
+.page-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+}
+.page-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.section-count {
+  font-size: 10px; color: var(--text-dim); background: var(--surface-2);
+  border: 1px solid var(--border-2); border-radius: 20px; padding: 2px 10px;
+}
+
+/* ═══════════════════════════════════════════
+   RECOVERY GRID
+═══════════════════════════════════════════ */
+#recoveryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 14px;
+}
+@media (max-width: 640px) {
+  #recoveryGrid { grid-template-columns: 1fr; }
+}
+
+/* ─── Recovery Card ─── */
+.rec-card {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  animation: slideUp 0.4s ease both;
+}
+/* violet top bar */
+.rec-card::before {
+  content: ""; display: block; height: 3px;
+  background: linear-gradient(90deg, var(--violet), #a78bfa);
+}
+
+/* ── Card Header ── */
+.rc-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.queue-circle {
+  font-family: "Outfit", sans-serif;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--violet-soft);
+  border: 2px solid rgba(139,92,246,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #c4b5fd; flex-shrink: 0;
+}
+.rc-title-block { flex: 1; min-width: 0; }
+.rc-animal-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 800; color: #fff; line-height: 1.1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rc-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+.rec-status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px; flex-shrink: 0;
+  font-size: 10px; font-weight: 700;
+  background: var(--violet-soft); color: #c4b5fd;
+  border: 1px solid rgba(139,92,246,0.3);
+}
+
+/* ── Card Tabs ── */
+.rc-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.rc-tab {
+  flex: 1; padding: 9px 6px; text-align: center;
+  font-size: 11px; font-weight: 600; color: var(--text-dim);
+  cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  font-family: "Sarabun", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+.rc-tab.active { color: #c4b5fd; border-bottom-color: var(--violet); }
+.rc-tab:hover  { color: var(--text); }
+
+/* ── Panel ── */
+.rc-panel { display: none; padding: 14px; }
+.rc-panel.active { display: block; }
+
+/* ── Info panel ── */
+.info-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0; }
+.info-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 12px; font-size: 12px;
+}
+.ic-label { color: var(--text-dim); }
+.ic-val   { color: var(--text); font-weight: 600; }
+
+/* ── Vitals panel ── */
+.vital-input-grid {
+  display: grid;
+  grid-template-columns: 72px repeat(4, 1fr) auto;
+  gap: 7px; align-items: end;
+  margin-bottom: 12px;
+}
+@media (max-width: 480px) {
+  .vital-input-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .vital-input-grid .v-time-cell { grid-column: 1 / -1; }
+  .vital-input-grid .v-btn-cell  { grid-column: 1 / -1; }
+}
+
+.field-group { display: flex; flex-direction: column; gap: 3px; }
+.field-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--text-faint);
+}
+.f-input {
+  width: 100%; padding: 8px 9px;
+  font-size: 13px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.f-input::placeholder { color: var(--text-faint); }
+.f-input:focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px var(--violet-soft);
+}
+
+/* vital table */
+.vital-table-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  overflow: hidden; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.vital-table {
+  width: 100%; border-collapse: collapse; min-width: 340px; font-size: 12px;
+}
+.vital-table thead tr { background: var(--surface-3); }
+.vital-table th {
+  padding: 7px 8px; text-align: center; font-weight: 700;
+  color: var(--text-dim); font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.vital-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.vital-table tbody tr:last-child { border-bottom: none; }
+.vital-table tbody tr:hover { background: var(--surface-2); }
+.vital-table td {
+  padding: 7px 8px; text-align: center; color: var(--text); vertical-align: middle;
+}
+.vital-table td:first-child { font-weight: 700; color: #c4b5fd; }
+.vital-empty {
+  text-align: center; padding: 20px; color: var(--text-faint); font-size: 12px;
+}
+
+/* ── Card Footer ── */
+.rc-footer {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 11px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  margin-top: auto;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn {
+  padding: 9px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: opacity 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-add-vital {
+  padding: 8px 12px;
+  background: var(--violet-soft); color: #c4b5fd;
+  border: 1px solid rgba(139,92,246,0.3);
+}
+.btn-add-vital:hover { background: rgba(139,92,246,0.22); }
+
+.btn-rx {
+  background: rgba(14,165,160,0.15); color: var(--teal-light);
+  border: 1px solid rgba(14,165,160,0.3); flex: 1; justify-content: center;
+}
+.btn-rx:hover { background: rgba(14,165,160,0.25); }
+
+.btn-close-job {
+  background: var(--emerald-soft); color: var(--emerald);
+  border: 1px solid rgba(16,185,129,0.3); flex: 1; justify-content: center;
+  font-size: 12px;
+}
+.btn-close-job:hover { background: rgba(16,185,129,0.25); }
+
+/* ── Empty ── */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center; padding: 60px 16px;
+  color: var(--text-faint); animation: slideUp 0.4s ease both;
+}
+.empty-state-icon { font-size: 52px; margin-bottom: 14px; }
+.empty-state-text { font-size: 14px; color: var(--text-dim); }
+.empty-state-sub  { font-size: 12px; margin-top: 6px; }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  header { height: 56px; padding: 0 14px; }
+  .brand-sub { display: none; }
+  .wrap { padding: 18px 12px 50px; }
+  .page-title { font-size: 18px; }
+}
 </style>
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <header>
-  <div class="header-brand">
-    <div class="brand-icon">🟣</div>
-    <div class="brand-text">
-      <h1>ห้องพักฟื้น (Recovery)</h1>
-      <span>RMUTTO – Veterinary Academic Service Division</span>
+  <div class="brand">
+    <div class="brand-logo">🟣</div>
+    <div>
+      <div class="brand-name">ห้องพักฟื้น</div>
+      <div class="brand-sub">RMUTTO – Veterinary Academic Service Division</div>
     </div>
   </div>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
 
-<div class="container">
+<!-- ── CONTENT ── -->
+<div class="wrap">
+
   <div class="page-header">
-    <h2>รายชื่อสัตว์ที่กำลังพักฟื้น</h2>
-  </div>
-  <div class="grid" id="recoveryGrid">
+    <div>
+      <div class="page-title">สัตว์ที่กำลังพักฟื้น</div>
+      <div class="page-sub">บันทึก Vitals และปิด Job เมื่อสัตว์ฟื้นตัวดีแล้ว</div>
     </div>
+  </div>
+
+  <div class="section-title">
+    กำลังพักฟื้น
+    <span class="section-count" id="recCount">0 รายการ</span>
+    <span></span>
+  </div>
+
+  <div id="recoveryGrid">
+    <div class="empty-state">
+      <div class="empty-state-icon">🟣</div>
+      <div class="empty-state-text">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+
 </div>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
+/* ══════════════════════════════════════
+   LOAD
+══════════════════════════════════════ */
 async function loadRecoveryAnimals() {
   const grid = document.getElementById("recoveryGrid");
-  grid.innerHTML = "<p>กำลังโหลดข้อมูล...</p>";
 
-  const { data:eventId } = await supabase.rpc("get_today_event");
-  
-  // ✅ เปลี่ยนมาใช้ (*) เพื่อดึงข้อมูล Vital Signs ทั้งหมด ป้องกัน error กรณีชื่อคอลัมน์ไม่ตรง
+  const { data: eventId } = await supabase.rpc("get_today_event");
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`
       id, queue_number, animal_name, species, sex, actual_weight,
+      vasd_owner(owner_name),
       vasd_queue!inner(status),
       vasd_vital_signs(*)
     `)
@@ -138,143 +401,200 @@ async function loadRecoveryAnimals() {
     .eq("vasd_queue.status", "recovery")
     .order("queue_number");
 
-  if (error) { 
-    console.error(error); 
-    grid.innerHTML = `<p style='color:var(--danger);'>เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`; 
-    return; 
-  }
-  
-  if (data.length === 0) {
-    grid.innerHTML = "<p style='color:var(--text-muted);'>ขณะนี้ไม่มีสัตว์ในห้องพักฟื้น</p>";
+  if (error) {
+    console.error(error);
+    grid.innerHTML = `<div class="empty-state"><div class="empty-state-text" style="color:#fca5a5;">❌ โหลดข้อมูลไม่สำเร็จ: ${error.message}</div></div>`;
     return;
   }
 
+  document.getElementById("recCount").textContent = `${data.length} รายการ`;
+
+  if (data.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">✅</div>
+        <div class="empty-state-text">ขณะนี้ไม่มีสัตว์ในห้องพักฟื้น</div>
+        <div class="empty-state-sub">เมื่อมีเคสจากห้องผ่าตัด หน้าจอจะอัปเดตอัตโนมัติ</div>
+      </div>`;
+    return;
+  }
+
+  /* keep open tab state */
+  const tabStates = {};
+  grid.querySelectorAll(".rec-card").forEach(c => {
+    const id  = c.dataset.id;
+    const act = c.querySelector(".rc-tab.active");
+    if (act) tabStates[id] = act.dataset.tab;
+  });
+
   grid.innerHTML = "";
+  const now = new Date().toTimeString().substring(0, 5);
 
-  data.forEach(a => {
-    // ✅ จัดเรียงเวลาแบบปลอดภัย แม้ว่าข้อมูลจะไม่มีเวลา (null) เพื่อไม่ให้เว็บค้าง
+  data.forEach((a, idx) => {
+    const spText    = a.species === "ส" ? "🐶 สุนัข" : "🐱 แมว";
+    const ownerName = a.vasd_owner?.owner_name || "–";
+
+    /* sort vitals */
     const vitals = (a.vasd_vital_signs || []).sort((x, y) => {
-        const t1 = x.time_recorded || x.created_at || x.recorded_at || "";
-        const t2 = y.time_recorded || y.created_at || y.recorded_at || "";
-        return t1.localeCompare(t2);
+      const t1 = x.time_recorded || x.created_at || "";
+      const t2 = y.time_recorded || y.created_at || "";
+      return t1.localeCompare(t2);
     });
-    
-    let vitalRows = vitals.map(v => {
-      // ✅ สร้างเวลาแสดงผลที่ปลอดภัยที่สุด
-      let timeStr = "-";
-      if (v.time_recorded) {
-          timeStr = v.time_recorded.substring(0,5);
-      } else if (v.created_at || v.recorded_at) {
-          const d = new Date(v.created_at || v.recorded_at);
-          timeStr = d.toLocaleTimeString("th-TH", {hour12:false}).substring(0,5);
-      }
 
-      // รองรับอุณหภูมิทั้งคอลัมน์ใหม่ (temp) และคอลัมน์เก่า (bt)
-      const tempVal = v.temp || v.bt || '-';
-      const spo2Val = v.spo2 ? v.spo2 + '%' : '-';
+    const vitalRows = vitals.length === 0
+      ? `<tr><td colspan="5" class="vital-empty">ยังไม่มีการบันทึก Vitals</td></tr>`
+      : vitals.map(v => {
+          let timeStr = "–";
+          if (v.time_recorded) timeStr = v.time_recorded.substring(0, 5);
+          else if (v.created_at) timeStr = new Date(v.created_at).toLocaleTimeString("th-TH", {hour12:false}).substring(0,5);
+          const spo2 = v.spo2 ? v.spo2 + "%" : "–";
+          return `<tr>
+            <td>${timeStr}</td>
+            <td>${v.hr   || "–"}</td>
+            <td>${v.rr   || "–"}</td>
+            <td>${v.temp || v.bt || "–"}</td>
+            <td>${spo2}</td>
+          </tr>`;
+        }).join("");
 
-      return `
-        <tr>
-          <td>${timeStr}</td>
-          <td>${v.hr || '-'}</td>
-          <td>${v.rr || '-'}</td>
-          <td>${tempVal}</td>
-          <td>${spo2Val}</td>
-        </tr>
-      `;
-    }).join("");
-
-    if(vitals.length === 0) {
-      vitalRows = `<tr><td colspan="5" style="color:#aaa; text-align:center;">ยังไม่มีการบันทึก</td></tr>`;
-    }
+    const activeTab = tabStates[a.id] || "info";
 
     const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="card-title">
-          <span class="queue-badge">#${a.queue_number}</span>
-          ${a.animal_name} (${a.species === 'ส' ? 'สุนัข' : 'แมว'})
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="info-row">
-          <div><span>เพศ</span><strong>${a.sex}</strong></div>
-          <div><span>น้ำหนักจริง</span><strong>${a.actual_weight || '-'} กก.</strong></div>
-        </div>
-        
-        <table class="vital-table">
-          <thead><tr><th>เวลา</th><th>HR (ครั้ง/นาที)</th><th>RR (ครั้ง/นาที)</th><th>Temp (°C)</th><th>SpO2</th></tr></thead>
-          <tbody>${vitalRows}</tbody>
-        </table>
+    card.className = "rec-card";
+    card.dataset.id = a.id;
+    card.style.animationDelay = `${idx * 0.06}s`;
 
-        <div class="vital-form" id="form-${a.id}">
-          <input type="time" class="v-time" required>
-          <input type="number" class="v-hr" placeholder="HR" title="Heart Rate">
-          <input type="number" class="v-rr" placeholder="RR" title="Respiratory Rate">
-          <input type="number" class="v-temp" placeholder="Temp" title="Temperature">
-          <input type="number" class="v-spo2" placeholder="SpO2" title="Oxygen Saturation">
-          <button class="btn-add-vital" onclick="saveVital('${a.id}')">➕ บันทึก</button>
+    card.innerHTML = `
+      <!-- Top bar via ::before -->
+
+      <!-- Header -->
+      <div class="rc-header">
+        <div class="queue-circle">#${a.queue_number}</div>
+        <div class="rc-title-block">
+          <div class="rc-animal-name">${a.animal_name}</div>
+          <div class="rc-meta">${spText} · ${a.sex} · ${a.actual_weight ?? "??"} กก.</div>
+        </div>
+        <span class="rec-status-pill">🟣 พักฟื้น</span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="rc-tabs">
+        <button class="rc-tab${activeTab === "info"   ? " active" : ""}" data-tab="info"   onclick="switchRecTab(this,'${a.id}')">📋 ข้อมูล</button>
+        <button class="rc-tab${activeTab === "vitals" ? " active" : ""}" data-tab="vitals" onclick="switchRecTab(this,'${a.id}')">🩺 Vitals</button>
+      </div>
+
+      <!-- Panel: Info -->
+      <div class="rc-panel${activeTab === "info" ? " active" : ""}" data-panel="info-${a.id}">
+        <div class="info-chips">
+          <div class="info-chip"><span class="ic-label">👤</span><span class="ic-val">${ownerName}</span></div>
+          <div class="info-chip"><span class="ic-label">⚖️</span><span class="ic-val">${a.actual_weight ?? "–"} กก.</span></div>
+          <div class="info-chip"><span class="ic-label">Vitals</span><span class="ic-val">${vitals.length} รายการ</span></div>
         </div>
       </div>
-      <div class="card-footer">
+
+      <!-- Panel: Vitals -->
+      <div class="rc-panel${activeTab === "vitals" ? " active" : ""}" data-panel="vitals-${a.id}">
+        <!-- Input row -->
+        <div class="vital-input-grid" id="form-${a.id}">
+          <div class="field-group v-time-cell">
+            <span class="field-label">เวลา</span>
+            <input class="f-input v-time" type="time" value="${now}">
+          </div>
+          <div class="field-group">
+            <span class="field-label">HR</span>
+            <input class="f-input v-hr" type="number" placeholder="HR">
+          </div>
+          <div class="field-group">
+            <span class="field-label">RR</span>
+            <input class="f-input v-rr" type="number" placeholder="RR">
+          </div>
+          <div class="field-group">
+            <span class="field-label">Temp</span>
+            <input class="f-input v-temp" type="number" placeholder="°C">
+          </div>
+          <div class="field-group">
+            <span class="field-label">SpO2%</span>
+            <input class="f-input v-spo2" type="number" placeholder="%">
+          </div>
+          <div class="field-group v-btn-cell" style="justify-content:flex-end;">
+            <span class="field-label" style="opacity:0">a</span>
+            <button class="btn btn-add-vital" onclick="saveVital('${a.id}')">➕ บันทึก</button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="vital-table-wrap">
+          <table class="vital-table">
+            <thead>
+              <tr>
+                <th>เวลา</th><th>HR</th><th>RR</th><th>Temp °C</th><th>SpO2</th>
+              </tr>
+            </thead>
+            <tbody>${vitalRows}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="rc-footer">
         <button class="btn btn-rx" onclick="location.href='rx.html?animal_id=${a.id}'">💊 สั่งยาเพิ่มเติม</button>
-        <button class="btn btn-close" onclick="closeRecoveryJob('${a.id}')">✅ ฟื้นแล้ว (ปิด Job)</button>
+        <button class="btn btn-close-job" onclick="closeRecoveryJob('${a.id}')">✅ ฟื้นแล้ว / ปิด Job</button>
       </div>
     `;
+
     grid.appendChild(card);
-    
-    // Set default time to now for inputs
-    const now = new Date();
-    const timeString = now.toTimeString().substring(0,5);
-    document.querySelector(`#form-${a.id} .v-time`).value = timeString;
   });
 }
 
-window.saveVital = async function(animalId) {
-  const form = document.querySelector(`#form-${animalId}`);
-  const timeVal = form.querySelector('.v-time').value;
-  const hrVal = form.querySelector('.v-hr').value;
-  const rrVal = form.querySelector('.v-rr').value;
-  const tempVal = form.querySelector('.v-temp').value;
-  const spo2Val = form.querySelector('.v-spo2').value;
-
-  if(!timeVal) return alert("กรุณาระบุเวลา");
-
-  const { error } = await supabase.from('vasd_vital_signs').insert({
-    animal_id: animalId,
-    time_recorded: timeVal,
-    hr: hrVal || null,
-    rr: rrVal || null,
-    temp: tempVal || null,
-    spo2: spo2Val || null
+/* ── Switch tab ── */
+window.switchRecTab = function(btn, animalId) {
+  const card = btn.closest(".rec-card");
+  const tab  = btn.dataset.tab;
+  card.querySelectorAll(".rc-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  card.querySelectorAll(".rc-panel").forEach(p => {
+    p.classList.toggle("active", p.dataset.panel === `${tab}-${animalId}`);
   });
-
-  if (error) { alert("บันทึกไม่สำเร็จ: " + error.message); } 
-  else { loadRecoveryAnimals(); }
 };
 
-window.closeRecoveryJob = async function(animalId) {
-  if(!confirm("ยืนยันว่าสัตว์ฟื้นตัวดีแล้ว และต้องการปิด Job พักฟื้น เพื่อส่งข้อมูลไปสรุปรายงาน?")) return;
-  
-  // เปลี่ยนสถานะเป็น ฟื้นแล้ว/รอรับกลับ (ready_to_go_home)
-  const { error } = await supabase
-    .from('vasd_queue')
-    .update({ status: 'ready_to_go_home', updated_at: new Date() })
-    .eq('animal_id', animalId);
+/* ── Save vital ── */
+window.saveVital = async function(animalId) {
+  const form    = document.getElementById(`form-${animalId}`);
+  const timeVal = form.querySelector(".v-time").value;
+  if (!timeVal) return alert("กรุณาระบุเวลา");
 
-  if (error) {
-    alert("อัปเดตสถานะไม่สำเร็จ: " + error.message);
-  } else {
-    alert("✅ ปิด Job พักฟื้นเรียบร้อยแล้ว ข้อมูลพร้อมสำหรับสรุปรายงาน");
+  const { error } = await supabase.from("vasd_vital_signs").insert({
+    animal_id:     animalId,
+    time_recorded: timeVal,
+    hr:    form.querySelector(".v-hr").value   || null,
+    rr:    form.querySelector(".v-rr").value   || null,
+    temp:  form.querySelector(".v-temp").value || null,
+    spo2:  form.querySelector(".v-spo2").value || null,
+  });
+
+  if (error) alert("บันทึกไม่สำเร็จ: " + error.message);
+  else {
+    ["v-hr","v-rr","v-temp","v-spo2"].forEach(cls => form.querySelector(`.${cls}`).value = "");
     loadRecoveryAnimals();
   }
 };
 
-// Real-time Update
+/* ── Close job ── */
+window.closeRecoveryJob = async function(animalId) {
+  if (!confirm("ยืนยันว่าสัตว์ฟื้นตัวดีแล้ว?\nระบบจะส่งข้อมูลไปยังขั้นตอนจัดยา/รับกลับ")) return;
+
+  const { error } = await supabase
+    .from("vasd_queue")
+    .update({ status: "ready_to_go_home", updated_at: new Date() })
+    .eq("animal_id", animalId);
+
+  if (error) alert("อัปเดตสถานะไม่สำเร็จ: " + error.message);
+  else { alert("✅ ปิด Job พักฟื้นเรียบร้อย"); loadRecoveryAnimals(); }
+};
+
+/* ── Real-time ── */
 supabase.channel("recovery-live")
-  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"}, loadRecoveryAnimals)
-  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_vital_signs"}, loadRecoveryAnimals)
+  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_queue" },       loadRecoveryAnimals)
+  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_vital_signs" }, loadRecoveryAnimals)
   .subscribe();
 
 loadRecoveryAnimals();
