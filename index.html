@@ -98,12 +98,14 @@ header {
   flex-shrink: 0;
 }
 .brand-logo {
-  width: 38px; height: 38px;
+  width: 48px; /* ปรับให้กว้างขึ้นเพื่อรองรับ 2 ไอคอน */
+  height: 38px;
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   box-shadow: 0 0 20px var(--teal-glow);
+  letter-spacing: -1px;
 }
 .brand-name {
   font-family: "Outfit", sans-serif;
@@ -351,7 +353,7 @@ footer {
 
 <header>
   <div class="brand">
-    <div class="brand-logo">🐾</div>
+    <div class="brand-logo">🚐🐾</div>
     <div>
       <div class="brand-name">RMUTTO – VASD</div>
       <div class="brand-sub">Veterinary Academic Service Division</div>
