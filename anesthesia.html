@@ -97,7 +97,6 @@ header {
 .wrap {
   position: relative; z-index: 1;
   max-width: 900px; margin: 0 auto;
-  /* เพิ่ม padding ล่าง เผื่อพื้นที่ให้ Bottom Nav */
   padding: 24px 16px 100px; 
   width: 100%;
 }
@@ -451,15 +450,15 @@ async function loadAnesthesiaQueue() {
           <div class="calc-box">
             <div class="calc-box-header">🧪 Pre-med (ไม่รวม ATB, NSAIDs)</div>
             <div class="calc-row">
-              <span class="calc-drug">Atropine 0.6 mg/ml <small style="color:var(--text-faint);">(0.04 mg/kg)</small></span>
+              <span class="calc-drug">Atropine 1 mg/ml <small style="color:var(--text-faint);">(0.04 mg/kg)</small></span>
               <span class="calc-dose pending" id="calc-atro-${a.id}">รอน้ำหนัก</span>
             </div>
             <div class="calc-row">
-              <span class="calc-drug">Xylazine 2% <small style="color:var(--text-faint);">(1 mg/kg)</small></span>
+              <span class="calc-drug">Xylazine 20 mg/ml <small style="color:var(--text-faint);">(1 mg/kg)</small></span>
               <span class="calc-dose pending" id="calc-xyla-${a.id}">รอน้ำหนัก</span>
             </div>
             <div class="calc-row">
-              <span class="calc-drug">Zoletil 50 mg/ml <small style="color:var(--text-faint);">(5 mg/kg)</small></span>
+              <span class="calc-drug">Zoletil 100 mg/ml <small style="color:var(--text-faint);">(5 mg/kg)</small></span>
               <span class="calc-dose pending" id="calc-zole-${a.id}">รอน้ำหนัก</span>
             </div>
           </div>
@@ -501,9 +500,10 @@ window.calculateDose = function(animalId, weightStr) {
     return;
   }
 
-  setVal(`calc-atro-${animalId}`, `${((w * 0.04) / 0.6).toFixed(2)} ml`, false);
+  // ปรับแก้ตัวหารตามความเข้มข้นของยาใหม่
+  setVal(`calc-atro-${animalId}`, `${((w * 0.04) / 1).toFixed(2)} ml`, false);
   setVal(`calc-xyla-${animalId}`, `${((w * 1) / 20).toFixed(2)} ml`, false);
-  setVal(`calc-zole-${animalId}`, `${((w * 5) / 50).toFixed(2)} ml`, false);
+  setVal(`calc-zole-${animalId}`, `${((w * 5) / 100).toFixed(2)} ml`, false);
 };
 
 /* ── Send to surgery ── */
