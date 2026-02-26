@@ -288,6 +288,7 @@ header {
 .nb-surgery  { background: rgba(239,68,68,0.2);  color: var(--c-surgery);  border: 1px solid rgba(239,68,68,0.4); }
 .nb-recovery { background: rgba(139,92,246,0.2); color: var(--c-recovery); border: 1px solid rgba(139,92,246,0.4); }
 .nb-ready    { background: rgba(59,130,246,0.2);  color: var(--c-ready);   border: 1px solid rgba(59,130,246,0.4); }
+.nb-total    { background: rgba(148,163,184,0.2); color: var(--c-total);   border: 1px solid rgba(148,163,184,0.4); }
 
 /* ═══════════════════════════════════════════
    MOBILE BOTTOM NAV (≤ 640px)
@@ -443,6 +444,7 @@ footer {
 
   <div class="menu-grid">
     <a class="menu-card" href="registration.html">
+      <div class="notif-badge nb-total" id="badge-total-menu"></div>
       <span class="card-emoji">📝</span>
       <div class="card-title">ลงทะเบียน</div>
       <div class="card-desc">บันทึกข้อมูลสัตว์และเจ้าของ</div>
@@ -553,7 +555,6 @@ window.login = function () {
   const role = roleSelect.value.trim();
   if (!name || !role) { alert("กรุณาใส่ชื่อและเลือกบทบาท"); return; }
   
-  // ตรวจสอบรหัสผ่านสำหรับบทบาท ผู้ดูแลระบบ
   if (role === "ผู้ดูแลระบบ" && pwdInput.value !== "2500") { 
     alert("รหัสผ่านผู้ดูแลระบบไม่ถูกต้อง"); 
     return; 
@@ -591,6 +592,9 @@ async function loadSummary() {
   const surgery  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","surgery")).count || 0;
   const recovery = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","recovery")).count || 0;
   const ready    = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home")).count || 0;
+  
+  // นับจำนวนสัตว์ทั้งหมด
+  const total = (await supabase.from("vasd_animal").select("*",{count:"exact",head:true})).count || 0;
 
   const setBadge = (id, count, label) => {
     const el = document.getElementById(id);
@@ -600,6 +604,7 @@ async function loadSummary() {
     }
   };
   
+  setBadge("badge-total-menu",    total,    "เคส");
   setBadge("badge-anes-menu",     waiting,  "รอคิว");
   setBadge("badge-surgery-menu",  surgery,  "กำลังผ่า");
   setBadge("badge-recovery-menu", recovery, "พักฟื้น");
@@ -614,20 +619,15 @@ function playAlarmSound() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const ctx = new AudioContext();
-    
-    if (ctx.state === 'suspended') {
-      ctx.resume();
-    }
+    if (ctx.state === 'suspended') ctx.resume();
     
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
     osc.connect(gain);
     gain.connect(ctx.destination);
     
     osc.type = 'sawtooth';
     const now = ctx.currentTime;
-    
     osc.frequency.setValueAtTime(400, now);
     osc.frequency.linearRampToValueAtTime(800, now + 0.5);
     osc.frequency.linearRampToValueAtTime(400, now + 1.0);
@@ -637,25 +637,18 @@ function playAlarmSound() {
     gain.gain.setValueAtTime(0.5, now);
     osc.start(now);
     osc.stop(now + 2.0);
-  } catch (err) {
-    console.log("Audio not supported", err);
-  }
+  } catch (err) { console.log("Audio not supported", err); }
 }
 
-const dashboardChannel = supabase.channel('dashboard-live', {
-  config: {
-    broadcast: { self: true },
-  },
-});
+const dashboardChannel = supabase.channel('dashboard-live', { config: { broadcast: { self: true } } });
 
 dashboardChannel
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
   .on('broadcast', { event: 'emergency_call' }, (payload) => {
     const myRole = (localStorage.getItem("vasd_role") || "").trim();
-    
     if (["ผู้ดูแลระบบ", "อาจารย์", "สัตวแพทย์"].includes(myRole)) {
       playAlarmSound();
-      
       setTimeout(() => {
         alert(`🚨 สัญญาณเรียกฉุกเฉิน!\nจาก: ${payload.payload.sender} (${payload.payload.role})\nเวลา: ${payload.payload.time}`);
       }, 100);
@@ -673,19 +666,11 @@ window.triggerEmergencyCall = async function() {
     await dashboardChannel.send({
       type: 'broadcast',
       event: 'emergency_call',
-      payload: { 
-        sender: name, 
-        role: role, 
-        time: new Date().toLocaleTimeString('th-TH') 
-      }
+      payload: { sender: name, role: role, time: new Date().toLocaleTimeString('th-TH') }
     });
     alert("✅ ส่งสัญญาณเรียกเรียบร้อยแล้วครับ");
-  } catch (error) {
-    alert("❌ ไม่สามารถส่งสัญญาณได้: " + error.message);
-  }
+  } catch (error) { alert("❌ ไม่สามารถส่งสัญญาณได้: " + error.message); }
 };
-
 </script>
-
 </body>
 </html>
