@@ -4,62 +4,65 @@
 <meta charset="UTF-8" />
 <title>Sticker Designer – RMUTTO VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Sarabun:wght@400;600&family=Prompt:wght@400;600&family=Kanit:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --navy: #0b1929; --navy-mid: #112240; --teal: #0ea5a0; --teal-light: #14c4bc;
   --surface: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1);
-  --text: #e2e8f0; --text-dim: #94a3b8; --radius: 12px;
+  --text: #e2e8f0; --text-dim: #94a3b8; --radius: 12px; --teal-glow: rgba(14,165,160,0.3);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: "Sarabun", sans-serif; background: var(--navy); color: var(--text); padding-bottom: 100px; }
+body { font-family: "Sarabun", sans-serif; background: var(--navy); color: var(--text); padding-bottom: 40px; }
 
 header {
   padding: 12px 15px; display: flex; align-items: center; justify-content: space-between;
-  background: rgba(11,25,41,0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
+  background: rgba(11,25,41,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 1000;
 }
 .btn-back { width: 38px; height: 38px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; }
 .btn-print { padding: 8px 16px; background: var(--teal); border: none; border-radius: 10px; color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; }
 
-/* Preview Container for Mobile */
+/* Preview ชั้นบนสุด (Sticky Mobile) */
 .preview-section {
-  padding: 20px; background: rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;
-  position: sticky; top: 63px; z-index: 90; border-bottom: 1px solid var(--border); backdrop-filter: blur(5px);
+  padding: 20px; background: rgba(11,25,41,0.9); display: flex; justify-content: center; align-items: center;
+  position: sticky; top: 63px; z-index: 900; border-bottom: 2px solid var(--teal); backdrop-filter: blur(10px);
 }
 .sticker-wrapper { transform-origin: center; transition: 0.3s; }
 .sticker {
   width: 80mm; height: 50mm; background: #fff; position: relative; color: #000; overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: 2px;
+  box-shadow: 0 0 25px rgba(14,165,160,0.4); border-radius: 2px;
 }
-.line { position: absolute; white-space: pre-wrap; word-break: break-word; line-height: 1.2; font-family: 'Sarabun'; }
+.line { position: absolute; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
 
-.editor-section { padding: 20px; max-width: 500px; margin: 0 auto; }
+.editor-section { padding: 20px; max-width: 600px; margin: 0 auto; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-.label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; display: block; font-weight: 600; }
+.label { font-size: 11px; color: var(--teal-light); margin-bottom: 6px; display: block; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
 input, select {
   width: 100%; padding: 12px; background: var(--navy-mid); border: 1px solid var(--border);
-  border-radius: 10px; color: #fff; font-size: 15px; outline: none; margin-bottom: 10px;
+  border-radius: 10px; color: #fff; font-size: 14px; outline: none; margin-bottom: 8px;
 }
+input:focus { border-color: var(--teal); }
 
-.prop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .prop-3-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-.btn-add { width: 100%; padding: 14px; background: var(--surface); border: 1px dotted var(--teal); color: var(--teal-light); border-radius: 12px; font-weight: 600; cursor: pointer; margin-bottom: 20px; }
-.btn-save { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--teal), var(--teal-light)); border: none; color: #fff; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px var(--teal-glow); }
-.btn-del { padding: 6px 12px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 6px; font-size: 11px; }
+.btn-add { width: 100%; padding: 14px; background: var(--surface); border: 1px dotted var(--teal); color: var(--teal-light); border-radius: 12px; font-weight: 600; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
+.btn-add:hover { background: var(--teal-glow); }
+.btn-save { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--teal), var(--teal-light)); border: none; color: #fff; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px var(--teal-glow); position: sticky; bottom: 20px; z-index: 100; }
+.btn-del { padding: 6px 12px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-/* Scaling for small screens */
-@media (max-width: 400px) { .sticker-wrapper { transform: scale(0.85); } }
-@media (max-width: 350px) { .sticker-wrapper { transform: scale(0.75); } }
+/* Variables Tooltip */
+.var-box { background: rgba(14,165,160,0.1); border: 1px solid var(--teal-glow); border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 11px; line-height: 1.6; color: var(--text-dim); }
+code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 4px; margin-right: 4px; }
 
-/* Desktop Adjustment */
+@media (max-width: 400px) { .sticker-wrapper { transform: scale(0.8); } .preview-section { padding: 10px; } }
+
 @media (min-width: 900px) {
   body { display: flex; flex-direction: row; padding-bottom: 0; }
-  header { position: fixed; width: 100%; }
-  .preview-section { width: 60%; height: 100vh; position: fixed; right: 0; top: 0; padding-top: 80px; }
-  .editor-section { width: 40%; margin: 0; padding-top: 80px; height: 100vh; overflow-y: auto; }
+  .preview-section { width: 55%; height: 100vh; position: fixed; right: 0; top: 0; border-bottom: none; border-left: 1px solid var(--border); }
+  .editor-section { width: 45%; margin-left: 0; padding-top: 80px; height: 100vh; overflow-y: auto; padding-bottom: 100px; }
+  header { position: fixed; width: 45%; border-right: 1px solid var(--border); }
 }
 </style>
 </head>
@@ -67,8 +70,8 @@ input, select {
 
 <header>
   <a href="settings.html" class="btn-back">←</a>
-  <span style="font-family:'Outfit'; font-weight:700;">Designer</span>
-  <button class="btn-print" onclick="window.printTest()">Test Print</button>
+  <span style="font-family:'Outfit'; font-weight:700;">Designer Pro</span>
+  <button class="btn-print" onclick="window.printTest()">🖨️ ทดสอบพิมพ์</button>
 </header>
 
 <section class="preview-section">
@@ -79,17 +82,25 @@ input, select {
 
 <div class="editor-section">
   <div class="card">
-    <label class="label">TEMPLATE TYPE</label>
+    <label class="label">ชนิดของ Sticker</label>
     <select id="templateType" onchange="loadTemplate()">
-      <option value="queue">🏷 คิว (Queue)</option>
-      <option value="envelope">✉️ ฉลากยา (Envelope)</option>
-      <option value="cage">🔒 ติดกรง (Cage)</option>
+      <option value="queue">🏷 ฉลากคิว (Queue)</option>
+      <option value="drug_envelope">✉️ ฉลากยา (Drug Envelope)</option>
+      <option value="drug_bag">💊 ฉลากถุงยา (Drug Bag)</option>
+      <option value="cage">🔒 ฉลากติดกรง (Cage)</option>
+      <option value="vaccine">📒 ฉลากวัคซีน (Vaccine)</option>
+      <option value="microchip">💳 ฉลากฝังไมโครชิฟ (Microchip)</option>
     </select>
+  </div>
+
+  <div class="var-box">
+    <strong>ตัวแปรที่ใช้ได้:</strong><br>
+    <code>{{queue_number}}</code> <code>{{animal_name}}</code> <code>{{owner_name}}</code> <code>{{drug_name}}</code> <code>{{dose}}</code> <code>{{species}}</code> <code>{{todayDate}}</code> <code>{{next7days}}</code>
   </div>
 
   <div id="lineEditor"></div>
   
-  <button class="btn-add" onclick="addLine()">+ เพิ่มบรรทัด</button>
+  <button class="btn-add" onclick="addLine()">+ เพิ่มบรรทัดใหม่</button>
   <button class="btn-save" onclick="saveTemplate()">💾 บันทึกรูปแบบนี้</button>
 </div>
 
@@ -97,16 +108,41 @@ input, select {
 import { supabase } from "./js/supabase.js";
 let currentConfig = [];
 
+// ฟังก์ชันจัดการวันที่
+const getDates = () => {
+  const now = new Date();
+  const next7 = new Date(); next7.setDate(now.getDate() + 7);
+  const fmt = (d) => d.toLocaleDateString('th-TH', { day:'2-digit', month:'2-digit', year:'2-digit' });
+  return { today: fmt(now), next: fmt(next7) };
+};
+
 function renderPreview() {
   const box = document.getElementById("sticker");
+  const dates = getDates();
   box.innerHTML = "";
   currentConfig.forEach(l => {
     const div = document.createElement("div");
     div.className = "line";
-    div.style.left = l.x + "px"; div.style.top = l.y + "px";
-    div.style.fontSize = l.size + "px"; div.style.textAlign = l.align || "left";
-    div.style.width = `calc(100% - ${l.x}px)`;
-    div.innerText = l.text.replace("{{queue_number}}","A01").replace("{{animal_name}}","น้องแมว");
+    div.style.left = l.x + "px"; 
+    div.style.top = l.y + "px";
+    div.style.fontSize = l.size + "px"; 
+    div.style.textAlign = l.align || "left";
+    div.style.fontFamily = l.font || "Sarabun";
+    div.style.fontWeight = l.bold ? "600" : "400";
+    div.style.width = l.align === 'center' ? "100%" : `calc(100% - ${l.x}px)`;
+    if(l.align === 'center') div.style.left = "0px";
+
+    let txt = l.text
+      .replace("{{queue_number}}","A001")
+      .replace("{{animal_name}}","น้องนำโชค")
+      .replace("{{owner_name}}","คุณสมชาย")
+      .replace("{{drug_name}}","Amoxicillin")
+      .replace("{{dose}}","1 เม็ด เช้า-เย็น")
+      .replace("{{species}}","สุนัข (Beagle)")
+      .replace("{{todayDate}}", dates.today)
+      .replace("{{next7days}}", dates.next);
+    
+    div.innerText = txt;
     box.appendChild(div);
   });
 }
@@ -118,41 +154,91 @@ function renderEditor() {
     const block = document.createElement("div");
     block.className = "card";
     block.innerHTML = `
-      <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-        <span style="font-size:12px; font-weight:700;">LINE ${i+1}</span>
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+        <span style="font-size:12px; font-weight:700; color:var(--teal-light)">LINE ${i+1}</span>
         <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
       </div>
-      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="ข้อความ...">
-      <div class="prop-row">
-        <select onchange="updateLine(${i},'align',this.value)">
-          <option value="left" ${l.align==='left'?'selected':''}>ชิดซ้าย</option>
-          <option value="center" ${l.align==='center'?'selected':''}>กลาง</option>
-        </select>
-        <div class="prop-3-row">
-          <input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)" placeholder="Size">
-          <input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)" placeholder="X">
-          <input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)" placeholder="Y">
+      
+      <label class="label">ข้อความ / ตัวแปร</label>
+      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="เช่น {{animal_name}}">
+      
+      <div class="prop-grid">
+        <div>
+          <label class="label">Font</label>
+          <select onchange="updateLine(${i},'font',this.value)">
+            <option value="Sarabun" ${l.font==='Sarabun'?'selected':''}>Sarabun (มาตรฐาน)</option>
+            <option value="Prompt" ${l.font==='Prompt'?'selected':''}>Prompt</option>
+            <option value="Kanit" ${l.font==='Kanit'?'selected':''}>Kanit</option>
+            <option value="Outfit" ${l.font==='Outfit'?'selected':''}>Outfit (EN)</option>
+          </select>
         </div>
+        <div>
+          <label class="label">การจัดวาง</label>
+          <select onchange="updateLine(${i},'align',this.value)">
+            <option value="left" ${l.align==='left'?'selected':''}>ชิดซ้าย</option>
+            <option value="center" ${l.align==='center'?'selected':''}>กึ่งกลาง</option>
+            <option value="right" ${l.align==='right'?'selected':''}>ชิดขวา</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="prop-3-row">
+        <div><label class="label">Size (px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
+        <div><label class="label">แกน X</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
+        <div><label class="label">แกน Y</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
+      </div>
+      
+      <div style="margin-top:5px; display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" style="width:16px; margin:0;" ${l.bold?'checked':''} onchange="updateLine(${i},'bold',this.checked)">
+        <span style="font-size:12px; color:var(--text-dim)">ตัวหนา (Bold)</span>
       </div>
     `;
     area.appendChild(block);
   });
 }
 
-window.updateLine = (i, k, v) => { if(['size','x','y'].includes(k)) v=parseInt(v)||0; currentConfig[i][k]=v; renderPreview(); };
+window.updateLine = (i, k, v) => { 
+  if(['size','x','y'].includes(k)) v=parseInt(v)||0; 
+  currentConfig[i][k]=v; 
+  renderPreview(); 
+};
+
 window.removeLine = (i) => { currentConfig.splice(i,1); renderEditor(); renderPreview(); };
-window.addLine = () => { currentConfig.push({text:"New Line", size:14, x:10, y:10, align:"left"}); renderEditor(); renderPreview(); };
+
+window.addLine = () => { 
+  currentConfig.push({text:"ข้อความใหม่", size:16, x:10, y:10, align:"left", font:"Sarabun", bold:false}); 
+  renderEditor(); renderPreview(); 
+};
 
 window.loadTemplate = async () => {
   const type = document.getElementById("templateType").value;
-  const { data } = await supabase.from("vasd_print_template").select("*").eq("template_type", type).single();
-  currentConfig = data?.config || []; renderEditor(); renderPreview();
+  const { data } = await supabase.from("vasd_print_template").select("*").eq("template_type", type).maybeSingle();
+  currentConfig = data?.config || []; 
+  renderEditor(); renderPreview();
 };
 
 window.saveTemplate = async () => {
   const type = document.getElementById("templateType").value;
-  await supabase.from("vasd_print_template").upsert({ template_type:type, config:currentConfig }, { onConflict:"template_type" });
-  alert("บันทึกสำเร็จ");
+  const { error } = await supabase.from("vasd_print_template").upsert({ 
+    template_type: type, 
+    config: currentConfig 
+  }, { onConflict: "template_type" });
+  
+  if(error) alert("ล้มเหลว: " + error.message);
+  else alert("💾 บันทึกรูปแบบสติกเกอร์สำเร็จ!");
+};
+
+window.printTest = () => {
+  const contents = document.getElementById("sticker").innerHTML;
+  const pw = window.open("","_blank","width=800,height=600");
+  pw.document.write(`<html><head><style>
+    body{margin:0; font-family:'Sarabun', sans-serif;}
+    .sticker{position:relative; width:80mm; height:50mm; background:#fff; overflow:hidden;}
+    .line{position:absolute; white-space:pre-wrap; word-break:break-word; color:#000;}
+    @page{size:80mm 50mm; margin:0;}
+  </style></head><body><div class="sticker">${contents}</div>
+  <script>window.onload=function(){window.print();window.close();};<\/script></body></html>`);
+  pw.document.close();
 };
 
 loadTemplate();
