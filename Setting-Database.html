@@ -2,13 +2,13 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<title>จัดการฐานข้อมูล – RMUTTO VASD</title>
+<title>Database Management – RMUTTO VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<link href__="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS (Match with index.html)
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
@@ -17,51 +17,37 @@
   --teal:       #0ea5a0;
   --teal-light: #14c4bc;
   --teal-glow:  rgba(14,165,160,0.25);
-  --amber:      #f59e0b;
-  --rose:       #ef4444;
-  --violet:     #8b5cf6;
-  --sky:        #3b82f6;
-  --emerald:    #10b981;
-  --slate:      #64748b;
-
+  --danger:     #ef4444;
   --surface:    rgba(255,255,255,0.04);
-  --surface-2:  rgba(255,255,255,0.07);
-  --surface-3:  rgba(255,255,255,0.10);
+  --surface-2:  rgba(255,255,255,0.08);
   --border:     rgba(255,255,255,0.08);
   --border-2:   rgba(255,255,255,0.14);
   --text:       #e2e8f0;
   --text-dim:   #94a3b8;
-  --text-faint: #4a5568;
-
-  --radius-xs:  6px;
-  --radius-sm:  10px;
-  --radius:     16px;
-  --radius-lg:  22px;
-
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  --radius:     20px;
+  --radius-sm:  12px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
 
 body {
   font-family: "Sarabun", "Outfit", sans-serif;
   background: var(--navy);
   color: var(--text);
   min-height: 100vh;
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding-bottom: 90px; /* Space for bottom nav */
 }
 
+/* Background Mesh Gradient */
 body::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
     radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 90% 20%, rgba(245,158,11,0.05) 0%, transparent 50%);
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%);
 }
 
 /* ═══════════════════════════════════════════
@@ -69,491 +55,226 @@ body::before {
 ═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 200;
-  background: rgba(11,25,41,0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(11,25,41,0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 10px 20px;
-  min-height: 64px;
-  display: flex; align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  padding: 15px 20px;
+  display: flex; align-items: center; gap: 15px;
 }
-.brand {
-  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-}
-.brand-logo {
-  width: 48px; height: 38px;
-  background: linear-gradient(135deg, var(--teal), var(--teal-light));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  box-shadow: 0 0 20px var(--teal-glow);
-}
-.brand-name {
-  font-family: "Outfit", sans-serif;
-  font-size: 15px; font-weight: 700;
-  color: #fff; line-height: 1; letter-spacing: -0.3px;
-}
-.brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
-
-.header-actions { display: flex; gap: 8px; align-items: center; }
-.btn-header {
-  padding: 8px 14px; font-size: 12px; font-weight: 600;
-  font-family: "Sarabun", sans-serif;
-  border: none; border-radius: var(--radius-sm); cursor: pointer;
-  display: inline-flex; align-items: center; gap: 6px;
-  transition: opacity 0.2s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn-header:active { opacity: 0.85; transform: scale(0.97); }
 .btn-back {
-  background: var(--surface-2); color: var(--text-dim);
-  border: 1px solid var(--border-2);
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  color: #fff; width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; text-decoration: none; transition: 0.2s;
 }
-.btn-back:hover { background: var(--surface); color: var(--text); }
+.btn-back:hover { background: var(--border-2); }
+.header-title { font-family: "Outfit", sans-serif; font-size: 18px; font-weight: 700; }
 
 /* ═══════════════════════════════════════════
    MAIN CONTENT
 ═══════════════════════════════════════════ */
-.wrap {
+.container {
   position: relative; z-index: 1;
-  max-width: 700px; margin: 0 auto;
-  padding: 28px 18px 100px;
-  width: 100%;
-}
-.page-header {
-  margin-bottom: 28px;
-  animation: slideUp 0.4s ease both;
-}
-.page-title {
-  font-family: "Outfit", sans-serif;
-  font-size: 26px; font-weight: 800;
-  color: #fff; letter-spacing: -0.5px;
-  margin-bottom: 6px;
-}
-.page-desc {
-  font-size: 13px; color: var(--text-dim); line-height: 1.6;
+  max-width: 800px; margin: 30px auto;
+  padding: 0 20px; width: 100%;
 }
 
-/* ═══════════════════════════════════════════
-   ACTION CARDS
-═══════════════════════════════════════════ */
-.action-card {
+.card {
   background: var(--surface);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  margin-bottom: 16px;
-  animation: slideUp 0.5s ease both;
-  transition: border-color 0.25s;
-}
-.action-card:hover { border-color: var(--border-2); }
-.action-card:nth-child(1) { animation-delay: 0.1s; }
-.action-card:nth-child(2) { animation-delay: 0.15s; }
-.action-card:nth-child(3) { animation-delay: 0.2s; }
-.action-card:nth-child(4) { animation-delay: 0.25s; }
-
-.action-header {
-  display: flex; align-items: center; gap: 14px; margin-bottom: 12px;
-}
-.action-icon {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
-}
-.icon-emerald { background: rgba(16,185,129,0.15); }
-.icon-sky     { background: rgba(59,130,246,0.15); }
-.icon-amber   { background: rgba(245,158,11,0.15); }
-.icon-rose    { background: rgba(239,68,68,0.15); }
-
-.action-title {
-  font-family: "Outfit", sans-serif;
-  font-size: 16px; font-weight: 700; color: #fff;
-  margin-bottom: 2px;
-}
-.action-desc {
-  font-size: 12px; color: var(--text-dim); line-height: 1.5;
+  border-radius: var(--radius);
+  padding: 25px;
+  margin-bottom: 25px;
 }
 
-.action-body {
-  margin-top: 16px;
+.section-label {
+  font-family: "Outfit", sans-serif; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px; color: var(--teal-light);
+  margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
 }
 
-.btn-action {
-  width: 100%;
-  padding: 12px; font-size: 14px; font-weight: 700;
-  font-family: "Sarabun", sans-serif;
-  border: none; border-radius: var(--radius-sm); cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  transition: opacity 0.2s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
+/* Statistics Grid */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
 }
-.btn-action:active { opacity: 0.85; transform: scale(0.97); }
-
-.btn-export {
-  background: linear-gradient(135deg, var(--teal), var(--teal-light));
-  color: #fff;
-  box-shadow: 0 2px 16px var(--teal-glow);
-}
-.btn-import {
-  background: linear-gradient(135deg, var(--sky), #60a5fa);
-  color: #fff;
-  box-shadow: 0 2px 16px rgba(59,130,246,0.3);
-}
-.btn-clear-today {
-  background: linear-gradient(135deg, var(--amber), #fbbf24);
-  color: #000;
-  box-shadow: 0 2px 16px rgba(245,158,11,0.3);
-}
-.btn-reset {
-  background: linear-gradient(135deg, var(--rose), #f87171);
-  color: #fff;
-  box-shadow: 0 2px 16px rgba(239,68,68,0.3);
-}
-
-/* hidden file input */
-.hidden-input { display: none; }
-
-/* status message */
-.status-msg {
-  margin-top: 12px;
-  padding: 10px 14px;
+.stat-item {
+  background: var(--navy-mid);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 13px; font-weight: 500;
-  display: none;
-  animation: slideUp 0.3s ease;
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 5px;
 }
-.status-success {
-  background: rgba(16,185,129,0.15); color: var(--emerald);
-  border: 1px solid rgba(16,185,129,0.3);
+.stat-val {
+  font-family: "Outfit", sans-serif; font-size: 28px; font-weight: 700; color: #fff;
 }
-.status-error {
-  background: rgba(239,68,68,0.15); color: var(--rose);
-  border: 1px solid rgba(239,68,68,0.3);
-}
+.stat-label { font-size: 12px; color: var(--text-dim); }
 
-/* Warning box */
-.warning-box {
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px; margin-bottom: 16px;
-  font-size: 12px; color: #fca5a5;
-  line-height: 1.6;
+/* Danger Zone */
+.danger-box {
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.03);
+  border-radius: var(--radius);
+  padding: 25px;
 }
-.warning-box strong { color: var(--rose); }
+.danger-title { color: var(--danger); font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.danger-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 20px; }
 
-/* Table info */
-.table-list {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+.btn-danger {
+  width: 100%; padding: 16px; background: rgba(239, 68, 68, 0.1);
+  color: var(--danger); border: 1px solid var(--danger);
+  border-radius: var(--radius-sm); cursor: pointer; font-weight: 700;
+  font-family: "Sarabun", sans-serif; transition: 0.3s;
 }
-.table-tag {
-  padding: 4px 10px; font-size: 11px; font-weight: 600;
-  background: var(--surface-2); border: 1px solid var(--border-2);
-  border-radius: 20px; color: var(--text-dim);
-}
+.btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
 
 /* ═══════════════════════════════════════════
-   BOTTOM NAV (Mobile)
+   BOTTOM NAVIGATION
 ═══════════════════════════════════════════ */
 .bottom-nav {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: rgba(11,25,41,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-2);
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-  grid-template-columns: repeat(5, 1fr);
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(11, 25, 41, 0.85); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
 }
 .nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 6px 4px;
-  font-size: 9px; color: var(--text-dim);
-  text-decoration: none; cursor: pointer;
-  transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-decoration: none; color: var(--text-dim); transition: 0.3s; flex: 1;
 }
-.nav-item:active { color: var(--teal); }
-.nav-icon { font-size: 21px; line-height: 1; }
-.nav-item.active { color: var(--teal); }
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 10px; font-weight: 600; font-family: "Sarabun", sans-serif; }
+.nav-item.active { color: var(--teal-light); }
 
-/* ═══════════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════════ */
-footer {
-  text-align: center;
-  font-size: 11px; color: var(--text-faint);
-  padding: 18px;
-  border-top: 1px solid var(--border);
-  position: relative; z-index: 1;
-}
-
-/* ═══════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════ */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 640px) {
-  header { padding: 8px 14px; }
-  .brand-sub { display: none; }
-  .brand-name { font-size: 14px; }
-  .wrap { padding: 20px 14px 80px; }
-  .page-title { font-size: 22px; }
-  .action-card { padding: 18px 16px; }
-  .bottom-nav { display: grid; }
-}
-
-@media (min-width: 900px) {
-  .wrap { padding: 36px 24px 60px; }
+@media (max-width: 500px) {
+  .stat-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">
-    <div class="brand-logo">🚐🐾</div>
-    <div>
-      <div class="brand-name">RMUTTO – VASD</div>
-      <div class="brand-sub">Veterinary Academic Service Division</div>
-    </div>
-  </div>
-  <div class="header-actions">
-    <button class="btn-header btn-back" onclick="location.href__='settings.html'">⬅️ กลับตั้งค่า</button>
-  </div>
+  <a href="settings.html" class="btn-back">←</a>
+  <div class="header-title">Database Management</div>
 </header>
 
-<div class="wrap">
-
-  <div class="page-header">
-    <div class="page-title">🗄️ จัดการฐานข้อมูล</div>
-    <div class="page-desc">สำรองข้อมูล, นำเข้าข้อมูล, ล้างคิววันนี้ หรือรีเซ็ตระบบทั้งหมด</div>
-  </div>
-
-  <div class="table-list">
-    <span class="table-tag">vasd_queue</span>
-    <span class="table-tag">vasd_animals</span>
-    <span class="table-tag">vasd_print_template</span>
-    <span class="table-tag">vasd_drug_catalog</span>
-  </div>
-
-  <!-- ── Export ── -->
-  <div class="action-card">
-    <div class="action-header">
-      <div class="action-icon icon-emerald">📤</div>
-      <div>
-        <div class="action-title">สำรองข้อมูล (Export)</div>
-        <div class="action-desc">ดาวน์โหลดข้อมูลทุกตารางเป็นไฟล์ JSON เพื่อเก็บสำรอง</div>
+<div class="container">
+  <section class="card">
+    <div class="section-label"><span>📊</span> System Overview</div>
+    <div class="stat-grid">
+      <div class="stat-item">
+        <div class="stat-val" id="count-animal">0</div>
+        <div class="stat-label">สัตว์ที่ลงทะเบียนทั้งหมด</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="count-queue">0</div>
+        <div class="stat-label">รายการในคิวปัจจุบัน</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="count-service">0</div>
+        <div class="stat-label">หัตถการที่บันทึกไว้</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="count-rx">0</div>
+        <div class="stat-label">รายการสั่งจ่ายยา</div>
       </div>
     </div>
-    <div class="action-body">
-      <button class="btn-action btn-export" onclick="exportData()">📥 ดาวน์โหลดข้อมูลสำรอง</button>
-      <div id="exportStatus" class="status-msg"></div>
-    </div>
-  </div>
+  </section>
 
-  <!-- ── Import ── -->
-  <div class="action-card">
-    <div class="action-header">
-      <div class="action-icon icon-sky">📥</div>
-      <div>
-        <div class="action-title">นำเข้าข้อมูล (Import)</div>
-        <div class="action-desc">อัปโหลดไฟล์ JSON ที่เคยสำรองไว้เพื่อกู้คืนข้อมูล</div>
-      </div>
-    </div>
-    <div class="action-body">
-      <input type="file" id="importFile" accept=".json" class="hidden-input" onchange="importData(event)">
-      <button class="btn-action btn-import" onclick="document.getElementById('importFile').click()">📂 เลือกไฟล์และนำเข้า</button>
-      <div id="importStatus" class="status-msg"></div>
-    </div>
+  <section class="card danger-box">
+    <div class="danger-title"><span>⚠️</span> DANGER ZONE</div>
+    <p class="danger-desc">
+      การล้างข้อมูลจะลบรายการสัตว์ (Animal), เจ้าของ (Owner), คิว (Queue), สัญญาณชีพ และใบสั่งยาทั้งหมดออกถาวร 
+      เหมาะสำหรับใช้ก่อนเริ่มโครงการค่ายอาสาครั้งใหม่ <br>
+      <i>* แม่แบบสติ๊กเกอร์ (Print Templates) จะไม่ถูกลบ</i>
+    </p>
+    
+    <button class="btn-danger" onclick="handleClearDatabase()">
+      🔥 ล้างข้อมูลสัตว์และคิวทั้งหมด
+    </button>
+  </section>
+  
+  <div style="text-align: center; color: var(--text-dim); font-size: 11px;">
+    Database Status: <span style="color: var(--teal-light);">Connected to Supabase</span>
   </div>
-
-  <!-- ── Clear Today ── -->
-  <div class="action-card">
-    <div class="action-header">
-      <div class="action-icon icon-amber">🧹</div>
-      <div>
-        <div class="action-title">ล้างคิววันนี้</div>
-        <div class="action-desc">ลบเฉพาะข้อมูลคิว (vasd_queue) ของวันนี้ เพื่อเริ่มต้นใหม่</div>
-      </div>
-    </div>
-    <div class="action-body">
-      <button class="btn-action btn-clear-today" onclick="clearToday()">🗑️ ล้างคิววันนี้</button>
-      <div id="clearTodayStatus" class="status-msg"></div>
-    </div>
-  </div>
-
-  <!-- ── Reset All ── -->
-  <div class="action-card">
-    <div class="action-header">
-      <div class="action-icon icon-rose">⚠️</div>
-      <div>
-        <div class="action-title">รีเซ็ตระบบทั้งหมด</div>
-        <div class="action-desc">ลบข้อมูลทั้งหมดออกจากระบบ (ไม่สามารถกู้คืนได้!)</div>
-      </div>
-    </div>
-    <div class="action-body">
-      <div class="warning-box">
-        <strong>⚠️ คำเตือน:</strong> การรีเซ็ตจะลบข้อมูลทุกอย่างในระบบอย่างถาวร รวมถึงคิว, ข้อมูลสัตว์, Template และรายการยา กรุณาสำรองข้อมูลก่อนดำเนินการ
-      </div>
-      <button class="btn-action btn-reset" onclick="resetAll()">💥 รีเซ็ตระบบทั้งหมด</button>
-      <div id="resetStatus" class="status-msg"></div>
-    </div>
-  </div>
-
 </div>
 
 <nav class="bottom-nav">
-  <a class="nav-item" href__="index.html">
-    <span class="nav-icon">🏠</span>หน้าหลัก
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">แดชบอร์ด</span>
   </a>
-  <a class="nav-item" href__="animals.html">
-    <span class="nav-icon">🐾</span>สัตว์
+  <a href="queue.html" class="nav-item">
+    <span class="nav-icon">⏳</span>
+    <span class="nav-label">จัดการคิว</span>
   </a>
-  <a class="nav-item" href__="anesthesia.html">
-    <span class="nav-icon">💉</span>วางยา
+  <a href="opd.html" class="nav-item">
+    <span class="nav-icon">🩺</span>
+    <span class="nav-label">ห้องตรวจ</span>
   </a>
-  <a class="nav-item" href__="surgery.html">
-    <span class="nav-icon">🛏️</span>ผ่าตัด
-  </a>
-  <a class="nav-item active" href__="settings.html">
-    <span class="nav-icon">⚙️</span>ตั้งค่า
+  <a href="settings.html" class="nav-item active">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">ตั้งค่า</span>
   </a>
 </nav>
-
-<footer>RMUTTO – VASD © 2026  ·  Veterinary Academic Service Division</footer>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-const TABLES = ["vasd_queue", "vasd_animals", "vasd_print_template", "vasd_drug_catalog"];
+// 1. ฟังก์ชันดึงสถิติข้อมูล
+async function updateStats() {
+  const tables = [
+    { table: 'vasd_animal', id: 'count-animal' },
+    { table: 'vasd_queue', id: 'count-queue' },
+    { table: 'vasd_service', id: 'count-service' },
+    { table: 'vasd_prescription', id: 'count-rx' }
+  ];
 
-function showStatus(id, message, isError = false) {
-  const el = document.getElementById(id);
-  el.textContent = message;
-  el.className = `status-msg ${isError ? "status-error" : "status-success"}`;
-  el.style.display = "block";
-  setTimeout(() => { el.style.display = "none"; }, 6000);
+  for (const item of tables) {
+    const { count, error } = await supabase
+      .from(item.table)
+      .select('*', { count: 'exact', head: true });
+    
+    if (!error) {
+      document.getElementById(item.id).innerText = count.toLocaleString();
+    }
+  }
 }
 
-/* ── Export ── */
-window.exportData = async function() {
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = "⏳ กำลังส่งออก...";
-
-  const backup = {};
-  for (const table of TABLES) {
-    const { data, error } = await supabase.from(table).select("*");
-    if (error) {
-      showStatus("exportStatus", `❌ ไม่สามารถอ่านตาราง ${table}: ${error.message}`, true);
-      btn.disabled = false;
-      btn.textContent = "📥 ดาวน์โหลดข้อมูลสำรอง";
-      return;
-    }
-    backup[table] = data;
-  }
-
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `vasd_backup_${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-
-  const totalRows = Object.values(backup).reduce((sum, rows) => sum + rows.length, 0);
-  showStatus("exportStatus", `✅ ส่งออกสำเร็จ — ${TABLES.length} ตาราง, ${totalRows} รายการ`);
-  btn.disabled = false;
-  btn.textContent = "📥 ดาวน์โหลดข้อมูลสำรอง";
-};
-
-/* ── Import ── */
-window.importData = async function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  if (!confirm("⚠️ การนำเข้าจะเพิ่มข้อมูลเข้าไปในระบบ (ไม่ลบข้อมูลเดิม)\nยืนยันจะดำเนินการ?")) {
-    event.target.value = "";
+// 2. ฟังก์ชันล้างข้อมูล (Dangerous)
+window.handleClearDatabase = async function() {
+  // ยืนยันขั้นตอนที่ 1
+  if (!confirm("🚨 คำเตือนสูงสุด: คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลสัตว์และคิวทั้งหมด?\nการกระทำนี้ไม่สามารถย้อนคืนได้!")) {
     return;
   }
 
-  const text = await file.text();
-  let backup;
+  // ยืนยันขั้นตอนที่ 2: รหัสผ่าน
+  const password = prompt("กรุณาป้อนรหัสผ่านผู้ดูแลระบบ (Admin Password) เพื่อยืนยัน:");
+  if (password !== '2500') {
+    alert("❌ รหัสผ่านไม่ถูกต้อง");
+    return;
+  }
+
   try {
-    backup = JSON.parse(text);
-  } catch {
-    showStatus("importStatus", "❌ ไฟล์ JSON ไม่ถูกต้อง", true);
-    event.target.value = "";
-    return;
-  }
+    // การลบ vasd_animal จะส่งผล Cascade Delete ไปยัง Queue, Service, Prescription, VitalSigns อัตโนมัติ (ตาม SQL Schema)
+    // เราลบสัตว์ที่อยู่ใน Event ทั้งหมด (ยกเว้น Template)
+    const { error } = await supabase
+      .from('vasd_animal')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
 
-  let imported = 0;
-  for (const table of TABLES) {
-    if (backup[table] && backup[table].length > 0) {
-      const { error } = await supabase.from(table).upsert(backup[table], { onConflict: "id" });
-      if (error) {
-        showStatus("importStatus", `❌ นำเข้า ${table} ผิดพลาด: ${error.message}`, true);
-        event.target.value = "";
-        return;
-      }
-      imported += backup[table].length;
-    }
-  }
+    if (error) throw error;
 
-  showStatus("importStatus", `✅ นำเข้าสำเร็จ — ${imported} รายการ`);
-  event.target.value = "";
-};
+    alert("✅ ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว ระบบกำลังเริ่มใหม่...");
+    window.location.reload();
 
-/* ── Clear Today ── */
-window.clearToday = async function() {
-  const today = new Date().toISOString().slice(0, 10);
-  if (!confirm(`⚠️ ลบข้อมูลคิวทั้งหมดของวันที่ ${today} ?\nข้อมูลที่ลบจะไม่สามารถกู้คืนได้`)) return;
-
-  const { error, count } = await supabase
-    .from("vasd_queue")
-    .delete({ count: "exact" })
-    .gte("created_at", today + "T00:00:00")
-    .lte("created_at", today + "T23:59:59");
-
-  if (error) {
-    showStatus("clearTodayStatus", `❌ เกิดข้อผิดพลาด: ${error.message}`, true);
-  } else {
-    showStatus("clearTodayStatus", `✅ ลบคิววันนี้เรียบร้อย — ${count || 0} รายการ`);
+  } catch (err) {
+    alert("❌ เกิดข้อผิดพลาด: " + err.message);
   }
 };
 
-/* ── Reset All ── */
-window.resetAll = async function() {
-  const confirmText = prompt("⚠️ พิมพ์ \"RESET\" เพื่อยืนยันการรีเซ็ตระบบทั้งหมด:");
-  if (confirmText !== "RESET") {
-    if (confirmText !== null) showStatus("resetStatus", "❌ ข้อความไม่ตรงกัน — ยกเลิกการรีเซ็ต", true);
-    return;
-  }
-
-  let deleted = 0;
-  for (const table of TABLES) {
-    const { error, count } = await supabase.from(table).delete({ count: "exact" }).neq("id", 0);
-    if (error) {
-      showStatus("resetStatus", `❌ ลบ ${table} ผิดพลาด: ${error.message}`, true);
-      return;
-    }
-    deleted += (count || 0);
-  }
-
-  showStatus("resetStatus", `✅ รีเซ็ตระบบเรียบร้อย — ลบ ${deleted} รายการจาก ${TABLES.length} ตาราง`);
-};
+// Initial Load
+updateStats();
 </script>
 </body>
 </html>
