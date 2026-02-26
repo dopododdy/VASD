@@ -2,337 +2,109 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<title>ตั้งค่าเครื่องพิมพ์ – RMUTTO VASD</title>
+<title>ตั้งค่าระบบ – RMUTTO VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* ═══════════════════════════════════════════
-   DESIGN TOKENS (Shared with index.html)
-═══════════════════════════════════════════ */
 :root {
-  --navy:       #0b1929;
-  --navy-mid:   #112240;
-  --navy-card:  #162d4a;
-  --teal:       #0ea5a0;
-  --teal-light: #14c4bc;
-  --teal-glow:  rgba(14,165,160,0.25);
-  --amber:      #f59e0b;
-  --surface:    rgba(255,255,255,0.04);
-  --surface-2:  rgba(255,255,255,0.08);
-  --border:     rgba(255,255,255,0.08);
-  --border-2:   rgba(255,255,255,0.14);
-  --text:       #e2e8f0;
-  --text-dim:   #94a3b8;
-  --radius-sm:  10px;
-  --radius:     16px;
-  --radius-lg:  22px;
+  --navy: #0b1929; --navy-mid: #112240; --navy-card: #162d4a;
+  --teal: #0ea5a0; --teal-light: #14c4bc; --teal-glow: rgba(14,165,160,0.25);
+  --surface: rgba(255,255,255,0.04); --surface-2: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.08); --text: #e2e8f0; --text-dim: #94a3b8;
+  --radius: 20px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: "Sarabun", "Outfit", sans-serif;
-  background: var(--navy);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  padding-bottom: 80px; /* กันโดน Bottom Nav บังบนมือถือ */
+  font-family: "Sarabun", sans-serif; background: var(--navy); color: var(--text);
+  min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+  padding-bottom: 90px;
 }
 
-/* Mesh background */
+/* Background Mesh */
 body::before {
-  content: "";
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%);
+  content: ""; position: fixed; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%);
 }
 
-/* ═══════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════ */
 header {
-  position: sticky; top: 0; z-index: 200;
-  background: rgba(11,25,41,0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 20px;
-  min-height: 64px;
-  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 200; padding: 20px;
+  background: rgba(11,25,41,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
 }
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand-logo {
-  width: 40px; height: 32px;
-  background: linear-gradient(135deg, var(--teal), var(--teal-light));
-  border-radius: 8px; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 15px var(--teal-glow);
-}
-.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+.brand-name { font-family: "Outfit", sans-serif; font-size: 20px; font-weight: 700; text-align: center; }
 
-.header-actions { display: flex; gap: 8px; }
-.btn-header {
-  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
-  border-radius: var(--radius-sm); border: none; cursor: pointer; transition: 0.2s;
-  display: flex; align-items: center; gap: 6px;
-}
-.btn-print { background: var(--teal); color: #fff; }
-
-/* ═══════════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════════ */
-.layout {
-  display: grid; grid-template-columns: 400px 1fr;
-  flex: 1; position: relative; z-index: 1;
+.menu-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px; padding: 25px; position: relative; z-index: 1; max-width: 1000px; margin: 0 auto;
 }
 
-.sidebar {
-  background: rgba(11, 25, 41, 0.4);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  height: calc(100vh - 64px);
+.menu-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 30px; text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px;
 }
-.sidebar-scroll { flex: 1; overflow-y: auto; padding: 20px; }
-
-.section-title {
-  font-family: "Outfit", sans-serif; font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px; color: var(--teal-light);
-  margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+.menu-card:hover {
+  background: var(--surface-2); border-color: var(--teal); transform: translateY(-5px);
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
 }
-
-/* Form Elements */
-.field-group { margin-bottom: 20px; }
-label { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; display: block; }
-
-input, select {
-  width: 100%; padding: 10px 12px; font-size: 13px; font-family: "Sarabun", sans-serif;
-  background: var(--navy-mid); border: 1px solid var(--border-2);
-  border-radius: var(--radius-sm); color: var(--text); outline: none;
+.menu-icon {
+  width: 60px; height: 60px; background: var(--navy-mid); border-radius: 15px;
+  display: flex; align-items: center; justify-content: center; font-size: 30px;
+  border: 1px solid var(--border); color: var(--teal-light);
 }
+.menu-card h3 { font-family: "Outfit", sans-serif; font-size: 18px; color: #fff; }
+.menu-card p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
 
-.line-block {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
-}
-.line-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.line-num { font-size: 13px; font-weight: 700; color: #fff; }
-
-.btn-del {
-  background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
-  padding: 4px 8px; font-size: 11px; border-radius: 6px; cursor: pointer;
-}
-
-.prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.prop-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
-
-.btn-main {
-  width: 100%; padding: 12px; font-weight: 700; border-radius: var(--radius-sm);
-  border: none; cursor: pointer; font-family: "Sarabun", sans-serif; transition: 0.2s;
-}
-.btn-save { background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: #fff; }
-.btn-add { background: var(--surface-2); color: var(--text); border: 1px solid var(--border-2); margin-top: 10px; }
-
-/* Preview Pane */
-.preview-pane {
-  background: rgba(0,0,0,0.2); display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding: 40px;
-}
-.sticker {
-  position: relative; width: 80mm; height: 50mm; background: #fff;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-radius: 2px;
-  overflow: hidden; color: #000;
-}
-.line { position: absolute; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
-
-/* ═══════════════════════════════════════════
-   BOTTOM NAVIGATION (Same as index.html)
-═══════════════════════════════════════════ */
+/* Bottom Nav */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(11, 25, 41, 0.8);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: space-around;
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(11, 25, 41, 0.85); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
 }
 .nav-item {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  text-decoration: none; color: var(--text-dim); transition: 0.3s; flex: 1;
+  text-decoration: none; color: var(--text-dim); flex: 1;
 }
-.nav-icon { font-size: 20px; }
-.nav-label { font-size: 10px; font-weight: 600; font-family: "Sarabun", sans-serif; }
 .nav-item.active { color: var(--teal-light); }
-.nav-item.active .nav-icon { transform: translateY(-2px); }
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { height: auto; border-right: none; }
-  .preview-pane { padding: 40px 10px; order: -1; }
-  .sticker { transform: scale(0.8); }
-  header .btn-home { display: none; } /* ซ่อนปุ่มโฮมบน Header เพราะมี Bottom Nav แล้ว */
-}
+.nav-label { font-size: 10px; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">
-    <div class="brand-logo">⚙️</div>
-    <div class="brand-name">Printer Settings</div>
-  </div>
-  <div class="header-actions">
-    <button class="btn-header btn-print" onclick="window.printTest()">🖨️ ทดสอบพิมพ์</button>
-  </div>
+  <div class="brand-name">Settings Center</div>
 </header>
 
-<div class="layout">
-  <aside class="sidebar">
-    <div class="sidebar-scroll">
-      <div class="field-group">
-        <label>ประเภทสติ๊กเกอร์</label>
-        <select id="templateType" onchange="loadTemplate()">
-          <option value="queue">🏷 คิว (Queue)</option>
-          <option value="cage">🔒 ติดกรง (Cage)</option>
-          <option value="envelope">✉️ ติดซองยา (Envelope)</option>
-          <option value="bag">💊 ติดถุงยา (Bag)</option>
-          <option value="vaccine">📒 ติดหน้าสมุดวัคซีน</option>
-          <option value="microchip">💳 ใบรับรองไมโครชิฟ</option>
-        </select>
-      </div>
+<div class="menu-grid">
+  <a href="Setting-Sticker.html" class="menu-card">
+    <div class="menu-icon">🏷️</div>
+    <h3>ตั้งค่า Stickers</h3>
+    <p>ปรับแต่งรูปแบบการพิมพ์คิว, ฉลากยา, และใบรับรองต่างๆ รองรับเครื่องพิมพ์ความร้อน 80mm</p>
+  </a>
 
-      <div class="section-title"><span>📝</span> รายละเอียดบรรทัด</div>
-      <div id="lineEditor"></div>
-      <button class="btn-main btn-add" onclick="addLine()">➕ เพิ่มบรรทัดใหม่</button>
+  <a href="Setting-Database.html" class="menu-card">
+    <div class="menu-icon">🗄️</div>
+    <h3>จัดการฐานข้อมูล</h3>
+    <p>ล้างข้อมูลสำหรับค่ายใหม่, ตรวจสอบจำนวน Record, และบำรุงรักษาระบบฐานข้อมูล</p>
+  </a>
 
-      <div style="margin-top: 24px; padding-bottom: 40px;">
-        <button class="btn-main btn-save" onclick="saveTemplate()">💾 บันทึกรูปแบบนี้</button>
-      </div>
-    </div>
-  </aside>
-
-  <main class="preview-pane">
-    <div class="sticker" id="sticker"></div>
-  </main>
+  <div class="menu-card" style="opacity: 0.5; cursor: not-allowed;">
+    <div class="menu-icon">👤</div>
+    <h3>จัดการผู้ใช้งาน</h3>
+    <p>Coming Soon: ระบบจัดการสิทธิ์การเข้าถึงสำหรับเจ้าหน้าที่และอาสาสมัคร</p>
+  </div>
 </div>
 
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <span class="nav-icon">📊</span>
-    <span class="nav-label">แดชบอร์ด</span>
-  </a>
-  <a href="queue.html" class="nav-item">
-    <span class="nav-icon">⏳</span>
-    <span class="nav-label">จัดการคิว</span>
-  </a>
-  <a href="opd.html" class="nav-item">
-    <span class="nav-icon">🩺</span>
-    <span class="nav-label">ห้องตรวจ</span>
-  </a>
-  <a href="settings.html" class="nav-item active">
-    <span class="nav-icon">⚙️</span>
-    <span class="nav-label">ตั้งค่า</span>
-  </a>
+  <a href="index.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-label">แดชบอร์ด</span></a>
+  <a href="queue.html" class="nav-item"><span class="nav-icon">⏳</span><span class="nav-label">จัดการคิว</span></a>
+  <a href="opd.html" class="nav-item"><span class="nav-icon">🩺</span><span class="nav-label">ห้องตรวจ</span></a>
+  <a href="settings.html" class="nav-item active"><span class="nav-icon">⚙️</span><span class="nav-label">ตั้งค่า</span></a>
 </nav>
 
-<script type="module">
-import { supabase } from "./js/supabase.js";
-
-let currentConfig = [];
-
-function getPreviewText(template) {
-  return template
-    .replace("{{queue_number}}","1").replace("{{animal_name}}","น้องถุงทอง")
-    .replace("{{species}}","แมว").replace("{{sex}}","ผู้")
-    .replace("{{owner_name}}","สมชาย ใจดี").replace("{{phone}}","081-234-5678")
-    .replace("{{drug_id}}","Amoxicillin").replace("{{total_pills}}","10");
-}
-
-function renderPreview() {
-  const box = document.getElementById("sticker");
-  box.innerHTML = "";
-  currentConfig.forEach(l => {
-    const div = document.createElement("div");
-    div.className = "line";
-    div.style.left = l.x + "px";
-    div.style.top  = l.y + "px";
-    div.style.fontSize   = l.size + "px";
-    div.style.fontWeight = l.weight || "normal";
-    div.style.fontFamily = l.font || "Sarabun";
-    div.style.textAlign  = l.align || "left";
-    div.style.width      = `calc(100% - ${l.x}px)`;
-    div.innerText = getPreviewText(l.text);
-    box.appendChild(div);
-  });
-}
-
-function renderEditor() {
-  const area = document.getElementById("lineEditor");
-  area.innerHTML = "";
-  currentConfig.forEach((l, i) => {
-    const block = document.createElement("div");
-    block.className = "line-block";
-    block.innerHTML = `
-      <div class="line-header">
-        <span class="line-num">บรรทัดที่ ${i+1}</span>
-        <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
-      </div>
-      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="ข้อความ...">
-      <div class="prop-grid">
-        <select onchange="updateLine(${i},'font',this.value)">
-          <option value="'Sarabun', sans-serif" ${l.font?.includes("Sarabun")?"selected":""}>Sarabun</option>
-          <option value="'Prompt', sans-serif" ${l.font?.includes("Prompt")?"selected":""}>Prompt</option>
-        </select>
-        <select onchange="updateLine(${i},'align',this.value)">
-          <option value="left" ${l.align==="left"?"selected":""}>ชิดซ้าย</option>
-          <option value="center" ${l.align==="center"?"selected":""}>กลาง</option>
-          <option value="right" ${l.align==="right"?"selected":""}>ชิดขวา</option>
-        </select>
-      </div>
-      <div class="prop-3">
-        <input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)">
-        <input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)">
-        <input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)">
-      </div>
-    `;
-    area.appendChild(block);
-  });
-}
-
-window.updateLine = (i, key, val) => {
-  if (["size","x","y"].includes(key)) val = parseInt(val)||0;
-  currentConfig[i][key] = val; renderPreview();
-};
-window.removeLine = (i) => { currentConfig.splice(i,1); renderEditor(); renderPreview(); };
-window.addLine = () => { currentConfig.push({ text:"ข้อความ", size:14, x:10, y:10 }); renderEditor(); renderPreview(); };
-
-window.loadTemplate = async () => {
-  const type = document.getElementById("templateType").value;
-  const { data } = await supabase.from("vasd_print_template").select("*").eq("template_type", type).single();
-  currentConfig = data?.config || [];
-  renderEditor(); renderPreview();
-};
-
-window.saveTemplate = async () => {
-  const type = document.getElementById("templateType").value;
-  const { error } = await supabase.from("vasd_print_template").upsert({ template_type:type, config:currentConfig },{ onConflict:"template_type" });
-  if (error) alert("❌ " + error.message);
-  else alert("✅ บันทึกสำเร็จ");
-};
-
-window.printTest = () => {
-  const contents = document.getElementById("sticker").innerHTML;
-  const pw = window.open("","_blank","width=800,height=600");
-  pw.document.write(`<html><head><style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;color:#000}@page{size:80mm 50mm;margin:0}</style></head><body><div class="sticker">${contents}</div><script>window.onload=function(){setTimeout(()=>{window.print();window.close();},500);};<\/script></body></html>`);
-  pw.document.close();
-};
-
-loadTemplate();
-</script>
 </body>
 </html>
