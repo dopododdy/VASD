@@ -8,11 +8,11 @@
 <style>
 :root {
   --navy: #0b1929; --navy-mid: #112240; --teal: #0ea5a0; --danger: #ef4444;
-  --surface: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1); --text: #e2e8f0;
+  --surface: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1); --text: #e2e8f0; --text-dim: #94a3b8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: "Sarabun", sans-serif; background: var(--navy); color: var(--text); padding-bottom: 40px; }
-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: rgba(11,25,41,0.8); backdrop-filter: blur(10px); sticky; top: 0; }
+body { font-family: "Sarabun", sans-serif; background: var(--navy); color: var(--text); padding-bottom: 100px; }
+header { padding: 15px; display: flex; align-items: center; gap: 15px; background: rgba(11,25,41,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;}
 .btn-back { width: 40px; height: 40px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; }
 
 .container { padding: 20px; max-width: 600px; margin: 0 auto; }
@@ -20,34 +20,56 @@ header { padding: 15px; display: flex; align-items: center; gap: 15px; backgroun
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .stat-item { background: var(--navy-mid); padding: 15px; border-radius: 15px; border: 1px solid var(--border); text-align: center; }
 .stat-val { font-family: "Outfit", sans-serif; font-size: 26px; font-weight: 700; color: var(--teal); }
-.stat-label { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.stat-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 
 .danger-zone { border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); }
 .btn-clear { width: 100%; padding: 18px; background: var(--danger); border: none; color: #fff; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(11, 25, 41, 0.9); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+}
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: var(--text-dim); flex: 1; }
+.nav-item.active { color: var(--teal-light); }
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 10px; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <header>
   <a href="settings.html" class="btn-back">←</a>
-  <h2 style="font-family:'Outfit'; font-size:18px;">Database</h2>
+  <h2 style="font-family:'Outfit'; font-size:18px;">Database Management</h2>
 </header>
 
 <div class="container">
   <div class="card">
-    <h3 style="margin-bottom:15px; font-size:16px;">📊 ข้อมูลปัจจุบัน</h3>
+    <h3 style="margin-bottom:15px; font-size:16px;">📊 สรุปข้อมูลล่าสุด</h3>
     <div class="stat-grid">
       <div class="stat-item"><div class="stat-val" id="c-animal">0</div><div class="stat-label">สัตว์ทั้งหมด</div></div>
-      <div class="stat-item"><div class="stat-val" id="c-queue">0</div><div class="stat-label">รายการคิว</div></div>
+      <div class="stat-item"><div class="stat-val" id="c-queue">0</div><div class="stat-label">ในคิวปัจจุบัน</div></div>
     </div>
   </div>
 
   <div class="card danger-zone">
     <h3 style="color:var(--danger); font-size:16px;">⚠️ Danger Zone</h3>
-    <p style="font-size:12px; color:#94a3b8; margin-top:8px; line-height:1.5;">การล้างข้อมูลจะลบรายการสัตว์และคิวทั้งหมดถาวรเพื่อเริ่มรอบใหม่ (รหัสยืนยัน: 2500)</p>
+    <p style="font-size:12px; color:#94a3b8; margin-top:8px; line-height:1.5;">การล้างข้อมูลจะลบรายการสัตว์และคิวทั้งหมดถาวรเพื่อเริ่มรอบใหม่ (ต้องยืนยันรหัส 2500)</p>
     <button class="btn-clear" onclick="clearDB()">🔥 ล้างข้อมูลสัตว์และคิว</button>
   </div>
 </div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">แดชบอร์ด</span>
+  </a>
+  <a href="settings.html" class="nav-item active">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">ตั้งค่า</span>
+  </a>
+</nav>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -58,10 +80,17 @@ async function loadStats() {
   document.getElementById('c-queue').innerText = q || 0;
 }
 window.clearDB = async () => {
-  if (prompt("ป้อนรหัสผ่านแอดมิน (2500):") !== "2500") return alert("รหัสผิด!");
-  if (!confirm("ยืนยันการลบข้อมูลทั้งหมด?")) return;
-  await supabase.from('vasd_animal').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  alert("ล้างข้อมูลแล้ว"); loadStats();
+  const pass = prompt("ป้อนรหัสผ่านแอดมิน (2500):");
+  if (pass !== "2500") return alert("รหัสผ่านไม่ถูกต้อง!");
+  if (!confirm("คุณกำลังจะลบข้อมูลสัตว์และคิวทั้งหมด ยืนยันหรือไม่?")) return;
+  
+  const { error } = await supabase.from('vasd_animal').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  
+  if (error) alert("เกิดข้อผิดพลาด: " + error.message);
+  else {
+    alert("ล้างข้อมูลเรียบร้อยแล้ว");
+    loadStats();
+  }
 };
 loadStats();
 </script>
