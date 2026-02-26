@@ -2,172 +2,432 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>สัตว์ทั้งหมด</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>สัตว์ทั้งหมด – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
 :root {
-  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
-  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
-  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --radius:14px; --radius-sm:8px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);}
+  --navy:         #0b1929;
+  --navy-mid:     #112240;
+  --teal:         #0ea5a0;
+  --teal-light:   #14c4bc;
+  --teal-glow:    rgba(14,165,160,0.25);
 
-/* HEADER */
-header{
-  background:var(--navy);padding:0 32px;display:flex;
-  justify-content:space-between;align-items:center;height:68px;
-  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
-}
-.header-brand{display:flex;align-items:center;gap:14px;}
-.brand-icon{
-  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
-  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
-}
-.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
-.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
+  --surface:      rgba(255,255,255,0.04);
+  --surface-2:    rgba(255,255,255,0.07);
+  --surface-3:    rgba(255,255,255,0.11);
+  --border:       rgba(255,255,255,0.08);
+  --border-2:     rgba(255,255,255,0.14);
+  --text:         #e2e8f0;
+  --text-dim:     #94a3b8;
+  --text-faint:   #4a5568;
 
-.btn-home{
-  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-  cursor:pointer;transition:background 0.2s;
-}
-.btn-home:hover{background:rgba(255,255,255,0.18);}
+  --radius-sm:    10px;
+  --radius:       16px;
+  --radius-lg:    22px;
 
-/* MAIN */
-.container{max-width:1400px;margin:0 auto;padding:28px 24px;}
-
-.page-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:24px;animation:fadeUp 0.4s ease both;
-}
-.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
-
-/* TABLE WRAPPER */
-.table-wrap{
-  background:var(--surface);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  overflow:hidden;animation:fadeUp 0.4s 0.05s ease both;
-}
-.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-
-table{width:100%;border-collapse:collapse;min-width:860px;}
-
-thead tr{background:linear-gradient(135deg,var(--navy),#1a2f47);}
-thead th{
-  padding:13px 12px;text-align:center;font-size:12px;font-weight:700;
-  letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.8);
-  border:none;white-space:nowrap;
+  /* status palette */
+  --s-wait:       #64748b;
+  --s-anes:       #3b82f6;
+  --s-surg:       #ef4444;
+  --s-rec:        #8b5cf6;
+  --s-ready:      #f59e0b;
+  --s-done:       #10b981;
+  --s-cancel:     #475569;
 }
 
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
-tbody td{padding:10px 12px;text-align:center;font-size:13px;border:none;vertical-align:middle;}
-tbody tr:last-child{border-bottom:none;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-/* STATUS ROW COLORS */
-.status-wait       {background:#ffffff;}
-.status-anesthesia {background:#ebf8ff;}
-.status-surgery    {background:#fff5f5;}
-.status-recovery   {background:#faf5ff;}
-.status-ready      {background:#fffff0;}
-.status-done       {background:#f0fff4;}
-.status-cancel     {background:#f7fafc;opacity:0.65;}
-
-/* INLINE INPUTS */
-tbody input, tbody select{
-  padding:6px 8px;font-size:13px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:6px;
-  width:100%;background:#fff;outline:none;
-  transition:border-color 0.2s;
+body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow-x: hidden;
 }
-tbody input:focus, tbody select:focus{border-color:var(--teal-light);}
-tbody input[readonly], tbody select:disabled{
-  border-color:transparent;background:transparent;cursor:default;
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14,165,160,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 85% 80%, rgba(99,102,241,0.07) 0%, transparent 60%);
 }
 
-/* BUTTONS */
-.btn{
-  padding:5px 10px;font-size:12px;font-weight:600;font-family:"Sarabun",sans-serif;
-  border:none;border-radius:6px;cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:4px;
-  margin:2px;white-space:nowrap;
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.btn:hover{opacity:0.85;transform:translateY(-1px);}
-.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-.btn-print {background:var(--navy);color:#fff;}
-.btn-edit  {background:var(--teal-light);color:#fff;}
-.btn-save  {background:var(--success);color:#fff;}
-.btn-cancel{background:var(--warning);color:#fff;}
-.btn-del   {background:var(--danger);color:#fff;}
-
-/* STATUS BADGE */
-.status-badge{
-  display:inline-block;padding:3px 10px;border-radius:20px;
-  font-size:11px;font-weight:600;
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 0 20px var(--teal-glow);
 }
-.badge-wait      {background:#edf2f7;color:#4a5568;}
-.badge-anesthesia{background:#bee3f8;color:#2b6cb0;}
-.badge-surgery   {background:#fed7d7;color:#c53030;}
-.badge-recovery  {background:#e9d8fd;color:#6b46c1;}
-.badge-ready     {background:#fefcbf;color:#744210;}
-.badge-done      {background:#c6f6d5;color:#276749;}
-.badge-cancel    {background:#edf2f7;color:#718096;}
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.3px;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.btn-home {
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-home:hover { background: var(--surface-3); color: var(--text); }
 
-/* FOOTER ACTIONS */
-.footer-actions{
-  padding:16px 20px;border-top:1px solid var(--border);
-  display:flex;justify-content:flex-end;background:#fafbfc;
+/* ═══════════════════════════════════════════
+   WRAP
+═══════════════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1000px; margin: 0 auto;
+  padding: 24px 16px 80px; width: 100%;
 }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+  animation: slideUp 0.4s ease both;
+}
+.page-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+}
+.page-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+/* ── Filter / Search bar ── */
+.toolbar {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 16px;
+  animation: slideUp 0.4s 0.05s ease both;
+}
+.search-box {
+  flex: 1; min-width: 180px;
+  padding: 10px 14px 10px 36px;
+  font-size: 13px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 10px center;
+}
+.search-box::placeholder { color: var(--text-faint); }
+.search-box:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
+
+.filter-select {
+  padding: 10px 12px; font-size: 12px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--text); outline: none; cursor: pointer;
+  -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+.filter-select:focus { border-color: var(--teal); }
+.filter-select option { background: var(--navy-mid); }
+
+/* ── Section Title ── */
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.section-count {
+  font-size: 10px; font-weight: 600; color: var(--text-dim);
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: 20px; padding: 2px 10px;
+}
+
+/* ═══════════════════════════════════════════
+   ANIMAL CARDS
+═══════════════════════════════════════════ */
+#animalList { display: flex; flex-direction: column; gap: 10px; }
+
+.animal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: slideUp 0.35s ease both;
+  transition: border-color 0.2s;
+}
+
+/* status left bar */
+.animal-card::before {
+  content: ""; display: block; height: 3px; width: 100%;
+}
+.ac-wait::before   { background: var(--s-wait); }
+.ac-anes::before   { background: var(--s-anes); }
+.ac-surg::before   { background: var(--s-surg); }
+.ac-rec::before    { background: var(--s-rec); }
+.ac-ready::before  { background: var(--s-ready); }
+.ac-done::before   { background: var(--s-done); }
+.ac-cancel::before { background: var(--s-cancel); }
+.ac-cancel { opacity: 0.6; }
+
+/* ── Card Top Row ── */
+.card-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.queue-badge {
+  font-family: "Outfit", sans-serif;
+  font-size: 13px; font-weight: 800;
+  min-width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+}
+.card-info { flex: 1; min-width: 0; }
+.animal-name {
+  font-size: 14px; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.animal-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; flex-shrink: 0;
+}
+.sp-wait   { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+.sp-anes   { background: rgba(59,130,246,0.2);  color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+.sp-surg   { background: rgba(239,68,68,0.2);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+.sp-rec    { background: rgba(139,92,246,0.2);  color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
+.sp-ready  { background: rgba(245,158,11,0.2);  color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+.sp-done   { background: rgba(16,185,129,0.2);  color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+.sp-cancel { background: rgba(71,85,105,0.2);   color: #64748b; border: 1px solid rgba(71,85,105,0.3); }
+
+.expand-icon {
+  font-size: 16px; color: var(--text-dim);
+  transition: transform 0.25s; flex-shrink: 0;
+}
+.animal-card.open .expand-icon { transform: rotate(180deg); }
+
+/* ── Expandable Detail ── */
+.card-detail {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  border-top: 0px solid var(--border);
+}
+.animal-card.open .card-detail {
+  max-height: 600px;
+  border-top: 1px solid var(--border);
+}
+
+.detail-body { padding: 14px; }
+
+/* edit fields grid */
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 80px;
+  gap: 10px; margin-bottom: 12px;
+}
+@media (max-width: 480px) {
+  .edit-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-faint); }
+
+.edit-input, .edit-select {
+  width: 100%; padding: 8px 10px;
+  font-size: 13px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.edit-input[readonly], .edit-select[disabled] {
+  border-color: transparent; background: transparent; cursor: default;
+  color: var(--text);
+}
+.edit-input:focus, .edit-select:focus {
+  border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
+}
+.edit-select option { background: var(--navy-mid); }
+
+/* owner row */
+.owner-row {
+  display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.owner-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 7px 12px;
+  font-size: 12px; color: var(--text-dim);
+}
+.owner-chip span { color: var(--text); font-weight: 600; }
+
+/* status change row */
+.status-row { margin-bottom: 14px; }
+.status-row .field-label { margin-bottom: 6px; display: block; }
+.status-select-full {
+  width: 100%; padding: 9px 12px;
+  font-size: 13px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--text); outline: none; cursor: pointer;
+  -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+.status-select-full[disabled] { border-color: transparent; background: transparent; cursor: default; }
+.status-select-full:focus { border-color: var(--teal); }
+.status-select-full option { background: var(--navy-mid); }
+
+/* action buttons */
+.action-row {
+  display: flex; gap: 7px; flex-wrap: wrap;
+  padding-top: 10px; border-top: 1px solid var(--border);
+}
+.btn {
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: opacity 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.95); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+.btn-print  { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-2); }
+.btn-print:hover { border-color: var(--teal); color: var(--teal-light); }
+.btn-edit   { background: rgba(14,165,160,0.15); color: var(--teal-light); border: 1px solid rgba(14,165,160,0.3); }
+.btn-edit:hover { background: rgba(14,165,160,0.25); }
+.btn-save   { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+.btn-save:hover { background: rgba(16,185,129,0.25); }
+.btn-cancel-status { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+.btn-cancel-status:hover { background: rgba(245,158,11,0.25); }
+.btn-del    { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+.btn-del:hover { background: rgba(239,68,68,0.25); }
+
+/* ── Empty & Loading ── */
+.empty-state {
+  text-align: center; padding: 60px 16px; color: var(--text-faint);
+  animation: slideUp 0.4s ease both;
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 14px; }
+.empty-state-text { font-size: 14px; }
+
+/* ── Danger zone ── */
+.danger-zone {
+  margin-top: 24px;
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+  animation: slideUp 0.4s 0.15s ease both;
+}
+.danger-label { font-size: 12px; color: rgba(239,68,68,0.7); font-weight: 600; }
+.danger-sub   { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+.btn-del-all {
+  padding: 9px 16px; font-size: 12px; font-weight: 700; font-family: "Sarabun", sans-serif;
+  background: rgba(239,68,68,0.15); color: #fca5a5;
+  border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-del-all:hover { background: rgba(239,68,68,0.25); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  header { height: 56px; padding: 0 14px; }
+  .brand-sub { display: none; }
+  .wrap { padding: 18px 12px 60px; }
+  .page-title { font-size: 18px; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-brand">
-    <div class="brand-icon">🐾</div>
-    <div class="brand-text">
-      <h1>สัตว์ทั้งหมดวันนี้</h1>
-      <span>RMUTTO – Veterinary Academic Service Division</span>
+  <div class="brand">
+    <div class="brand-logo">🐾</div>
+    <div>
+      <div class="brand-name">สัตว์ทั้งหมดวันนี้</div>
+      <div class="brand-sub">RMUTTO – Veterinary Academic Service Division</div>
     </div>
   </div>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
 
-<div class="container">
+<div class="wrap">
 
+  <!-- Page Header -->
   <div class="page-header">
-    <h2>รายชื่อสัตว์ประจำวันนี้</h2>
+    <div>
+      <div class="page-title">รายชื่อสัตว์ประจำวันนี้</div>
+      <div class="page-sub">แตะที่รายการเพื่อดูรายละเอียดและแก้ไข</div>
+    </div>
   </div>
 
-  <div class="table-wrap">
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th>คิว</th>
-            <th>ชื่อสัตว์</th>
-            <th>ชนิด</th>
-            <th>เพศ</th>
-            <th>น้ำหนัก (กก.)</th>
-            <th>สถานะ</th>
-            <th>เจ้าของ</th>
-            <th>โทร</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="animalTable"></tbody>
-      </table>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input class="search-box" id="searchBox" placeholder="ค้นหาชื่อสัตว์ / เจ้าของ..." oninput="filterCards()">
+    <select class="filter-select" id="filterStatus" onchange="filterCards()">
+      <option value="">ทุกสถานะ</option>
+      <option value="waiting">รอผ่าตัด</option>
+      <option value="anesthesia">กำลังวางยาสลบ</option>
+      <option value="surgery">กำลังผ่าตัด</option>
+      <option value="recovery">กำลังพักฟื้น</option>
+      <option value="ready_to_go_home">รอรับกลับ</option>
+      <option value="done">รับกลับแล้ว</option>
+      <option value="cancel">ยกเลิก</option>
+    </select>
+  </div>
+
+  <!-- Section title -->
+  <div class="section-title">
+    รายการสัตว์
+    <span class="section-count" id="countBadge">0 รายการ</span>
+    <span></span>
+  </div>
+
+  <!-- Animal List -->
+  <div id="animalList">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state-icon">🐾</div>
+      <div class="empty-state-text">กำลังโหลดข้อมูล...</div>
     </div>
-    <div class="footer-actions">
-      <button class="btn btn-del" onclick="deleteAll()">🗑 ลบข้อมูลทั้งหมดวันนี้</button>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="danger-zone">
+    <div>
+      <div class="danger-label">⚠️ ลบข้อมูลทั้งหมด</div>
+      <div class="danger-sub">ลบสัตว์ทุกตัวของวันนี้ (ต้องใช้รหัส admin)</div>
     </div>
+    <button class="btn-del-all" onclick="deleteAll()">🗑 ลบทั้งหมดวันนี้</button>
   </div>
 
 </div>
@@ -178,17 +438,19 @@ import { supabase } from "./js/supabase.js";
 const ADMIN_PASSWORD = "2500";
 
 const statusMap = {
-  waiting:          { text:"รอผ่าตัด",         cls:"status-wait",       badge:"badge-wait" },
-  anesthesia:       { text:"กำลังวางยาสลบ",    cls:"status-anesthesia", badge:"badge-anesthesia" },
-  surgery:          { text:"กำลังผ่าตัด",      cls:"status-surgery",    badge:"badge-surgery" },
-  recovery:         { text:"กำลังพักฟื้น",     cls:"status-recovery",   badge:"badge-recovery" },
-  ready_to_go_home: { text:"ฟื้นแล้ว/รอรับกลับ",cls:"status-ready",    badge:"badge-ready" },
-  done:             { text:"รับกลับแล้ว",       cls:"status-done",       badge:"badge-done" },
-  cancel:           { text:"ยกเลิก",            cls:"status-cancel",     badge:"badge-cancel" }
+  waiting:          { text: "รอผ่าตัด",          cls: "ac-wait",   pill: "sp-wait",   dot: "⚪" },
+  anesthesia:       { text: "กำลังวางยาสลบ",     cls: "ac-anes",   pill: "sp-anes",   dot: "🔵" },
+  surgery:          { text: "กำลังผ่าตัด",       cls: "ac-surg",   pill: "sp-surg",   dot: "🔴" },
+  recovery:         { text: "กำลังพักฟื้น",      cls: "ac-rec",    pill: "sp-rec",    dot: "🟣" },
+  ready_to_go_home: { text: "ฟื้นแล้ว/รอรับกลับ", cls: "ac-ready",  pill: "sp-ready",  dot: "🟡" },
+  done:             { text: "รับกลับแล้ว",        cls: "ac-done",   pill: "sp-done",   dot: "🟢" },
+  cancel:           { text: "ยกเลิก",             cls: "ac-cancel", pill: "sp-cancel", dot: "⬛" }
 };
 
+let allData = [];
+
 async function loadAnimals() {
-  const { data:eventId } = await supabase.rpc("get_today_event");
+  const { data: eventId } = await supabase.rpc("get_today_event");
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`id,queue_number,animal_name,species,sex,est_weight,vasd_owner(owner_name,phone),vasd_queue(status)`)
@@ -196,82 +458,157 @@ async function loadAnimals() {
     .order("queue_number");
 
   if (error) { console.error(error); return; }
+  allData = data || [];
+  renderCards(allData);
+}
 
-  const tbody = document.getElementById("animalTable");
-  tbody.innerHTML = "";
+function renderCards(data) {
+  const list = document.getElementById("animalList");
+  const empty = document.getElementById("emptyState");
+  document.getElementById("countBadge").textContent = `${data.length} รายการ`;
 
-  data.forEach(a => {
+  if (data.length === 0) {
+    list.innerHTML = "";
+    empty.style.display = "block";
+    empty.querySelector(".empty-state-text").textContent = "ไม่พบรายการสัตว์";
+    list.appendChild(empty);
+    return;
+  }
+  if (empty.parentNode === list) list.removeChild(empty);
+
+  /* keep open states */
+  const openIds = new Set([...list.querySelectorAll(".animal-card.open")].map(el => el.dataset.id));
+
+  list.innerHTML = "";
+  data.forEach((a, idx) => {
     const statusKey = a.vasd_queue?.status || "waiting";
     const s = statusMap[statusKey] || statusMap.waiting;
+    const speciesText = a.species === "ม" ? "🐱 แมว" : "🐶 สุนัข";
 
-    const tr = document.createElement("tr");
-    tr.dataset.id = a.id;
-    tr.className = s.cls;
+    const card = document.createElement("div");
+    card.className = `animal-card ${s.cls}`;
+    card.dataset.id = a.id;
+    card.dataset.status = statusKey;
+    card.dataset.name = (a.animal_name || "").toLowerCase();
+    card.dataset.owner = (a.vasd_owner?.owner_name || "").toLowerCase();
+    card.style.animationDelay = `${idx * 0.03}s`;
 
-    tr.innerHTML = `
-      <td><strong>#${a.queue_number}</strong></td>
-      <td><input class="f" value="${a.animal_name}" readonly></td>
-      <td>
-        <select class="f" disabled>
-          <option value="ม" ${a.species==="ม"?"selected":""}>แมว</option>
-          <option value="ส" ${a.species==="ส"?"selected":""}>สุนัข</option>
-        </select>
-      </td>
-      <td>
-        <select class="f" disabled>
-          <option value="เมีย" ${a.sex==="เมีย"?"selected":""}>เมีย</option>
-          <option value="ผู้"  ${a.sex==="ผู้" ?"selected":""}>ผู้</option>
-        </select>
-      </td>
-      <td><input class="f" type="number" value="${a.est_weight??""}" readonly style="max-width:80px;margin:auto;"></td>
-      <td>
-        <select class="status" disabled>
-          ${Object.entries(statusMap).map(([k,v])=>
-            `<option value="${k}" ${k===statusKey?"selected":""}>${v.text}</option>`
-          ).join("")}
-        </select>
-      </td>
-      <td>${a.vasd_owner?.owner_name??""}</td>
-      <td>${a.vasd_owner?.phone??""}</td>
-      <td>
-        <button class="btn btn-print" onclick="printQueue('${a.id}')">🖨</button>
-        <button class="btn btn-edit"  onclick="enableEdit(this)">✏️ แก้ไข</button>
-        <button class="btn btn-save"  onclick="saveRow(this)" disabled>💾</button>
-        <button class="btn btn-cancel" onclick="cancelRow('${a.id}')">🚫</button>
-        <button class="btn btn-del"   onclick="deleteRow('${a.id}')">🗑</button>
-      </td>
+    card.innerHTML = `
+      <!-- TOP ROW (tap to expand) -->
+      <div class="card-top" onclick="toggleCard(this.closest('.animal-card'))">
+        <div class="queue-badge">#${a.queue_number}</div>
+        <div class="card-info">
+          <div class="animal-name">${a.animal_name}</div>
+          <div class="animal-meta">${speciesText} · ${a.sex} · ${a.est_weight ?? "–"} กก.</div>
+        </div>
+        <span class="status-pill ${s.pill}">${s.dot} ${s.text}</span>
+        <span class="expand-icon">⌄</span>
+      </div>
+
+      <!-- DETAIL (expandable) -->
+      <div class="card-detail">
+        <div class="detail-body">
+
+          <!-- Owner -->
+          <div class="owner-row">
+            <div class="owner-chip">👤 เจ้าของ: <span>${a.vasd_owner?.owner_name ?? "–"}</span></div>
+            ${a.vasd_owner?.phone ? `<div class="owner-chip">📞 <a href="tel:${a.vasd_owner.phone}" style="color:var(--teal-light);text-decoration:none;">${a.vasd_owner.phone}</a></div>` : ""}
+          </div>
+
+          <!-- Edit Fields -->
+          <div class="edit-grid">
+            <div class="field-group">
+              <span class="field-label">ชื่อสัตว์</span>
+              <input class="edit-input f-name" value="${a.animal_name}" readonly>
+            </div>
+            <div class="field-group">
+              <span class="field-label">ชนิด</span>
+              <select class="edit-select f-species" disabled>
+                <option value="ม" ${a.species==="ม"?"selected":""}>🐱 แมว</option>
+                <option value="ส" ${a.species==="ส"?"selected":""}>🐶 สุนัข</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <span class="field-label">เพศ</span>
+              <select class="edit-select f-sex" disabled>
+                <option value="เมีย" ${a.sex==="เมีย"?"selected":""}>♀ เมีย</option>
+                <option value="ผู้"  ${a.sex==="ผู้" ?"selected":""}>♂ ผู้</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <span class="field-label">นน. (กก.)</span>
+              <input class="edit-input f-weight" type="number" value="${a.est_weight??""}" readonly min="0" step="0.1">
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="status-row">
+            <span class="field-label">สถานะ</span>
+            <select class="status-select-full f-status" disabled>
+              ${Object.entries(statusMap).map(([k,v]) =>
+                `<option value="${k}" ${k===statusKey?"selected":""}>${v.dot} ${v.text}</option>`
+              ).join("")}
+            </select>
+          </div>
+
+          <!-- Actions -->
+          <div class="action-row">
+            <button class="btn btn-print" onclick="printQueue('${a.id}')">🖨 พิมพ์คิว</button>
+            <button class="btn btn-edit"  onclick="enableEdit(this, '${a.id}')">✏️ แก้ไข</button>
+            <button class="btn btn-save"  onclick="saveRow(this, '${a.id}')" disabled>💾 บันทึก</button>
+            <button class="btn btn-cancel-status" onclick="cancelRow('${a.id}')">🚫 ยกเลิก</button>
+            <button class="btn btn-del"   onclick="deleteRow('${a.id}')">🗑 ลบ</button>
+          </div>
+
+        </div>
+      </div>
     `;
-    tbody.appendChild(tr);
+
+    if (openIds.has(a.id)) card.classList.add("open");
+    list.appendChild(card);
   });
 }
 
-loadAnimals();
+/* ── Toggle expand ── */
+window.toggleCard = function(card) {
+  card.classList.toggle("open");
+};
 
+/* ── Filter ── */
+window.filterCards = function() {
+  const q = document.getElementById("searchBox").value.toLowerCase();
+  const st = document.getElementById("filterStatus").value;
+  const filtered = allData.filter(a => {
+    const matchName  = (a.animal_name || "").toLowerCase().includes(q) || (a.vasd_owner?.owner_name || "").toLowerCase().includes(q);
+    const matchStatus = !st || (a.vasd_queue?.status || "waiting") === st;
+    return matchName && matchStatus;
+  });
+  renderCards(filtered);
+};
+
+/* ── Print ── */
 window.printQueue = async function(animalId) {
-  const { data:a } = await supabase
-    .from("vasd_animal")
+  const { data: a } = await supabase.from("vasd_animal")
     .select(`queue_number,animal_name,species,sex,vasd_owner(owner_name,phone),vasd_service(service_type)`)
     .eq("id", animalId).single();
   if (!a) return alert("ไม่พบข้อมูล");
 
-  const spcText  = a.species==="ส"?"สุนัข":"แมว";
-  const services = a.vasd_service?.map(s=>s.service_type).join(", ") || "-";
+  const spcText  = a.species === "ส" ? "สุนัข" : "แมว";
+  const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
   const phone    = a.vasd_owner?.phone || "ไม่ระบุ";
   const ownerName= a.vasd_owner?.owner_name || "";
 
-  const { data:tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
+  const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
   if (!tmplData?.config) return alert("⚠️ ยังไม่ได้บันทึก Template สติ๊กเกอร์คิว กรุณาตั้งค่าเครื่องพิมพ์ก่อน");
 
   let printContents = "";
   tmplData.config.forEach(l => {
     let text = l.text
-      .replace("{{queue_number}}",a.queue_number)
-      .replace("{{animal_name}}",a.animal_name)
-      .replace("{{species}}",spcText)
-      .replace("{{sex}}",a.sex)
-      .replace("{{owner_name}}",ownerName)
-      .replace("{{phone}}",phone)
-      .replace("{{services}}",services);
+      .replace("{{queue_number}}", a.queue_number)
+      .replace("{{animal_name}}", a.animal_name)
+      .replace("{{species}}", spcText).replace("{{sex}}", a.sex)
+      .replace("{{owner_name}}", ownerName).replace("{{phone}}", phone)
+      .replace("{{services}}", services);
     printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
   });
 
@@ -280,58 +617,71 @@ window.printQueue = async function(animalId) {
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;color:#000!important}@page{size:80mm 50mm;margin:0}</style>
     </head><body><div class="sticker">${printContents}</div>
-    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},200);});}<\/script></body></html>`);
+    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},200)})}<\/script></body></html>`);
   pw.document.close();
 };
 
-window.enableEdit = function(btn) {
+/* ── Enable Edit ── */
+window.enableEdit = function(btn, id) {
   const pass = prompt("กรอกรหัส admin");
   if (pass !== ADMIN_PASSWORD) return;
-  const tr = btn.closest("tr");
-  tr.querySelectorAll(".f,.status").forEach(el=>{ el.readOnly=false; el.disabled=false; });
-  tr.querySelector(".btn-save").disabled = false;
+  const card = btn.closest(".animal-card");
+  card.querySelectorAll(".f-name, .f-weight").forEach(el => el.readOnly = false);
+  card.querySelectorAll(".f-species, .f-sex, .f-status").forEach(el => el.disabled = false);
+  card.querySelector(".btn-save").disabled = false;
+  btn.disabled = true;
 };
 
-window.saveRow = async function(btn) {
-  const tr = btn.closest("tr"), id = tr.dataset.id;
-  const f  = tr.querySelectorAll(".f");
-  const status = tr.querySelector(".status").value;
-await supabase.from("vasd_animal").update({ 
-  animal_name: f[0].value, 
-  species: f[1].value, 
-  sex: f[2].value, 
-  est_weight: f[3].value, 
-  actual_weight: f[3].value // ✅ เพิ่มบรรทัดนี้เพื่อบังคับอัปเดตน้ำหนักจริง
-}).eq("id",id);
-  await supabase.from("vasd_queue").update({ status, updated_at:new Date() }).eq("animal_id",id);
+/* ── Save Row ── */
+window.saveRow = async function(btn, id) {
+  const card = btn.closest(".animal-card");
+  const name    = card.querySelector(".f-name").value;
+  const species = card.querySelector(".f-species").value;
+  const sex     = card.querySelector(".f-sex").value;
+  const weight  = card.querySelector(".f-weight").value;
+  const status  = card.querySelector(".f-status").value;
+
+  await supabase.from("vasd_animal").update({
+    animal_name: name, species, sex,
+    est_weight: weight, actual_weight: weight
+  }).eq("id", id);
+  await supabase.from("vasd_queue").update({ status, updated_at: new Date() }).eq("animal_id", id);
   loadAnimals();
 };
 
+/* ── Cancel Status ── */
 window.cancelRow = async function(id) {
-  await supabase.from("vasd_queue").update({ status:"cancel", updated_at:new Date() }).eq("animal_id",id);
+  if (!confirm("ต้องการยกเลิกสถานะสัตว์ตัวนี้?")) return;
+  await supabase.from("vasd_queue").update({ status: "cancel", updated_at: new Date() }).eq("animal_id", id);
   loadAnimals();
 };
 
+/* ── Delete Row ── */
 window.deleteRow = async function(id) {
   const pwd = prompt("กรอกรหัส admin เพื่อยืนยันการลบ");
   if (!pwd) return;
-  const { error } = await supabase.rpc("admin_delete_animal",{ p_animal_id:id, p_admin_password:pwd });
-  if (error) alert("❌ ลบไม่สำเร็จ"); else loadAnimals();
+  const { error } = await supabase.rpc("admin_delete_animal", { p_animal_id: id, p_admin_password: pwd });
+  if (error) alert("❌ ลบไม่สำเร็จ: " + error.message);
+  else loadAnimals();
 };
 
+/* ── Delete All ── */
 window.deleteAll = async function() {
   if (!confirm("⚠️ ต้องการลบสัตว์ทั้งหมดของวันนี้หรือไม่?")) return;
   const pwd = prompt("กรอกรหัส admin");
   if (!pwd) return;
-  const { error } = await supabase.rpc("admin_delete_all_today",{ p_admin_password:pwd });
+  const { error } = await supabase.rpc("admin_delete_all_today", { p_admin_password: pwd });
   if (error) alert("❌ ลบไม่สำเร็จ");
   else { alert("✅ ลบข้อมูลทั้งหมดแล้ว"); loadAnimals(); }
 };
 
-supabase.channel("vasd-live")
-  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_queue"},loadAnimals)
-  .on("postgres_changes",{event:"*",schema:"public",table:"vasd_animal"},loadAnimals)
+/* ── Real-time ── */
+supabase.channel("vasd-animals-live")
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadAnimals)
+  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_animal" }, loadAnimals)
   .subscribe();
+
+loadAnimals();
 </script>
 </body>
 </html>
