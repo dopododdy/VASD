@@ -448,4 +448,222 @@ footer {
 
     <a class="menu-card" href="anesthesia.html">
       <div class="notif-badge nb-waiting" id="badge-anes-menu"></div>
-      <span class="card-emoji">💉</span>
+      <span class="card-emoji">💉</span> <div class="card-title">วางยาสลบ</div>
+      <div class="card-desc">คำนวณยา · วางยา · Vitals</div>
+    </a>
+
+    <a class="menu-card" href="recovery.html">
+      <div class="notif-badge nb-recovery" id="badge-recovery-menu"></div>
+      <span class="card-emoji">❤️‍🩹</span> <div class="card-title">พักฟื้น</div>
+      <div class="card-desc">ติดตามการฟื้นตัวหลังผ่าตัด</div>
+    </a>
+
+    <a class="menu-card" href="rx.html">
+      <div class="notif-badge nb-ready" id="badge-rx-menu"></div>
+      <span class="card-emoji">💊</span>
+      <div class="card-title">โต๊ะจัดยา</div>
+      <div class="card-desc">จัดการและพิมพ์ใบสั่งยา</div>
+    </a>
+
+    <a class="menu-card" href="report.html">
+      <span class="card-emoji">📊</span>
+      <div class="card-title">รายงาน</div>
+      <div class="card-desc">สรุปข้อมูลและสถิติ</div>
+    </a>
+
+    <a class="menu-card" href="settings.html">
+      <span class="card-emoji">⚙️</span>
+      <div class="card-title">ตั้งค่า</div>
+      <div class="card-desc">ตั้งค่าเครื่องพิมพ์และกระดาษ</div>
+    </a>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item active" href="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item" href="anesthesia.html">
+    <span class="nav-icon">💉</span>วางยา </a>
+  <a class="nav-item" href="surgery.html">
+    <span class="nav-icon">🛏️</span>ผ่าตัด </a>
+  <a class="nav-item" href="recovery.html">
+    <span class="nav-icon">❤️‍🩹</span>พักฟื้น </a>
+</nav>
+
+<button class="fab" onclick="location.href='registration.html'" title="ลงทะเบียน">
+  ➕
+</button>
+
+<footer>RMUTTO – VASD © 2026  ·  Veterinary Academic Service Division</footer>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+/* ── ฟังก์ชันตรวจสอบและซ่อนปุ่ม CALL ── */
+function updateCallButtonVisibility() {
+  // ใช้ .trim() เพื่อลบช่องว่างที่อาจติดมา
+  const role = (localStorage.getItem("vasd_role") || "").trim();
+  const btn = document.getElementById("emergencyCallBtn");
+  if (!btn) return;
+
+  if (["admin", "อาจารย์", "สัตวแพทย์"].includes(role)) {
+    btn.style.display = "none";
+  } else {
+    btn.style.display = "flex";
+  }
+}
+
+/* ── Login Logic ── */
+const nameInput  = document.getElementById("userName");
+const roleSelect = document.getElementById("userRole");
+const pwdInput   = document.getElementById("adminPwd");
+const loginPanel = document.getElementById("loginPanel");
+const userInfo   = document.getElementById("userInfo");
+const showUser   = document.getElementById("showUser");
+
+roleSelect.onchange = () => {
+  pwdInput.style.display = roleSelect.value === "admin" ? "inline-block" : "none";
+};
+
+window.login = function () {
+  const name = nameInput.value.trim();
+  const role = roleSelect.value.trim(); // กันช่องว่างตอนล็อกอิน
+  if (!name || !role) { alert("กรุณาใส่ชื่อและเลือกบทบาท"); return; }
+  if (role === "admin" && pwdInput.value !== "2500") { alert("รหัสผ่าน admin ไม่ถูกต้อง"); return; }
+  
+  localStorage.setItem("vasd_user", name);
+  localStorage.setItem("vasd_role", role);
+  showUser.innerText = `${name} (${role})`;
+  
+  loginPanel.style.display = "none";
+  userInfo.style.display = "flex";
+  
+  updateCallButtonVisibility();
+};
+
+window.logout = function () { 
+  localStorage.clear(); 
+  location.reload(); 
+};
+
+/* ── Restore Session ── */
+const savedName = localStorage.getItem("vasd_user");
+const savedRole = localStorage.getItem("vasd_role");
+if (savedName && savedRole) {
+  showUser.innerText = `${savedName} (${savedRole})`;
+  loginPanel.style.display = "none";
+  userInfo.style.display = "flex";
+}
+
+updateCallButtonVisibility();
+
+/* ── Dashboard Badges ── */
+async function loadSummary() {
+  const waiting  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","waiting")).count || 0;
+  const surgery  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","surgery")).count || 0;
+  const recovery = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","recovery")).count || 0;
+  const ready    = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home")).count || 0;
+
+  const setBadge = (id, count, label) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.innerText = `${count} ${label}`;
+      el.style.display = count > 0 ? "block" : "none";
+    }
+  };
+  
+  setBadge("badge-anes-menu",     waiting,  "รอคิว");
+  setBadge("badge-surgery-menu",  surgery,  "กำลังผ่า");
+  setBadge("badge-recovery-menu", recovery, "พักฟื้น");
+  setBadge("badge-rx-menu",       ready,    "รอจัดยา");
+}
+
+loadSummary();
+
+/* ── Broadcast & Realtime Logic ── */
+
+function playAlarmSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContext();
+    
+    // สำคัญ: ปลุก AudioContext ให้ตื่นถ้าโดนเบราว์เซอร์พักการทำงานไว้
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.type = 'sawtooth';
+    const now = ctx.currentTime;
+    
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.linearRampToValueAtTime(800, now + 0.5);
+    osc.frequency.linearRampToValueAtTime(400, now + 1.0);
+    osc.frequency.linearRampToValueAtTime(800, now + 1.5);
+    osc.frequency.linearRampToValueAtTime(400, now + 2.0);
+    
+    gain.gain.setValueAtTime(0.5, now);
+    osc.start(now);
+    osc.stop(now + 2.0);
+  } catch (err) {
+    console.log("Audio not supported or user hasn't interacted yet", err);
+  }
+}
+
+const dashboardChannel = supabase.channel('dashboard-live', {
+  config: {
+    broadcast: { self: true },
+  },
+});
+
+dashboardChannel
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
+  .on('broadcast', { event: 'emergency_call' }, (payload) => {
+    // ใช้ .trim() ป้องกัน error จากช่องว่าง
+    const myRole = (localStorage.getItem("vasd_role") || "").trim();
+    
+    if (["admin", "อาจารย์", "สัตวแพทย์"].includes(myRole)) {
+      playAlarmSound();
+      
+      setTimeout(() => {
+        alert(`🚨 สัญญาณเรียกฉุกเฉิน!\nจาก: ${payload.payload.sender} (${payload.payload.role})\nเวลา: ${payload.payload.time}`);
+      }, 100);
+    }
+  })
+  .subscribe();
+
+window.triggerEmergencyCall = async function() {
+  const name = localStorage.getItem("vasd_user") || "ผู้ใช้งาน";
+  const role = localStorage.getItem("vasd_role") || "ไม่ได้ระบุ";
+
+  if (!confirm("🚨 ยืนยันการส่งสัญญาณเรียก สัตวแพทย์/อาจารย์/Admin ด่วน?")) return;
+
+  try {
+    await dashboardChannel.send({
+      type: 'broadcast',
+      event: 'emergency_call',
+      payload: { 
+        sender: name, 
+        role: role, 
+        time: new Date().toLocaleTimeString('th-TH') 
+      }
+    });
+    alert("✅ ส่งสัญญาณเรียกเรียบร้อยแล้วครับ");
+  } catch (error) {
+    alert("❌ ไม่สามารถส่งสัญญาณได้: " + error.message);
+  }
+};
+
+</script>
+
+</body>
+</html>
