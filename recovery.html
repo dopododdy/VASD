@@ -2,13 +2,13 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ห้องพักฟื้น – VASD</title>
+<title>หน่วยพักฟื้น – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════
-   TOKENS (คงเดิมตาม Design System ของคุณ)
+   TOKENS
 ═══════════════════════════════════════════ */
 :root {
   --navy:         #0b1929;
@@ -74,6 +74,7 @@ header {
   background: linear-gradient(135deg, var(--violet), #a78bfa);
   border-radius: 10px; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 20px var(--violet-glow);
+  font-size: 20px;
 }
 .brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
 .btn-home {
@@ -85,7 +86,7 @@ header {
 .wrap {
   position: relative; z-index: 1;
   max-width: 960px; margin: 0 auto;
-  padding: 24px 16px 60px; width: 100%;
+  padding: 24px 16px 100px; width: 100%; /* เพิ่ม padding bottom สำหรับ nav */
 }
 
 .section-title {
@@ -148,12 +149,12 @@ header {
 
 /* Vital Table Style */
 .vital-input-grid {
-  display: grid; grid-template-columns: 72px repeat(4, 1fr) auto;
+  display: grid; grid-template-columns: repeat(4, 1fr) auto;
   gap: 7px; margin-bottom: 12px;
 }
 @media (max-width: 480px) {
-  .vital-input-grid { grid-template-columns: repeat(3, 1fr); }
-  .v-time-cell, .v-btn-cell { grid-column: 1 / -1; }
+  .vital-input-grid { grid-template-columns: repeat(2, 1fr); }
+  .v-btn-cell { grid-column: 1 / -1; }
 }
 
 .field-group { display: flex; flex-direction: column; gap: 3px; }
@@ -183,6 +184,31 @@ header {
 .btn-rx { background: rgba(14,165,160,0.15); color: var(--teal-light); border: 1px solid rgba(14,165,160,0.3); }
 .btn-close-job { background: var(--emerald-soft); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); }
 
+/* ═══════════════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════════════ */
+.bottom-nav {
+  display: flex;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  justify-content: space-around;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 9px; color: var(--text-dim);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  flex: 1;
+}
+.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item.active { color: var(--teal-light); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
+
 @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
@@ -190,8 +216,8 @@ header {
 
 <header>
   <div class="brand">
-    <div class="brand-logo">🟣</div>
-    <div class="brand-name">VASD RECOVERY</div>
+    <div class="brand-logo">❤️‍🩹</div>
+    <div class="brand-name">หน่วยพักฟื้น</div>
   </div>
   <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
@@ -205,6 +231,24 @@ header {
     <div class="empty-state">กำลังโหลดข้อมูล...</div>
   </div>
 </div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item" href="anesthesia.html">
+    <span class="nav-icon">💉</span>วางยา
+  </a>
+  <a class="nav-item" href="surgery.html">
+    <span class="nav-icon">🛏️</span>ผ่าตัด
+  </a>
+  <a class="nav-item active" href="recovery.html">
+    <span class="nav-icon">❤️‍🩹</span>พักฟื้น
+  </a>
+</nav>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -232,7 +276,6 @@ async function loadRecoveryAnimals() {
     return;
   }
 
-  // เก็บสถานะ Tab ปัจจุบันไว้กันหน้าจอ Refresh แล้วกระโดด
   const currentTabs = {};
   grid.querySelectorAll(".rec-card").forEach(c => {
     const active = c.querySelector(".rc-tab.active");
@@ -240,18 +283,13 @@ async function loadRecoveryAnimals() {
   });
 
   grid.innerHTML = "";
-  const now = new Date().toTimeString().substring(0, 5);
 
   data.forEach(a => {
     const weight = a.actual_weight || 0;
     const activeTab = currentTabs[a.id] || "monitoring";
 
-    // คำนวณ Emergency Dose
-    // Adrenaline 1mg/ml (0.01 mg/kg) -> ml = (weight * 0.01) / 1
     const adr = (weight * 0.01).toFixed(2);
-    // Atropine 1mg/ml (0.02 mg/kg) -> ml = (weight * 0.02) / 1
     const atr = (weight * 0.02).toFixed(2);
-    // Antipamezole 5mg/ml (0.05 mg/kg) -> ml = (weight * 0.05) / 5
     const ant = ((weight * 0.05) / 5).toFixed(2);
 
     const vitals = (a.vasd_vital_signs || []).sort((x, y) => (x.time_recorded || "").localeCompare(y.time_recorded || ""));
@@ -286,18 +324,17 @@ async function loadRecoveryAnimals() {
 
       <div class="rc-panel ${activeTab==='monitoring'?'active':''}" data-panel="monitoring">
         <div class="vital-input-grid" id="form-${a.id}">
-          <div class="field-group v-time-cell"><span class="field-label">Time</span><input class="f-input v-time" type="time" value="${now}"></div>
-          <div class="field-group"><span class="field-label">HR</span><input class="f-input v-hr" type="number" placeholder="bpm"></div>
-          <div class="field-group"><span class="field-label">RR</span><input class="f-input v-rr" type="number" placeholder="/m"></div>
-          <div class="field-group"><span class="field-label">Temp</span><input class="f-input v-temp" type="number" placeholder="°C"></div>
-          <div class="field-group"><span class="field-label">SpO2</span><input class="f-input v-spo2" type="number" placeholder="%"></div>
+          <div class="field-group"><span class="field-label">HR (bpm)</span><input class="f-input v-hr" type="number" placeholder="HR"></div>
+          <div class="field-group"><span class="field-label">RR (/m)</span><input class="f-input v-rr" type="number" placeholder="RR"></div>
+          <div class="field-group"><span class="field-label">Temp (°F)</span><input class="f-input v-temp" type="number" placeholder="°F"></div>
+          <div class="field-group"><span class="field-label">SpO2 (%)</span><input class="f-input v-spo2" type="number" placeholder="%"></div>
           <div class="field-group v-btn-cell" style="justify-content:flex-end">
             <button class="btn" style="background:var(--violet); color:#fff; padding:8px" onclick="saveVital('${a.id}')">บันทึก</button>
           </div>
         </div>
         <div class="vital-table-wrap">
           <table class="vital-table">
-            <thead><tr><th>Time</th><th>HR</th><th>RR</th><th>T(°C)</th><th>SpO2</th></tr></thead>
+            <thead><tr><th>Time</th><th>HR</th><th>RR</th><th>T(°F)</th><th>SpO2</th></tr></thead>
             <tbody>${vitalRows}</tbody>
           </table>
         </div>
@@ -336,9 +373,12 @@ window.switchTab = (btn) => {
 
 window.saveVital = async (animalId) => {
   const form = document.getElementById(`form-${animalId}`);
+  // บันทึกเวลาอัตโนมัติจากฝั่ง Client
+  const autoTime = new Date().toLocaleTimeString('th-TH', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  
   const { error } = await supabase.from("vasd_vital_signs").insert({
     animal_id: animalId,
-    time_recorded: form.querySelector(".v-time").value,
+    time_recorded: autoTime,
     hr: form.querySelector(".v-hr").value || null,
     rr: form.querySelector(".v-rr").value || null,
     temp: form.querySelector(".v-temp").value || null,
