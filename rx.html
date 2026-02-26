@@ -2,214 +2,514 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>โต๊ะจ่ายยา</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>โต๊ะจ่ายยา – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;700&family=Prompt:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
 :root {
-  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
-  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
-  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --shadow-lg:0 12px 40px rgba(13,27,42,0.12);
-  --radius:14px; --radius-sm:8px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  --navy:         #0b1929;
+  --navy-mid:     #112240;
+  --teal:         #0ea5a0;
+  --teal-light:   #14c4bc;
+  --teal-glow:    rgba(14,165,160,0.25);
+  --sky:          #3b82f6;
+  --sky-soft:     rgba(59,130,246,0.14);
+  --amber:        #f59e0b;
+  --amber-soft:   rgba(245,158,11,0.14);
+  --rose:         #ef4444;
+  --rose-soft:    rgba(239,68,68,0.12);
+  --emerald:      #10b981;
+  --emerald-soft: rgba(16,185,129,0.14);
 
-/* HEADER */
-header{
-  background:var(--navy);padding:0 32px;display:flex;
-  justify-content:space-between;align-items:center;height:68px;
-  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
-}
-.header-brand{display:flex;align-items:center;gap:14px;}
-.brand-icon{
-  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
-  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
-}
-.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
-.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --surface-3:  rgba(255,255,255,0.11);
+  --border:     rgba(255,255,255,0.08);
+  --border-2:   rgba(255,255,255,0.14);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #4a5568;
 
-.btn-home{
-  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-  cursor:pointer;transition:background 0.2s;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius:    16px;
+  --radius-lg: 22px;
 }
-.btn-home:hover{background:rgba(255,255,255,0.18);}
 
-/* MAIN */
-.container{max-width:1200px;margin:0 auto;padding:28px 24px;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-.page-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:24px;animation:fadeUp 0.4s ease both;
+body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow-x: hidden;
 }
-.page-header h2{font-size:22px;font-weight:700;color:var(--navy);}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(59,130,246,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(14,165,160,0.07) 0%, transparent 60%);
+}
 
-/* RX CARD */
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--sky), #60a5fa);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 0 20px var(--sky-soft);
+}
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.3px;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.btn-home {
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-home:hover { background: var(--surface-3); color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   WRAP
+═══════════════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1000px; margin: 0 auto;
+  padding: 24px 16px 60px; width: 100%;
+}
+
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 22px; flex-wrap: wrap; gap: 10px;
+  animation: slideUp 0.4s ease both;
+}
+.page-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+}
+.page-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.section-count {
+  font-size: 10px; color: var(--text-dim); background: var(--surface-2);
+  border: 1px solid var(--border-2); border-radius: 20px; padding: 2px 10px;
+}
+
+/* ═══════════════════════════════════════════
+   RX CARD
+═══════════════════════════════════════════ */
+#rx-container { display: flex; flex-direction: column; gap: 16px; }
+
 .rx-card {
-  background:var(--surface);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  margin-bottom:24px;overflow:hidden;animation:fadeUp 0.4s 0.05s ease both;
-  transition:box-shadow 0.2s;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: slideUp 0.4s ease both;
+  transition: border-color 0.2s;
 }
-.rx-card:hover { box-shadow:var(--shadow-md); }
-
-.rx-header {
-  padding:16px 20px; background:#fafbfc; border-bottom:1px solid var(--border);
-  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
-}
-.rx-header h3 { font-size:16px; color:var(--navy); font-weight:700; margin:0;}
-.rx-header span { color:var(--text-muted); font-size:14px; font-weight:400; }
-.rx-header-actions { display: flex; gap: 10px; flex-wrap:wrap; }
-
-/* TABLE INSIDE CARD */
-.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse;min-width:700px;}
-thead tr{background:linear-gradient(135deg,var(--navy),#1a2f47);}
-thead th{
-  padding:12px 10px;text-align:left;font-size:12px;font-weight:700;
-  letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.8);
-  border:none;white-space:nowrap;
-}
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
-tbody td{padding:8px 10px;text-align:left;font-size:14px;border:none;vertical-align:middle;}
-tbody tr:last-child{border-bottom:none;}
-
-/* INPUT IN TABLE */
-.rx-input {
-  width:100%; padding:6px 8px; font-size:14px; font-family:"Sarabun", sans-serif;
-  border:1px solid transparent; border-radius:6px; background:transparent; color:var(--text);
-  outline:none; transition:all 0.2s;
-}
-.rx-input:not([readonly]) {
-  border-color:var(--border); background:#fff;
-}
-.rx-input:focus:not([readonly]) {
-  border-color:var(--teal-light); box-shadow:0 0 0 2px rgba(34,145,154,0.1);
+/* sky blue top bar */
+.rx-card::before {
+  content: ""; display: block; height: 3px;
+  background: linear-gradient(90deg, var(--sky), #60a5fa);
 }
 
-/* BUTTONS */
-.btn{
-  padding:8px 16px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  border:none;border-radius:6px;cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;
+/* ── Card Header ── */
+.rxc-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
 }
-.btn:hover{opacity:0.85;transform:translateY(-1px);}
-.btn-sm{padding:5px 8px; font-size:12px; gap:4px; border-radius:4px; margin-right:2px;}
+.rxc-top-row {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px;
+}
+.queue-circle {
+  font-family: "Outfit", sans-serif;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--sky-soft); border: 2px solid rgba(59,130,246,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #93c5fd; flex-shrink: 0;
+}
+.rxc-title-block { flex: 1; min-width: 0; }
+.rxc-animal-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 16px; font-weight: 800; color: #fff; line-height: 1.1;
+}
+.rxc-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
 
-.btn-dispense {background:var(--success);color:#fff;}
-.btn-print-all {background:var(--navy);color:#fff;}
-.btn-print {background:var(--navy);color:#fff;}
-.btn-edit {background:var(--teal-light);color:#fff;}
-.btn-add-rx {background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;}
-.btn-save {background:var(--success);color:#fff;}
-.btn-delete {background:#e2e8f0;color:var(--danger);}
-.btn-delete:hover {background:var(--danger);color:#fff;}
+/* service chips */
+.svc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.svc-chip {
+  font-size: 11px; font-weight: 500;
+  background: rgba(14,165,160,0.1); color: var(--teal-light);
+  border: 1px solid rgba(14,165,160,0.2);
+  border-radius: 20px; padding: 3px 10px;
+}
 
-/* UTILS */
-.text-danger { color:var(--danger); font-weight:700; }
-.text-muted { color:var(--text-muted); font-size:12px; }
-.empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:16px; }
+/* action buttons row */
+.rxc-actions {
+  display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid var(--border);
+}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+/* ── Rx Table (desktop) ── */
+.rx-table-wrap {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.rx-table {
+  width: 100%; border-collapse: collapse; min-width: 600px; font-size: 13px;
+}
+.rx-table thead tr { background: var(--surface-3); }
+.rx-table th {
+  padding: 9px 10px; text-align: left; font-weight: 700;
+  color: var(--text-dim); font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.rx-table th:first-child { text-align: center; }
+.rx-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.rx-table tbody tr:last-child { border-bottom: none; }
+.rx-table tbody tr:hover { background: var(--surface-2); }
+.rx-table td {
+  padding: 9px 10px; vertical-align: middle; color: var(--text);
+}
+.rx-table td:first-child { text-align: center; color: var(--text-dim); font-size: 11px; }
 
-/* ─── MODAL ADD RX ─── */
+/* editable rx inputs */
+.rx-inp {
+  width: 100%; padding: 6px 8px;
+  font-size: 12px; font-family: "Sarabun", sans-serif;
+  background: transparent; border: 1px solid transparent;
+  border-radius: var(--radius-xs); color: var(--text); outline: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+.rx-inp:not([readonly]) {
+  background: var(--surface-2); border-color: var(--border-2);
+}
+.rx-inp:focus:not([readonly]) {
+  border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal-glow);
+}
+.rx-inp.total-val {
+  font-family: "Outfit", sans-serif; font-weight: 800;
+  color: #fca5a5; font-size: 14px; text-align: center;
+}
+
+/* ── Mobile RX List (≤ 600px) ── */
+.rx-item-list { display: none; flex-direction: column; gap: 8px; padding: 12px; }
+.rx-item {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px;
+  position: relative;
+}
+.rx-item-name {
+  font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px;
+  padding-right: 80px;
+}
+.rx-item-details { font-size: 11px; color: var(--text-dim); line-height: 1.8; }
+.rx-item-total {
+  font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 800;
+  color: #fca5a5;
+}
+.rx-item-actions {
+  position: absolute; top: 10px; right: 10px;
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
+}
+
+@media (max-width: 600px) {
+  .rx-table-wrap { display: none; }
+  .rx-item-list  { display: flex; }
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn {
+  padding: 8px 13px; font-size: 11px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: opacity 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.95); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+/* action buttons on card */
+.btn-add-rx {
+  background: rgba(14,165,160,0.15); color: var(--teal-light);
+  border: 1px solid rgba(14,165,160,0.3);
+}
+.btn-add-rx:hover { background: rgba(14,165,160,0.25); }
+
+.btn-print-bag {
+  background: var(--sky-soft); color: #93c5fd;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+.btn-print-bag:hover { background: rgba(59,130,246,0.22); }
+
+.btn-print-vaccine {
+  background: var(--amber-soft); color: var(--amber);
+  border: 1px solid rgba(245,158,11,0.3);
+}
+.btn-print-vaccine:hover { background: rgba(245,158,11,0.22); }
+
+.btn-print-all-rx {
+  background: var(--surface-3); color: var(--text);
+  border: 1px solid var(--border-2);
+}
+.btn-print-all-rx:hover { border-color: var(--teal); color: var(--teal-light); }
+
+.btn-dispense {
+  background: linear-gradient(135deg, var(--emerald), #34d399);
+  color: #fff; font-size: 12px;
+  box-shadow: 0 4px 14px var(--emerald-soft);
+}
+.btn-dispense:hover { opacity: 0.9; }
+
+/* row action buttons */
+.btn-row {
+  padding: 5px 9px; font-size: 11px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  border: none; border-radius: var(--radius-xs); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 3px;
+  transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-row-print  { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border-2); }
+.btn-row-edit   { background: rgba(14,165,160,0.15); color: var(--teal-light); border: 1px solid rgba(14,165,160,0.3); }
+.btn-row-save   { background: var(--emerald-soft); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); display: none; }
+.btn-row-del    { background: var(--rose-soft); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+
+/* ── Empty ── */
+.empty-state {
+  text-align: center; padding: 60px 16px;
+  color: var(--text-faint); animation: slideUp 0.4s ease both;
+}
+.empty-state-icon { font-size: 52px; margin-bottom: 14px; }
+.empty-state-text { font-size: 14px; color: var(--text-dim); }
+.empty-state-sub  { font-size: 12px; margin-top: 6px; }
+
+/* ═══════════════════════════════════════════
+   MODAL (Add Rx)
+═══════════════════════════════════════════ */
 .modal-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(13, 27, 42, 0.7); z-index: 1000;
-  display: none; justify-content: center; align-items: center;
-  padding: 20px; backdrop-filter: blur(2px);
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: none; justify-content: center; align-items: flex-end;
+}
+@media (min-width: 600px) {
+  .modal-overlay { align-items: center; padding: 20px; }
 }
 .modal-overlay.active { display: flex; }
-.modal-content {
-  background: var(--surface); width: 100%; max-width: 700px;
-  border-radius: var(--radius); box-shadow: var(--shadow-lg);
-  animation: fadeUp 0.3s ease both; max-height: 90vh; display: flex; flex-direction: column;
+
+.modal-box {
+  background: var(--navy-mid);
+  border: 1px solid var(--border-2);
+  width: 100%; max-width: 680px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  max-height: 90vh; display: flex; flex-direction: column;
+  animation: slideUp 0.3s ease both;
 }
+@media (min-width: 600px) {
+  .modal-box { border-radius: var(--radius-lg); max-height: 85vh; }
+}
+
 .modal-header {
-  padding: 18px 24px; border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center; background: #fafbfc; border-radius: var(--radius) var(--radius) 0 0;
+  padding: 16px 18px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
 }
-.modal-header h3 { font-size: 18px; color: var(--navy); margin: 0; display:flex; align-items:center; gap:8px;}
-.btn-close-modal { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding:4px;}
-.btn-close-modal:hover { color: var(--danger); }
-.modal-body { padding: 24px; overflow-y: auto; background:#f8fafc; }
+.modal-title    { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 700; color: #fff; }
+.modal-subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.btn-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--surface-3); border: 1px solid var(--border-2);
+  color: var(--text-dim); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-close:hover { background: var(--rose-soft); color: var(--rose); }
+
+.modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+
+.rx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .rx-grid { grid-template-columns: 1fr; } }
+
+.rx-drug-card {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); padding: 13px;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+}
+.rx-drug-card:hover { border-color: rgba(14,165,160,0.4); }
+.rx-drug-card.selected { border-color: var(--teal); background: rgba(14,165,160,0.08); }
+
+.rx-drug-top { display: flex; align-items: flex-start; gap: 9px; }
+.rx-drug-card input[type="checkbox"] { display: none; }
+.rx-checkbox {
+  width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
+  border: 2px solid var(--border-2); background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+  font-size: 11px; color: transparent;
+}
+.rx-drug-card.selected .rx-checkbox { background: var(--teal); border-color: var(--teal); color: #fff; }
+.rx-drug-info { flex: 1; }
+.rx-cat  { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 3px; }
+.rx-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+.rx-fields {
+  display: none; flex-direction: column; gap: 7px;
+  margin-top: 11px; padding-top: 11px; border-top: 1px dashed var(--border-2);
+}
+.rx-drug-card.selected .rx-fields { display: flex; }
+
+.rx-field-row { display: flex; align-items: center; gap: 8px; }
+.rx-field-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--teal-light); width: 54px; flex-shrink: 0; }
+.rx-field-input {
+  flex: 1; padding: 6px 9px; font-size: 12px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius-xs); color: var(--text); outline: none;
+}
+.rx-field-input:focus { border-color: var(--teal); }
+.rx-field-sm    { width: 58px; flex: none; }
+.rx-field-total { width: 58px; flex: none; font-weight: 700; color: #fca5a5; }
+
 .modal-footer {
-  padding: 16px 24px; border-top: 1px solid var(--border);
-  display: flex; justify-content: flex-end; gap: 10px; background: #fff; border-radius: 0 0 var(--radius) var(--radius);
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; flex-shrink: 0;
+}
+.btn-modal-cancel {
+  padding: 10px 18px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: var(--surface-3); color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-modal-save {
+  flex: 1; padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: "Sarabun", sans-serif;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  box-shadow: 0 4px 16px var(--teal-glow);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ─── RX GRID ─── */
-.rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media(max-width:560px){.rx-grid{grid-template-columns:1fr;}}
-.rx-card-item{background:#fff; border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;
-  cursor:pointer;transition:all 0.2s;}
-.rx-card-item.selected{border-color:var(--teal-light);background:#e6f6f4;box-shadow:0 2px 8px rgba(34,145,154,0.15);}
-.rx-card-item label{display:flex;align-items:flex-start;gap:10px;cursor:pointer; margin:0;}
-.rx-card-item input[type="checkbox"]{width:18px;height:18px;accent-color:var(--teal-light);flex-shrink:0;margin-top:2px;}
-.rx-cat{font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;}
-.rx-name{font-size:14px;font-weight:700;color:var(--navy);}
-.rx-custom-inputs { display: none; flex-direction: column; gap: 8px; margin-top: 12px; padding-top:12px; border-top:1px dashed #cbd5e0;}
-.rx-input-group { display: flex; align-items: center; gap: 8px; }
-.rx-input-group label { font-size: 12px; color: var(--teal); font-weight:600; width: 50px; flex-shrink: 0; }
-.rx-input-group input { flex: 1; padding: 6px 10px; font-size: 13px; font-family:"Sarabun",sans-serif; border: 1px solid var(--border); border-radius: 4px; outline:none; }
-.rx-input-group input:focus{border-color:var(--teal-light);}
-
+/* ═══════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════ */
 @media print {
-  body { background: white; padding: 0; }
-  header, .btn-home, .page-header button, .btn-dispense, .btn-print-all, .btn-add-rx, .btn-sm { display: none !important; }
-  .container { padding: 0; max-width: 100%; }
-  .rx-card { box-shadow: none; border: 1px solid #000; break-inside: avoid; margin-bottom: 20px; }
-  .rx-header { background: #f0f0f0 !important; border-bottom: 1px solid #000; }
-  table { border: 1px solid #000; }
-  thead tr { background: #e0e0e0 !important; }
-  thead th { color: #000 !important; border-bottom: 1px solid #000; }
-  tbody td { border-bottom: 1px solid #ccc; color: #000; }
-  .rx-input { border:none !important; background:transparent !important; padding:0 !important; }
+  body { background: white; }
+  header, .wrap > .page-header, .section-title,
+  .rxc-actions, .btn, .btn-row,
   .modal-overlay { display: none !important; }
+  .wrap { padding: 0; max-width: 100%; }
+  .rx-card { box-shadow: none; border: 1px solid #000; break-inside: avoid; margin-bottom: 16px; }
+  .rx-card::before { display: none; }
+  .rxc-header { background: #f0f0f0 !important; border-bottom: 1px solid #ccc; }
+  .rxc-animal-name { color: #000; }
+  .rx-table th, .rx-table td { color: #000 !important; border: 1px solid #ccc; }
+  .rx-inp { border: none !important; background: transparent !important; padding: 0 !important; color: #000; }
+  .rx-item-list { display: none !important; }
+  .rx-table-wrap { display: block !important; }
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  header { height: 56px; padding: 0 14px; }
+  .brand-sub { display: none; }
+  .wrap { padding: 18px 12px 50px; }
+  .page-title { font-size: 18px; }
 }
 </style>
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <header>
-  <div class="header-brand">
-    <div class="brand-icon">💊</div>
-    <div class="brand-text">
-      <h1>ห้องจ่ายยา (Rx)</h1>
-      <span>RMUTTO – Veterinary Academic Service Division</span>
+  <div class="brand">
+    <div class="brand-logo">💊</div>
+    <div>
+      <div class="brand-name">โต๊ะจ่ายยา</div>
+      <div class="brand-sub">RMUTTO – Veterinary Academic Service Division</div>
     </div>
   </div>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
 
-<div class="container">
+<!-- ── CONTENT ── -->
+<div class="wrap">
+
   <div class="page-header">
-    <h2>รายการรอจัดยา / จ่ายยา</h2>
+    <div>
+      <div class="page-title">รายการรอจัดยา / จ่ายยา</div>
+      <div class="page-sub">จัดยา พิมพ์ฉลาก และส่งสัตว์กลับบ้าน</div>
+    </div>
   </div>
+
+  <div class="section-title">
+    คิวรอจัดยา
+    <span class="section-count" id="rxCount">0 รายการ</span>
+    <span></span>
+  </div>
+
   <div id="rx-container">
-    <div class="empty-state">กำลังโหลดข้อมูล...</div>
+    <div class="empty-state">
+      <div class="empty-state-icon">💊</div>
+      <div class="empty-state-text">กำลังโหลดข้อมูล...</div>
+    </div>
   </div>
+
 </div>
 
+<!-- ── MODAL ADD RX ── -->
 <div class="modal-overlay" id="rxModal">
-  <div class="modal-content">
+  <div class="modal-box">
     <div class="modal-header">
-      <h3>💊 สั่งจ่ายยาเพิ่มเติม</h3>
-      <button class="btn-close-modal" onclick="closeRxModal()">✖</button>
+      <div>
+        <div class="modal-title">💊 สั่งจ่ายยาเพิ่มเติม</div>
+        <div class="modal-subtitle" id="rxModalSub"></div>
+      </div>
+      <button class="btn-close" onclick="closeRxModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div style="margin-bottom: 14px; font-size:13px; color:var(--text-muted);" id="rxModalAnimalName"></div>
-      <div class="rx-grid" id="rxModalGrid">
-        </div>
+      <div class="rx-grid" id="rxModalGrid"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-delete" onclick="closeRxModal()">ยกเลิก</button>
-      <button class="btn btn-save" onclick="saveNewRx()">💾 บันทึกการสั่งยาเพิ่ม</button>
+      <button class="btn-modal-cancel" onclick="closeRxModal()">ยกเลิก</button>
+      <button class="btn-modal-save" id="btnModalSave" onclick="saveNewRx()">💾 บันทึกการสั่งยาเพิ่ม</button>
     </div>
   </div>
 </div>
@@ -217,89 +517,346 @@ tbody tr:last-child{border-bottom:none;}
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ── ฟังก์ชันช่วยคำนวณและสร้างฟอร์มยา ── */
-function round(val) { return Math.ceil(val * 4) / 4; }
+let currentRxAnimalId = null;
 
-window.recalcTotalRxNew = function(did) {
-  const doseStr = document.getElementById(`newrxdose-${did}`).value;
-  const freqStr = document.getElementById(`newrxfreq-${did}`).value;
-  const daysStr = document.getElementById(`newrxdays-${did}`).value;
+/* ── helper ── */
+function round(val) {
+  const n = Math.ceil(val * 4) / 4;
+  return n < 0.25 ? 0.25 : n;
+}
+function getTodayAndNext7() {
+  const now   = new Date();
+  const next7 = new Date(); next7.setDate(next7.getDate() + 7);
+  const fmt = d => d.toLocaleDateString("th-TH", { day:"2-digit", month:"2-digit", year:"numeric" });
+  return { todayStr: fmt(now), next7Str: fmt(next7) };
+}
 
-  const doseMatch = doseStr.match(/[\d.]+/);
-  const dose = doseMatch ? parseFloat(doseMatch[0]) : 0;
-  
-  const freqMatch = freqStr.match(/[\d.]+/);
-  const freq = freqMatch ? parseFloat(freqMatch[0]) : 0;
-  
-  const days = parseFloat(daysStr) || 0;
+/* ══════════════════════════════════════════
+   LOAD PRESCRIPTIONS
+══════════════════════════════════════════ */
+async function loadPrescriptions() {
+  const container = document.getElementById("rx-container");
+  try {
+    const { data: eventId } = await supabase.rpc("get_today_event");
+    const { data: queueData, error } = await supabase
+      .from("vasd_queue")
+      .select(`id, animal_id, status,
+        vasd_animal(
+          event_id, queue_number, animal_name, species, sex, actual_weight, est_weight,
+          vasd_owner(owner_name, phone),
+          vasd_service(service_type),
+          vasd_prescription(id, drug_id, dose, freq, days, total_pills)
+        )`)
+      .in("status", ["recovery", "ready_to_go_home"])
+      .order("updated_at", { ascending: false });
 
-  const total = Math.ceil(dose * freq * days);
-  document.getElementById(`newrxtotal-${did}`).value = total;
+    if (error) throw error;
+
+    const list = (queueData || []).filter(q =>
+      q.vasd_animal?.event_id === eventId &&
+      q.vasd_animal?.vasd_prescription?.length > 0
+    );
+
+    document.getElementById("rxCount").textContent = `${list.length} รายการ`;
+    container.innerHTML = "";
+
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">✅</div>
+          <div class="empty-state-text">ไม่มีรายการรอจัดยาในขณะนี้</div>
+          <div class="empty-state-sub">เมื่อมีเคสใหม่เข้ามา หน้าจอจะอัปเดตอัตโนมัติ</div>
+        </div>`;
+      return;
+    }
+
+    list.forEach((q, idx) => {
+      const a = q.vasd_animal;
+      const ownerName  = a.vasd_owner?.owner_name || "ไม่ระบุ";
+      const phone      = a.vasd_owner?.phone || "–";
+      const spText     = a.species === "ส" ? "🐶 สุนัข" : "🐱 แมว";
+      const weight     = a.actual_weight || a.est_weight || 0;
+      const hasVaccine = (a.vasd_service || []).some(s => s.service_type.includes("วัคซีน"));
+      const allRxIds   = (a.vasd_prescription || []).map(r => r.id).join(",");
+
+      /* ── desktop table rows ── */
+      const tableRows = (a.vasd_prescription || []).map((rx, i) => `
+        <tr id="rxrow-${rx.id}">
+          <td>${i + 1}</td>
+          <td><input class="rx-inp rx-drug" value="${rx.drug_id || ""}" readonly></td>
+          <td><input class="rx-inp rx-dose" value="${rx.dose || ""}" readonly></td>
+          <td><input class="rx-inp rx-freq" value="${rx.freq || ""}" readonly></td>
+          <td><input class="rx-inp rx-days" type="number" value="${rx.days || ""}" readonly style="width:52px;"></td>
+          <td><input class="rx-inp rx-total total-val" type="number" value="${rx.total_pills || 0}" readonly style="width:52px;"></td>
+          <td>
+            <div style="display:flex;gap:4px;flex-wrap:nowrap;">
+              <button class="btn-row btn-row-print" onclick="printRx('${rx.id}')" title="พิมพ์ซองยา">🖨</button>
+              <button class="btn-row btn-row-edit"  onclick="editRx(this)" title="แก้ไข">✏️</button>
+              <button class="btn-row btn-row-save"  onclick="saveRx(this,'${rx.id}')" title="บันทึก">💾</button>
+              <button class="btn-row btn-row-del"   onclick="deleteRx('${rx.id}')" title="ลบ">🗑</button>
+            </div>
+          </td>
+        </tr>`).join("");
+
+      /* ── mobile list items ── */
+      const mobileItems = (a.vasd_prescription || []).map(rx => `
+        <div class="rx-item" id="rxitem-${rx.id}">
+          <div class="rx-item-name">${rx.drug_id || "–"}</div>
+          <div class="rx-item-details">
+            ปริมาณ: ${rx.dose || "–"}<br>
+            ความถี่: ${rx.freq || "–"}<br>
+            จำนวนวัน: ${rx.days || "–"} วัน
+          </div>
+          <div class="rx-item-total">${rx.total_pills || 0} เม็ด</div>
+          <div class="rx-item-actions">
+            <button class="btn-row btn-row-print" onclick="printRx('${rx.id}')">🖨</button>
+            <button class="btn-row btn-row-del" onclick="deleteRx('${rx.id}')">🗑</button>
+          </div>
+        </div>`).join("");
+
+      const card = document.createElement("div");
+      card.className = "rx-card";
+      card.dataset.id = q.animal_id;
+      card.style.animationDelay = `${idx * 0.06}s`;
+
+      card.innerHTML = `
+        <!-- Header -->
+        <div class="rxc-header">
+          <div class="rxc-top-row">
+            <div class="queue-circle">#${a.queue_number}</div>
+            <div class="rxc-title-block">
+              <div class="rxc-animal-name">${a.animal_name}</div>
+              <div class="rxc-meta">${spText} · ${a.sex} · ${weight} กก. · ${ownerName}${phone !== "–" ? ` · <a href="tel:${phone}" style="color:var(--teal-light);text-decoration:none;">${phone}</a>` : ""}</div>
+            </div>
+          </div>
+          <div class="svc-chips">
+            ${(a.vasd_service || []).map(s => `<span class="svc-chip">${s.service_type}</span>`).join("")}
+          </div>
+          <!-- Action Buttons -->
+          <div class="rxc-actions">
+            <button class="btn btn-add-rx" onclick="openRxModal('${q.animal_id}','${a.animal_name}',${weight},'${a.species}')">💊 จ่ายยาเพิ่ม</button>
+            <button class="btn btn-print-bag" onclick="printBag('${q.animal_id}')">🛍️ พิมพ์ถุงยา</button>
+            ${hasVaccine ? `<button class="btn btn-print-vaccine" onclick="printVaccine('${q.animal_id}')">📘 สมุดวัคซีน</button>` : ""}
+            <button class="btn btn-print-all-rx" onclick="printMultipleRx('${allRxIds}')">🖨️ ซองยาทั้งหมด</button>
+            <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ ส่งกลับบ้าน</button>
+          </div>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="rx-table-wrap">
+          <table class="rx-table">
+            <thead>
+              <tr>
+                <th>#</th><th>รายการยา</th><th>ปริมาณ/ครั้ง</th>
+                <th>ความถี่</th><th>วัน</th><th>รวม (เม็ด)</th><th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+
+        <!-- Mobile List -->
+        <div class="rx-item-list">${mobileItems}</div>
+      `;
+
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-text" style="color:#fca5a5;">❌ โหลดข้อมูลไม่สำเร็จ: ${err.message}</div>
+      </div>`;
+  }
+}
+
+/* ── Mark dispensed ── */
+window.markAsDispensed = async function(animalId) {
+  if (!confirm("ยืนยันว่าจัดยาเรียบร้อยแล้ว และต้องการส่งสัตว์กลับบ้าน?")) return;
+  const { error } = await supabase.from("vasd_queue").update({ status:"done", updated_at:new Date() }).eq("animal_id", animalId);
+  if (error) alert("❌ เกิดข้อผิดพลาด"); else loadPrescriptions();
 };
 
-window.toggleNewRx = function(chk, did) {
-  const card = document.getElementById(`newrxcard-${did}`);
-  const inputs = document.getElementById(`newrxcustom-${did}`);
-  if(chk.checked) {
-    card.classList.add("selected");
-    inputs.style.display = "flex"; // แสดงช่องกรอกเมื่อติ๊กเลือก
-  } else {
-    card.classList.remove("selected");
-    inputs.style.display = "none";
+/* ── Edit / Save / Delete row ── */
+window.editRx = function(btn) {
+  const tr = btn.closest("tr");
+  tr.querySelectorAll(".rx-inp").forEach(el => el.removeAttribute("readonly"));
+  tr.querySelector(".btn-row-edit").style.display = "none";
+  tr.querySelector(".btn-row-save").style.display = "inline-flex";
+};
+window.saveRx = async function(btn, rxId) {
+  const tr = btn.closest("tr");
+  const { error } = await supabase.from("vasd_prescription").update({
+    drug_id:     tr.querySelector(".rx-drug").value,
+    dose:        tr.querySelector(".rx-dose").value,
+    freq:        tr.querySelector(".rx-freq").value,
+    days:        parseInt(tr.querySelector(".rx-days").value) || 0,
+    total_pills: parseFloat(tr.querySelector(".rx-total").value) || 0,
+  }).eq("id", rxId);
+  if (error) return alert("❌ บันทึกไม่สำเร็จ: " + error.message);
+  tr.querySelectorAll(".rx-inp").forEach(el => el.setAttribute("readonly", true));
+  tr.querySelector(".btn-row-save").style.display = "none";
+  tr.querySelector(".btn-row-edit").style.display = "inline-flex";
+};
+window.deleteRx = async function(rxId) {
+  if (!confirm("ต้องการลบรายการยานี้?")) return;
+  const { error } = await supabase.from("vasd_prescription").delete().eq("id", rxId);
+  if (error) alert("❌ ลบไม่สำเร็จ");
+  else {
+    document.getElementById(`rxrow-${rxId}`)?.remove();
+    document.getElementById(`rxitem-${rxId}`)?.remove();
   }
 };
 
-let currentRxAnimalId = null;
+/* ══════════════════════════════════════════
+   PRINT FUNCTIONS (identical logic)
+══════════════════════════════════════════ */
+async function generateStickerHTML(rxId) {
+  const { data: rx, error } = await supabase.from("vasd_prescription")
+    .select(`*, vasd_animal(queue_number, animal_name, species, sex, vasd_owner(owner_name,phone), vasd_service(service_type))`)
+    .eq("id", rxId).single();
+  if (error || !rx) return null;
+  const { data: tmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type","envelope").single();
+  if (!tmpl?.config) return null;
 
-// เปิด Modal สั่งยาเพิ่ม
+  const a = rx.vasd_animal;
+  const { todayStr, next7Str } = getTodayAndNext7();
+  const spcText = a.species === "ส" ? "สุนัข" : "แมว";
+  const services = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
+
+  let html = `<div class="sticker-page">`;
+  tmpl.config.forEach(l => {
+    let text = l.text
+      .replace(/{{queue_number}}/g, a.queue_number||"")
+      .replace(/{{animal_name}}/g,  a.animal_name||"")
+      .replace(/{{species}}/g,      spcText)
+      .replace(/{{sex}}/g,          a.sex||"")
+      .replace(/{{owner_name}}/g,   a.vasd_owner?.owner_name||"")
+      .replace(/{{phone}}/g,        a.vasd_owner?.phone||"ไม่ระบุ")
+      .replace(/{{services}}/g,     services)
+      .replace(/{{drug_id}}/g,      rx.drug_id||"")
+      .replace(/{{dose}}/g,         rx.dose||"")
+      .replace(/{{freq}}/g,         rx.freq||"")
+      .replace(/{{days}}/g,         rx.days ? rx.days+" วัน" : "")
+      .replace(/{{total_pills}}/g,  rx.total_pills ? rx.total_pills+" เม็ด" : "")
+      .replace(/{{today}}/g,        todayStr)
+      .replace(/{{next7day}}/g,     next7Str);
+    html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
+  });
+  return html + `</div>`;
+}
+
+async function generateGeneralStickerHTML(animalId, templateType) {
+  const { data: a, error } = await supabase.from("vasd_animal")
+    .select(`queue_number,animal_name,species,sex,vasd_owner(owner_name,phone),vasd_service(service_type)`)
+    .eq("id", animalId).single();
+  if (error || !a) return null;
+  const { data: tmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", templateType).single();
+  if (!tmpl?.config) return null;
+
+  const spcText  = a.species === "ส" ? "สุนัข" : "แมว";
+  const services = (a.vasd_service || []).map(s => s.service_type).join(", ") || "-";
+  const { todayStr, next7Str } = getTodayAndNext7();
+
+  let html = `<div class="sticker-page">`;
+  tmpl.config.forEach(l => {
+    let text = l.text
+      .replace(/{{queue_number}}/g, a.queue_number||"")
+      .replace(/{{animal_name}}/g,  a.animal_name||"")
+      .replace(/{{species}}/g,      spcText)
+      .replace(/{{sex}}/g,          a.sex||"")
+      .replace(/{{owner_name}}/g,   a.vasd_owner?.owner_name||"")
+      .replace(/{{phone}}/g,        a.vasd_owner?.phone||"ไม่ระบุ")
+      .replace(/{{services}}/g,     services)
+      .replace(/{{drug_id}}/g, "").replace(/{{dose}}/g, "").replace(/{{freq}}/g, "")
+      .replace(/{{days}}/g, "").replace(/{{total_pills}}/g, "")
+      .replace(/{{today}}/g, todayStr).replace(/{{next7day}}/g, next7Str);
+    html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
+  });
+  return html + `</div>`;
+}
+
+function openPrintWindow(htmlContent) {
+  const pw = window.open("","_blank","width=800,height=600");
+  pw.document.write(`<html><head><title>Print</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body{margin:0}.sticker-page{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden;page-break-after:always}
+      .line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;color:#000!important}
+      @page{size:80mm 50mm;margin:0}
+    </style></head><body>${htmlContent}
+    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},300)})}<\/script>
+    </body></html>`);
+  pw.document.close();
+}
+
+window.printRx = async function(rxId) {
+  const c = await generateStickerHTML(rxId);
+  if (!c) return alert("⚠️ ยังไม่ได้ตั้งค่า Template 'ซองยา' (envelope)");
+  openPrintWindow(c);
+};
+window.printMultipleRx = async function(rxIdsStr) {
+  const ids = rxIdsStr.split(","); let all = "";
+  for (const id of ids) { const c = await generateStickerHTML(id); if (c) all += c; }
+  if (!all) return alert("⚠️ ยังไม่ได้ตั้งค่า Template 'ซองยา'");
+  openPrintWindow(all);
+};
+window.printBag = async function(animalId) {
+  const c = await generateGeneralStickerHTML(animalId, "bag");
+  if (!c) return alert("⚠️ ยังไม่ได้สร้าง Template 'bag' ในระบบ");
+  openPrintWindow(c);
+};
+window.printVaccine = async function(animalId) {
+  const c = await generateGeneralStickerHTML(animalId, "vaccine");
+  if (!c) return alert("⚠️ ยังไม่ได้สร้าง Template 'vaccine' ในระบบ");
+  openPrintWindow(c);
+};
+
+/* ══════════════════════════════════════════
+   RX MODAL
+══════════════════════════════════════════ */
 window.openRxModal = function(animalId, animalName, w, species) {
   currentRxAnimalId = animalId;
   w = parseFloat(w) || 0;
-  
-  document.getElementById("rxModalAnimalName").innerHTML = `สั่งยาให้: <strong>${animalName}</strong> (น้ำหนักอ้างอิง: ${w} กก.)`;
-  const grid = document.getElementById("rxModalGrid");
-  
-  // ✅ ปรับข้อมูลชื่อยา ความถี่(เอาวงเล็บออก) ตามมาตรฐานใหม่
+  document.getElementById("rxModalSub").textContent = `${animalName} · น้ำหนักอ้างอิง ${w} กก.`;
+
   const drugs = [
-    {id:"dox",    cat:"Antibiotic",    name:"ปฏิชีวนะ Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:14},
-    {id:"nor200", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 200 mg",  tabs: round((w*20)/200), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
-    {id:"nor100", cat:"Antibiotic",    name:"ปฏิชีวนะ Norfloxacin 100 mg",  tabs: round((w*20)/100), freq:"วันละ 2 ครั้ง เช้า-เย็น หลังอาหาร", f_num:2, days:7},
-    {id:"tolf60", cat:"NSAID",         name:"แก้ปวด Tolfedine 60 mg",      tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
-    {id:"tolf6",  cat:"NSAID",         name:"แก้ปวด Tolfedine 6 mg",       tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง หลังอาหารเย็น", f_num:1, days:3},
-    {id:"fbc",    cat:"Blood support", name:"บำรุงเลือด FBC",              tabs: (w>=10?1:0.5),     freq:"วันละ 1 ครั้ง หลังอาหารเช้า", f_num:1, days:14},
-    {id:"custom1",cat:"อื่นๆ",         name:"ระบุยาเอง...",                tabs: 1, freq:"วันละ 1 ครั้ง", f_num:1, days:5, isCustom:true}
+    { id:"dox",  cat:"Antibiotic",    name:"Doxycycline 100 mg",  tabs: round((w*10)/100), freq:"วันละ 1 ครั้ง หลังอาหาร",  f_num:1, days:14 },
+    { id:"n200", cat:"Antibiotic",    name:"Norfloxacin 200 mg",  tabs: round((w*20)/200), freq:"วันละ 2 ครั้ง เช้า-เย็น",  f_num:2, days:7  },
+    { id:"n100", cat:"Antibiotic",    name:"Norfloxacin 100 mg",  tabs: round((w*20)/100), freq:"วันละ 2 ครั้ง เช้า-เย็น",  f_num:2, days:7  },
+    { id:"t60",  cat:"NSAID",         name:"Tolfedine 60 mg",     tabs: round((w*4)/60),   freq:"วันละ 1 ครั้ง หลังอาหาร",  f_num:1, days:3  },
+    { id:"t6",   cat:"NSAID",         name:"Tolfedine 6 mg",      tabs: round((w*4)/6),    freq:"วันละ 1 ครั้ง หลังอาหาร",  f_num:1, days:3  },
+    { id:"fbc",  cat:"Blood support", name:"FBC บำรุงเลือด",      tabs: w >= 10 ? 1 : 0.5, freq:"วันละ 1 ครั้ง หลังอาหาร",  f_num:1, days:14 },
+    { id:"cstm", cat:"อื่นๆ",         name:"",                    tabs: 1,                 freq:"วันละ 1 ครั้ง",             f_num:1, days:5, isCustom: true },
   ];
 
-  grid.innerHTML = drugs.map(d => `
-    <div class="rx-card-item" id="newrxcard-${d.id}">
-      <label>
-        <input type="checkbox" id="newrxchk-${d.id}" data-name="${d.name}" onchange="toggleNewRx(this, '${d.id}')">
-        <div style="width:100%;">
+  document.getElementById("rxModalGrid").innerHTML = drugs.map(d => `
+    <div class="rx-drug-card" id="rxcard-${d.id}" onclick="toggleRxDrug('${d.id}')">
+      <div class="rx-drug-top">
+        <input type="checkbox" id="rxchk-${d.id}" data-name="${d.name}">
+        <div class="rx-checkbox" id="rxbox-${d.id}">✓</div>
+        <div class="rx-drug-info">
           <div class="rx-cat">${d.cat}</div>
-          ${d.isCustom ? 
-            `<input type="text" id="custom-name-${d.id}" placeholder="พิมพ์ชื่อยา..." class="rx-input" style="border:1px solid #cbd5e0; background:#fff; margin-top:4px;" onclick="event.preventDefault();">` : 
-            `<div class="rx-name">${d.name}</div>`
-          }
+          ${d.isCustom
+            ? `<input class="rx-field-input" type="text" id="custom-name-${d.id}" placeholder="พิมพ์ชื่อยา..." style="margin-top:4px;" onclick="event.stopPropagation()">`
+            : `<div class="rx-name">${d.name}</div>`}
         </div>
-      </label>
-      <div class="rx-custom-inputs" id="newrxcustom-${d.id}">
-        <div class="rx-input-group">
-          <label>ปริมาณ</label>
-          <input type="text" id="newrxdose-${d.id}" value="ป้อนครั้งละ ${d.tabs} เม็ด" oninput="recalcTotalRxNew('${d.id}')">
+      </div>
+      <div class="rx-fields">
+        <div class="rx-field-row">
+          <span class="rx-field-label">ปริมาณ</span>
+          <input class="rx-field-input" id="rxdose-${d.id}" value="ป้อนครั้งละ ${d.tabs} เม็ด" oninput="recalcRx('${d.id}',${d.f_num})">
         </div>
-        <div class="rx-input-group">
-          <label>ความถี่</label>
-          <input type="text" id="newrxfreq-${d.id}" value="${d.freq}" oninput="recalcTotalRxNew('${d.id}')">
+        <div class="rx-field-row">
+          <span class="rx-field-label">ความถี่</span>
+          <input class="rx-field-input" id="rxfreq-${d.id}" value="${d.freq}" oninput="recalcRx('${d.id}',${d.f_num})">
         </div>
-        <div class="rx-input-group" style="display:flex; gap:10px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <label>จน.วัน</label>
-            <input type="number" id="newrxdays-${d.id}" value="${d.days}" style="width:60px;" oninput="recalcTotalRxNew('${d.id}')">
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <label style="color:var(--danger);">รวม</label>
-            <input type="number" step="1" id="newrxtotal-${d.id}" value="${Math.ceil(d.tabs * d.f_num * d.days)}" style="width:60px; font-weight:bold; color:var(--danger);">
-          </div>
+        <div class="rx-field-row">
+          <span class="rx-field-label">จน.วัน</span>
+          <input class="rx-field-input rx-field-sm" type="number" id="rxdays-${d.id}" value="${d.days}" oninput="recalcRx('${d.id}',${d.f_num})">
+          <span class="rx-field-label" style="color:var(--text-dim);margin-left:6px;">รวม</span>
+          <input class="rx-field-input rx-field-total" type="number" id="rxtotal-${d.id}" value="${Math.ceil(d.tabs * d.f_num * d.days)}">
         </div>
       </div>
     </div>`).join("");
@@ -307,376 +864,63 @@ window.openRxModal = function(animalId, animalName, w, species) {
   document.getElementById("rxModal").classList.add("active");
 };
 
+window.toggleRxDrug = function(did) {
+  const card = document.getElementById(`rxcard-${did}`);
+  const chk  = document.getElementById(`rxchk-${did}`);
+  chk.checked = !chk.checked;
+  card.classList.toggle("selected", chk.checked);
+};
+
+window.recalcRx = function(did, fNum) {
+  const dose = parseFloat((document.getElementById(`rxdose-${did}`).value||"").match(/[\d.]+/)?.[0]) || 0;
+  const freq = parseFloat((document.getElementById(`rxfreq-${did}`).value||"").match(/[\d.]+/)?.[0]) || fNum || 1;
+  const days = parseFloat(document.getElementById(`rxdays-${did}`).value) || 0;
+  document.getElementById(`rxtotal-${did}`).value = Math.ceil(dose * freq * days);
+};
+
 window.closeRxModal = function() {
   document.getElementById("rxModal").classList.remove("active");
   currentRxAnimalId = null;
 };
 
-// บันทึกยาใหม่เข้าฐานข้อมูล
 window.saveNewRx = async function() {
-  if(!currentRxAnimalId) return;
-  const rxInserts = [];
-  
-  Array.from(document.querySelectorAll(`input[id^="newrxchk-"]:checked`)).forEach(el => {
-    const did = el.id.replace("newrxchk-", "");
-    
-    // ดึงชื่อยา ถ้าเป็น Custom ให้เอาจากช่อง Input
+  if (!currentRxAnimalId) return;
+  const checked = [...document.querySelectorAll(`input[id^="rxchk-"]:checked`)];
+  if (!checked.length) return alert("กรุณาเลือกยาอย่างน้อย 1 รายการ");
+
+  const rxInserts = checked.map(el => {
+    const did = el.id.replace("rxchk-","");
     let drugName = el.dataset.name;
-    if(did.startsWith("custom")) {
-      const customNameInput = document.getElementById(`custom-name-${did}`);
-      if(customNameInput && customNameInput.value.trim() !== "") {
-        drugName = customNameInput.value.trim();
-      } else {
-        drugName = "ยาเพิ่มเติม";
-      }
+    if (did === "cstm") {
+      const cn = document.getElementById(`custom-name-${did}`);
+      drugName = cn?.value.trim() || "ยาเพิ่มเติม";
     }
-
-    rxInserts.push({
-      animal_id:    currentRxAnimalId,
-      drug_id:      drugName, 
-      dose:         document.getElementById(`newrxdose-${did}`).value,
-      freq:         document.getElementById(`newrxfreq-${did}`).value,
-      days:         parseInt(document.getElementById(`newrxdays-${did}`).value) || 5,
-      total_pills:  parseFloat(document.getElementById(`newrxtotal-${did}`).value) || 0 
-    });
+    return {
+      animal_id:   currentRxAnimalId,
+      drug_id:     drugName,
+      dose:        document.getElementById(`rxdose-${did}`).value,
+      freq:        document.getElementById(`rxfreq-${did}`).value,
+      days:        parseInt(document.getElementById(`rxdays-${did}`).value) || 5,
+      total_pills: parseFloat(document.getElementById(`rxtotal-${did}`).value) || 0,
+    };
   });
 
-  if(rxInserts.length === 0) {
-    alert("กรุณาเลือกยาที่ต้องการสั่งจ่ายอย่างน้อย 1 รายการ");
-    return;
-  }
-
-  const btnSave = document.querySelector("#rxModal .btn-save");
-  btnSave.innerText = "⏳ กำลังบันทึก...";
-  btnSave.disabled = true;
-
+  const saveBtn = document.getElementById("btnModalSave");
+  saveBtn.textContent = "⏳ กำลังบันทึก..."; saveBtn.disabled = true;
   const { error } = await supabase.from("vasd_prescription").insert(rxInserts);
-  
-  btnSave.innerText = "💾 บันทึกการสั่งยาเพิ่ม";
-  btnSave.disabled = false;
+  saveBtn.textContent = "💾 บันทึกการสั่งยาเพิ่ม"; saveBtn.disabled = false;
 
-  if(error) {
-    alert("❌ บันทึกไม่สำเร็จ: " + error.message);
-  } else {
-    closeRxModal();
-  }
+  if (error) alert("❌ บันทึกไม่สำเร็จ: " + error.message);
+  else { closeRxModal(); loadPrescriptions(); }
 };
 
-/* ── MAIN LOGIC ── */
-async function loadPrescriptions() {
-  try {
-    const { data: eventId } = await supabase.rpc("get_today_event");
-
-    const { data: queueData, error } = await supabase
-      .from("vasd_queue")
-      .select(`
-        id, animal_id, status,
-        vasd_animal ( 
-          event_id, queue_number, animal_name, species, sex, actual_weight, est_weight,
-          vasd_owner(owner_name, phone),
-          vasd_service(service_type),
-          vasd_prescription ( id, drug_id, dose, freq, days, total_pills )
-        )
-      `)
-      .in("status", ["recovery", "ready_to_go_home"])
-      .order("updated_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching Rx:", error);
-      document.getElementById("rx-container").innerHTML = `<div class="empty-state text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</div>`;
-      return;
-    }
-
-    const animalsWithRx = (queueData || []).filter(q => 
-      q.vasd_animal && 
-      q.vasd_animal.event_id === eventId && 
-      q.vasd_animal.vasd_prescription && 
-      q.vasd_animal.vasd_prescription.length > 0
-    );
-
-    const container = document.getElementById("rx-container");
-    container.innerHTML = "";
-
-    if (animalsWithRx.length === 0) {
-      container.innerHTML = `<div class="empty-state">✅ ไม่มีรายการรอจัดยาในขณะนี้</div>`;
-      return;
-    }
-
-    animalsWithRx.forEach((q, index) => {
-      const animal = q.vasd_animal;
-      const ownerName = animal.vasd_owner ? animal.vasd_owner.owner_name : 'ไม่ระบุ';
-      const species = animal.species === "ส" ? "สุนัข" : (animal.species === "ม" ? "แมว" : animal.species);
-      const rxList = animal.vasd_prescription; 
-      const weight = animal.actual_weight || animal.est_weight || 0;
-
-      // ✅ เช็คเงื่อนไขและเตรียมข้อความแสดงบริการ
-      const hasVaccine = (animal.vasd_service || []).some(s => s.service_type.includes("วัคซีน"));
-      const servicesText = (animal.vasd_service || []).map(s => s.service_type).join(", ") || "ไม่มีข้อมูลบริการ";
-
-      const allRxIds = rxList.map(rx => rx.id).join(",");
-
-      let rxRows = rxList.map((rx, idx) => `
-        <tr id="rx-row-${rx.id}">
-          <td style="width:5%; text-align:center;">${idx + 1}</td>
-          <td style="width:25%;">
-            <input type="text" class="rx-input rx-drug" value="${rx.drug_id || ''}" readonly placeholder="ชื่อยา">
-          </td>
-          <td style="width:20%;">
-            <input type="text" class="rx-input rx-dose" value="${rx.dose || ''}" readonly placeholder="ปริมาณ">
-          </td>
-          <td style="width:20%;">
-            <input type="text" class="rx-input rx-freq" value="${rx.freq || ''}" readonly placeholder="ความถี่">
-          </td>
-          <td style="width:10%;">
-            <input type="number" class="rx-input rx-days" value="${rx.days || ''}" readonly placeholder="วัน" style="width:60px;">
-          </td>
-          <td style="width:10%;">
-            <input type="number" step="0.25" class="rx-input rx-total text-danger" value="${rx.total_pills || 0}" readonly placeholder="เม็ด" style="width:60px; font-weight:bold;">
-          </td>
-          <td style="width:10%; white-space:nowrap;">
-            <button class="btn btn-print btn-sm" onclick="printRx('${rx.id}')" title="พิมพ์ฉลากยา">🖨️</button>
-            <button class="btn btn-edit btn-sm btn-action-edit" onclick="editRx(this)" title="แก้ไข">✏️</button>
-            <button class="btn btn-save btn-sm btn-action-save" onclick="saveRx(this, '${rx.id}')" style="display:none;" title="บันทึก">💾</button>
-            <button class="btn btn-delete btn-sm" onclick="deleteRx('${rx.id}')" title="ลบรายการ">🗑️</button>
-          </td>
-        </tr>
-      `).join("");
-
-      // ✅ สร้างปุ่มสมุดวัคซีนแบบแสดงตามเงื่อนไข
-      let vaccineBtnHTML = hasVaccine 
-        ? `<button class="btn btn-print-all" style="background:var(--warning);" onclick="printVaccine('${q.animal_id}')">📘 พิมพ์สมุดวัคซีน</button>` 
-        : "";
-
-      const card = document.createElement("div");
-      card.className = "rx-card";
-      card.style.animationDelay = `${(index * 0.1) + 0.1}s`; 
-      
-      card.innerHTML = `
-        <div class="rx-header">
-          <div>
-            <h3>🐾 ${animal.animal_name} <span style="font-weight:normal;">(${species})</span> <span style="margin-left:8px;font-size:13px;">| เจ้าของ: ${ownerName}</span></h3>
-            <div style="font-size:13px; color:var(--teal); margin-top:6px; font-weight:600;">🩺 บริการที่รับ: ${servicesText}</div>
-          </div>
-          <div class="rx-header-actions">
-            <button class="btn btn-add-rx" onclick="openRxModal('${q.animal_id}', '${animal.animal_name}', ${weight}, '${animal.species}')">💊 จ่ายยาเพิ่ม</button>
-            
-            <button class="btn btn-print-all" style="background:var(--teal);" onclick="printBag('${q.animal_id}')">🛍️ พิมพ์ถุงยา</button>
-            ${vaccineBtnHTML}
-            <button class="btn btn-print-all" onclick="printMultipleRx('${allRxIds}')">🖨️ ซองยาทั้งหมด</button>
-            
-            <button class="btn btn-dispense" onclick="markAsDispensed('${q.animal_id}')">✔️ ส่งกลับบ้าน</button>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th style="text-align:center;">#</th>
-                <th>รายการยา (Drug ID)</th>
-                <th>ปริมาณ/ครั้ง</th>
-                <th>ความถี่</th>
-                <th>จำนวนวัน</th>
-                <th>รวม (เม็ด)</th>
-                <th>จัดการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rxRows}
-            </tbody>
-          </table>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  } catch (err) {
-    console.error("Javascript Error:", err);
-    document.getElementById("rx-container").innerHTML = `<div class="empty-state text-danger">เกิดข้อผิดพลาดในระบบ: ${err.message}</div>`;
-  }
-}
-
-// ส่งกลับบ้าน
-window.markAsDispensed = async function(animalId) {
-  if(confirm("ยืนยันว่าทำการจัดยาเรียบร้อย และต้องการส่งสัตว์กลับบ้าน?\n(ระบบจะเปลี่ยนสถานะเป็น 'รับกลับแล้ว')")) {
-    const { error } = await supabase.from("vasd_queue").update({ status: "done", updated_at: new Date() }).eq("animal_id", animalId);
-    if (error) { alert("❌ เกิดข้อผิดพลาด"); } else { loadPrescriptions(); }
-  }
-};
-
-// แก้ไขยา
-window.editRx = function(btn) {
-  const tr = btn.closest("tr");
-  const inputs = tr.querySelectorAll(".rx-input");
-  inputs.forEach(input => input.removeAttribute("readonly"));
-  tr.querySelector(".btn-action-edit").style.display = "none";
-  tr.querySelector(".btn-action-save").style.display = "inline-flex";
-};
-
-window.saveRx = async function(btn, rxId) {
-  const tr = btn.closest("tr");
-  const drug_id = tr.querySelector(".rx-drug").value;
-  const dose = tr.querySelector(".rx-dose").value;
-  const freq = tr.querySelector(".rx-freq").value;
-  const days = parseInt(tr.querySelector(".rx-days").value) || 0;
-  const total_pills = parseFloat(tr.querySelector(".rx-total").value) || 0;
-
-  const { error } = await supabase.from("vasd_prescription").update({ drug_id, dose, freq, days, total_pills }).eq("id", rxId);
-  if (error) return alert("❌ บันทึกไม่สำเร็จ: " + error.message);
-
-  const inputs = tr.querySelectorAll(".rx-input");
-  inputs.forEach(input => input.setAttribute("readonly", true));
-  tr.querySelector(".btn-action-save").style.display = "none";
-  tr.querySelector(".btn-action-edit").style.display = "inline-flex";
-};
-
-window.deleteRx = async function(rxId) {
-  if(!confirm("คุณต้องการลบรายการยานี้ใช่หรือไม่?")) return;
-  const { error } = await supabase.from("vasd_prescription").delete().eq("id", rxId);
-  if (error) alert("❌ ลบไม่สำเร็จ"); else document.getElementById(`rx-row-${rxId}`).remove();
-};
-
-/* ─── การจัดการพิมพ์ (Print) ─── */
-
-// สร้างวันที่จำลองสำหรับ {{today}} และ {{next7day}}
-function getTodayAndNext7() {
-  const now = new Date();
-  const todayStr = now.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const next7 = new Date();
-  next7.setDate(next7.getDate() + 7);
-  const next7Str = next7.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  return { todayStr, next7Str };
-}
-
-// 1. พิมพ์ฉลากยาแบบเดี่ยว/ซองยา (เจาะจงยาแต่ละตัว)
-async function generateStickerHTML(rxId) {
-  const { data: rx, error } = await supabase.from("vasd_prescription").select(`*, vasd_animal ( queue_number, animal_name, species, sex, vasd_owner ( owner_name, phone ), vasd_service ( service_type ) )`).eq("id", rxId).single();
-  if (error || !rx) return null;
-
-  let { data: tmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", "envelope").single();
-  if (!tmpl || !tmpl.config) return null;
-
-  const a = rx.vasd_animal;
-  const spcText = a.species === "ส" ? "สุนัข" : (a.species === "ม" ? "แมว" : a.species);
-  const ownerName = a.vasd_owner?.owner_name || "";
-  const phone = a.vasd_owner?.phone || "ไม่ระบุ";
-  const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
-
-  const { todayStr, next7Str } = getTodayAndNext7();
-
-  let html = `<div class="sticker-page">`;
-  tmpl.config.forEach(l => {
-    let text = l.text
-      .replace(/{{queue_number}}/g, a.queue_number || "")
-      .replace(/{{animal_name}}/g, a.animal_name || "")
-      .replace(/{{species}}/g, spcText)
-      .replace(/{{sex}}/g, a.sex || "")
-      .replace(/{{owner_name}}/g, ownerName)
-      .replace(/{{phone}}/g, phone)
-      .replace(/{{services}}/g, services)
-      .replace(/{{drug_id}}/g, rx.drug_id || "")
-      .replace(/{{dose}}/g, rx.dose || "")
-      .replace(/{{freq}}/g, rx.freq || "")
-      .replace(/{{days}}/g, rx.days ? rx.days + " วัน" : "")
-      .replace(/{{total_pills}}/g, rx.total_pills ? rx.total_pills + " เม็ด" : "")
-      .replace(/{{today}}/g, todayStr)
-      .replace(/{{next7day}}/g, next7Str);
-
-    html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
-  });
-  html += `</div>`;
-  return html;
-}
-
-// 2. พิมพ์แบบไม่เจาะจงยา (ถุงยา หรือ สมุดวัคซีน)
-async function generateGeneralStickerHTML(animalId, templateType) {
-  const { data: a, error } = await supabase.from("vasd_animal").select(`queue_number, animal_name, species, sex, vasd_owner ( owner_name, phone ), vasd_service ( service_type )`).eq("id", animalId).single();
-  if (error || !a) return null;
-
-  const { data: tmpl } = await supabase.from("vasd_print_template").select("config").eq("template_type", templateType).single();
-  if (!tmpl || !tmpl.config) return null;
-
-  const spcText = a.species === "ส" ? "สุนัข" : (a.species === "ม" ? "แมว" : a.species);
-  const ownerName = a.vasd_owner?.owner_name || "";
-  const phone = a.vasd_owner?.phone || "ไม่ระบุ";
-  const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
-
-  const { todayStr, next7Str } = getTodayAndNext7();
-
-  let html = `<div class="sticker-page">`;
-  tmpl.config.forEach(l => {
-    let text = l.text
-      .replace(/{{queue_number}}/g, a.queue_number || "")
-      .replace(/{{animal_name}}/g, a.animal_name || "")
-      .replace(/{{species}}/g, spcText)
-      .replace(/{{sex}}/g, a.sex || "")
-      .replace(/{{owner_name}}/g, ownerName)
-      .replace(/{{phone}}/g, phone)
-      .replace(/{{services}}/g, services)
-      .replace(/{{drug_id}}/g, "")
-      .replace(/{{dose}}/g, "")
-      .replace(/{{freq}}/g, "")
-      .replace(/{{days}}/g, "")
-      .replace(/{{total_pills}}/g, "")
-      .replace(/{{today}}/g, todayStr)
-      .replace(/{{next7day}}/g, next7Str);
-
-    html += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
-  });
-  html += `</div>`;
-  return html;
-}
-
-window.printRx = async function(rxId) {
-  const content = await generateStickerHTML(rxId);
-  if (!content) { alert("⚠️ ไม่พบข้อมูล หรือยังไม่ได้ตั้งค่า Template 'ซองยา' (envelope)"); return; }
-  openPrintWindow(content);
-};
-
-window.printMultipleRx = async function(rxIdsStr) {
-  const rxIds = rxIdsStr.split(",");
-  let allContents = "";
-  for (let id of rxIds) {
-    const content = await generateStickerHTML(id);
-    if (content) allContents += content;
-  }
-  if (allContents === "") { alert("⚠️ ไม่พบข้อมูลให้พิมพ์ หรือยังไม่ได้ตั้งค่า Template 'ซองยา'"); return; }
-  openPrintWindow(allContents);
-};
-
-// ✅ ฟังก์ชันพิมพ์ถุงยา (Bag)
-window.printBag = async function(animalId) {
-  const content = await generateGeneralStickerHTML(animalId, "bag");
-  if (!content) { alert("⚠️ ไม่พบข้อมูล หรือยังไม่ได้สร้าง Template 'bag' ในระบบ"); return; }
-  openPrintWindow(content);
-};
-
-// ✅ ฟังก์ชันพิมพ์สมุดวัคซีน (Vaccine)
-window.printVaccine = async function(animalId) {
-  const content = await generateGeneralStickerHTML(animalId, "vaccine");
-  if (!content) { alert("⚠️ ไม่พบข้อมูล หรือยังไม่ได้สร้าง Template 'vaccine' ในระบบ"); return; }
-  openPrintWindow(content);
-};
-
-function openPrintWindow(htmlContent) {
-  const pw = window.open("","_blank","width=800,height=600");
-  pw.document.write(`<html><head><title>Print Job</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-      body { margin: 0; }
-      .sticker-page { position: relative; width: 80mm; height: 50mm; background: #fff; overflow: hidden; page-break-after: always; }
-      .line { position: absolute; white-space: pre-wrap; word-break: break-word; padding-right: 5px; box-sizing: border-box; color: #000 !important; }
-      @page { size: 80mm 50mm; margin: 0; }
-    </style>
-    </head><body>${htmlContent}
-    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},300);});}<\/script></body></html>`);
-  pw.document.close();
-}
+/* ── Real-time ── */
+supabase.channel("vasd-rx-live")
+  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_queue" },        loadPrescriptions)
+  .on("postgres_changes", { event:"*", schema:"public", table:"vasd_prescription" }, loadPrescriptions)
+  .subscribe();
 
 loadPrescriptions();
-
-supabase.channel("vasd-rx-live")
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadPrescriptions)
-  .on("postgres_changes", { event: "*", schema: "public", table: "vasd_prescription" }, loadPrescriptions)
-  .subscribe();
 </script>
 </body>
 </html>
