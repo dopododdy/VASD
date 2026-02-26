@@ -2,210 +2,469 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ลงทะเบียนสัตว์</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>ลงทะเบียนสัตว์ – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS (matches index.html)
+═══════════════════════════════════════════ */
 :root {
-  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
-  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
-  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --radius:14px; --radius-sm:8px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);}
+  --navy:       #0b1929;
+  --navy-mid:   #112240;
+  --navy-card:  #162d4a;
+  --teal:       #0ea5a0;
+  --teal-light: #14c4bc;
+  --teal-glow:  rgba(14,165,160,0.25);
+  --amber:      #f59e0b;
+  --rose:       #ef4444;
+  --rose-soft:  rgba(239,68,68,0.15);
+  --emerald:    #10b981;
+  --emerald-soft: rgba(16,185,129,0.15);
+  --violet:     #8b5cf6;
 
-/* HIDDEN font preloader */
-.font-preload{position:absolute;opacity:0;pointer-events:none;z-index:-9999;}
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --surface-3:  rgba(255,255,255,0.10);
+  --border:     rgba(255,255,255,0.08);
+  --border-2:   rgba(255,255,255,0.14);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #4a5568;
 
-/* HEADER */
-header{
-  background:var(--navy);padding:0 32px;display:flex;
-  justify-content:space-between;align-items:center;height:68px;
-  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.25);
-}
-.header-brand{display:flex;align-items:center;gap:14px;}
-.brand-icon{
-  width:40px;height:40px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
-  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
-}
-.brand-text h1{font-size:17px;font-weight:700;color:#fff;line-height:1.2;}
-.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
-.btn-home{
-  padding:8px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);
-  border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);
-  cursor:pointer;transition:background 0.2s;
-}
-.btn-home:hover{background:rgba(255,255,255,0.18);}
-
-/* CONTAINER */
-.container{max-width:1200px;margin:0 auto;padding:28px 24px;display:flex;flex-direction:column;gap:20px;}
-
-/* CARD */
-.card{
-  background:var(--surface);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  overflow:hidden;animation:fadeUp 0.4s ease both;
-}
-.card:nth-child(1){animation-delay:0.05s;}
-.card:nth-child(2){animation-delay:0.1s;}
-
-.card-header{
-  padding:16px 22px 14px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;
-}
-.card-header-icon{
-  width:32px;height:32px;border-radius:8px;
-  background:linear-gradient(135deg,var(--teal-light),var(--accent));
-  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;
-}
-.card-header h4{font-size:15px;font-weight:700;color:var(--navy);margin:0;}
-
-.card-body{padding:20px 22px;}
-
-/* OWNER GRID */
-.owner-grid{display:grid;grid-template-columns:2fr 1fr auto;gap:12px;align-items:start;}
-@media(max-width:640px){.owner-grid{grid-template-columns:1fr;}}
-
-input,select,textarea{
-  width:100%;padding:10px 12px;font-size:14px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);
-  background:#fff;outline:none;transition:border-color 0.2s,box-shadow 0.2s;
-}
-input:focus,select:focus,textarea:focus{
-  border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(34,145,154,0.12);
-}
-textarea{resize:vertical;min-height:44px;}
-input::placeholder{color:var(--text-muted);}
-
-/* ANIMAL TABLE */
-.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse;min-width:900px;}
-thead tr{background:linear-gradient(135deg,var(--navy),#1a2f47);}
-thead th{
-  padding:12px 10px;font-size:11px;font-weight:700;
-  letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.8);
-  border:none;text-align:center;
-}
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
-tbody tr:last-child{border-bottom:none;}
-tbody tr:hover{background:#fafbfc;}
-tbody td{padding:10px;border:none;vertical-align:top;text-align:center;}
-
-/* SERVICE CHECKBOXES */
-.service-line{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;text-align:left;}
-.service-line label{
-  display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;
-  background:#f8f9fa;padding:7px 10px;border:1px solid var(--border);border-radius:6px;
-  user-select:none;transition:all 0.15s;
-}
-.service-line label:hover{background:#e9ecef;border-color:#ced4da;}
-.service-line label:has(input:checked){background:#e6f6f4;border-color:#22919a;color:#1a6b72;font-weight:600;}
-.service-line input[type="checkbox"]{width:auto;margin:0;accent-color:var(--teal-light);}
-
-/* HEALTH NOTE WARNING */
-.note-cell{transition:background 0.2s;}
-.note-cell.important-warning{background:#fffbeb !important;}
-.note-cell.important-warning textarea{border-color:var(--warning);background:#fffbeb;}
-
-/* BUTTONS */
-.btn{
-  padding:9px 18px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  border:none;border-radius:var(--radius-sm);cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:6px;
-}
-.btn:hover{opacity:0.88;transform:translateY(-1px);}
-.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-.btn-add   {background:#edf2f7;color:var(--text);}
-.btn-paste {background:var(--success);color:#fff;}
-.btn-del   {background:var(--danger);color:#fff;padding:6px 10px;font-size:12px;}
-.btn-submit{
-  background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;
-  font-size:16px;padding:14px 36px;border-radius:10px;box-shadow:var(--shadow-md);
+  --radius-xs:  6px;
+  --radius-sm:  10px;
+  --radius:     16px;
+  --radius-lg:  22px;
 }
 
-.card-footer{
-  padding:16px 22px;border-top:1px solid var(--border);background:#fafbfc;
-}
-.submit-wrap{
-  padding:0;margin-top:4px;display:flex;justify-content:center;
-  animation:fadeUp 0.4s 0.15s ease both;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow-x: hidden;
 }
 
-/* PRINT */
-#printArea{display:none;}
-@media print{
-  body > :not(#printArea){display:none!important;}
-  #printArea{display:block!important;}
-  .sticker-page{position:relative;width:80mm;height:50mm;page-break-after:always;overflow:hidden;background:#fff;}
-  .line{position:absolute;white-space:pre-wrap;word-break:break-word;box-sizing:border-box;padding-right:5px;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  @page{size:80mm 50mm;margin:0;}
+/* Mesh background */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.07) 0%, transparent 60%);
 }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+/* Font preload */
+.font-preload { position: absolute; opacity: 0; pointer-events: none; z-index: -9999; }
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  box-shadow: 0 0 20px var(--teal-glow);
+}
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.3px;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+
+.btn-home {
+  padding: 8px 16px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-home:hover { background: var(--surface-3); color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 960px; margin: 0 auto;
+  padding: 24px 16px 100px;
+  width: 100%; display: flex; flex-direction: column; gap: 16px;
+}
+
+.page-title-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+  animation: slideUp 0.4s ease both;
+}
+.page-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+}
+.page-sub { font-size: 12px; color: var(--text-dim); }
+
+/* ─── Section Title ─── */
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+/* ═══════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: slideUp 0.4s ease both;
+}
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.10s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface-2);
+}
+.card-header-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
+  box-shadow: 0 0 12px var(--teal-glow);
+}
+.card-header h4 { font-size: 14px; font-weight: 700; color: #fff; margin: 0; }
+.card-header-sub { font-size: 11px; color: var(--text-dim); margin-left: auto; }
+
+.card-body { padding: 18px; }
+.card-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* ═══════════════════════════════════════════
+   FORM FIELDS
+═══════════════════════════════════════════ */
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-label { font-size: 11px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.5px; text-transform: uppercase; }
+
+input, select, textarea {
+  width: 100%; padding: 10px 12px;
+  font-size: 14px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -webkit-appearance: none;
+}
+input::placeholder { color: var(--text-faint); }
+input:focus, select:focus, textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-glow);
+  background: rgba(255,255,255,0.08);
+}
+select { cursor: pointer; }
+select option { background: var(--navy-mid); color: var(--text); }
+textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
+
+/* Owner row */
+.owner-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px; align-items: end;
+}
+@media (max-width: 560px) {
+  .owner-row { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn {
+  padding: 10px 16px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: opacity 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+.btn-ghost {
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border-2);
+}
+.btn-ghost:hover { background: var(--surface-3); color: var(--text); }
+
+.btn-paste {
+  background: var(--emerald-soft); color: var(--emerald);
+  border: 1px solid rgba(16,185,129,0.3);
+}
+.btn-paste:hover { background: rgba(16,185,129,0.22); }
+
+.btn-add {
+  background: var(--surface-3); color: var(--text);
+  border: 1px solid var(--border-2);
+}
+.btn-add:hover { background: rgba(14,165,160,0.12); border-color: var(--teal); color: var(--teal-light); }
+
+.btn-del {
+  padding: 7px 10px; font-size: 14px;
+  background: var(--rose-soft); color: var(--rose);
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.btn-del:hover { background: rgba(239,68,68,0.22); }
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  color: #fff; font-size: 15px; padding: 14px 36px;
+  border-radius: var(--radius); width: 100%; justify-content: center;
+  box-shadow: 0 4px 24px var(--teal-glow);
+  letter-spacing: 0.3px;
+}
+.btn-submit:hover { opacity: 0.9; box-shadow: 0 6px 30px var(--teal-glow); }
+
+/* ═══════════════════════════════════════════
+   ANIMAL CARDS (mobile-first, card per row)
+═══════════════════════════════════════════ */
+#animalList { display: flex; flex-direction: column; gap: 12px; }
+
+.animal-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  animation: slideUp 0.3s ease both;
+  transition: border-color 0.2s;
+}
+.animal-card:hover { border-color: rgba(14,165,160,0.3); }
+
+.animal-card-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.animal-card-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+  font-family: "Outfit", sans-serif;
+}
+.animal-card-label {
+  font-size: 13px; font-weight: 600; color: var(--text); flex: 1;
+}
+
+/* animal fields grid */
+.animal-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 80px;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+@media (max-width: 560px) {
+  .animal-fields { grid-template-columns: 1fr 1fr; }
+}
+
+/* service checkboxes */
+.svc-section { margin-bottom: 12px; }
+.svc-label-row {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 8px;
+}
+.svc-grid {
+  display: flex; flex-wrap: wrap; gap: 7px;
+}
+.svc-chip {
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer; font-size: 12px; font-weight: 500;
+  background: var(--surface); border: 1px solid var(--border-2);
+  color: var(--text-dim); border-radius: 20px;
+  padding: 6px 12px;
+  user-select: none;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.svc-chip:hover { background: var(--surface-3); border-color: var(--teal); color: var(--text); }
+.svc-chip input[type="checkbox"] { display: none; }
+.svc-chip.checked {
+  background: rgba(14,165,160,0.15);
+  border-color: var(--teal);
+  color: var(--teal-light);
+  font-weight: 600;
+}
+.svc-chip.checked::before { content: "✓ "; font-size: 11px; }
+
+/* health note */
+.note-section { }
+.note-section textarea {
+  font-size: 13px; min-height: 52px;
+}
+.note-section textarea.has-content {
+  border-color: var(--amber);
+  background: rgba(245,158,11,0.06);
+  color: var(--amber);
+}
+.note-section textarea.has-content::placeholder { color: rgba(245,158,11,0.4); }
+
+/* delete btn position */
+.btn-del-animal {
+  position: absolute; top: 12px; right: 12px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 32px 16px;
+  color: var(--text-faint);
+}
+.empty-state-icon { font-size: 40px; margin-bottom: 10px; }
+.empty-state-text { font-size: 13px; }
+
+/* ═══════════════════════════════════════════
+   SUBMIT AREA
+═══════════════════════════════════════════ */
+.submit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  animation: slideUp 0.4s 0.2s ease both;
+}
+
+/* ═══════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════ */
+#printArea { display: none; }
+@media print {
+  body > :not(#printArea) { display: none !important; }
+  #printArea { display: block !important; }
+  .sticker-page {
+    position: relative; width: 80mm; height: 50mm;
+    page-break-after: always; overflow: hidden; background: #fff;
+  }
+  .line {
+    position: absolute; white-space: pre-wrap; word-break: break-word;
+    box-sizing: border-box; padding-right: 5px; color: #000 !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  @page { size: 80mm 50mm; margin: 0; }
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE TWEAKS
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  header { height: 56px; padding: 0 14px; }
+  .brand-sub { display: none; }
+  .brand-name { font-size: 14px; }
+  .wrap { padding: 18px 12px 80px; }
+  .page-title { font-size: 18px; }
+  .card-body { padding: 14px; }
+  .card-footer { padding: 10px 14px; }
+}
 </style>
 </head>
 <body>
 
+<!-- font preload -->
 <div class="font-preload">
   <span style="font-family:'Kanit',sans-serif;">โหลด</span>
   <span style="font-family:'Prompt',sans-serif;">โหลด</span>
   <span style="font-family:'Sarabun',sans-serif;">โหลด</span>
 </div>
 
+<!-- ── HEADER ── -->
 <header>
-  <div class="header-brand">
-    <div class="brand-icon">📝</div>
-    <div class="brand-text">
-      <h1>ลงทะเบียนสัตว์</h1>
-      <span>RMUTTO – Veterinary Academic Service Division</span>
+  <div class="brand">
+    <div class="brand-logo">📝</div>
+    <div>
+      <div class="brand-name">ลงทะเบียนสัตว์</div>
+      <div class="brand-sub">RMUTTO – Veterinary Academic Service Division</div>
     </div>
   </div>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
 
-<div class="container">
+<!-- ── CONTENT ── -->
+<div class="wrap">
 
-  <!-- OWNER CARD -->
+  <!-- Page title -->
+  <div class="page-title-row">
+    <div>
+      <div class="page-title">ลงทะเบียนสัตว์เข้ารับบริการ</div>
+      <div class="page-sub">กรอกข้อมูลเจ้าของและสัตว์ที่ต้องการรับบริการ</div>
+    </div>
+  </div>
+
+  <!-- ── OWNER CARD ── -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">👤</div>
       <h4>ข้อมูลเจ้าของสัตว์</h4>
     </div>
     <div class="card-body">
-      <div class="owner-grid">
-        <input id="ownerName" placeholder="ชื่อเจ้าของสัตว์ (บังคับ)" required>
-        <input id="phone" type="tel" placeholder="เบอร์โทร (ไม่บังคับ)">
-        <button type="button" class="btn btn-paste" onclick="window.pasteOwnerName()">📋 ดึงชื่อจากบัตร</button>
+      <div class="owner-row">
+        <div class="field-group">
+          <label class="field-label">ชื่อเจ้าของ *</label>
+          <input id="ownerName" placeholder="ระบุชื่อ-นามสกุล" required>
+        </div>
+        <div class="field-group">
+          <label class="field-label">เบอร์โทร</label>
+          <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
+        </div>
+        <div class="field-group">
+          <label class="field-label" style="opacity:0">ดึงชื่อ</label>
+          <button type="button" class="btn btn-paste" onclick="window.pasteOwnerName()">📋 วางจากคลิปบอร์ด</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ANIMALS CARD -->
+  <!-- ── ANIMALS CARD ── -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">🐾</div>
-      <h4>ข้อมูลสัตว์</h4>
+      <h4>รายการสัตว์</h4>
+      <span class="card-header-sub" id="animalCount">0 รายการ</span>
     </div>
-    <div class="card-body" style="padding-bottom:0;">
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:14%">ชื่อสัตว์</th>
-              <th style="width:8%">ชนิด</th>
-              <th style="width:8%">เพศ</th>
-              <th style="width:8%">นน. (กก.)</th>
-              <th style="width:36%">บริการ</th>
-              <th style="width:16%">บันทึกสุขภาพ</th>
-              <th style="width:10%">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="animalBody"></tbody>
-        </table>
+    <div class="card-body">
+      <div id="animalList">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-state-icon">🐾</div>
+          <div class="empty-state-text">กด "เพิ่มรายการสัตว์" เพื่อเริ่มต้น</div>
+        </div>
       </div>
     </div>
     <div class="card-footer">
@@ -213,8 +472,8 @@ tbody td{padding:10px;border:none;vertical-align:top;text-align:center;}
     </div>
   </div>
 
-  <!-- SUBMIT -->
-  <div class="submit-wrap">
+  <!-- ── SUBMIT ── -->
+  <div class="submit-card">
     <button type="button" id="btnSaveAll" class="btn btn-submit" onclick="window.saveAll()">
       💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว
     </button>
@@ -224,10 +483,29 @@ tbody td{padding:10px;border:none;vertical-align:top;text-align:center;}
 
 <div id="printArea"></div>
 
+<!-- ════════════════════════════════════════
+     SCRIPT – logic identical to original
+════════════════════════════════════════ -->
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-/* ─── Paste owner name ─── */
+let animalCount = 0;
+
+/* ── Count display ── */
+function refreshCount() {
+  const rows = document.querySelectorAll(".animal-card");
+  document.getElementById("animalCount").textContent = `${rows.length} รายการ`;
+  document.getElementById("emptyState").style.display = rows.length === 0 ? "block" : "none";
+  /* re-number badges */
+  rows.forEach((card, i) => {
+    const num = card.querySelector(".animal-card-num");
+    if (num) num.textContent = i + 1;
+    const lbl = card.querySelector(".animal-card-label");
+    if (lbl) lbl.textContent = `สัตว์รายการที่ ${i + 1}`;
+  });
+}
+
+/* ── Paste owner name ── */
 window.pasteOwnerName = async function () {
   try {
     const text = await navigator.clipboard.readText();
@@ -237,142 +515,216 @@ window.pasteOwnerName = async function () {
   } catch { alert("⚠️ ไม่สามารถอ่าน Clipboard ได้"); }
 };
 
-/* ─── Phone format ─── */
-document.getElementById("phone").addEventListener("input", function() {
-  let v = this.value.replace(/\D/g,"").slice(0,10);
-  if (v.length>6) v=v.replace(/(\d{3})(\d{3})(\d+)/,"$1-$2-$3");
-  else if (v.length>3) v=v.replace(/(\d{3})(\d+)/,"$1-$2");
-  this.value=v;
+/* ── Phone format ── */
+document.getElementById("phone").addEventListener("input", function () {
+  let v = this.value.replace(/\D/g, "").slice(0, 10);
+  if (v.length > 6)      v = v.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d+)/, "$1-$2");
+  this.value = v;
 });
 
-/* ─── Services ─── */
-window.serviceHTML = function(sex, species) {
-  const nt = sex==="ผู้"?"ทำหมันเพศผู้":"ทำหมันเพศเมีย";
-  return `<div class="service-line">
-    <label><input type="checkbox" class="svc" checked value="${nt}"> ${nt}</label>
-    <label><input type="checkbox" class="svc" value="ฉีดวัคซีนพิษสุนัขบ้า"> ฉีดวัคซีนพิษสุนัขบ้า</label>
-    ${species==="ส"?`<label><input type="checkbox" class="svc" value="ฉีดยาป้องกันเห็บ"> ฉีดยาป้องกันเห็บ</label>`:""}
-    <label><input type="checkbox" class="svc" value="ตรวจเลือด"> ตรวจเลือด</label>
-    <label><input type="checkbox" class="svc" value="ฝังไมโครชิฟ"> ฝังไมโครชิฟ</label>
-  </div>`;
-};
+/* ── Build service chips ── */
+function buildSvcChips(container, sex, species) {
+  const neuter = sex === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย";
+  const services = [
+    neuter,
+    "ฉีดวัคซีนพิษสุนัขบ้า",
+    ...(species === "ส" ? ["ฉีดยาป้องกันเห็บ"] : []),
+    "ตรวจเลือด",
+    "ฝังไมโครชิฟ",
+  ];
+  container.innerHTML = "";
+  services.forEach((svc, idx) => {
+    const lbl = document.createElement("label");
+    lbl.className = "svc-chip" + (idx === 0 ? " checked" : "");
+    lbl.dataset.value = svc;
+    lbl.innerHTML = `<input type="checkbox" class="svc" value="${svc}" ${idx === 0 ? "checked" : ""}>${svc}`;
+    lbl.addEventListener("click", (e) => {
+      e.preventDefault();
+      const cb = lbl.querySelector("input");
+      cb.checked = !cb.checked;
+      lbl.classList.toggle("checked", cb.checked);
+    });
+    container.appendChild(lbl);
+  });
+}
 
-/* ─── Add animal row ─── */
+/* ── Add animal card ── */
 window.addAnimal = function () {
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td><input class="animalName" placeholder="ระบุชื่อ..." required></td>
-    <td><select class="species"><option value="ม">แมว</option><option value="ส">สุนัข</option></select></td>
-    <td><select class="sex"><option value="เมีย">เมีย</option><option value="ผู้">ผู้</option></select></td>
-    <td><input type="number" class="estWeight" value="3" min="0" step="0.1"></td>
-    <td class="svcCell" style="text-align:left;"></td>
-    <td class="noteCell" style="text-align:left;"><textarea class="healthNote" placeholder="โรคประจำตัว, ข้อควรระวัง..."></textarea></td>
-    <td><button type="button" class="btn btn-del" onclick="this.closest('tr').remove()">🗑</button></td>
+  animalCount++;
+  const card = document.createElement("div");
+  card.className = "animal-card";
+  card.innerHTML = `
+    <div class="animal-card-header">
+      <div class="animal-card-num">${animalCount}</div>
+      <span class="animal-card-label">สัตว์รายการที่ ${animalCount}</span>
+    </div>
+    <button type="button" class="btn btn-del btn-del-animal" onclick="this.closest('.animal-card').remove(); refreshCount();">🗑</button>
+
+    <div class="animal-fields">
+      <div class="field-group">
+        <label class="field-label">ชื่อสัตว์ *</label>
+        <input class="animalName" placeholder="ระบุชื่อ..." required>
+      </div>
+      <div class="field-group">
+        <label class="field-label">ชนิด</label>
+        <select class="species">
+          <option value="ม">🐱 แมว</option>
+          <option value="ส">🐶 สุนัข</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">เพศ</label>
+        <select class="sex">
+          <option value="เมีย">♀ เมีย</option>
+          <option value="ผู้">♂ ผู้</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">นน. (กก.)</label>
+        <input type="number" class="estWeight" value="3" min="0" step="0.1">
+      </div>
+    </div>
+
+    <div class="svc-section">
+      <div class="svc-label-row">บริการที่ต้องการ</div>
+      <div class="svc-grid"></div>
+    </div>
+
+    <div class="note-section">
+      <div class="field-group">
+        <label class="field-label">⚠️ บันทึกสุขภาพ / ข้อควรระวัง</label>
+        <textarea class="healthNote" placeholder="โรคประจำตัว, ยาที่แพ้, ข้อควรระวัง..."></textarea>
+      </div>
+    </div>
   `;
 
-  const species  = tr.querySelector(".species");
-  const sex      = tr.querySelector(".sex");
-  const svcCell  = tr.querySelector(".svcCell");
-  const note     = tr.querySelector(".healthNote");
-  const noteCell = tr.querySelector(".noteCell");
-  const nameInput= tr.querySelector(".animalName");
+  const svcGrid  = card.querySelector(".svc-grid");
+  const species  = card.querySelector(".species");
+  const sex      = card.querySelector(".sex");
+  const note     = card.querySelector(".healthNote");
+  const nameInput= card.querySelector(".animalName");
 
-  nameInput.oninput = () => { nameInput.style.borderColor = ""; };
-  function refreshSvc() { svcCell.innerHTML = window.serviceHTML(sex.value, species.value); }
+  nameInput.addEventListener("input", () => { nameInput.style.borderColor = ""; });
+
+  function refreshSvc() { buildSvcChips(svcGrid, sex.value, species.value); }
   refreshSvc();
-  species.onchange = refreshSvc;
-  sex.onchange     = refreshSvc;
-  note.oninput     = () => noteCell.classList.toggle("important-warning", note.value.trim()!=="");
+  species.addEventListener("change", refreshSvc);
+  sex.addEventListener("change", refreshSvc);
+  note.addEventListener("input", () => note.classList.toggle("has-content", note.value.trim() !== ""));
 
-  document.getElementById("animalBody").appendChild(tr);
+  /* expose refreshCount globally so inline onclick works */
+  window.refreshCount = refreshCount;
+
+  const list = document.getElementById("animalList");
+  list.appendChild(card);
+  refreshCount();
+  card.scrollIntoView({ behavior: "smooth", block: "nearest" });
 };
 
-window.addAnimal();
-
-/* ─── Save & Print ─── */
+/* ── Save All ── */
 window.saveAll = async function () {
   const btnSave = document.getElementById("btnSaveAll");
   const ownerNameInput = document.getElementById("ownerName");
   const ownerName = ownerNameInput.value.trim();
-  const phone = document.getElementById("phone").value.trim();
+  const phone     = document.getElementById("phone").value.trim();
 
   if (!ownerName) { alert("❌ กรุณาระบุชื่อเจ้าของสัตว์"); ownerNameInput.focus(); return; }
-  const rows = document.querySelectorAll("#animalBody tr");
-  if (rows.length===0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
+  const cards = document.querySelectorAll(".animal-card");
+  if (cards.length === 0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
 
-  let hasError=false;
-  rows.forEach((row,i)=>{
-    const ni=row.querySelector(".animalName");
-    if (!ni.value.trim()) { alert(`❌ กรุณาระบุชื่อสัตว์รายการที่ ${i+1}`); ni.focus(); ni.style.borderColor="var(--danger)"; hasError=true; }
+  let hasError = false;
+  cards.forEach((card, i) => {
+    const ni = card.querySelector(".animalName");
+    if (!ni.value.trim()) {
+      alert(`❌ กรุณาระบุชื่อสัตว์รายการที่ ${i + 1}`);
+      ni.focus(); ni.style.borderColor = "var(--rose)"; hasError = true;
+    }
   });
   if (hasError) return;
 
-  btnSave.disabled=true; btnSave.textContent="⏳ กำลังบันทึก...";
+  btnSave.disabled = true; btnSave.textContent = "⏳ กำลังบันทึก...";
 
   try {
-    const { data:eventId, error:evtErr } = await supabase.rpc("get_today_event");
+    const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
     if (evtErr) throw evtErr;
 
-    const { data:owner, error:ownerErr } = await supabase.from("vasd_owner")
-      .insert({ event_id:eventId, owner_name:ownerName, phone }).select().single();
+    const { data: owner, error: ownerErr } = await supabase
+      .from("vasd_owner")
+      .insert({ event_id: eventId, owner_name: ownerName, phone })
+      .select().single();
     if (ownerErr) throw ownerErr;
 
-    const { count, error:cntErr } = await supabase.from("vasd_animal").select("*",{count:"exact",head:true}).eq("event_id",eventId);
+    const { count, error: cntErr } = await supabase
+      .from("vasd_animal").select("*", { count: "exact", head: true }).eq("event_id", eventId);
     if (cntErr) throw cntErr;
 
-    let q=( count||0)+1, svcs=[], queues=[], forPrint=[];
+    let q = (count || 0) + 1, svcs = [], queues = [], forPrint = [];
 
-    for (const r of rows) {
-      const spVal=r.querySelector(".species").value;
-      const { data:animal, error:animalErr } = await supabase.from("vasd_animal").insert({
-        event_id:eventId, owner_id:owner.id, queue_number:q++,
-        species:spVal, animal_name:r.querySelector(".animalName").value.trim(),
-        sex:r.querySelector(".sex").value, est_weight:r.querySelector(".estWeight").value||0,
-        health_note:r.querySelector(".healthNote").value.trim()
-      }).select().single();
+    for (const card of cards) {
+      const spVal = card.querySelector(".species").value;
+      const { data: animal, error: animalErr } = await supabase
+        .from("vasd_animal").insert({
+          event_id: eventId, owner_id: owner.id, queue_number: q++,
+          species: spVal,
+          animal_name: card.querySelector(".animalName").value.trim(),
+          sex: card.querySelector(".sex").value,
+          est_weight: card.querySelector(".estWeight").value || 0,
+          health_note: card.querySelector(".healthNote").value.trim()
+        }).select().single();
       if (animalErr) throw animalErr;
 
-      let sNames=[];
-      r.querySelectorAll(".svc:checked").forEach(s=>{ svcs.push({animal_id:animal.id,service_type:s.value}); sNames.push(s.value); });
-      queues.push({ animal_id:animal.id, status:"waiting" });
-      forPrint.push({ q:animal.queue_number, name:animal.animal_name, spc:spVal==="ม"?"แมว":"สุนัข", sex:animal.sex, svc:sNames.join(", ") });
+      let sNames = [];
+      card.querySelectorAll(".svc:checked").forEach(s => {
+        svcs.push({ animal_id: animal.id, service_type: s.value });
+        sNames.push(s.value);
+      });
+      queues.push({ animal_id: animal.id, status: "waiting" });
+      forPrint.push({ q: animal.queue_number, name: animal.animal_name, spc: spVal === "ม" ? "แมว" : "สุนัข", sex: animal.sex, svc: sNames.join(", ") });
     }
 
     if (svcs.length)   await supabase.from("vasd_service").insert(svcs);
     if (queues.length) await supabase.from("vasd_queue").insert(queues);
 
-    const { data:tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
+    const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
     if (tmplData?.config) {
-      let html="";
-      forPrint.forEach(a=>{
-        let page="<div class='sticker-page'>";
-        tmplData.config.forEach(l=>{
-          let txt=l.text
-            .replace("{{queue_number}}",a.q).replace("{{animal_name}}",a.name)
-            .replace("{{species}}",a.spc).replace("{{sex}}",a.sex)
-            .replace("{{owner_name}}",ownerName).replace("{{phone}}",phone||"ไม่ระบุ")
-            .replace("{{services}}",a.svc);
-          let fnt=(l.font||"'Segoe UI'").replace(/"/g,"'");
-          page+=`<div class="line" style="left:${l.x||0}px;width:calc(100% - ${l.x||0}px);top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${fnt};text-align:${l.align||"left"};">${txt}</div>`;
+      let html = "";
+      forPrint.forEach(a => {
+        let page = "<div class='sticker-page'>";
+        tmplData.config.forEach(l => {
+          let txt = l.text
+            .replace("{{queue_number}}", a.q).replace("{{animal_name}}", a.name)
+            .replace("{{species}}", a.spc).replace("{{sex}}", a.sex)
+            .replace("{{owner_name}}", ownerName).replace("{{phone}}", phone || "ไม่ระบุ")
+            .replace("{{services}}", a.svc);
+          let fnt = (l.font || "'Segoe UI'").replace(/"/g, "'");
+          page += `<div class="line" style="left:${l.x||0}px;width:calc(100% - ${l.x||0}px);top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${fnt};text-align:${l.align||"left"};">${txt}</div>`;
         });
-        html+=page+"</div>";
+        html += page + "</div>";
       });
-      document.getElementById("printArea").innerHTML=html;
-      try{await document.fonts.load("16px 'Kanit'");await document.fonts.load("16px 'Prompt'");await document.fonts.load("16px 'Sarabun'");}catch(e){}
+      document.getElementById("printArea").innerHTML = html;
+      try {
+        await document.fonts.load("16px 'Kanit'");
+        await document.fonts.load("16px 'Prompt'");
+        await document.fonts.load("16px 'Sarabun'");
+      } catch(e) {}
       await document.fonts.ready;
-      await new Promise(r=>setTimeout(r,300));
+      await new Promise(r => setTimeout(r, 300));
       window.print();
     }
 
-    setTimeout(()=>{ location.href="index.html"; },1000);
+    setTimeout(() => { location.href = "index.html"; }, 1000);
 
-  } catch(err) {
+  } catch (err) {
     console.error(err);
-    alert("❌ เกิดข้อผิดพลาด: "+(err.message||"โปรดลองใหม่"));
-    btnSave.disabled=false;
-    btnSave.innerHTML="💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว";
+    alert("❌ เกิดข้อผิดพลาด: " + (err.message || "โปรดลองใหม่"));
+    btnSave.disabled = false;
+    btnSave.innerHTML = "💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว";
   }
 };
+
+/* auto-add first animal */
+window.addAnimal();
 </script>
 </body>
 </html>
