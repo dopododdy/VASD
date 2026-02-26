@@ -182,10 +182,8 @@ header {
   background: linear-gradient(135deg, #ef4444, #b91c1c);
   color: white;
   border: none;
-  padding: 18px;
+  padding: 14px 18px;
   border-radius: var(--radius-lg);
-  font-size: 18px;
-  font-weight: 700;
   font-family: "Sarabun", sans-serif;
   margin-bottom: 24px;
   cursor: pointer;
@@ -193,11 +191,18 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
   transition: transform 0.2s;
   animation: pulseAlert 2s infinite;
 }
 .btn-call:active { transform: scale(0.97); }
+
+.call-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.3;
+}
 
 @keyframes pulseAlert {
   0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
@@ -414,8 +419,12 @@ footer {
 </header>
 
 <div class="wrap">
-  <button class="btn-call" onclick="triggerEmergencyCall()">
-    <span style="font-size: 24px;">🚨</span> CALL (เรียกอาจารย์/สัตวแพทย์/Admin ด่วน)
+  <button id="emergencyCallBtn" class="btn-call" onclick="triggerEmergencyCall()">
+    <span style="font-size: 32px; flex-shrink: 0;">🚨</span>
+    <div class="call-text-wrapper">
+      <span style="font-size: 20px; font-weight: 700;">EMERGENCY CALL</span>
+      <span style="font-size: 13px; font-weight: 500; opacity: 0.9;">(ยกมือขึ้น สุดแขน เมื่อกดเรียกแล้ว)</span>
+    </div>
   </button>
 
   <div class="menu-grid">
@@ -500,6 +509,20 @@ footer {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
+/* ── ฟังก์ชันตรวจสอบและซ่อนปุ่ม CALL ── */
+function updateCallButtonVisibility() {
+  const role = localStorage.getItem("vasd_role");
+  const btn = document.getElementById("emergencyCallBtn");
+  if (!btn) return;
+
+  // หากเป็น admin, อาจารย์, หรือ สัตวแพทย์ ให้ซ่อนปุ่ม
+  if (["admin", "อาจารย์", "สัตวแพทย์"].includes(role)) {
+    btn.style.display = "none";
+  } else {
+    btn.style.display = "flex";
+  }
+}
+
 /* ── Login Logic ── */
 const nameInput  = document.getElementById("userName");
 const roleSelect = document.getElementById("userRole");
@@ -517,14 +540,22 @@ window.login = function () {
   const role = roleSelect.value;
   if (!name || !role) { alert("กรุณาใส่ชื่อและเลือกบทบาท"); return; }
   if (role === "admin" && pwdInput.value !== "2500") { alert("รหัสผ่าน admin ไม่ถูกต้อง"); return; }
+  
   localStorage.setItem("vasd_user", name);
   localStorage.setItem("vasd_role", role);
   showUser.innerText = `${name} (${role})`;
+  
   loginPanel.style.display = "none";
   userInfo.style.display = "flex";
+  
+  // อัปเดตการแสดงผลปุ่ม CALL ทันทีหลังเข้าสู่ระบบ
+  updateCallButtonVisibility();
 };
 
-window.logout = function () { localStorage.clear(); location.reload(); };
+window.logout = function () { 
+  localStorage.clear(); 
+  location.reload(); 
+};
 
 /* ── Restore Session ── */
 const savedName = localStorage.getItem("vasd_user");
@@ -534,6 +565,9 @@ if (savedName && savedRole) {
   loginPanel.style.display = "none";
   userInfo.style.display = "flex";
 }
+
+/* เรียกทำงานตอนโหลดหน้าเว็บเพื่อตรวจสอบสิทธิ์ตั้งแต่แรก */
+updateCallButtonVisibility();
 
 /* ── Dashboard Badges ── */
 async function loadSummary() {
@@ -560,7 +594,6 @@ loadSummary();
 
 /* ── Broadcast & Realtime Logic ── */
 
-// ฟังก์ชันสร้างเสียงเตือนดังๆ ด้วย Web Audio API (ไม่ต้องพึ่งไฟล์)
 function playAlarmSound() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -574,7 +607,6 @@ function playAlarmSound() {
     osc.type = 'sawtooth';
     const now = ctx.currentTime;
     
-    // ทำเสียงไซเรน วนขึ้นลง 2 วินาที
     osc.frequency.setValueAtTime(400, now);
     osc.frequency.linearRampToValueAtTime(800, now + 0.5);
     osc.frequency.linearRampToValueAtTime(400, now + 1.0);
@@ -589,7 +621,6 @@ function playAlarmSound() {
   }
 }
 
-// ตั้งค่า Channel ให้รองรับการส่ง Broadcast ด้วย
 const dashboardChannel = supabase.channel('dashboard-live', {
   config: {
     broadcast: { self: true },
@@ -597,18 +628,14 @@ const dashboardChannel = supabase.channel('dashboard-live', {
 });
 
 dashboardChannel
-  // 1. รับ Data Changes เพื่ออัปเดต Badge
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
-  
-  // 2. รับข้อความ Broadcast สำหรับ Emergency Call
   .on('broadcast', { event: 'emergency_call' }, (payload) => {
     const myRole = localStorage.getItem("vasd_role") || "";
     
-    // ถ้าเครื่องเราเป็น Admin, อาจารย์ หรือ สัตวแพทย์ ให้แจ้งเตือน!
+    // แจ้งเตือนเฉพาะเครื่องของ 3 บทบาทนี้
     if (["admin", "อาจารย์", "สัตวแพทย์"].includes(myRole)) {
       playAlarmSound();
       
-      // Delay alert นิดหน่อยให้เสียงเริ่มทำงานก่อน
       setTimeout(() => {
         alert(`🚨 สัญญาณเรียกฉุกเฉิน!\nจาก: ${payload.payload.sender} (${payload.payload.role})\nเวลา: ${payload.payload.time}`);
       }, 100);
@@ -616,7 +643,6 @@ dashboardChannel
   })
   .subscribe();
 
-// ส่งข้อความ Broadcast เมื่อกดปุ่ม CALL
 window.triggerEmergencyCall = async function() {
   const name = localStorage.getItem("vasd_user") || "ผู้ใช้งาน";
   const role = localStorage.getItem("vasd_role") || "ไม่ได้ระบุ";
