@@ -1,332 +1,347 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>ตั้งค่าเครื่องพิมพ์</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<title>ตั้งค่า – RMUTTO VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link href__="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS  (เหมือน index.html)
+═══════════════════════════════════════════ */
 :root {
-  --navy:#0d1b2a; --teal:#1a6b72; --teal-light:#22919a; --accent:#00d4aa;
-  --bg:#f0f4f8; --surface:#fff; --text:#1a202c; --text-muted:#718096;
-  --border:#e2e8f0; --danger:#e53e3e; --success:#38a169; --warning:#d69e2e;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.06); --shadow-md:0 4px 16px rgba(13,27,42,0.08);
-  --radius:14px; --radius-sm:8px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Sarabun",sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;}
+  --navy:       #0b1929;
+  --navy-mid:   #112240;
+  --navy-card:  #162d4a;
+  --teal:       #0ea5a0;
+  --teal-light: #14c4bc;
+  --teal-glow:  rgba(14,165,160,0.25);
+  --amber:      #f59e0b;
+  --amber-soft: rgba(245,158,11,0.15);
+  --rose:       #ef4444;
+  --violet:     #8b5cf6;
+  --sky:        #3b82f6;
+  --emerald:    #10b981;
+  --slate:      #64748b;
 
-/* HEADER */
-header{
-  background:var(--navy);padding:0 24px;display:flex;
-  justify-content:space-between;align-items:center;height:68px;
-  flex-shrink:0;box-shadow:0 2px 20px rgba(0,0,0,0.25);z-index:10;
-}
-.header-brand{display:flex;align-items:center;gap:12px;}
-.brand-icon{
-  width:38px;height:38px;background:linear-gradient(135deg,var(--teal-light),var(--accent));
-  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;
-}
-.brand-text h1{font-size:16px;font-weight:700;color:#fff;line-height:1.2;}
-.brand-text span{font-size:11px;color:rgba(255,255,255,0.5);}
-.header-actions{display:flex;gap:8px;}
-.btn-header{
-  padding:7px 14px;font-size:13px;font-weight:600;font-family:"Sarabun",sans-serif;
-  border:none;border-radius:var(--radius-sm);cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;gap:5px;
-}
-.btn-header:hover{opacity:0.88;transform:translateY(-1px);}
-.btn-print-test{background:linear-gradient(135deg,var(--success),#48bb78);color:#fff;}
-.btn-home-h{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.2);}
-.btn-home-h:hover{background:rgba(255,255,255,0.18);}
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --border:     rgba(255,255,255,0.08);
+  --border-2:   rgba(255,255,255,0.14);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #4a5568;
 
-/* MAIN LAYOUT */
-.layout{display:grid;grid-template-columns:380px 1fr;flex:1;overflow:hidden;}
+  --radius-xs:  6px;
+  --radius-sm:  10px;
+  --radius:     16px;
+  --radius-lg:  22px;
+  --radius-xl:  28px;
 
-/* SIDEBAR */
-.sidebar{
-  background:var(--surface);border-right:1px solid var(--border);
-  overflow-y:auto;display:flex;flex-direction:column;
-}
-.sidebar-top{padding:20px;border-bottom:1px solid var(--border);}
-.sidebar-section{padding:16px 20px;border-bottom:1px solid var(--border);}
-.sidebar-section:last-child{border-bottom:none;}
-.section-title{
-  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:12px;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-glow: 0 0 30px rgba(14,165,160,0.2);
 }
 
-/* FIELDS */
-label.field-label{font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;}
-input,select{
-  width:100%;padding:9px 12px;font-size:13px;font-family:"Sarabun",sans-serif;
-  border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);
-  background:#fff;outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:10px;
-}
-input:focus,select:focus{border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(34,145,154,0.12);}
-input:last-child,select:last-child{margin-bottom:0;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-/* LINE BLOCK */
-.line-block{
-  background:#fafbfc;border:1px solid var(--border);border-radius:var(--radius-sm);
-  padding:14px;margin-bottom:10px;position:relative;
-}
-.line-block:last-child{margin-bottom:0;}
-.line-block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.line-block-header strong{font-size:13px;color:var(--navy);}
-
-.prop-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-.prop-mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;}
-.prop-grid select,.prop-mini input,.prop-mini select{margin-bottom:0;}
-
-/* VARS HINT */
-.vars-hint{
-  background:#f0fdf9;border:1px solid #a7f3d0;border-radius:var(--radius-sm);
-  padding:12px;font-size:12px;line-height:1.8;color:#065f46;
-}
-.vars-hint strong{color:var(--navy);display:block;margin-bottom:4px;margin-top:8px;}
-.vars-hint strong:first-child{margin-top:0;}
-.vars-hint code{
-  background:rgba(0,0,0,0.06);padding:2px 5px;border-radius:4px;font-size:11px;display:inline-block;margin-bottom:4px;
+body {
+  font-family: "Sarabun", "Outfit", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
-/* BUTTONS */
-.btn{
-  width:100%;padding:10px;font-size:13px;font-weight:700;font-family:"Sarabun",sans-serif;
-  border:none;border-radius:var(--radius-sm);cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  margin-bottom:8px;
-}
-.btn:last-child{margin-bottom:0;}
-.btn:hover{opacity:0.88;transform:translateY(-1px);}
-.btn-load{background:#edf2f7;color:var(--text);}
-.btn-add {background:var(--border);color:var(--text);}
-.btn-save{background:linear-gradient(135deg,var(--teal),var(--accent));color:#fff;}
-.btn-del-line{
-  background:none;border:1px solid var(--border);color:var(--danger);
-  padding:3px 8px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;
-}
-.btn-del-line:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
-
-/* PREVIEW PANE */
-.preview-pane{
-  background:#dee3ea;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;gap:20px;overflow:hidden;
-}
-.preview-label{
-  font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-  color:#718096;
-}
-.sticker{
-  position:relative;width:80mm;height:50mm;background:#fff;
-  box-shadow:0 4px 24px rgba(0,0,0,0.2),0 1px 4px rgba(0,0,0,0.1);
-  overflow:hidden;border-radius:3px;
-}
-.line{
-  position:absolute;white-space:pre-wrap;word-break:break-word;
-  padding-right:5px;box-sizing:border-box;
+/* Mesh background */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 90% 20%, rgba(245,158,11,0.05) 0%, transparent 50%);
 }
 
-/* PRINT */
-@media print{
-  body*{visibility:hidden;}
-  #sticker,#sticker *{visibility:visible;}
-  #sticker{position:absolute;left:0;top:0;box-shadow:none;}
-  @page{size:80mm 50mm;margin:0;}
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.brand-logo {
+  width: 48px; height: 38px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 0 20px var(--teal-glow);
+}
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #fff; line-height: 1; letter-spacing: -0.3px;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+
+.header-actions { display: flex; gap: 8px; align-items: center; }
+
+.btn-header {
+  padding: 8px 14px; font-size: 12px; font-weight: 600;
+  font-family: "Sarabun", sans-serif;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: opacity 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-header:active { opacity: 0.85; transform: scale(0.97); }
+.btn-home {
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border-2);
+}
+.btn-home:hover { background: var(--surface); color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto;
+  padding: 28px 18px 100px;
+  width: 100%;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 28px;
+  animation: slideUp 0.4s ease both;
+}
+.page-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 26px; font-weight: 800;
+  color: #fff; letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.page-desc {
+  font-size: 13px; color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════
+   MENU GRID
+═══════════════════════════════════════════ */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.menu-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px 20px;
+  cursor: pointer; text-decoration: none; display: block;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  animation: slideUp 0.5s ease both;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-card:hover {
+  border-color: var(--teal);
+  background: rgba(14,165,160,0.06);
+  box-shadow: 0 8px 32px rgba(14,165,160,0.12);
+  transform: translateY(-2px);
+}
+.menu-card:active { transform: scale(0.97); }
+
+.menu-card::after {
+  content: "›";
+  position: absolute; bottom: 16px; right: 18px;
+  font-size: 20px; color: var(--teal);
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.menu-card:hover::after { opacity: 1; transform: translateX(0); }
+
+.menu-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-card:nth-child(2) { animation-delay: 0.15s; }
+.menu-card:nth-child(3) { animation-delay: 0.2s; }
+.menu-card:nth-child(4) { animation-delay: 0.25s; }
+
+.card-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+.icon-teal    { background: rgba(14,165,160,0.15); }
+.icon-amber   { background: rgba(245,158,11,0.15); }
+.icon-violet  { background: rgba(139,92,246,0.15); }
+.icon-sky     { background: rgba(59,130,246,0.15); }
+.icon-rose    { background: rgba(239,68,68,0.15); }
+.icon-emerald { background: rgba(16,185,129,0.15); }
+
+.card-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #fff; margin-bottom: 6px; letter-spacing: -0.2px;
+}
+.card-desc {
+  font-size: 12px; color: var(--text-dim);
+  line-height: 1.5; padding-right: 20px;
+}
+
+/* ═══════════════════════════════════════════
+   BOTTOM NAV (Mobile)
+═══════════════════════════════════════════ */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  grid-template-columns: repeat(5, 1fr);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px;
+  font-size: 9px; color: var(--text-dim);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item:active { color: var(--teal); }
+.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item.active { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  text-align: center;
+  font-size: 11px; color: var(--text-faint);
+  padding: 18px;
+  border-top: 1px solid var(--border);
+  position: relative; z-index: 1;
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  header { padding: 8px 14px; }
+  .brand-sub { display: none; }
+  .brand-name { font-size: 14px; }
+  .wrap { padding: 20px 14px 80px; }
+  .page-title { font-size: 22px; }
+
+  .menu-grid { grid-template-columns: 1fr; gap: 12px; }
+  .menu-card { padding: 20px 16px 16px; border-radius: var(--radius); }
+
+  .bottom-nav { display: grid; }
+}
+
+@media (min-width: 641px) {
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 900px) {
+  .wrap { padding: 36px 24px 60px; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-brand">
-    <div class="brand-icon">⚙️</div>
-    <div class="brand-text">
-      <h1>ตั้งค่าเครื่องพิมพ์</h1>
-      <span>Sticker Template Configuration</span>
+  <div class="brand">
+    <div class="brand-logo">🚐🐾</div>
+    <div>
+      <div class="brand-name">RMUTTO – VASD</div>
+      <div class="brand-sub">Veterinary Academic Service Division</div>
     </div>
   </div>
+
   <div class="header-actions">
-    <button class="btn-header btn-print-test" onclick="window.printTest()">🖨️ ทดสอบพิมพ์</button>
-    <button class="btn-header btn-home-h" onclick="location.href='index.html'">🏠 หน้าแรก</button>
+    <button class="btn-header btn-home" onclick="location.href__='index.html'">🏠 หน้าแรก</button>
   </div>
 </header>
 
-<div class="layout">
+<div class="wrap">
 
-  <div class="sidebar">
-
-    <div class="sidebar-top">
-      <label class="field-label">ประเภทสติ๊กเกอร์</label>
-      <select id="templateType">
-        <option value="queue">🏷 คิว</option>
-        <option value="cage">🔒 ติดกรง</option>
-        <option value="envelope">✉️ ติดซองยา</option>
-        <option value="bag">💊 ติดถุงยา</option>
-        <option value="vaccine">📒 ติดหน้าสมุดวัคซีน</option>
-        <option value="microchip">💳 ติดใบรับรองไมโครชิฟ</option>
-      </select>
-      <button class="btn btn-load" onclick="loadTemplate()">🔄 โหลด Template</button>
-    </div>
-
-    <div class="sidebar-section" style="flex:1;overflow-y:auto;">
-      <div class="section-title">บรรทัดข้อความ</div>
-      <div id="lineEditor"></div>
-      <button class="btn btn-add" onclick="addLine()">➕ เพิ่มบรรทัด</button>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="vars-hint">
-        <strong>ข้อมูลสัตว์ / คิว</strong>
-        <code>{{queue_number}}</code> <code>{{animal_name}}</code> <code>{{species}}</code>
-        <code>{{sex}}</code> <code>{{owner_name}}</code> <code>{{phone}}</code> <code>{{services}}</code>
-        
-        <strong>ข้อมูลยา (ฉลากยา)</strong>
-        <code>{{drug_id}}</code> <code>{{dose}}</code> <code>{{freq}}</code> 
-        <code>{{days}}</code> <code>{{total_pills}}</code>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <button class="btn btn-save" onclick="saveTemplate()">💾 บันทึก Template</button>
-    </div>
-
+  <div class="page-header">
+    <div class="page-title">⚙️ ตั้งค่าระบบ</div>
+    <div class="page-desc">จัดการการตั้งค่าต่าง ๆ ของระบบ เช่น สติ๊กเกอร์ ฐานข้อมูล และอื่น ๆ</div>
   </div>
 
-  <div class="preview-pane">
-    <span class="preview-label">ตัวอย่างสติ๊กเกอร์ (ขนาดจริง 80×50 mm)</span>
-    <div class="sticker" id="sticker"></div>
+  <div class="menu-grid">
+
+    <a class="menu-card" href__="Setting-Sticker.html">
+      <div class="card-icon icon-teal">🏷️</div>
+      <div class="card-title">ตั้งค่า Stickers</div>
+      <div class="card-desc">ปรับแต่ง Template สติ๊กเกอร์ สำหรับพิมพ์คิว, ติดกรง, ซองยา, ถุงยา ฯลฯ</div>
+    </a>
+
+    <a class="menu-card" href__="Setting-Database.html">
+      <div class="card-icon icon-amber">🗄️</div>
+      <div class="card-title">จัดการฐานข้อมูล</div>
+      <div class="card-desc">สำรองข้อมูล, กู้คืน, รีเซ็ตระบบ และจัดการข้อมูลภายใน</div>
+    </a>
+
   </div>
 
 </div>
 
-<script type="module">
-import { supabase } from "./js/supabase.js";
+<nav class="bottom-nav">
+  <a class="nav-item" href__="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href__="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item" href__="anesthesia.html">
+    <span class="nav-icon">💉</span>วางยา
+  </a>
+  <a class="nav-item" href__="surgery.html">
+    <span class="nav-icon">🛏️</span>ผ่าตัด
+  </a>
+  <a class="nav-item active" href__="settings.html">
+    <span class="nav-icon">⚙️</span>ตั้งค่า
+  </a>
+</nav>
 
-let currentConfig = [];
+<footer>RMUTTO – VASD © 2026  ·  Veterinary Academic Service Division</footer>
 
-function renderPreview() {
-  const box = document.getElementById("sticker");
-  box.innerHTML = "";
-  currentConfig.forEach(l => {
-    const div = document.createElement("div");
-    div.className = "line";
-    div.style.left = l.x + "px";
-    div.style.top  = l.y + "px";
-    div.style.fontSize   = l.size + "px";
-    div.style.fontWeight = l.weight;
-    div.style.fontFamily = l.font;
-    div.style.textAlign  = l.align || "left";
-    div.style.width      = `calc(100% - ${l.x}px)`;
-    
-    // เปลี่ยนตัวแปรให้เป็นข้อความจำลอง
-    div.innerText = l.text
-      .replace("{{queue_number}}","1")
-      .replace("{{animal_name}}","น้องถุงทอง")
-      .replace("{{species}}","แมว")
-      .replace("{{sex}}","ผู้")
-      .replace("{{owner_name}}","สมชาย ใจดี")
-      .replace("{{phone}}","081-234-5678")
-      .replace("{{services}}","ทำหมัน, วัคซีน")
-      // จำลองตัวแปรยา
-      .replace("{{drug_id}}","Amoxicillin 250mg")
-      .replace("{{dose}}","กินครั้งละ 1 เม็ด")
-      .replace("{{freq}}","วันละ 2 ครั้ง (เช้า-เย็น) หลังอาหาร")
-      .replace("{{days}}","5 วัน")
-      .replace("{{total_pills}}","10");
-      
-    box.appendChild(div);
-  });
-}
-
-function renderEditor() {
-  const area = document.getElementById("lineEditor");
-  area.innerHTML = "";
-  currentConfig.forEach((l, i) => {
-    const block = document.createElement("div");
-    block.className = "line-block";
-    block.innerHTML = `
-      <div class="line-block-header">
-        <strong>บรรทัดที่ ${i+1}</strong>
-        <button class="btn-del-line" onclick="removeLine(${i})">ลบ</button>
-      </div>
-      <label class="field-label">ข้อความ</label>
-      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" style="margin-bottom:10px;">
-      <div class="prop-grid">
-        <div>
-          <label class="field-label">Font</label>
-          <select onchange="updateLine(${i},'font',this.value)">
-            <option value="monospace" ${l.font==="monospace"?"selected":""}>Monospace</option>
-            <option value="Tahoma" ${l.font==="Tahoma"?"selected":""}>Tahoma</option>
-            <option value="'Segoe UI'" ${l.font==="'Segoe UI'"?"selected":""}>Segoe UI</option>
-            <option value="'Prompt', sans-serif" ${l.font==="'Prompt', sans-serif"?"selected":""}>Prompt</option>
-            <option value="'Kanit', sans-serif" ${l.font==="'Kanit', sans-serif"?"selected":""}>Kanit</option>
-            <option value="'Sarabun', sans-serif" ${l.font==="'Sarabun', sans-serif"?"selected":""}>Sarabun</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">น้ำหนัก</label>
-          <select onchange="updateLine(${i},'weight',this.value)">
-            <option value="normal" ${l.weight==="normal"?"selected":""}>ปกติ</option>
-            <option value="bold"   ${l.weight==="bold"  ?"selected":""}>หนา</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">จัดตำแหน่ง</label>
-          <select onchange="updateLine(${i},'align',this.value)">
-            <option value="left"   ${!l.align||l.align==="left"  ?"selected":""}>ซ้าย</option>
-            <option value="center" ${l.align==="center"?"selected":""}>กลาง</option>
-            <option value="right"  ${l.align==="right" ?"selected":""}>ขวา</option>
-          </select>
-        </div>
-      </div>
-      <div class="prop-mini">
-        <div><label class="field-label">ขนาด (px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
-        <div><label class="field-label">X (ซ้าย)</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
-        <div><label class="field-label">Y (บน)</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
-      </div>
-    `;
-    area.appendChild(block);
-  });
-}
-
-window.updateLine = function(i, key, val) {
-  if (["size","x","y"].includes(key)) val = parseInt(val)||0;
-  currentConfig[i][key] = val;
-  renderPreview();
-};
-window.removeLine = function(i) {
-  currentConfig.splice(i,1);
-  renderEditor(); renderPreview();
-};
-window.addLine = function() {
-  currentConfig.push({ text:"ข้อความใหม่", font:"'Prompt', sans-serif", size:16, x:10, y:10, weight:"normal", align:"left" });
-  renderEditor(); renderPreview();
-};
-window.loadTemplate = async function() {
-  const { data } = await supabase.from("vasd_print_template").select("*").eq("template_type", document.getElementById("templateType").value).single();
-  currentConfig = data?.config || [];
-  renderEditor(); renderPreview();
-};
-window.saveTemplate = async function() {
-  const type = document.getElementById("templateType").value;
-  const { error } = await supabase.from("vasd_print_template").upsert({ template_type:type, config:currentConfig },{ onConflict:"template_type" });
-  if (error) alert("❌ เกิดข้อผิดพลาด: "+error.message);
-  else alert("✅ บันทึก Template \""+type+"\" เรียบร้อยแล้ว");
-};
-window.printTest = function() {
-  const contents = document.getElementById("sticker").innerHTML;
-  const pw = window.open("","_blank","width=800,height=600");
-  pw.document.write(`<html><head><title>Print Test</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;}@page{size:80mm 50mm;margin:0}</style>
-    </head><body><div class="sticker">${contents}</div>
-    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},300);});}<\/script></body></html>`);
-  pw.document.close();
-};
-
-loadTemplate();
-</script>
 </body>
 </html>
