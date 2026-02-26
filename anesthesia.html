@@ -461,6 +461,10 @@ async function loadAnesthesiaQueue() {
               <span class="calc-drug">Zoletil 100 mg/ml <small style="color:var(--text-faint);">(3 mg/kg)</small></span>
               <span class="calc-dose pending" id="calc-zole-${a.id}">รอน้ำหนัก</span>
             </div>
+            <div class="calc-row">
+              <span class="calc-drug">Thiopental 10 mg/ml <small style="color:var(--text-faint);">(5 mg/kg)</small></span>
+              <span class="calc-dose pending" id="calc-thio-${a.id}">รอน้ำหนัก</span>
+            </div>
           </div>
 
         </div><div class="ac-footer">
@@ -497,6 +501,7 @@ window.calculateDose = function(animalId, weightStr) {
     setVal(`calc-atro-${animalId}`, "รอน้ำหนัก", true);
     setVal(`calc-xyla-${animalId}`, "รอน้ำหนัก", true);
     setVal(`calc-zole-${animalId}`, "รอน้ำหนัก", true);
+    setVal(`calc-thio-${animalId}`, "รอน้ำหนัก", true);
     return;
   }
 
@@ -504,6 +509,7 @@ window.calculateDose = function(animalId, weightStr) {
   setVal(`calc-atro-${animalId}`, `${((w * 0.04) / 1).toFixed(2)} ml`, false);
   setVal(`calc-xyla-${animalId}`, `${((w * 1) / 20).toFixed(2)} ml`, false);
   setVal(`calc-zole-${animalId}`, `${((w * 3) / 100).toFixed(2)} ml`, false);
+  setVal(`calc-thio-${animalId}`, `${((w * 5) / 10).toFixed(2)} ml`, false);
 };
 
 /* ── Send to surgery ── */
