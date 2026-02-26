@@ -2,228 +2,459 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<title>RMUTTO - VASD – Veterinary Academic Service Division</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>RMUTTO – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-  :root {
-    --navy: #0d1b2a;
-    --teal: #1a6b72;
-    --teal-light: #22919a;
-    --accent: #00d4aa;
-    --accent2: #f0a500;
-    --bg: #f0f4f8;
-    --surface: #ffffff;
-    --text: #1a202c;
-    --text-muted: #718096;
-    --border: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 16px rgba(13,27,42,0.08);
-    --radius: 14px;
-    --radius-sm: 8px;
-    
-    /* Colors for status */
-    --c-total: #718096;
-    --c-waiting: #d69e2e;
-    --c-surgery: #e53e3e;
-    --c-recovery: #805ad5;
-    --c-ready: #3182ce;
-    --c-done: #38a169;
-  }
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --navy:       #0b1929;
+  --navy-mid:   #112240;
+  --navy-card:  #162d4a;
+  --teal:       #0ea5a0;
+  --teal-light: #14c4bc;
+  --teal-glow:  rgba(14,165,160,0.25);
+  --amber:      #f59e0b;
+  --amber-soft: rgba(245,158,11,0.15);
+  --rose:       #ef4444;
+  --violet:     #8b5cf6;
+  --sky:        #3b82f6;
+  --emerald:    #10b981;
+  --slate:      #64748b;
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --border:     rgba(255,255,255,0.08);
+  --border-2:   rgba(255,255,255,0.14);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #4a5568;
 
-  body {
-    font-family: "Sarabun", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  --radius-xs:  6px;
+  --radius-sm:  10px;
+  --radius:     16px;
+  --radius-lg:  22px;
+  --radius-xl:  28px;
 
-  /* ─── HEADER ─── */
-  header {
-    background: var(--navy);
-    padding: 0 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 68px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.25);
-  }
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-glow: 0 0 30px rgba(14,165,160,0.2);
 
-  .header-brand { display: flex; align-items: center; gap: 14px; }
-  .brand-icon {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, var(--teal-light), var(--accent));
-    border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .brand-text h1 { font-size: 17px; font-weight: 700; color: #ffffff; line-height: 1.2; }
-  .brand-text span { font-size: 11px; color: rgba(255,255,255,0.5); }
+  /* status palette */
+  --c-waiting:  #f59e0b;
+  --c-surgery:  #ef4444;
+  --c-recovery: #8b5cf6;
+  --c-ready:    #3b82f6;
+  --c-done:     #10b981;
+  --c-total:    #94a3b8;
+}
 
-  /* ─── USER PANEL ─── */
-  .user-panel { display: flex; gap: 8px; align-items: center; }
-  .user-panel input, .user-panel select {
-    padding: 8px 12px; font-size: 13px; font-family: "Sarabun", sans-serif;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    border-radius: var(--radius-sm); color: #fff; outline: none;
-  }
-  .user-panel input::placeholder { color: rgba(255,255,255,0.4); }
-  .user-panel input:focus, .user-panel select:focus { border-color: var(--accent); background: rgba(255,255,255,0.12); }
-  .user-panel select option { background: var(--navy); color: #fff; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .btn-ok {
-    padding: 8px 18px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
-    background: linear-gradient(135deg, var(--teal-light), var(--accent));
-    color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
-  }
-  .btn-logout {
-    padding: 7px 14px; font-size: 13px; font-weight: 500; font-family: "Sarabun", sans-serif;
-    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
-    border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); cursor: pointer;
-  }
-  
-  .user-badge { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 30px; padding: 5px 14px 5px 8px; }
-  .user-avatar { width: 28px; height: 28px; background: linear-gradient(135deg, var(--teal-light), var(--accent)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-  #showUser { font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 500; }
+html { scroll-behavior: smooth; }
 
-  /* ─── MAIN ─── */
-  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; flex: 1; }
+body {
+  font-family: "Sarabun", "Outfit", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
 
-  .date-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; animation: fadeUp 0.4s ease both; }
-  .date-bar h2 { font-size: 20px; font-weight: 700; color: var(--navy); }
-  .date-chip { font-size: 13px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; }
+/* Mesh background */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 90% 20%, rgba(245,158,11,0.05) 0%, transparent 50%);
+}
 
-  /* ─── COMPACT SUMMARY CARDS (HYBRID) ─── */
-  .summary {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-  @media (max-width: 768px) {
-    .summary { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 480px) {
-    .summary { grid-template-columns: 1fr; }
-  }
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-  .summary-card {
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.4s ease both;
-  }
-  .summary-card::before {
-    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-  }
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.brand-logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px var(--teal-glow);
+}
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.3px;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
 
-  .summary-card:nth-child(1)::before { background: var(--c-total); }
-  .summary-card:nth-child(2)::before { background: var(--c-waiting); }
-  .summary-card:nth-child(3)::before { background: var(--c-surgery); }
-  .summary-card:nth-child(4)::before { background: var(--c-recovery); }
-  .summary-card:nth-child(5)::before { background: var(--c-ready); }
-  .summary-card:nth-child(6)::before { background: var(--c-done); }
+/* ── Login Panel ── */
+#loginPanel {
+  display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+}
+.input-field {
+  padding: 8px 10px; font-size: 12px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-field::placeholder { color: var(--text-faint); }
+.input-field:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
+.input-field option { background: var(--navy-mid); }
+#userName  { width: 96px; }
+#userRole  { width: 116px; cursor: pointer; }
+#adminPwd  { width: 82px; }
 
-  .summary-card:nth-child(1) { animation-delay: 0.05s; }
-  .summary-card:nth-child(2) { animation-delay: 0.1s; }
-  .summary-card:nth-child(3) { animation-delay: 0.15s; }
-  .summary-card:nth-child(4) { animation-delay: 0.2s; }
-  .summary-card:nth-child(5) { animation-delay: 0.25s; }
-  .summary-card:nth-child(6) { animation-delay: 0.3s; }
+.btn-login {
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer;
+  white-space: nowrap; letter-spacing: 0.3px;
+  box-shadow: 0 2px 12px var(--teal-glow);
+  transition: opacity 0.2s, transform 0.15s;
+}
+.btn-login:active { opacity: 0.85; transform: scale(0.97); }
 
-  .card-icon-sm { font-size: 24px; line-height: 1; }
-  .summary-info { display: flex; flex-direction: column; }
-  .summary-info h2 { font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1; margin-bottom: 2px; }
-  .summary-info p { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+/* ── User Info ── */
+#userInfo { display: none; align-items: center; gap: 8px; }
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: 30px; padding: 5px 12px 5px 7px;
+}
+.user-avatar {
+  width: 26px; height: 26px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+#showUser { font-size: 12px; color: var(--text); font-weight: 500; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-logout {
+  padding: 6px 12px; font-size: 12px; font-family: "Sarabun", sans-serif;
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-logout:hover { background: var(--surface-2); color: var(--text); }
 
-  /* ─── SECTION LABEL ─── */
-  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; animation: fadeUp 0.4s 0.2s ease both; }
+/* ═══════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto;
+  padding: 28px 18px 100px;
+  width: 100%;
+}
 
-  /* ─── MENU CARDS ─── */
-  .menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+/* Date Bar */
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 22px;
+  animation: slideUp 0.5s ease both;
+}
+.page-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: #fff; letter-spacing: -0.5px; line-height: 1.1;
+}
+.page-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+.date-pill {
+  font-size: 11px; color: var(--text-dim);
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  white-space: nowrap; flex-shrink: 0;
+  margin-top: 2px;
+}
 
-  .card {
-    background: var(--surface); border-radius: var(--radius); padding: 24px 22px;
-    box-shadow: var(--shadow-sm); border: 1px solid var(--border); cursor: pointer;
-    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
-    animation: fadeUp 0.4s ease both; position: relative; overflow: hidden; text-decoration: none; display: block;
-  }
-  .card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--teal-light); }
-  .card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+/* ─── SECTION TITLE ─── */
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
 
-  .card-emoji { font-size: 26px; display: block; margin-bottom: 12px; line-height: 1; }
-  .card h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
-  .card p { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-top: 4px; padding-right: 10px;}
+/* ═══════════════════════════════════════════
+   SUMMARY STRIP
+═══════════════════════════════════════════ */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 30px;
+  animation: slideUp 0.5s 0.05s ease both;
+}
 
-  .card-arrow {
-    position: absolute; bottom: 18px; right: 18px; width: 24px; height: 24px;
-    background: var(--teal-light); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 12px; opacity: 0; transform: translateX(4px); transition: opacity 0.2s, transform 0.2s;
-  }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 14px 12px;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.stat-card:active { transform: scale(0.97); }
 
-  /* ─── NOTIFICATION BADGE ─── */
-  .menu-badge {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: var(--c-surgery);
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 20px;
-    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4);
-    animation: pulse 2s infinite;
-    display: none; /* เริ่มต้นซ่อนไว้ก่อน */
-    z-index: 10;
-  }
-  
-  /* แยกสี Badge ตามสถานะ */
-  .badge-waiting { background: var(--c-waiting); box-shadow: 0 0 0 0 rgba(214, 158, 46, 0.4); }
-  .badge-surgery { background: var(--c-surgery); box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4); }
-  .badge-recovery { background: var(--c-recovery); box-shadow: 0 0 0 0 rgba(128, 90, 213, 0.4); }
-  .badge-ready { background: var(--c-ready); box-shadow: 0 0 0 0 rgba(49, 130, 206, 0.4); }
+/* Left accent bar */
+.stat-card::before {
+  content: ""; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+.sc-total::before  { background: var(--c-total); }
+.sc-wait::before   { background: var(--c-waiting); }
+.sc-surg::before   { background: var(--c-surgery); }
+.sc-rec::before    { background: var(--c-recovery); }
+.sc-ready::before  { background: var(--c-ready); }
+.sc-done::before   { background: var(--c-done); }
 
-  @keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 currentColor; }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0,0,0,0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,0,0,0); }
-  }
+.stat-icon { font-size: 20px; line-height: 1; margin-bottom: 8px; }
+.stat-value {
+  font-family: "Outfit", sans-serif;
+  font-size: 26px; font-weight: 800;
+  color: #fff; line-height: 1;
+  margin-bottom: 3px;
+}
+.stat-label { font-size: 11px; color: var(--text-dim); line-height: 1.3; }
 
-  footer { text-align: center; font-size: 12px; color: var(--text-muted); padding: 20px; border-top: 1px solid var(--border); background: var(--surface); }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+/* Color tint on hover */
+.sc-total:hover  { border-color: var(--c-total);    background: rgba(100,116,139,0.08); }
+.sc-wait:hover   { border-color: var(--c-waiting);  background: rgba(245,158,11,0.06); }
+.sc-surg:hover   { border-color: var(--c-surgery);  background: rgba(239,68,68,0.06); }
+.sc-rec:hover    { border-color: var(--c-recovery); background: rgba(139,92,246,0.06); }
+.sc-ready:hover  { border-color: var(--c-ready);    background: rgba(59,130,246,0.06); }
+.sc-done:hover   { border-color: var(--c-done);     background: rgba(16,185,129,0.06); }
+
+/* ═══════════════════════════════════════════
+   MENU GRID
+═══════════════════════════════════════════ */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.menu-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px 18px;
+  cursor: pointer; text-decoration: none; display: block;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  animation: slideUp 0.5s ease both;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-card:hover {
+  border-color: var(--teal);
+  background: rgba(14,165,160,0.06);
+  box-shadow: 0 8px 32px rgba(14,165,160,0.12);
+  transform: translateY(-2px);
+}
+.menu-card:active { transform: scale(0.97); }
+
+/* Ripple dot top-right on hover */
+.menu-card::after {
+  content: "›";
+  position: absolute; bottom: 14px; right: 16px;
+  font-size: 18px; color: var(--teal);
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.menu-card:hover::after { opacity: 1; transform: translateX(0); }
+
+.menu-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-card:nth-child(2) { animation-delay: 0.13s; }
+.menu-card:nth-child(3) { animation-delay: 0.16s; }
+.menu-card:nth-child(4) { animation-delay: 0.19s; }
+.menu-card:nth-child(5) { animation-delay: 0.22s; }
+.menu-card:nth-child(6) { animation-delay: 0.25s; }
+.menu-card:nth-child(7) { animation-delay: 0.28s; }
+.menu-card:nth-child(8) { animation-delay: 0.31s; }
+
+.card-emoji {
+  font-size: 28px; display: block; margin-bottom: 12px; line-height: 1;
+}
+.card-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: #fff; margin-bottom: 4px; letter-spacing: -0.2px;
+}
+.card-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; padding-right: 16px; }
+
+/* ── Notification Badge ── */
+.notif-badge {
+  position: absolute; top: 14px; right: 14px;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: 0.3px; display: none;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+.nb-waiting  { background: rgba(245,158,11,0.2); color: var(--c-waiting); border: 1px solid rgba(245,158,11,0.4); }
+.nb-surgery  { background: rgba(239,68,68,0.2);  color: var(--c-surgery);  border: 1px solid rgba(239,68,68,0.4); }
+.nb-recovery { background: rgba(139,92,246,0.2); color: var(--c-recovery); border: 1px solid rgba(139,92,246,0.4); }
+.nb-ready    { background: rgba(59,130,246,0.2);  color: var(--c-ready);   border: 1px solid rgba(59,130,246,0.4); }
+
+/* ═══════════════════════════════════════════
+   MOBILE BOTTOM NAV (≤ 640px)
+═══════════════════════════════════════════ */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  grid-template-columns: repeat(5, 1fr);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px;
+  font-size: 9px; color: var(--text-dim);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item:active { color: var(--teal); }
+.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item.active { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
+
+/* ── Floating Action Button ── */
+.fab {
+  display: none;
+  position: fixed; bottom: 90px; right: 20px; z-index: 250;
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 50%; border: none; cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 20px var(--teal-glow), 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.fab:active { transform: scale(0.93); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  text-align: center;
+  font-size: 11px; color: var(--text-faint);
+  padding: 18px;
+  border-top: 1px solid var(--border);
+  position: relative; z-index: 1;
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  header { height: 58px; padding: 0 14px; }
+  .brand-sub { display: none; }
+  .brand-name { font-size: 14px; }
+  #userName  { width: 78px; }
+  #userRole  { width: 100px; }
+  #adminPwd  { width: 72px; }
+  .btn-login { padding: 8px 11px; }
+
+  .wrap { padding: 20px 14px 80px; }
+  .page-title { font-size: 18px; }
+
+  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .stat-card { padding: 11px 10px 10px; }
+  .stat-value { font-size: 22px; }
+  .stat-label { font-size: 10px; }
+
+  .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .menu-card { padding: 16px 14px 14px; border-radius: var(--radius); }
+  .card-emoji { font-size: 24px; margin-bottom: 10px; }
+  .card-title { font-size: 13px; }
+
+  .bottom-nav { display: grid; }
+  .fab { display: flex; align-items: center; justify-content: center; }
+}
+
+@media (max-width: 380px) {
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-card:last-child { grid-column: span 2; display: flex; align-items: center; gap: 12px; }
+  .stat-card:last-child .stat-value { margin-bottom: 0; }
+  #loginPanel { gap: 4px; }
+  #userName  { width: 68px; font-size: 11px; }
+  #userRole  { width: 90px; font-size: 11px; }
+}
+
+/* Desktop refinements */
+@media (min-width: 641px) {
+  .menu-grid { grid-template-columns: repeat(4, 1fr); }
+  .summary-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (min-width: 900px) {
+  .wrap { padding: 36px 24px 60px; }
+  .page-title { font-size: 26px; }
+}
 </style>
 </head>
-
 <body>
 
+<!-- ── HEADER ── -->
 <header>
-  <div class="header-brand">
-    <div class="brand-icon">🐾</div>
-    <div class="brand-text">
-      <h1>RMUTTO – VASD</h1>
-      <span>Veterinary Academic Service Division</span>
+  <div class="brand">
+    <div class="brand-logo">🐾</div>
+    <div>
+      <div class="brand-name">RMUTTO – VASD</div>
+      <div class="brand-sub">Veterinary Academic Service Division</div>
     </div>
   </div>
 
-  <div class="user-panel" id="loginPanel">
-    <input id="userName" placeholder="ชื่อผู้ใช้" style="width:120px">
-    <select id="userRole">
-      <option value="">เลือกหน้าที่</option>
+  <div id="loginPanel">
+    <input id="userName" class="input-field" placeholder="ชื่อผู้ใช้">
+    <select id="userRole" class="input-field">
+      <option value="">บทบาท</option>
       <option value="admin">admin</option>
       <option value="อาจารย์">อาจารย์</option>
       <option value="สัตวแพทย์">สัตวแพทย์</option>
@@ -234,115 +465,164 @@
       <option value="นศ ผู้ช่วยผ่าตัด">นศ ผู้ช่วยผ่าตัด</option>
       <option value="นศ ช่วยงานทั่วไป">นศ ช่วยงานทั่วไป</option>
     </select>
-    <input id="adminPwd" type="password" placeholder="รหัส admin" style="display:none;width:90px">
-    <button class="btn-ok" onclick="login()">เข้าสู่ระบบ</button>
+    <input id="adminPwd" type="password" class="input-field" placeholder="รหัส admin" style="display:none">
+    <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
   </div>
 
-  <div class="user-panel" id="userInfo" style="display:none">
-    <div class="user-badge"><div class="user-avatar">👤</div><span id="showUser"></span></div>
-    <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+  <div id="userInfo">
+    <div class="user-pill">
+      <div class="user-avatar">👤</div>
+      <span id="showUser"></span>
+    </div>
+    <button class="btn-logout" onclick="logout()">ออก</button>
   </div>
 </header>
 
-<div class="container">
+<!-- ── MAIN ── -->
+<div class="wrap">
 
-  <div class="date-bar">
-    <h2>ภาพรวมวันนี้</h2>
-    <div class="date-chip" id="todayDate">–</div>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">ภาพรวมวันนี้</div>
+      <div class="page-sub">Veterinary Academic Service Division</div>
+    </div>
+    <div class="date-pill" id="todayDate">–</div>
   </div>
 
-  <div class="summary">
-    <div class="summary-card">
-      <span class="card-icon-sm">🐾</span>
-      <div class="summary-info"><h2 id="totalAnimal">–</h2><p>สัตว์ทั้งหมด</p></div>
+  <!-- Summary -->
+  <div class="section-title">สรุปสถานะ</div>
+  <div class="summary-grid">
+    <div class="stat-card sc-total">
+      <div class="stat-icon">🐾</div>
+      <div class="stat-value" id="totalAnimal">–</div>
+      <div class="stat-label">สัตว์ทั้งหมด</div>
     </div>
-    <div class="summary-card">
-      <span class="card-icon-sm">⏳</span>
-      <div class="summary-info"><h2 id="waiting">–</h2><p>รอคิวผ่าตัด</p></div>
+    <div class="stat-card sc-wait">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-value" id="waiting">–</div>
+      <div class="stat-label">รอคิวผ่าตัด</div>
     </div>
-    <div class="summary-card">
-      <span class="card-icon-sm">🔬</span>
-      <div class="summary-info"><h2 id="inSurgery">–</h2><p>กำลังผ่าตัด</p></div>
+    <div class="stat-card sc-surg">
+      <div class="stat-icon">🔬</div>
+      <div class="stat-value" id="inSurgery">–</div>
+      <div class="stat-label">กำลังผ่าตัด</div>
     </div>
-    <div class="summary-card">
-      <span class="card-icon-sm">🛏️</span>
-      <div class="summary-info"><h2 id="recovery">–</h2><p>พักฟื้น</p></div>
+    <div class="stat-card sc-rec">
+      <div class="stat-icon">🛏️</div>
+      <div class="stat-value" id="recovery">–</div>
+      <div class="stat-label">พักฟื้น</div>
     </div>
-    <div class="summary-card">
-      <span class="card-icon-sm">🕒</span>
-      <div class="summary-info"><h2 id="ready">–</h2><p>รอจัดยา/รับกลับ</p></div>
+    <div class="stat-card sc-ready">
+      <div class="stat-icon">🕒</div>
+      <div class="stat-value" id="ready">–</div>
+      <div class="stat-label">รอจัดยา</div>
     </div>
-    <div class="summary-card">
-      <span class="card-icon-sm">✅</span>
-      <div class="summary-info"><h2 id="done">–</h2><p>กลับบ้านแล้ว</p></div>
+    <div class="stat-card sc-done">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value" id="done">–</div>
+      <div class="stat-label">กลับบ้านแล้ว</div>
     </div>
   </div>
 
-  <div class="section-label">เมนูหลัก (พร้อมแจ้งเตือนเคสค้าง)</div>
-  <div class="menu">
+  <!-- Menu -->
+  <div class="section-title">เมนูหลัก</div>
+  <div class="menu-grid">
 
-    <div class="card" onclick="location.href='registration.html'">
+    <a class="menu-card" href="registration.html">
       <span class="card-emoji">📝</span>
-      <h3>ลงทะเบียน</h3><p>บันทึกข้อมูลสัตว์และเจ้าของ</p>
-      <div class="card-arrow">›</div>
-    </div>
+      <div class="card-title">ลงทะเบียน</div>
+      <div class="card-desc">บันทึกข้อมูลสัตว์และเจ้าของ</div>
+    </a>
 
-    <div class="card" onclick="location.href='animals.html'">
+    <a class="menu-card" href="animals.html">
       <span class="card-emoji">🐾</span>
-      <h3>สถานะสัตว์ทั้งหมด</h3><p>ดูรายชื่อและสถานะสัตว์ทั้งหมด</p>
-      <div class="card-arrow">›</div>
-    </div>
+      <div class="card-title">สถานะสัตว์</div>
+      <div class="card-desc">ดูรายชื่อและสถานะสัตว์ทั้งหมด</div>
+    </a>
 
-    <div class="card" onclick="location.href='surgery.html'">
-      <div class="menu-badge badge-waiting" id="badge-surgery-menu">0 เคสรอคิว</div> <span class="card-emoji">📋</span>
-      <h3>โต๊ะผ่าตัด</h3><p>รับเคสเข้าห้องผ่าตัดและบันทึกข้อมูล</p>
-      <div class="card-arrow">›</div>
-    </div>
+    <a class="menu-card" href="surgery.html">
+      <div class="notif-badge nb-waiting" id="badge-surgery-menu"></div>
+      <span class="card-emoji">📋</span>
+      <div class="card-title">โต๊ะผ่าตัด</div>
+      <div class="card-desc">รับเคสเข้าห้องผ่าตัด</div>
+    </a>
 
-    <div class="card" onclick="location.href='anesthesia.html'">
-      <div class="menu-badge badge-surgery" id="badge-anes-menu">0 กำลังผ่า</div> <span class="card-emoji">🩺</span>
-      <h3>วางยาสลบ</h3><p>คำนวณยา / วางยา / บันทึก Vitals</p>
-      <div class="card-arrow">›</div>
-    </div>
+    <a class="menu-card" href="anesthesia.html">
+      <div class="notif-badge nb-surgery" id="badge-anes-menu"></div>
+      <span class="card-emoji">🩺</span>
+      <div class="card-title">วางยาสลบ</div>
+      <div class="card-desc">คำนวณยา · วางยา · Vitals</div>
+    </a>
 
-    <div class="card" onclick="location.href='recovery.html'">
-      <div class="menu-badge badge-recovery" id="badge-recovery-menu">0 พักฟื้น</div> <span class="card-emoji">🟣</span>
-      <h3>พักฟื้น</h3><p>ติดตามการฟื้นตัวหลังผ่าตัด</p>
-      <div class="card-arrow">›</div>
-    </div>
+    <a class="menu-card" href="recovery.html">
+      <div class="notif-badge nb-recovery" id="badge-recovery-menu"></div>
+      <span class="card-emoji">🟣</span>
+      <div class="card-title">พักฟื้น</div>
+      <div class="card-desc">ติดตามการฟื้นตัวหลังผ่าตัด</div>
+    </a>
 
-    <div class="card" onclick="location.href='rx.html'">
-      <div class="menu-badge badge-ready" id="badge-rx-menu">0 รอจัดยา</div> <span class="card-emoji">💊</span>
-      <h3>โต๊ะจัดยา</h3><p>จัดการและพิมพ์ใบสั่งยา</p>
-      <div class="card-arrow">›</div>
-    </div>
+    <a class="menu-card" href="rx.html">
+      <div class="notif-badge nb-ready" id="badge-rx-menu"></div>
+      <span class="card-emoji">💊</span>
+      <div class="card-title">โต๊ะจัดยา</div>
+      <div class="card-desc">จัดการและพิมพ์ใบสั่งยา</div>
+    </a>
 
-    <div class="card" onclick="location.href='report.html'">
+    <a class="menu-card" href="report.html">
       <span class="card-emoji">📊</span>
-      <h3>รายงาน</h3><p>สรุปข้อมูลและสถิติ</p>
-      <div class="card-arrow">›</div>
-    </div>
+      <div class="card-title">รายงาน</div>
+      <div class="card-desc">สรุปข้อมูลและสถิติ</div>
+    </a>
 
-    <div class="card" onclick="location.href='settings.html'">
+    <a class="menu-card" href="settings.html">
       <span class="card-emoji">⚙️</span>
-      <h3>ตั้งค่า</h3><p>ตั้งค่าเครื่องพิมพ์และกระดาษ</p>
-      <div class="card-arrow">›</div>
-    </div>
+      <div class="card-title">ตั้งค่า</div>
+      <div class="card-desc">ตั้งค่าเครื่องพิมพ์และกระดาษ</div>
+    </a>
 
   </div>
 </div>
 
+<!-- ── BOTTOM NAV (Mobile) ── -->
+<nav class="bottom-nav">
+  <a class="nav-item active" href="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item" href="surgery.html">
+    <span class="nav-icon">📋</span>ผ่าตัด
+  </a>
+  <a class="nav-item" href="recovery.html">
+    <span class="nav-icon">🛏️</span>พักฟื้น
+  </a>
+  <a class="nav-item" href="report.html">
+    <span class="nav-icon">📊</span>รายงาน
+  </a>
+</nav>
+
+<!-- ── FAB (Mobile quick register) ── -->
+<button class="fab" onclick="location.href='registration.html'" title="ลงทะเบียน">
+  ➕
+</button>
+
 <footer>RMUTTO – VASD © 2026 &nbsp;·&nbsp; Veterinary Academic Service Division</footer>
 
+<!-- ════════════════════════════════════════
+     SCRIPT (logic identical to original)
+════════════════════════════════════════ -->
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
 /* ── Date ── */
 const dateEl = document.getElementById("todayDate");
-const now = new Date();
-dateEl.textContent = now.toLocaleDateString("th-TH", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+dateEl.textContent = new Date().toLocaleDateString("th-TH", {
+  weekday: "short", year: "numeric", month: "short", day: "numeric"
+});
 
-/* ── Login ── */
+/* ── Login Logic ── */
 const nameInput  = document.getElementById("userName");
 const roleSelect = document.getElementById("userRole");
 const pwdInput   = document.getElementById("adminPwd");
@@ -350,15 +630,20 @@ const loginPanel = document.getElementById("loginPanel");
 const userInfo   = document.getElementById("userInfo");
 const showUser   = document.getElementById("showUser");
 
-roleSelect.onchange = () => { pwdInput.style.display = roleSelect.value === "admin" ? "inline-block" : "none"; };
+roleSelect.onchange = () => {
+  pwdInput.style.display = roleSelect.value === "admin" ? "inline-block" : "none";
+};
 
 window.login = function () {
   const name = nameInput.value.trim();
   const role = roleSelect.value;
-  if (!name || !role) { alert("กรุณาใส่ชื่อและเลือกหน้าที่"); return; }
+  if (!name || !role) { alert("กรุณาใส่ชื่อและเลือกบทบาท"); return; }
   if (role === "admin" && pwdInput.value !== "2500") { alert("รหัสผ่าน admin ไม่ถูกต้อง"); return; }
-  localStorage.setItem("vasd_user", name); localStorage.setItem("vasd_role", role);
-  showUser.innerText = `${name} (${role})`; loginPanel.style.display = "none"; userInfo.style.display = "flex";
+  localStorage.setItem("vasd_user", name);
+  localStorage.setItem("vasd_role", role);
+  showUser.innerText = `${name} (${role})`;
+  loginPanel.style.display = "none";
+  userInfo.style.display = "flex";
 };
 
 window.logout = function () { localStorage.clear(); location.reload(); };
@@ -367,7 +652,9 @@ window.logout = function () { localStorage.clear(); location.reload(); };
 const savedName = localStorage.getItem("vasd_user");
 const savedRole = localStorage.getItem("vasd_role");
 if (savedName && savedRole) {
-  showUser.innerText = `${savedName} (${savedRole})`; loginPanel.style.display = "none"; userInfo.style.display = "flex";
+  showUser.innerText = `${savedName} (${savedRole})`;
+  loginPanel.style.display = "none";
+  userInfo.style.display = "flex";
 }
 
 /* ── Dashboard Summary & Badges ── */
@@ -381,7 +668,6 @@ async function loadSummary() {
   const ready    = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home")).count || 0;
   const done     = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","done")).count || 0;
 
-  // 1. อัปเดตตัวเลขใน Compact Summary
   document.getElementById("totalAnimal").innerText = total;
   document.getElementById("waiting").innerText     = waiting;
   document.getElementById("inSurgery").innerText   = surgery;
@@ -389,33 +675,24 @@ async function loadSummary() {
   document.getElementById("ready").innerText       = ready;
   document.getElementById("done").innerText        = done;
 
-  // 2. อัปเดต Notification Badges บนเมนู (โชว์เมื่อมีค่า > 0 เท่านั้น)
-  const bSurgery = document.getElementById("badge-surgery-menu");
-  bSurgery.innerText = `${waiting} รอคิว`;
-  bSurgery.style.display = waiting > 0 ? "block" : "none";
-
-  const bAnes = document.getElementById("badge-anes-menu");
-  bAnes.innerText = `${surgery} กำลังผ่า`;
-  bAnes.style.display = surgery > 0 ? "block" : "none";
-
-  const bRecovery = document.getElementById("badge-recovery-menu");
-  bRecovery.innerText = `${recovery} พักฟื้น`;
-  bRecovery.style.display = recovery > 0 ? "block" : "none";
-
-  const bRx = document.getElementById("badge-rx-menu");
-  bRx.innerText = `${ready} รอจัดยา`;
-  bRx.style.display = ready > 0 ? "block" : "none";
+  const setBadge = (id, count, label) => {
+    const el = document.getElementById(id);
+    el.innerText = `${count} ${label}`;
+    el.style.display = count > 0 ? "block" : "none";
+  };
+  setBadge("badge-surgery-menu",  waiting,  "รอคิว");
+  setBadge("badge-anes-menu",     surgery,  "กำลังผ่า");
+  setBadge("badge-recovery-menu", recovery, "พักฟื้น");
+  setBadge("badge-rx-menu",       ready,    "รอจัดยา");
 }
 
-// โหลดข้อมูล Dashboard ครั้งแรก
 loadSummary();
 
-// Real-time Dashboard Update (ถ้าใครทำอะไรในระบบ เลขจะอัปเดตแบบเรียลไทม์)
 supabase.channel('dashboard-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
   .subscribe();
-
 </script>
+
 </body>
 </html>
