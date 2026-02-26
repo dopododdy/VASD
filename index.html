@@ -206,57 +206,6 @@ header {
 }
 
 /* ═══════════════════════════════════════════
-   SUMMARY STRIP
-═══════════════════════════════════════════ */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 30px;
-  animation: slideUp 0.5s 0.05s ease both;
-}
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 14px 12px;
-  position: relative; overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s;
-}
-.stat-card:active { transform: scale(0.97); }
-
-/* Left accent bar */
-.stat-card::before {
-  content: ""; position: absolute;
-  left: 0; top: 0; bottom: 0; width: 3px;
-  border-radius: 0 2px 2px 0;
-}
-.sc-total::before  { background: var(--c-total); }
-.sc-wait::before   { background: var(--c-waiting); }
-.sc-surg::before   { background: var(--c-surgery); }
-.sc-rec::before    { background: var(--c-recovery); }
-.sc-ready::before  { background: var(--c-ready); }
-.sc-done::before   { background: var(--c-done); }
-
-.stat-icon { font-size: 20px; line-height: 1; margin-bottom: 8px; }
-.stat-value {
-  font-family: "Outfit", sans-serif;
-  font-size: 26px; font-weight: 800;
-  color: #fff; line-height: 1;
-  margin-bottom: 3px;
-}
-.stat-label { font-size: 11px; color: var(--text-dim); line-height: 1.3; }
-
-/* Color tint on hover */
-.sc-total:hover  { border-color: var(--c-total);    background: rgba(100,116,139,0.08); }
-.sc-wait:hover   { border-color: var(--c-waiting);  background: rgba(245,158,11,0.06); }
-.sc-surg:hover   { border-color: var(--c-surgery);  background: rgba(239,68,68,0.06); }
-.sc-rec:hover    { border-color: var(--c-recovery); background: rgba(139,92,246,0.06); }
-.sc-ready:hover  { border-color: var(--c-ready);    background: rgba(59,130,246,0.06); }
-.sc-done:hover   { border-color: var(--c-done);     background: rgba(16,185,129,0.06); }
-
-/* ═══════════════════════════════════════════
    MENU GRID
 ═══════════════════════════════════════════ */
 .menu-grid {
@@ -404,11 +353,6 @@ footer {
   .wrap { padding: 20px 14px 80px; }
   .page-title { font-size: 18px; }
 
-  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
-  .stat-card { padding: 11px 10px 10px; }
-  .stat-value { font-size: 22px; }
-  .stat-label { font-size: 10px; }
-
   .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .menu-card { padding: 16px 14px 14px; border-radius: var(--radius); }
   .card-emoji { font-size: 24px; margin-bottom: 10px; }
@@ -419,9 +363,6 @@ footer {
 }
 
 @media (max-width: 380px) {
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
-  .stat-card:last-child { grid-column: span 2; display: flex; align-items: center; gap: 12px; }
-  .stat-card:last-child .stat-value { margin-bottom: 0; }
   #loginPanel { gap: 4px; }
   #userName  { width: 68px; font-size: 11px; }
   #userRole  { width: 90px; font-size: 11px; }
@@ -430,7 +371,6 @@ footer {
 /* Desktop refinements */
 @media (min-width: 641px) {
   .menu-grid { grid-template-columns: repeat(4, 1fr); }
-  .summary-grid { grid-template-columns: repeat(6, 1fr); }
 }
 
 @media (min-width: 900px) {
@@ -485,40 +425,6 @@ footer {
       <div class="page-sub">Veterinary Academic Service Division</div>
     </div>
     <div class="date-pill" id="todayDate">–</div>
-  </div>
-
-  <div class="section-title">สรุปสถานะ</div>
-  <div class="summary-grid">
-    <div class="stat-card sc-total">
-      <div class="stat-icon">🐾</div>
-      <div class="stat-value" id="totalAnimal">–</div>
-      <div class="stat-label">สัตว์ทั้งหมด</div>
-    </div>
-    <div class="stat-card sc-wait">
-      <div class="stat-icon">⏳</div>
-      <div class="stat-value" id="waiting">–</div>
-      <div class="stat-label">รอคิวผ่าตัด</div>
-    </div>
-    <div class="stat-card sc-surg">
-      <div class="stat-icon">🔪</div>
-      <div class="stat-value" id="inSurgery">–</div>
-      <div class="stat-label">กำลังผ่าตัด</div>
-    </div>
-    <div class="stat-card sc-rec">
-      <div class="stat-icon">🛏️</div>
-      <div class="stat-value" id="recovery">–</div>
-      <div class="stat-label">พักฟื้น</div>
-    </div>
-    <div class="stat-card sc-ready">
-      <div class="stat-icon">🕒</div>
-      <div class="stat-value" id="ready">–</div>
-      <div class="stat-label">รอจัดยา</div>
-    </div>
-    <div class="stat-card sc-done">
-      <div class="stat-icon">✅</div>
-      <div class="stat-value" id="done">–</div>
-      <div class="stat-label">กลับบ้านแล้ว</div>
-    </div>
   </div>
 
   <div class="section-title">เมนูหลัก</div>
@@ -586,14 +492,14 @@ footer {
   <a class="nav-item" href="animals.html">
     <span class="nav-icon">🐾</span>สัตว์
   </a>
+  <a class="nav-item" href="anesthesia.html">
+    <span class="nav-icon">🩺</span>วางยา
+  </a>
   <a class="nav-item" href="surgery.html">
     <span class="nav-icon">📋</span>ผ่าตัด
   </a>
   <a class="nav-item" href="recovery.html">
     <span class="nav-icon">🛏️</span>พักฟื้น
-  </a>
-  <a class="nav-item" href="report.html">
-    <span class="nav-icon">📊</span>รายงาน
   </a>
 </nav>
 
@@ -647,23 +553,12 @@ if (savedName && savedRole) {
   userInfo.style.display = "flex";
 }
 
-/* ── Dashboard Summary & Badges ── */
+/* ── Dashboard Badges ── */
 async function loadSummary() {
-  const { data: eventId } = await supabase.rpc("get_today_event");
-
-  const total    = (await supabase.from("vasd_animal").select("*",{count:"exact",head:true}).eq("event_id",eventId)).count || 0;
   const waiting  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","waiting")).count || 0;
   const surgery  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","surgery")).count || 0;
   const recovery = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","recovery")).count || 0;
   const ready    = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home")).count || 0;
-  const done     = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","done")).count || 0;
-
-  document.getElementById("totalAnimal").innerText = total;
-  document.getElementById("waiting").innerText     = waiting;
-  document.getElementById("inSurgery").innerText   = surgery;
-  document.getElementById("recovery").innerText    = recovery;
-  document.getElementById("ready").innerText       = ready;
-  document.getElementById("done").innerText        = done;
 
   const setBadge = (id, count, label) => {
     const el = document.getElementById(id);
@@ -673,7 +568,6 @@ async function loadSummary() {
     }
   };
   
-  // สลับข้อมูลเพื่อความถูกต้องของ Workflow ตามที่แก้ไข
   setBadge("badge-anes-menu",     waiting,  "รอคิว");
   setBadge("badge-surgery-menu",  surgery,  "กำลังผ่า");
   setBadge("badge-recovery-menu", recovery, "พักฟื้น");
@@ -684,7 +578,6 @@ loadSummary();
 
 supabase.channel('dashboard-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
   .subscribe();
 </script>
 
