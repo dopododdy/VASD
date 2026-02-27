@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>วางยาสลบ – VASD</title>
+<title>โต๊ะวิสัญญี – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -25,6 +25,9 @@
   --slate-400:    #94a3b8;
   --slate-300:    #cbd5e1;
   --white:        #ffffff;
+  --border-2:     rgba(255,255,255,0.14);
+  --text-dim:     #94a3b8;
+  
   --radius-lg:    20px;
   --radius-md:    12px;
   --radius-sm:    8px;
@@ -39,7 +42,7 @@ body {
   color: var(--white);
   font-family: var(--font-main);
   line-height: 1.5;
-  padding-bottom: 80px;
+  padding-bottom: 90px; /* เผื่อที่ให้ Bottom Nav */
 }
 
 /* ═══════════════════════════════════════════
@@ -49,11 +52,22 @@ body {
   position: sticky; top: 0; z-index: 100;
   background: rgba(11, 25, 41, 0.85);
   backdrop-filter: blur(12px);
-  padding: 16px 20px;
+  padding: 12px 20px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.nav-title { font-size: 20px; font-weight: 800; color: var(--teal-light); letter-spacing: -0.5px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.nav-title { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: -0.5px; }
+.brand-icon { font-size: 24px; }
+
+.btn-home {
+  padding: 8px 14px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: rgba(255,255,255,0.08); color: var(--white);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.2s;
+}
+.btn-home:hover { background: rgba(255,255,255,0.15); }
 
 .container { padding: 16px; max-width: 600px; margin: 0 auto; }
 
@@ -83,8 +97,9 @@ body {
 
 .info-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .chip {
-  padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600;
-  background: rgba(255,255,255,0.08); color: var(--slate-300);
+  padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 600;
+  background: rgba(255,255,255,0.08); color: var(--white);
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 /* Health Note Display */
@@ -95,18 +110,18 @@ body {
   border-radius: var(--radius-sm); 
   padding: 12px 14px;
   font-size: 14px; color: var(--rose);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .est-weight-strip {
   background: var(--amber-soft);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  padding: 12px 14px;
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 16px;
 }
-.est-label { font-size: 11px; color: var(--amber); font-weight: 800; text-transform: uppercase; }
-.est-val { font-size: 15px; font-weight: 700; color: var(--amber); }
+.est-label { font-size: 12px; color: var(--amber); font-weight: 700; }
+.est-val { font-size: 16px; font-weight: 800; color: var(--amber); }
 
 /* Weight Input */
 .input-label { display: block; font-size: 13px; font-weight: 600; color: var(--slate-400); margin-bottom: 8px; }
@@ -142,6 +157,36 @@ body {
 .spinner { width: 40px; height: 40px; border: 4px solid rgba(14,165,160,0.1); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ═══════════════════════════════════════════
+   MOBILE BOTTOM NAV
+═══════════════════════════════════════════ */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  grid-template-columns: repeat(5, 1fr);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px;
+  font-size: 10px; color: var(--text-dim);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item:active { color: var(--teal); }
+.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item.active { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
+
+@media (max-width: 640px) {
+  .bottom-nav { display: grid; }
+}
+
 </style>
 </head>
 <body>
@@ -151,13 +196,36 @@ body {
   <div style="font-weight:600; color:var(--teal-light)">กำลังดึงข้อมูลคิววางยา...</div>
 </div>
 
-<nav class="top-nav">
-  <div class="nav-title">ANESTHESIA</div>
-  <div id="user-display" style="font-size: 12px; color: var(--slate-400);"></div>
-</nav>
+<header class="top-nav">
+  <div class="brand">
+    <div class="brand-icon">💉</div>
+    <div class="nav-title">โต๊ะวิสัญญี</div>
+  </div>
+  <button class="btn-home" onclick="location.href='index.html'">
+    🏠 หน้าหลัก
+  </button>
+</header>
 
 <div class="container" id="anesthesia-container">
   </div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item active" href="anesthesia.html">
+    <span class="nav-icon">🩺</span>วางยา
+  </a>
+  <a class="nav-item" href="surgery.html">
+    <span class="nav-icon">📋</span>ผ่าตัด
+  </a>
+  <a class="nav-item" href="recovery.html">
+    <span class="nav-icon">🛏️</span>พักฟื้น
+  </a>
+</nav>
 
 <script type="module">
 import { supabase } from './js/supabase.js';
@@ -204,6 +272,14 @@ async function loadAnesthesiaQueue() {
       const card = document.createElement("div");
       card.className = "anesthesia-card";
 
+      // คำนวนข้อความให้สื่อความหมายมากขึ้น
+      const speciesName = a.species === "ม" ? "แมว" : a.species === "ส" ? "สุนัข" : "ไม่ระบุ";
+      const sexName = a.sex === "ผู้" ? "เพศผู้" : a.sex === "เมีย" ? "เพศเมีย" : (a.sex || "-");
+      const serviceName = a.vasd_service?.service_type || "ทำหมัน/ทั่วไป";
+      
+      // ดึงน้ำหนักตั้งต้น
+      const initialWeight = a.actual_weight || a.est_weight || "";
+
       // logic แสดงบันทึกสุขภาพ
       const noteMarkup = a.health_note 
         ? `<div class="health-note-strip">
@@ -215,6 +291,36 @@ async function loadAnesthesiaQueue() {
            </div>`
         : "";
 
+      // รายการยาพื้นฐาน (สำหรับทั้งคู่)
+      let drugRows = `
+        <tr>
+          <td><span class="drug-name">Adrenaline (1:10,000)</span><br><small>Dose 0.01 mg/kg (0.1mg/ml)</small></td>
+          <td class="drug-calc" id="calc-adre-${animalId}">-</td>
+        </tr>
+        <tr>
+          <td><span class="drug-name">Atropine</span><br><small>0.04 mg/kg (1mg/ml)</small></td>
+          <td class="drug-calc" id="calc-atro-${animalId}">-</td>
+        </tr>
+        <tr>
+          <td><span class="drug-name">Xylazine</span><br><small>1 mg/kg (20mg/ml)</small></td>
+          <td class="drug-calc" id="calc-xyla-${animalId}">-</td>
+        </tr>
+        <tr>
+          <td><span class="drug-name">Zoletil</span><br><small>3 mg/kg (100mg/ml)</small></td>
+          <td class="drug-calc" id="calc-zole-${animalId}">-</td>
+        </tr>
+      `;
+
+      // ถัาเป็นสุนัข ให้เพิ่ม Thiopental
+      if (a.species === "ส") {
+        drugRows += `
+        <tr>
+          <td><span class="drug-name">Thiopental</span><br><small>5 mg/kg (10mg/ml)</small></td>
+          <td class="drug-calc" id="calc-thio-${animalId}">-</td>
+        </tr>
+        `;
+      }
+
       card.innerHTML = `
         <div class="ac-header">
           <div class="q-num">#${a.queue_number || '??'}</div>
@@ -223,23 +329,23 @@ async function loadAnesthesiaQueue() {
         
         <div class="ac-body">
           <div class="info-chips">
-            <div class="chip">${a.species || 'ไม่ระบุ'}</div>
-            <div class="chip">${a.sex || '-'}</div>
-            <div class="chip">${a.vasd_service?.service_type || 'General'}</div>
+            <div class="chip">${a.species === 'ม' ? '🐱' : '🐶'} ${speciesName}</div>
+            <div class="chip">⚧ ${sexName}</div>
+            <div class="chip">📋 ${serviceName}</div>
           </div>
 
           ${noteMarkup}
 
           <div class="est-weight-strip">
-            <span class="est-label">น้ำหนักแจ้ง (Est.)</span>
-            <span class="est-val">${a.est_weight || '??'} kg</span>
+            <span class="est-label">น้ำหนักประเมินจากโต๊ะลงทะเบียน</span>
+            <span class="est-val">${a.est_weight ? a.est_weight + ' kg' : 'ยังไม่ประเมิน'}</span>
           </div>
 
-          <label class="input-label">ระบุน้ำหนักจริง (Actual Weight)</label>
+          <label class="input-label">ระบุน้ำหนักจริง (Actual Weight - kg)</label>
           <input type="number" step="0.01" class="weight-input" 
             id="weight-${animalId}" 
             placeholder="0.00"
-            value="${a.actual_weight || ''}"
+            value="${initialWeight}"
             oninput="window.calcDrugs('${animalId}')">
 
           <table class="drug-table">
@@ -247,34 +353,25 @@ async function loadAnesthesiaQueue() {
               <tr><th>Drug List</th><th style="text-align:right">Dose (ml)</th></tr>
             </thead>
             <tbody>
-              <tr>
-                <td><span class="drug-name">Atropine</span><br><small>0.04 mg/kg (1mg/ml)</small></td>
-                <td class="drug-calc" id="calc-atro-${animalId}">-</td>
-              </tr>
-              <tr>
-                <td><span class="drug-name">Xylazine</span><br><small>1 mg/kg (20mg/ml)</small></td>
-                <td class="drug-calc" id="calc-xyla-${animalId}">-</td>
-              </tr>
-              <tr>
-                <td><span class="drug-name">Zoletil</span><br><small>3 mg/kg (100mg/ml)</small></td>
-                <td class="drug-calc" id="calc-zole-${animalId}">-</td>
-              </tr>
+              ${drugRows}
             </tbody>
           </table>
 
           <button class="btn-primary" onclick="window.sendToSurgery('${animalId}')">
-            <span>ส่งเข้าโต๊ะผ่าตัด</span>
+            <span>บันทึกและส่งเข้าโต๊ะผ่าตัด</span>
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14m-7-7l7 7-7 7"></path></svg>
           </button>
         </div>
       `;
       container.appendChild(card);
-      if(a.actual_weight) window.calcDrugs(animalId);
+      
+      // สั่งคำนวณยาทันที (เนื่องจากมีการดึงค่าน้ำหนักประเมินมาใส่ช่องน้ำหนักจริงโดยปริยาย)
+      if(initialWeight) window.calcDrugs(animalId);
     });
 
   } catch (err) {
     console.error("Critical Error:", err);
-    loading.style.display = "none"; // ปิด Loading แม้จะพังเพื่อให้เห็น Error
+    loading.style.display = "none";
     container.innerHTML = `
       <div style="background:var(--rose-soft); padding:20px; border-radius:12px; color:var(--rose); border:1px solid var(--rose);">
         <strong>เกิดข้อผิดพลาดในการโหลดข้อมูล:</strong><br>
@@ -297,20 +394,23 @@ window.calcDrugs = function(animalId) {
   };
 
   if (!w || w <= 0) {
-    ["calc-atro-", "calc-xyla-", "calc-zole-"].forEach(p => setV(p + animalId, null));
+    ["calc-adre-", "calc-atro-", "calc-xyla-", "calc-zole-", "calc-thio-"].forEach(p => setV(p + animalId, null));
     return;
   }
 
+  // สูตรคำนวณ: (น้ำหนัก * Dose_mg_kg) / ความเข้มข้น_mg_ml
+  setV(`calc-adre-${animalId}`, ((w * 0.01) / 0.1).toFixed(2)); // Adrenaline 1:10000 = 0.1mg/ml
   setV(`calc-atro-${animalId}`, ((w * 0.04) / 1).toFixed(2));
   setV(`calc-xyla-${animalId}`, ((w * 1) / 20).toFixed(2));
   setV(`calc-zole-${animalId}`, ((w * 3) / 100).toFixed(2));
+  setV(`calc-thio-${animalId}`, ((w * 5) / 10).toFixed(2)); // จะถูกข้ามไปถ้าเป็นแมวและไม่มี element id นี้
 };
 
 window.sendToSurgery = async function(animalId) {
   const weight = document.getElementById(`weight-${animalId}`).value;
-  if (!weight) return alert("กรุณาระบุน้ำหนักจริง");
+  if (!weight) return alert("กรุณาระบุน้ำหนักจริงก่อนส่งคิว");
   
-  if (!confirm("ยืนยันการส่งเข้าผ่าตัด?")) return;
+  if (!confirm("ยืนยันการบันทึกน้ำหนักและส่งสัตว์เข้าโต๊ะผ่าตัด?")) return;
 
   try {
     // อัปเดตน้ำหนัก
