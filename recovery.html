@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>หน่วยพักฟื้น (Recovery) – VASD</title>
+<title>หน่วยพักฟื้น – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -19,8 +19,11 @@
   --violet:        #8b5cf6;
   --violet-soft:   rgba(139,92,246,0.14);
   --rose:          #ef4444;
+  --amber:         #f59e0b;
+  --emerald:       #10b981;
   --surface:       rgba(255,255,255,0.04);
   --border:        rgba(255,255,255,0.08);
+  --border-2:      rgba(255,255,255,0.14);
   --text:          #e2e8f0;
   --text-dim:      #94a3b8;
 }
@@ -55,7 +58,9 @@ header {
   margin-bottom: 20px;
   position: relative;
   overflow: hidden;
+  animation: slideUp 0.4s ease both;
 }
+@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
 .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
 .q-circle {
@@ -67,62 +72,99 @@ header {
 
 .tabs { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
 .tab-btn {
-  flex: 1; padding: 8px; border: none; border-radius: 8px;
-  background: transparent; color: var(--text-dim); font-size: 13px; cursor: pointer;
+  flex: 1; padding: 10px; border: none; border-radius: 8px;
+  background: transparent; color: var(--text-dim); font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; font-family: "Sarabun", sans-serif;
 }
 .tab-btn.active { background: var(--violet); color: white; }
 
 .panel { display: none; }
-.panel.active { display: block; }
+.panel.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Vitals Table (The Trend View) */
+/* Vitals Table */
 .vitals-history { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
 .vitals-history th { color: var(--teal-light); border-bottom: 1px solid var(--border); padding: 8px 4px; text-align: center; }
 .vitals-history td { text-align: center; padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
 /* Form Elements */
-.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.monitor-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
 input {
   background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-  padding: 12px; border-radius: 12px; color: white; width: 100%;
+  padding: 10px 8px; border-radius: 10px; color: white; width: 100%;
+  font-size: 13px; font-family: "Sarabun", sans-serif; text-align: center;
+  outline: none; transition: 0.2s;
 }
+input:focus { border-color: var(--violet); }
 
 .btn-save {
-  width: 100%; padding: 14px; background: var(--teal); border: none;
-  border-radius: 14px; color: white; font-weight: 700; cursor: pointer;
+  width: 100%; padding: 10px; background: var(--violet); border: none;
+  border-radius: 10px; color: white; font-weight: 600; cursor: pointer;
+  margin-bottom: 15px; font-family: "Sarabun", sans-serif; font-size: 13px;
 }
 
 .btn-finish {
   width: 100%; padding: 14px; background: transparent; border: 1px solid var(--violet);
-  color: var(--violet); border-radius: 14px; font-weight: 700; margin-top: 10px; cursor: pointer;
+  color: var(--violet); border-radius: 14px; font-weight: 700; margin-top: 15px; cursor: pointer;
+  font-family: "Sarabun", sans-serif; font-size: 15px; transition: 0.2s;
 }
+.btn-finish:hover { background: var(--violet-soft); }
 
-/* Bottom Nav */
+/* ═══════════════════════════════════════════
+   BOTTOM NAV (Same as index.html)
+═══════════════════════════════════════════ */
 .bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(11, 25, 41, 0.9); backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border); display: flex; justify-content: space-around;
-  padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+  display: grid;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  grid-template-columns: repeat(5, 1fr);
 }
-.nav-item { text-decoration: none; color: var(--text-dim); font-size: 10px; text-align: center; }
-.nav-item.active { color: var(--teal-light); }
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px;
+  font-size: 9px; color: var(--text-dim);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  font-weight: normal;
+}
+.nav-item:active { color: var(--teal); }
+.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item.active { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
 </style>
 </head>
 <body>
 
 <header>
-  <h2 style="font-family:'Outfit';">Recovery Ward</h2>
+  <h2 style="font-family:'Outfit';">หน่วยพักฟื้น</h2>
   <div id="count-badge" style="background:var(--violet); padding:4px 12px; border-radius:20px; font-size:12px;">0 สัตว์พักฟื้น</div>
 </header>
 
 <div class="container" id="recovery-list">
-  </div>
+  <div style="text-align: center; color: var(--text-dim); padding: 40px;">กำลังโหลดข้อมูล...</div>
+</div>
 
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item">🏠<br>หน้าหลัก</a>
-  <a href="surgery.html" class="nav-item">✂️<br>ผ่าตัด</a>
-  <a href="recovery.html" class="nav-item active">🚑<br>พักฟื้น</a>
-  <a href="report.html" class="nav-item">📊<br>รายงาน</a>
+  <a class="nav-item" href="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item" href="anesthesia.html">
+    <span class="nav-icon">💉</span>วางยา
+  </a>
+  <a class="nav-item" href="surgery.html">
+    <span class="nav-icon">🛏️</span>ผ่าตัด
+  </a>
+  <a class="nav-item active" href="recovery.html">
+    <span class="nav-icon">❤️‍🩹</span>พักฟื้น
+  </a>
 </nav>
 
 <script type="module">
@@ -143,13 +185,21 @@ async function loadRecovery() {
     .eq('vasd_queue.status', 'recovery')
     .order('created_at', { foreignTable: 'vasd_vital_signs', ascending: true });
 
-  if (error) return console.error(error);
+  if (error) {
+    container.innerHTML = `<div style="text-align:center; padding: 40px; color: #fca5a5;">❌ โหลดข้อมูลไม่สำเร็จ</div>`;
+    return console.error(error);
+  }
   
   document.getElementById("count-badge").innerText = `${animals.length} สัตว์พักฟื้น`;
   container.innerHTML = "";
 
+  if (animals.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding: 60px 20px; color: var(--text-dim);">✅ ไม่มีเคสกำลังพักฟื้นในขณะนี้</div>`;
+    return;
+  }
+
   animals.forEach(ani => {
-    // เตรียมแถวข้อมูลตาราง (Vital Signs Trends)
+    // เตรียมแถวข้อมูลตาราง (Vital Signs Trends) ที่บันทึกมาจากตอนผ่าตัดและตอนพักฟื้น
     const vitalsRows = (ani.vasd_vital_signs || []).map(v => `
       <tr>
         <td style="color:var(--teal-light)">${v.time_recorded || '-'}</td>
@@ -160,6 +210,15 @@ async function loadRecovery() {
       </tr>
     `).join('');
 
+    // คำนวณปริมาตรยา Emergency แบบเดียวกับหน้า Surgery
+    const weight = parseFloat(ani.actual_weight) || 0;
+    let adrVol = "N/A", atrVol = "N/A", atipVol = "N/A";
+    if (weight > 0) {
+      adrVol = ((weight * 0.01) / 1).toFixed(2) + " ml";
+      atrVol = ((weight * 0.02) / 1).toFixed(2) + " ml";
+      atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";
+    }
+
     const card = document.createElement("div");
     card.className = "rec-card";
     card.innerHTML = `
@@ -167,16 +226,25 @@ async function loadRecovery() {
         <div>
           <h3 style="font-size:18px;">${ani.animal_name}</h3>
           <p style="font-size:12px; color:var(--text-dim)">เจ้าของ: ${ani.vasd_owner?.owner_name || '-'}</p>
+          <p style="font-size:11px; color:var(--text-dim); margin-top:2px;">นน.: ${ani.actual_weight || '-'} kg</p>
         </div>
         <div class="q-circle">${ani.queue_number}</div>
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab(this, 'monitor')">Monitoring</button>
-        <button class="tab-btn" onclick="switchTab(this, 'record')">บันทึกเพิ่ม</button>
+        <button class="tab-btn active" onclick="switchTab(this, 'panel-monitor-${ani.id}')">Monitoring</button>
+        <button class="tab-btn" style="color:var(--rose);" onclick="switchTab(this, 'panel-emergency-${ani.id}')">🚨 Emergency</button>
       </div>
 
       <div class="panel active" id="panel-monitor-${ani.id}">
+        <div class="monitor-inputs">
+          <input type="number" placeholder="HR" class="in-hr">
+          <input type="number" placeholder="RR" class="in-rr">
+          <input type="number" placeholder="SpO2%" class="in-spo2">
+          <input type="number" step="0.1" placeholder="T(°C)" class="in-temp">
+        </div>
+        <button class="btn-save" onclick="saveVital('${ani.id}', this)">+ บันทึกสัญญาณชีพ</button>
+
         <div style="overflow-x:auto; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;">
           <table class="vitals-history">
             <thead>
@@ -185,49 +253,58 @@ async function loadRecovery() {
               </tr>
             </thead>
             <tbody>
-              ${vitalsRows || '<tr><td colspan="5" style="padding:20px; color:var(--text-dim)">ไม่มีข้อมูลสัญญาณชีพ</td></tr>'}
+              ${vitalsRows || '<tr><td colspan="5" style="padding:20px; color:var(--text-dim)">ยังไม่มีข้อมูลสัญญาณชีพ</td></tr>'}
             </tbody>
           </table>
         </div>
-        <button class="btn-finish" onclick="moveToReady('${ani.id}')">ฟื้นสลบเรียบร้อย (Ready)</button>
+        <button class="btn-finish" onclick="moveToReady('${ani.id}')">✅ ฟื้นสลบเรียบร้อย</button>
       </div>
 
-      <div class="panel" id="panel-record-${ani.id}">
-        <div class="input-row">
-          <input type="number" placeholder="HR (ครั้ง/นาที)" class="in-hr">
-          <input type="number" placeholder="RR (ครั้ง/นาที)" class="in-rr">
+      <div class="panel" id="panel-emergency-${ani.id}">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="background: rgba(239,68,68,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
+            <span style="color:var(--rose); font-weight:700;">Adrenaline</span> <b style="font-size:18px;">${adrVol}</b>
+          </div>
+          <div style="background: rgba(245,158,11,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
+            <span style="color:var(--amber); font-weight:700;">Atropine</span> <b style="font-size:18px;">${atrVol}</b>
+          </div>
+          <div style="background: rgba(16,185,129,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
+            <span style="color:var(--emerald); font-weight:700;">Atipamezole</span> <b style="font-size:18px;">${atipVol}</b>
+          </div>
         </div>
-        <div class="input-row">
-          <input type="number" step="0.1" placeholder="Temp (°C)" class="in-temp">
-          <input type="number" placeholder="SpO2 (%)" class="in-spo2">
-        </div>
-        <button class="btn-save" onclick="saveVital('${ani.id}', this)">บันทึกสัญญาณชีพ</button>
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-// ฟังก์ชันสลับ Tab ภายใน Card
-window.switchTab = (btn, tabName) => {
+// ฟังก์ชันสลับ Tab
+window.switchTab = (btn, targetId) => {
   const card = btn.closest(".rec-card");
   card.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   
   card.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-  card.querySelector(`#panel-${tabName}-${card.querySelector('.btn-save').getAttribute('onclick').split("'")[1]}`).classList.add("active");
+  document.getElementById(targetId).classList.add("active");
 };
 
-// ฟังก์ชันบันทึกสัญญาณชีพใหม่
+// ฟังก์ชันบันทึกสัญญาณชีพใหม่ลงฐานข้อมูล (จะไปแสดงรวมกับของเดิมทันที)
 window.saveVital = async (animalId, btn) => {
   const panel = btn.closest(".panel");
+  const inHr = panel.querySelector(".in-hr").value;
+  const inRr = panel.querySelector(".in-rr").value;
+  const inTemp = panel.querySelector(".in-temp").value;
+  const inSpo2 = panel.querySelector(".in-spo2").value;
+
+  if (!inHr && !inRr && !inTemp && !inSpo2) return; // ไม่บันทึกถ้าว่างเปล่าทั้งหมด
+
   const data = {
     animal_id: animalId,
     time_recorded: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    hr: panel.querySelector(".in-hr").value,
-    rr: panel.querySelector(".in-rr").value,
-    temp: panel.querySelector(".in-temp").value,
-    spo2: panel.querySelector(".in-spo2").value
+    hr: inHr,
+    rr: inRr,
+    temp: inTemp,
+    spo2: inSpo2
   };
 
   const { error } = await supabase.from('vasd_vital_signs').insert(data);
@@ -243,7 +320,7 @@ window.moveToReady = async (animalId) => {
   else loadRecovery();
 };
 
-// Realtime Update: โหลดข้อมูลใหม่หากมีการเปลี่ยนแปลง
+// Realtime Update: โหลดข้อมูลใหม่หากมีการเปลี่ยนแปลงจากหน้านี้หรือหน้าอื่น
 supabase.channel('recovery-realtime')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, loadRecovery)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadRecovery)
