@@ -244,10 +244,10 @@ async function loadSurgeryQueue() {
   try {
     const { data: eventId } = await supabase.rpc("get_today_event");
     
-    // ดึงข้อมูลสัตว์ พร้อมดึง vasd_vital_signs จากฐานข้อมูลโดยตรง
+    // ดึงข้อมูลสัตว์ พร้อมดึง vasd_vital_signs และข้อมูลหมอ/วิสัญญี/โต๊ะ จากฐานข้อมูลโดยตรง
     const { data: queueData, error } = await supabase
       .from("vasd_queue")
-      .select(`id, animal_id, status,
+      .select(`id, animal_id, status, operating_table, surgeon_name, anesthetist,
         vasd_animal(id, event_id, queue_number, animal_name, species, sex, actual_weight, 
         vasd_service(id, service_type, is_done),
         vasd_vital_signs(*))
@@ -269,10 +269,12 @@ async function loadSurgeryQueue() {
       const a = q.vasd_animal;
       const spText = a.species === "ส" ? "🐶 สุนัข" : "🐱 แมว";
       
-      // ดึงข้อมูล LocalStorage เพื่อป้องกันข้อมูล โต๊ะ, หมอ, วิสัญญี หายตอนสลับหน้า หรือตอนตารางรีเฟรชออโต้
-      const savedTable = escapeHtml(localStorage.getItem(`surg_table_${a.id}`));
-      const savedSurgeon = escapeHtml(localStorage.getItem(`surg_surgeon_${a.id}`));
-      const savedAnes = escapeHtml(localStorage.getItem(`surg_anes_${a.id}`));
+      // ดึงข้อมูลจาก Database ตรงๆ เพื่อให้แสดงผลเหมือนกันทุกเครื่อง
+      const savedTable = escapeHtml(q.operating_table || '');
+      const savedSurgeon = escapeHtml(q.surgeon_name || '');
+      const savedAnes = escapeHtml(q.anesthetist || '');
+      
+      // การจำ Tab ที่เปิดอยู่ ยังใช้ LocalStorage ตามเดิม เพราะเป็นความสะดวกส่วนตัวของมือถือแต่ละคน
       const activeTab = localStorage.getItem(`surg_tab_${a.id}`) || `tab-info-${a.id}`;
 
       const isInfoActive = activeTab === `tab-info-${a.id}` ? 'active' : '';
@@ -297,7 +299,7 @@ async function loadSurgeryQueue() {
           <td>${l.temp || '-'}</td><td style="color:var(--teal-light);">${l.zoletil_top || '-'}</td>
           <td style="text-align:left; font-size:11px;">${l.note || '-'}</td>
         </tr>
-      `).join('') || `<tr><td colspan="7" style="color:var(--text-faint);">ยังไม่มีการบันทึก</td></tr>`;
+      `).join('') || `<tr><td colspan=\"7\" style=\"color:var(--text-faint);\">ยังไม่มีการบันทึก</td></tr>`;
 
       // คำนวณปริมาตรยา Emergency
       const weight = parseFloat(a.actual_weight) || 0;
@@ -372,10 +374,11 @@ async function loadSurgeryQueue() {
           </div>
           
           <div class="form-grid">
-            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะ" value="${savedTable}" oninput="saveLocalInput('${a.id}', 'table', this.value)">
-            <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *" value="${savedSurgeon}" oninput="saveLocalInput('${a.id}', 'surgeon', this.value)">
+            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะ" value="${savedTable}">
+            <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *" value="${savedSurgeon}">
           </div>
-          <input type="text" id="anes-${a.id}" class="f-input" placeholder="Anesthetist (ผู้ช่วย / วิสัญญี)" value="${savedAnes}" oninput="saveLocalInput('${a.id}', 'anes', this.value)">
+          <input type="text" id="anes-${a.id}" class="f-input" placeholder="Anesthetist (ผู้ช่วย / วิสัญญี)" value="${savedAnes}" style="margin-bottom:12px;">
+          <button class="btn btn-teal" onclick="saveSurgeryInfo('${a.id}')">💾 บันทึกข้อมูลประจำโต๊ะ</button>
         </div>
 
         <div id="tab-monitor-${a.id}" class="tab-content ${isMonitorActive}">
@@ -428,9 +431,24 @@ async function loadSurgeryQueue() {
   }
 }
 
-// ฟังก์ชันเก็บค่าลง LocalStorage เฉพาะ Table, Surgeon, Anes
-window.saveLocalInput = function(animalId, field, value) {
-  localStorage.setItem(`surg_${field}_${animalId}`, value);
+// ฟังก์ชันบันทึกข้อมูล โต๊ะ, หมอ, วิสัญญี ลงฐานข้อมูล (Supabase) ถาวร
+window.saveSurgeryInfo = async function(animalId) {
+  const tb = document.getElementById(`table-${animalId}`).value.trim();
+  const surgeon = document.getElementById(`surgeon-${animalId}`).value.trim();
+  const anes = document.getElementById(`anes-${animalId}`).value.trim();
+
+  try {
+    const { error } = await supabase.from('vasd_queue').update({
+      operating_table: tb,
+      surgeon_name: surgeon,
+      anesthetist: anes
+    }).eq('animal_id', animalId);
+
+    if (error) throw error;
+    alert('✅ บันทึกข้อมูลประจำโต๊ะผ่าตัดสำเร็จ');
+  } catch (err) {
+    alert('❌ บันทึกไม่สำเร็จ: ' + err.message);
+  }
 };
 
 // คำนวณยอดรวมเม็ดยาใหม่เมื่อมีการแก้ตัวเลข
@@ -533,11 +551,13 @@ window.addVitalSign = async function(animalId) {
 };
 
 window.finishSurgery = async function(animalId) {
-  // ดึงค่า Surgeon จาก input แทน เพราะเราใช้ oninput ผูกค่าไว้แล้ว
   const surgeon = document.getElementById(`surgeon-${animalId}`).value.trim();
+  const anes = document.getElementById(`anes-${animalId}`).value.trim();
+  const tb = document.getElementById(`table-${animalId}`).value.trim();
+
   if (!surgeon) {
     document.getElementById(`btn-tab-info-${animalId}`).click();
-    alert("⚠️ กรุณาระบุชื่อ Surgeon ก่อนครับ");
+    alert("⚠️ กรุณาระบุชื่อ Surgeon ให้เรียบร้อย และกด 'บันทึกข้อมูลประจำโต๊ะ' ก่อนครับ");
     return;
   }
   if (!confirm("ยืนยันเสร็จสิ้นการผ่าตัดและส่งไปยังห้องพักฟื้น?")) return;
@@ -545,12 +565,14 @@ window.finishSurgery = async function(animalId) {
     const { error } = await supabase.from("vasd_queue").update({ 
       status: "recovery", 
       surgeon_name: surgeon,
+      anesthetist: anes,
+      operating_table: tb,
       updated_at: new Date() 
     }).eq("animal_id", animalId);
     if (error) throw error;
     
-    // ล้าง LocalStorage ที่ค้างอยู่ทั้งหมดของสัตว์ตัวนี้เมื่อผ่าตัดเสร็จ (เฉพาะ Info กับ Tab)
-    ['table', 'surgeon', 'anes', 'tab'].forEach(k => localStorage.removeItem(`surg_${k}_${animalId}`));
+    // ล้าง LocalStorage ที่ค้างอยู่ (ล้างเฉพาะการจำ Tab)
+    localStorage.removeItem(`surg_tab_${animalId}`);
 
   } catch (err) { alert(err.message); }
 };
