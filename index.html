@@ -288,6 +288,7 @@ header {
 .nb-surgery  { background: rgba(239,68,68,0.2);  color: var(--c-surgery);  border: 1px solid rgba(239,68,68,0.4); }
 .nb-recovery { background: rgba(139,92,246,0.2); color: var(--c-recovery); border: 1px solid rgba(139,92,246,0.4); }
 .nb-ready    { background: rgba(59,130,246,0.2);  color: var(--c-ready);   border: 1px solid rgba(59,130,246,0.4); }
+.nb-done     { background: rgba(16,185,129,0.2); color: var(--c-done); border: 1px solid rgba(16,185,129,0.4); }
 .nb-total    { background: rgba(148,163,184,0.2); color: var(--c-total);   border: 1px solid rgba(148,163,184,0.4); }
 
 /* ═══════════════════════════════════════════
@@ -451,6 +452,7 @@ footer {
     </a>
 
     <a class="menu-card" href="animals.html">
+      <div class="notif-badge nb-ready" id="badge-ready-menu"></div>
       <span class="card-emoji">🐾</span>
       <div class="card-title">สถานะสัตว์</div>
       <div class="card-desc">ดูรายชื่อและสถานะสัตว์ทั้งหมด</div>
@@ -485,6 +487,7 @@ footer {
     </a>
 
     <a class="menu-card" href="report.html">
+      <div class="notif-badge nb-done" id="badge-report-menu"></div>
       <span class="card-emoji">📊</span>
       <div class="card-title">รายงาน</div>
       <div class="card-desc">สรุปข้อมูลและสถิติ</div>
@@ -588,13 +591,21 @@ updateCallButtonVisibility();
 
 /* ── Dashboard Badges ── */
 async function loadSummary() {
-  const waiting  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","waiting")).count || 0;
-  const surgery  = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","surgery")).count || 0;
-  const recovery = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","recovery")).count || 0;
-  const ready    = (await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home")).count || 0;
-  
-  // นับจำนวนสัตว์ทั้งหมด
-  const total = (await supabase.from("vasd_animal").select("*",{count:"exact",head:true})).count || 0;
+  const { count: waiting }  = await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","waiting");
+  const { count: surgery }  = await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","surgery");
+  const { count: recovery } = await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","recovery");
+  const { count: ready }    = await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","ready_to_go_home");
+  const { count: done }     = await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","done");
+  const { count: total }    = await supabase.from("vasd_animal").select("*",{count:"exact",head:true});
+
+  // ค้นหาจำนวน "ซองยา" ของสัตว์ที่กำลังอยู่ในขั้นตอนรักษาหรือรอรับกลับ (ยังไม่ done)
+  let rxCount = 0;
+  const { data: activeQueues } = await supabase.from("vasd_queue").select("animal_id").in("status", ["surgery", "recovery", "ready_to_go_home"]);
+  if (activeQueues && activeQueues.length > 0) {
+    const animalIds = activeQueues.map(q => q.animal_id);
+    const { count } = await supabase.from("vasd_prescription").select("*", { count: "exact", head: true }).in("animal_id", animalIds);
+    rxCount = count || 0;
+  }
 
   const setBadge = (id, count, label) => {
     const el = document.getElementById(id);
@@ -604,11 +615,13 @@ async function loadSummary() {
     }
   };
   
-  setBadge("badge-total-menu",    total,    "เคส");
-  setBadge("badge-anes-menu",     waiting,  "รอคิว");
-  setBadge("badge-surgery-menu",  surgery,  "กำลังผ่า");
-  setBadge("badge-recovery-menu", recovery, "พักฟื้น");
-  setBadge("badge-rx-menu",       ready,    "รอจัดยา");
+  setBadge("badge-total-menu",    total || 0,    "เคส");
+  setBadge("badge-anes-menu",     waiting || 0,  "รอคิว");
+  setBadge("badge-surgery-menu",  surgery || 0,  "กำลังผ่า");
+  setBadge("badge-recovery-menu", recovery || 0, "พักฟื้น");
+  setBadge("badge-ready-menu",    ready || 0,    "ตื่นแล้ว");    // ย้ายไปไว้ที่เมนู "สถานะสัตว์"
+  setBadge("badge-rx-menu",       rxCount,       "ซองยารอจัด");  // คำนวณจากจำนวนซองยา
+  setBadge("badge-report-menu",   done || 0,     "เสร็จสิ้น");    // ไว้ที่เมนู "รายงาน"
 }
 
 loadSummary();
@@ -619,10 +632,10 @@ const dashboardChannel = supabase.channel('dashboard-live');
 dashboardChannel
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_prescription' }, loadSummary) // เพื่อให้ยอดซองยาเด้งทันที
   .subscribe();
 
 /* ── Emergency Broadcast Sending ── */
-// สร้างช่องสำหรับส่งสัญญาณฉุกเฉิน (จะจับคู่กับ global-alarm.js)
 const emergencyChannel = supabase.channel('emergency-live', { config: { broadcast: { self: true } } });
 emergencyChannel.subscribe();
 
