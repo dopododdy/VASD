@@ -615,13 +615,13 @@ async function loadSummary() {
     }
   };
   
-  setBadge("badge-total-menu",    total || 0,    "เคส");
-  setBadge("badge-anes-menu",     waiting || 0,  "รอคิว");
+  setBadge("badge-total-menu",    total || 0,    "ลงทะเบียน");
+  setBadge("badge-anes-menu",     waiting || 0,  "นั่งรอเรียกวางยา");
   setBadge("badge-surgery-menu",  surgery || 0,  "กำลังผ่า");
-  setBadge("badge-recovery-menu", recovery || 0, "พักฟื้น");
-  setBadge("badge-ready-menu",    ready || 0,    "ตื่นแล้ว");    // ย้ายไปไว้ที่เมนู "สถานะสัตว์"
-  setBadge("badge-rx-menu",       rxCount,       "ซองยารอจัด");  // คำนวณจากจำนวนซองยา
-  setBadge("badge-report-menu",   done || 0,     "เสร็จสิ้น");    // ไว้ที่เมนู "รายงาน"
+  setBadge("badge-recovery-menu", recovery || 0, "กำลังพักฟื้น");
+  setBadge("badge-ready-menu",    ready || 0,    "ตื่นแล้วรอรับกลับ");    // ย้ายไปไว้ที่เมนู "สถานะสัตว์"
+  setBadge("badge-rx-menu",       rxCount,       "ซองยา - รอจัด");  // คำนวณจากจำนวนซองยา
+  setBadge("badge-report-menu",   done || 0,     "รับกลับแล้ว");    // ไว้ที่เมนู "รายงาน"
 }
 
 loadSummary();
