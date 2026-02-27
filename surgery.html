@@ -233,6 +233,12 @@ const drugList = [
   { id: 'blood', name: 'บำรุงเลือด', type: 'supp', dosePerKg: 0.1, freq: 'วันละ 1 ครั้ง พร้อมอาหารเช้า', days: 7 }
 ];
 
+// ฟังก์ชันแปลงข้อความป้องกัน HTML injection
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 async function loadSurgeryQueue() {
   const container = document.getElementById("surgery-container");
   try {
@@ -263,6 +269,17 @@ async function loadSurgeryQueue() {
       const a = q.vasd_animal;
       const spText = a.species === "ส" ? "🐶 สุนัข" : "🐱 แมว";
       
+      // ดึงข้อมูล LocalStorage เพื่อป้องกันข้อมูล โต๊ะ, หมอ, วิสัญญี หายตอนสลับหน้า หรือตอนตารางรีเฟรชออโต้
+      const savedTable = escapeHtml(localStorage.getItem(`surg_table_${a.id}`));
+      const savedSurgeon = escapeHtml(localStorage.getItem(`surg_surgeon_${a.id}`));
+      const savedAnes = escapeHtml(localStorage.getItem(`surg_anes_${a.id}`));
+      const activeTab = localStorage.getItem(`surg_tab_${a.id}`) || `tab-info-${a.id}`;
+
+      const isInfoActive = activeTab === `tab-info-${a.id}` ? 'active' : '';
+      const isMonitorActive = activeTab === `tab-monitor-${a.id}` ? 'active' : '';
+      const isRxActive = activeTab === `tab-rx-${a.id}` ? 'active' : '';
+      const isEmergencyActive = activeTab === `tab-emergency-${a.id}` ? 'active' : '';
+
       // สร้าง Checklist หัตถการ
       const servicesHtml = (a.vasd_service || []).map(s => `
         <label class="svc-check">
@@ -296,15 +313,15 @@ async function loadSurgeryQueue() {
         let tabs = 0;
         if (weight > 0) {
           if (d.type === 'supp') {
-            tabs = Math.round((weight * d.dosePerKg) * 4) / 4; // บำรุงเลือด ปัดเศษปกติที่ 0.25
+            tabs = Math.round((weight * d.dosePerKg) * 4) / 4; 
           } else {
             let exact = (weight * d.mgPerKg) / d.mgPerTab;
-            if (d.type === 'abx') tabs = Math.ceil(exact * 4) / 4;   // ปฏิชีวนะ ปัดเศษขึ้นที่ 0.25
-            if (d.type === 'nsaid') tabs = Math.floor(exact * 4) / 4; // แก้ปวด ปัดเศษลงที่ 0.25
+            if (d.type === 'abx') tabs = Math.ceil(exact * 4) / 4;   
+            if (d.type === 'nsaid') tabs = Math.floor(exact * 4) / 4; 
           }
         }
         if (tabs < 0) tabs = 0;
-        let total = Math.ceil(tabs * 1 * d.days); // สมมติป้อนวันละ 1 ครั้ง จำนวนยาปัดเศษขึ้นเป็นเม็ดเต็มเสมอ
+        let total = Math.ceil(tabs * 1 * d.days); 
 
         return `
           <label class="rx-item">
@@ -342,31 +359,31 @@ async function loadSurgeryQueue() {
         </div>
 
         <div class="tabs-header">
-          <button class="tab-btn active" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูล</button>
-          <button class="tab-btn" id="btn-tab-monitor-${a.id}" onclick="switchTab(this, 'tab-monitor-${a.id}')">Monitoring</button>
-          <button class="tab-btn" id="btn-tab-rx-${a.id}" style="color:var(--teal);" onclick="switchTab(this, 'tab-rx-${a.id}')">💊 Rx (จ่ายยา)</button>
-          <button class="tab-btn" id="btn-tab-emergency-${a.id}" style="color:var(--rose);" onclick="switchTab(this, 'tab-emergency-${a.id}')">🚨</button>
+          <button class="tab-btn ${isInfoActive}" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}', '${a.id}')">ข้อมูล</button>
+          <button class="tab-btn ${isMonitorActive}" id="btn-tab-monitor-${a.id}" onclick="switchTab(this, 'tab-monitor-${a.id}', '${a.id}')">Monitoring</button>
+          <button class="tab-btn ${isRxActive}" id="btn-tab-rx-${a.id}" style="color:var(--teal);" onclick="switchTab(this, 'tab-rx-${a.id}', '${a.id}')">💊 Rx (จ่ายยา)</button>
+          <button class="tab-btn ${isEmergencyActive}" id="btn-tab-emergency-${a.id}" style="color:var(--rose);" onclick="switchTab(this, 'tab-emergency-${a.id}', '${a.id}')">🚨</button>
         </div>
 
-        <div id="tab-info-${a.id}" class="tab-content active">
+        <div id="tab-info-${a.id}" class="tab-content ${isInfoActive}">
           <div class="info-item">
             <div class="info-label">หัตถการที่ต้องทำ</div>
             <div class="service-list">${servicesHtml}</div>
           </div>
           
           <div class="form-grid">
-            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะ">
-            <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *">
+            <input type="text" id="table-${a.id}" class="f-input" placeholder="โต๊ะ" value="${savedTable}" oninput="saveLocalInput('${a.id}', 'table', this.value)">
+            <input type="text" id="surgeon-${a.id}" class="f-input" placeholder="Surgeon (สัตวแพทย์) *" value="${savedSurgeon}" oninput="saveLocalInput('${a.id}', 'surgeon', this.value)">
           </div>
-          <input type="text" id="anes-${a.id}" class="f-input" placeholder="Anesthetist (ผู้ช่วย / วิสัญญี)">
+          <input type="text" id="anes-${a.id}" class="f-input" placeholder="Anesthetist (ผู้ช่วย / วิสัญญี)" value="${savedAnes}" oninput="saveLocalInput('${a.id}', 'anes', this.value)">
         </div>
 
-        <div id="tab-monitor-${a.id}" class="tab-content">
+        <div id="tab-monitor-${a.id}" class="tab-content ${isMonitorActive}">
           <div class="monitor-inputs">
             <input type="number" id="hr-${a.id}" class="f-input third" placeholder="HR">
             <input type="number" id="rr-${a.id}" class="f-input third" placeholder="RR">
             <input type="number" id="spo2-${a.id}" class="f-input third" placeholder="SpO2%">
-            <input type="number" step="0.1" id="temp-${a.id}" class="f-input half" placeholder="T (°C)">
+            <input type="number" step="0.1" id="temp-${a.id}" class="f-input half" placeholder="Temp">
             <input type="number" step="0.01" id="zol-${a.id}" class="f-input half" placeholder="Zol (ml)">
             <input type="text" id="note-${a.id}" class="f-input wide" placeholder="บันทึกเพิ่มเติม...">
           </div>
@@ -379,12 +396,12 @@ async function loadSurgeryQueue() {
           </div>
         </div>
 
-        <div id="tab-rx-${a.id}" class="tab-content">
+        <div id="tab-rx-${a.id}" class="tab-content ${isRxActive}">
           <div class="rx-list" style="margin-bottom:12px;">${rxHtml}</div>
           <button class="btn btn-teal" id="btn-save-rx-${a.id}" onclick="saveRx('${a.id}')">💾 สั่งยาและส่งไปห้องจัดยา</button>
         </div>
 
-        <div id="tab-emergency-${a.id}" class="tab-content">
+        <div id="tab-emergency-${a.id}" class="tab-content ${isEmergencyActive}">
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <div style="background: rgba(239,68,68,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
               <span style="color:var(--rose); font-weight:700;">Adrenaline</span> <b style="font-size:18px;">${adrVol}</b>
@@ -411,7 +428,12 @@ async function loadSurgeryQueue() {
   }
 }
 
-// คำนวณยอดรวมเม็ดยาใหม่เมื่อมีการแก้ตัวเลข (โดส หรือ วัน)
+// ฟังก์ชันเก็บค่าลง LocalStorage เฉพาะ Table, Surgeon, Anes
+window.saveLocalInput = function(animalId, field, value) {
+  localStorage.setItem(`surg_${field}_${animalId}`, value);
+};
+
+// คำนวณยอดรวมเม็ดยาใหม่เมื่อมีการแก้ตัวเลข
 window.recalcRx = function(drugId, animalId) {
   const dose = parseFloat(document.getElementById(`dose-${drugId}-${animalId}`).value) || 0;
   const days = parseInt(document.getElementById(`days-${drugId}-${animalId}`).value) || 0;
@@ -446,11 +468,9 @@ window.saveRx = async function(animalId) {
     if (error) throw error;
     alert("✅ สั่งยาเรียบร้อยแล้ว รายการถูกส่งไปยังโต๊ะจัดยา");
     
-    // เปลี่ยนข้อความและเปิดปุ่มให้ส่งซ้ำได้เผื่อต้องการสั่งเพิ่ม
     btn.textContent = "✅ ส่งยาเพิ่มเติม";
     btn.disabled = false;
     
-    // เอาติ๊กออกจากช่องที่ส่งไปแล้วเพื่อกันการส่งเบิ้ลโดยไม่ตั้งใจ
     for (const d of drugList) {
       const chk = document.getElementById(`chk-${d.id}-${animalId}`);
       if (chk) chk.checked = false;
@@ -462,7 +482,6 @@ window.saveRx = async function(animalId) {
   }
 };
 
-// ฟังก์ชันอัปเดตสถานะหัตถการ (Checkbox)
 window.toggleServiceStatus = async function(serviceId, isDone) {
   try {
     const { error } = await supabase.from("vasd_service").update({ is_done: isDone }).eq("id", serviceId);
@@ -470,12 +489,16 @@ window.toggleServiceStatus = async function(serviceId, isDone) {
   } catch (err) { alert("ไม่สามารถบันทึกสถานะได้: " + err.message); }
 };
 
-window.switchTab = function(btn, targetId) {
+window.switchTab = function(btn, targetId, animalId) {
   const card = btn.closest('.surg-card');
   card.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   card.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(targetId).classList.add('active');
+  
+  if (animalId) {
+    localStorage.setItem(`surg_tab_${animalId}`, targetId);
+  }
 };
 
 // บันทึก Vital Sign ลง Database 
@@ -496,7 +519,10 @@ window.addVitalSign = async function(animalId) {
     hr: hr, rr: rr, spo2: spo2, temp: temp, zoletil_top: zol, note: note
   };
 
-  ['hr', 'rr', 'spo2', 'temp', 'zol', 'note'].forEach(k => document.getElementById(`${k}-${animalId}`).value = '');
+  // ล้างค่าในช่องกรอกเมื่อบันทึกสำเร็จ
+  ['hr', 'rr', 'spo2', 'temp', 'zol', 'note'].forEach(k => {
+    document.getElementById(`${k}-${animalId}`).value = '';
+  });
 
   try {
     const { error } = await supabase.from('vasd_vital_signs').insert(data);
@@ -507,6 +533,7 @@ window.addVitalSign = async function(animalId) {
 };
 
 window.finishSurgery = async function(animalId) {
+  // ดึงค่า Surgeon จาก input แทน เพราะเราใช้ oninput ผูกค่าไว้แล้ว
   const surgeon = document.getElementById(`surgeon-${animalId}`).value.trim();
   if (!surgeon) {
     document.getElementById(`btn-tab-info-${animalId}`).click();
@@ -521,6 +548,10 @@ window.finishSurgery = async function(animalId) {
       updated_at: new Date() 
     }).eq("animal_id", animalId);
     if (error) throw error;
+    
+    // ล้าง LocalStorage ที่ค้างอยู่ทั้งหมดของสัตว์ตัวนี้เมื่อผ่าตัดเสร็จ (เฉพาะ Info กับ Tab)
+    ['table', 'surgeon', 'anes', 'tab'].forEach(k => localStorage.removeItem(`surg_${k}_${animalId}`));
+
   } catch (err) { alert(err.message); }
 };
 
