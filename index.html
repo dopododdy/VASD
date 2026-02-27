@@ -421,7 +421,7 @@ footer {
       <input id="adminPwd" type="password" class="input-field" placeholder="รหัสผ่าน" style="display:none">
       <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
     </div>
-    <div class="input-hint">ตย. เช่น: ต้น-วิสัญญี-โต๊ะ5 (ห้ามเว้นวรรค)</div>
+    <div class="input-hint">ตัวอย่าง: ต้น-วิสัญญี-โต๊ะ5 (ห้ามเว้นวรรค)</div>
   </div>
 
   <div id="userInfo">
@@ -438,7 +438,7 @@ footer {
     <span style="font-size: 32px; flex-shrink: 0;">🚨</span>
     <div class="call-text-wrapper">
       <span style="font-size: 20px; font-weight: 700;">EMERGENCY CALL</span>
-      <span style="font-size: 13px; font-weight: 500; opacity: 0.9;">(ยกมือขึ้น สุดแขน เมื่อกดเรียกแล้ว)</span>
+      <span style="font-size: 13px; font-weight: 500; opacity: 0.9;">(ยกมือขึ้น เมื่อกดเรียกแล้ว)</span>
     </div>
   </button>
 
@@ -446,7 +446,7 @@ footer {
     <a class="menu-card" href="registration.html">
       <div class="notif-badge nb-total" id="badge-total-menu"></div>
       <span class="card-emoji">📝</span>
-      <div class="card-title">ลงทะเบียน</div>
+      <div class="card-title">โต๊ะลงทะเบียน</div>
       <div class="card-desc">บันทึกข้อมูลสัตว์และเจ้าของ</div>
     </a>
 
@@ -466,7 +466,7 @@ footer {
     <a class="menu-card" href="anesthesia.html">
       <div class="notif-badge nb-waiting" id="badge-anes-menu"></div>
       <span class="card-emoji">💉</span>
-      <div class="card-title">วางยาสลบ</div>
+      <div class="card-title">โต๊ะวางยาสลบ</div>
       <div class="card-desc">คำนวณยา · วางยา · Vitals</div>
     </a>
 
@@ -613,48 +613,18 @@ async function loadSummary() {
 
 loadSummary();
 
-/* ── Broadcast & Realtime Logic ── */
-
-function playAlarmSound() {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-    
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    osc.type = 'sawtooth';
-    const now = ctx.currentTime;
-    osc.frequency.setValueAtTime(400, now);
-    osc.frequency.linearRampToValueAtTime(800, now + 0.5);
-    osc.frequency.linearRampToValueAtTime(400, now + 1.0);
-    osc.frequency.linearRampToValueAtTime(800, now + 1.5);
-    osc.frequency.linearRampToValueAtTime(400, now + 2.0);
-    
-    gain.gain.setValueAtTime(0.5, now);
-    osc.start(now);
-    osc.stop(now + 2.0);
-  } catch (err) { console.log("Audio not supported", err); }
-}
-
-const dashboardChannel = supabase.channel('dashboard-live', { config: { broadcast: { self: true } } });
+/* ── Realtime Data Sync ── */
+const dashboardChannel = supabase.channel('dashboard-live');
 
 dashboardChannel
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
-  .on('broadcast', { event: 'emergency_call' }, (payload) => {
-    const myRole = (localStorage.getItem("vasd_role") || "").trim();
-    if (["ผู้ดูแลระบบ", "อาจารย์", "สัตวแพทย์"].includes(myRole)) {
-      playAlarmSound();
-      setTimeout(() => {
-        alert(`🚨 สัญญาณเรียกฉุกเฉิน!\nจาก: ${payload.payload.sender} (${payload.payload.role})\nเวลา: ${payload.payload.time}`);
-      }, 100);
-    }
-  })
   .subscribe();
+
+/* ── Emergency Broadcast Sending ── */
+// สร้างช่องสำหรับส่งสัญญาณฉุกเฉิน (จะจับคู่กับ global-alarm.js)
+const emergencyChannel = supabase.channel('emergency-live', { config: { broadcast: { self: true } } });
+emergencyChannel.subscribe();
 
 window.triggerEmergencyCall = async function() {
   const name = localStorage.getItem("vasd_user") || "ผู้ใช้งาน";
@@ -663,14 +633,18 @@ window.triggerEmergencyCall = async function() {
   if (!confirm("🚨 ยืนยันการส่งสัญญาณเรียก สัตวแพทย์/อาจารย์/ผู้ดูแลระบบ ด่วน?")) return;
 
   try {
-    await dashboardChannel.send({
+    await emergencyChannel.send({
       type: 'broadcast',
       event: 'emergency_call',
       payload: { sender: name, role: role, time: new Date().toLocaleTimeString('th-TH') }
     });
     alert("✅ ส่งสัญญาณเรียกเรียบร้อยแล้วครับ");
-  } catch (error) { alert("❌ ไม่สามารถส่งสัญญาณได้: " + error.message); }
+  } catch (error) { 
+    alert("❌ ไม่สามารถส่งสัญญาณได้: " + error.message); 
+  }
 };
 </script>
+
+<script type="module" src="./js/global-alarm.js"></script>
 </body>
 </html>
