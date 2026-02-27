@@ -68,6 +68,7 @@ header {
   background: var(--violet); color: white;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Outfit'; font-weight: 800; font-size: 18px;
+  flex-shrink: 0;
 }
 
 .tabs { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
@@ -171,10 +172,16 @@ input:focus { border-color: var(--violet); }
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
+// ป้องกัน HTML injection สำหรับข้อมูลที่ดึงมาแสดงผล
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 async function loadRecovery() {
   const container = document.getElementById("recovery-list");
   
-  // ดึงข้อมูลสัตว์ พร้อมข้อมูลคิว และ Vital Signs ทั้งหมด (เรียงตามเวลาที่สร้าง)
+  // ดึงข้อมูลสัตว์ พร้อมข้อมูลคิว (Status: recovery) และ Vital Signs ทั้งหมด
   const { data: animals, error } = await supabase
     .from('vasd_animal')
     .select(`
@@ -223,14 +230,26 @@ async function loadRecovery() {
       atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";
     }
 
+    // ดึงข้อมูล โต๊ะ, Surgeon, Anes ที่บันทึกมาจากห้องผ่าตัด
+    const qData = Array.isArray(ani.vasd_queue) ? ani.vasd_queue[0] : ani.vasd_queue;
+    const table = escapeHtml(qData?.operating_table || '-');
+    const surgeon = escapeHtml(qData?.surgeon_name || '-');
+    const anes = escapeHtml(qData?.anesthetist || '-');
+
     const card = document.createElement("div");
     card.className = "rec-card";
     card.innerHTML = `
       <div class="card-header">
-        <div>
+        <div style="flex: 1;">
           <h3 style="font-size:18px;">${ani.animal_name}</h3>
           <p style="font-size:12px; color:var(--text-dim)">เจ้าของ: ${ani.vasd_owner?.owner_name || '-'}</p>
           <p style="font-size:11px; color:var(--text-dim); margin-top:2px;">นน.: ${ani.actual_weight || '-'} kg</p>
+          
+          <div style="font-size:11px; color:var(--teal-light); margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <span>🛏️ โต๊ะ: <b style="color:#fff">${table}</b></span>
+            <span>🔪 หมอ: <b style="color:#fff">${surgeon}</b></span>
+            <span>💉 วิสัญญี: <b style="color:#fff">${anes}</b></span>
+          </div>
         </div>
         <div class="q-circle">${ani.queue_number}</div>
       </div>
@@ -245,7 +264,7 @@ async function loadRecovery() {
           <input type="number" placeholder="HR" class="in-hr">
           <input type="number" placeholder="RR" class="in-rr">
           <input type="number" placeholder="SpO2%" class="in-spo2">
-          <input type="number" step="0.1" placeholder="T(°C)" class="in-temp">
+          <input type="number" step="0.1" placeholder="Temp" class="in-temp">
           <input type="text" placeholder="บันทึกเพิ่มเติม (Note)..." class="in-note wide">
         </div>
         <button class="btn-save" onclick="saveVital('${ani.id}', this)">+ บันทึกสัญญาณชีพลงระบบ</button>
@@ -316,7 +335,6 @@ window.saveVital = async (animalId, btn) => {
 
   const { error } = await supabase.from('vasd_vital_signs').insert(data);
   if (error) alert("เกิดข้อผิดพลาด: " + error.message);
-  // ข้อมูลตารางจะถูกโหลดใหม่ด้วย Realtime event
 };
 
 // ฟังก์ชันย้ายสถานะไปยัง "พร้อมกลับบ้าน"
