@@ -53,8 +53,8 @@ input:focus { border-color: var(--teal); }
 .btn-del { padding: 6px 12px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
 /* Variables Tooltip */
-.var-box { background: rgba(14,165,160,0.1); border: 1px solid var(--teal-glow); border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 11px; line-height: 1.6; color: var(--text-dim); }
-code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 4px; margin-right: 4px; }
+.var-box { background: rgba(14,165,160,0.1); border: 1px solid var(--teal-glow); border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 11px; line-height: 1.8; color: var(--text-dim); }
+code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; margin-bottom: 4px; white-space: nowrap; }
 
 @media (max-width: 400px) { .sticker-wrapper { transform: scale(0.8); } .preview-section { padding: 10px; } }
 
@@ -94,8 +94,14 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 2px 4px; 
   </div>
 
   <div class="var-box">
-    <strong>ตัวแปรที่ใช้ได้:</strong><br>
-    <code>{{queue_number}}</code> <code>{{animal_name}}</code> <code>{{owner_name}}</code> <code>{{drug_name}}</code> <code>{{dose}}</code> <code>{{species}}</code> <code>{{todayDate}}</code> <code>{{next7days}}</code>
+    <strong>📌 ตัวแปรที่สามารถใช้งานได้ (คัดลอกไปวางได้เลย):</strong><br>
+    <code>{{queue_number}}</code> คิว<br>
+    <code>{{animal_name}}</code> ชื่อสัตว์ | <code>{{species}}</code> ชนิด | <code>{{sex}}</code> เพศ<br>
+    <code>{{owner_name}}</code> ชื่อเจ้าของ | <code>{{owner_id}}</code> เลขปชช.<br>
+    <code>{{address}}</code> ที่อยู่ | <code>{{phone}}</code> เบอร์โทร<br>
+    <code>{{drug_name}}</code> ชื่อยา | <code>{{dose}}</code> จำนวน/ครั้ง | <code>{{freq}}</code> ความถี่<br>
+    <code>{{total_amount}}</code> จำนวนยารวมทั้งซอง<br>
+    <code>{{todayDate}}</code> วันที่ปัจจุบัน | <code>{{next7days}}</code> วันตัดไหม (อีก 7 วัน)
   </div>
 
   <div id="lineEditor"></div>
@@ -112,7 +118,7 @@ let currentConfig = [];
 const getDates = () => {
   const now = new Date();
   const next7 = new Date(); next7.setDate(now.getDate() + 7);
-  const fmt = (d) => d.toLocaleDateString('th-TH', { day:'2-digit', month:'2-digit', year:'2-digit' });
+  const fmt = (d) => d.toLocaleDateString('th-TH', { day:'2-digit', month:'2-digit', year:'numeric' }); // ปรับเป็นปีเต็มเพื่อให้เป็นทางการขึ้น
   return { today: fmt(now), next: fmt(next7) };
 };
 
@@ -120,6 +126,7 @@ function renderPreview() {
   const box = document.getElementById("sticker");
   const dates = getDates();
   box.innerHTML = "";
+  
   currentConfig.forEach(l => {
     const div = document.createElement("div");
     div.className = "line";
@@ -132,15 +139,22 @@ function renderPreview() {
     div.style.width = l.align === 'center' ? "100%" : `calc(100% - ${l.x}px)`;
     if(l.align === 'center') div.style.left = "0px";
 
+    // แทนค่าตัวแปรจำลองเพื่อให้เห็นภาพจริงใน Preview
     let txt = l.text
-      .replace("{{queue_number}}","A001")
-      .replace("{{animal_name}}","น้องนำโชค")
-      .replace("{{owner_name}}","คุณสมชาย")
-      .replace("{{drug_name}}","Amoxicillin")
-      .replace("{{dose}}","1 เม็ด เช้า-เย็น")
-      .replace("{{species}}","สุนัข (Beagle)")
-      .replace("{{todayDate}}", dates.today)
-      .replace("{{next7days}}", dates.next);
+      .replace(/{{queue_number}}/g, "A001")
+      .replace(/{{animal_name}}/g, "น้องนำโชค")
+      .replace(/{{species}}/g, "สุนัข (Beagle)")
+      .replace(/{{sex}}/g, "ผู้")
+      .replace(/{{owner_name}}/g, "คุณสมชาย ใจดี")
+      .replace(/{{owner_id}}/g, "1234567890123")
+      .replace(/{{address}}/g, "123 ม.4 ต.บางพระ อ.ศรีราชา จ.ชลบุรี")
+      .replace(/{{phone}}/g, "081-234-5678")
+      .replace(/{{drug_name}}/g, "Amoxicillin (500mg)")
+      .replace(/{{dose}}/g, "1 เม็ด")
+      .replace(/{{freq}}/g, "เช้า - เย็น หลังอาหาร")
+      .replace(/{{total_amount}}/g, "14 เม็ด")
+      .replace(/{{todayDate}}/g, dates.today)
+      .replace(/{{next7days}}/g, dates.next);
     
     div.innerText = txt;
     box.appendChild(div);
@@ -160,7 +174,7 @@ function renderEditor() {
       </div>
       
       <label class="label">ข้อความ / ตัวแปร</label>
-      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="เช่น {{animal_name}}">
+      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="เช่น ชื่อสัตว์: {{animal_name}}">
       
       <div class="prop-grid">
         <div>
