@@ -8,7 +8,7 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   TOKENS
+   TOKENS (Match animals.html)
 ═══════════════════════════════════════════ */
 :root {
   --navy:         #0b1929;
@@ -20,136 +20,195 @@
   --amber-soft:   rgba(245,158,11,0.14);
   --rose:         #ef4444;
   --rose-soft:    rgba(239,68,68,0.12);
-  --emerald:      #10b981;
-  --emerald-soft: rgba(16,185,129,0.12);
-  --slate-400:    #94a3b8;
-  --slate-300:    #cbd5e1;
-  --white:        #ffffff;
+
+  --surface:      rgba(255,255,255,0.04);
+  --surface-2:    rgba(255,255,255,0.07);
+  --surface-3:    rgba(255,255,255,0.11);
+  --border:       rgba(255,255,255,0.08);
   --border-2:     rgba(255,255,255,0.14);
+  --text:         #e2e8f0;
   --text-dim:     #94a3b8;
-  
-  --radius-lg:    20px;
+  --text-faint:   #4a5568;
+
   --radius-md:    12px;
-  --radius-sm:    8px;
-  --shadow-sm:    0 4px 20px rgba(0,0,0,0.2);
-  --font-main:    'Outfit', 'Sarabun', sans-serif;
+  --radius-sm:    10px;
+  --radius:       16px;
+  --radius-lg:    22px;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
 body {
-  margin: 0; padding: 0;
-  background-color: var(--navy);
-  color: var(--white);
-  font-family: var(--font-main);
-  line-height: 1.5;
-  padding-bottom: 90px; /* เผื่อที่ให้ Bottom Nav */
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow-x: hidden;
+  padding-bottom: 90px;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14,165,160,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 85% 80%, rgba(99,102,241,0.07) 0%, transparent 60%);
 }
 
 /* ═══════════════════════════════════════════
-   LAYOUT
+   HEADER
 ═══════════════════════════════════════════ */
-.top-nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(11, 25, 41, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 12px 20px;
-  display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.brand { display: flex; align-items: center; gap: 10px; }
-.nav-title { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: -0.5px; }
-.brand-icon { font-size: 24px; }
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-icon { font-size: 22px; }
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 16px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.3px;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
 .btn-home {
-  padding: 8px 14px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
-  background: rgba(255,255,255,0.08); color: var(--white);
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); color: var(--text-dim);
   border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  transition: background 0.2s;
+  display: flex; align-items: center; gap: 5px;
+  transition: background 0.2s, color 0.2s;
 }
-.btn-home:hover { background: rgba(255,255,255,0.15); }
-
-.container { padding: 16px; max-width: 600px; margin: 0 auto; }
+.btn-home:hover { background: var(--surface-3); color: var(--text); }
 
 /* ═══════════════════════════════════════════
-   QUEUE CARD
+   WRAP
 ═══════════════════════════════════════════ */
-.anesthesia-card {
-  background: var(--navy-mid);
-  border-radius: var(--radius-lg);
-  margin-bottom: 20px;
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 800px; margin: 0 auto;
+  padding: 24px 16px 40px;
+  width: 100%;
+}
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.section-count {
+  font-size: 10px; font-weight: 600; color: var(--text-dim);
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: 20px; padding: 2px 10px;
+}
+
+/* ═══════════════════════════════════════════
+   ANIMAL CARDS (Expandable Style)
+═══════════════════════════════════════════ */
+#anesthesiaList { display: flex; flex-direction: column; gap: 10px; }
+
+.animal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: var(--shadow-sm);
-  animation: fadeIn 0.4s ease-out;
+  animation: slideUp 0.35s ease both;
+  transition: border-color 0.2s;
 }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animal-card::before { content: ""; display: block; height: 3px; width: 100%; background: #64748b; }
 
-.ac-header {
-  padding: 16px 20px;
-  background: rgba(255,255,255,0.03);
-  display: flex; justify-content: space-between; align-items: center;
+.card-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.q-num { font-size: 24px; font-weight: 800; color: var(--teal-light); }
-.animal-name { font-size: 18px; font-weight: 700; color: var(--white); }
+.queue-badge {
+  font-family: "Outfit", sans-serif; font-size: 14px; font-weight: 800;
+  min-width: 38px; height: 38px; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--teal-light); flex-shrink: 0;
+}
+.card-info { flex: 1; min-width: 0; }
+.animal-name {
+  font-size: 15px; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: flex; align-items: center;
+}
+.animal-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
-.ac-body { padding: 20px; }
-
-.info-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.chip {
-  padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 600;
-  background: rgba(255,255,255,0.08); color: var(--white);
-  border: 1px solid rgba(255,255,255,0.05);
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; flex-shrink: 0;
+  background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3);
 }
 
-/* Health Note Display */
-.health-note-strip {
+.expand-icon { font-size: 16px; color: var(--text-dim); transition: transform 0.25s; flex-shrink: 0; }
+.animal-card.open .expand-icon { transform: rotate(180deg); }
+
+/* ── Expandable Detail ── */
+.card-detail {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+  border-top: 0px solid var(--border);
+}
+.animal-card.open .card-detail { max-height: 1200px; border-top: 1px solid var(--border); }
+.detail-body { padding: 18px 14px; }
+
+/* ── Content inside detail ── */
+.svc-chip {
+  background: var(--surface-3); border: 1px solid var(--border-2);
+  border-radius: 50px; padding: 4px 12px; font-size: 12px; font-weight: 500; color: var(--text);
+}
+.health-note {
   display: flex; align-items: flex-start; gap: 10px;
-  background: var(--rose-soft); 
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: var(--radius-sm); 
-  padding: 12px 14px;
-  font-size: 14px; color: var(--rose);
-  margin-bottom: 16px;
+  background: var(--rose-soft); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  margin-bottom: 16px; color: var(--rose);
 }
 
+/* ── Anesthesia specific ── */
 .est-weight-strip {
-  background: var(--amber-soft);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  display: flex; align-items: center; justify-content: space-between;
+  background: var(--amber-soft); border-radius: var(--radius-sm);
+  padding: 12px 14px; display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 16px;
 }
-.est-label { font-size: 12px; color: var(--amber); font-weight: 700; }
-.est-val { font-size: 16px; font-weight: 800; color: var(--amber); }
+.est-label { font-size: 12px; color: var(--amber); font-weight: 600; }
+.est-val { font-size: 15px; font-weight: 700; color: var(--amber); }
 
-/* Weight Input */
-.input-label { display: block; font-size: 13px; font-weight: 600; color: var(--slate-400); margin-bottom: 8px; }
+.input-label { display: block; font-size: 12px; font-weight: 600; color: var(--slate-400); margin-bottom: 8px; text-transform: uppercase; }
 .weight-input {
-  width: 100%; background: rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.1);
+  width: 100%; background: var(--surface-2); border: 1px solid var(--border-2);
   border-radius: var(--radius-md); padding: 14px 16px; color: var(--white);
-  font-size: 20px; font-weight: 800; transition: all 0.2s;
-  margin-bottom: 20px;
+  font-size: 20px; font-weight: 800; transition: all 0.2s; margin-bottom: 20px;
 }
-.weight-input:focus { border-color: var(--teal); outline: none; background: rgba(14,165,160,0.05); }
+.weight-input:focus { border-color: var(--teal); outline: none; box-shadow: 0 0 0 3px var(--teal-glow); }
 
-/* Drug Table */
 .drug-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-.drug-table th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--slate-400); padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.drug-table td { padding: 12px 4px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-.drug-name { font-weight: 700; color: var(--slate-300); }
+.drug-table th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--text-faint); padding: 8px 4px; border-bottom: 1px solid var(--border-2); }
+.drug-table td { padding: 12px 4px; font-size: 14px; border-bottom: 1px solid var(--border); }
+.drug-name { font-weight: 700; color: var(--text); }
 .drug-calc { font-weight: 800; color: var(--teal-light); text-align: right; font-size: 16px; }
 
-/* Buttons */
 .btn-primary {
-  width: 100%; background: var(--teal); color: var(--navy); border: none;
-  padding: 16px; border-radius: var(--radius-md); font-size: 16px; font-weight: 800;
+  width: 100%; background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: var(--navy); border: none;
+  padding: 14px; border-radius: var(--radius-md); font-size: 15px; font-weight: 800;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  cursor: pointer; transition: transform 0.1s;
+  cursor: pointer; transition: transform 0.1s, box-shadow 0.2s;
 }
 .btn-primary:active { transform: scale(0.97); }
 
-/* Loading State */
+.empty-state { text-align: center; padding: 60px 16px; color: var(--text-faint); animation: slideUp 0.4s ease both; }
+.empty-state-icon { font-size: 48px; margin-bottom: 14px; }
+
+/* ═══════════════════════════════════════════
+   LOADING & NAV
+═══════════════════════════════════════════ */
 #loading-overlay {
   position: fixed; inset: 0; background: var(--navy); z-index: 1000;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;
@@ -157,36 +216,28 @@ body {
 .spinner { width: 40px; height: 40px; border: 4px solid rgba(14,165,160,0.1); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ═══════════════════════════════════════════
-   MOBILE BOTTOM NAV
-═══════════════════════════════════════════ */
 .bottom-nav {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: rgba(11,25,41,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-2);
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2); padding: 8px 0 max(8px, env(safe-area-inset-bottom));
   grid-template-columns: repeat(5, 1fr);
 }
 .nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 6px 4px;
-  font-size: 10px; color: var(--text-dim);
-  text-decoration: none; cursor: pointer;
-  transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px;
+  font-size: 9px; color: var(--text-dim); text-decoration: none; transition: color 0.2s; -webkit-tap-highlight-color: transparent;
 }
-.nav-item:active { color: var(--teal); }
 .nav-icon { font-size: 21px; line-height: 1; }
 .nav-item.active { color: var(--teal); }
 .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
 
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
 @media (max-width: 640px) {
+  header { height: 56px; padding: 0 14px; }
+  .brand-sub { display: none; }
+  .wrap { padding: 18px 12px 90px; }
   .bottom-nav { display: grid; }
 }
-
 </style>
 </head>
 <body>
@@ -196,41 +247,39 @@ body {
   <div style="font-weight:600; color:var(--teal-light)">กำลังดึงข้อมูลคิววางยา...</div>
 </div>
 
-<header class="top-nav">
+<header>
   <div class="brand">
     <div class="brand-icon">💉</div>
-    <div class="nav-title">โต๊ะวิสัญญี</div>
+    <div>
+      <div class="brand-name">โต๊ะวิสัญญี</div>
+      <div class="brand-sub">RMUTTO – Veterinary Academic Service Division</div>
+    </div>
   </div>
-  <button class="btn-home" onclick="location.href='index.html'">
-    🏠 หน้าหลัก
-  </button>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
 </header>
 
-<div class="container" id="anesthesia-container">
+<div class="wrap">
+  <div class="section-title">
+    แตะที่รายการเพื่อคำนวณยาและส่งผ่าตัด
+    <span class="section-count" id="countBadge">0 คิว</span>
   </div>
 
+  <div id="anesthesiaList">
+    </div>
+</div>
+
 <nav class="bottom-nav">
-  <a class="nav-item" href="index.html">
-    <span class="nav-icon">🏠</span>หน้าหลัก
-  </a>
-  <a class="nav-item" href="animals.html">
-    <span class="nav-icon">🐾</span>สัตว์
-  </a>
-  <a class="nav-item active" href="anesthesia.html">
-    <span class="nav-icon">🩺</span>วางยา
-  </a>
-  <a class="nav-item" href="surgery.html">
-    <span class="nav-icon">📋</span>ผ่าตัด
-  </a>
-  <a class="nav-item" href="recovery.html">
-    <span class="nav-icon">🛏️</span>พักฟื้น
-  </a>
+  <a class="nav-item" href="index.html"><span class="nav-icon">🏠</span>หน้าหลัก</a>
+  <a class="nav-item" href="animals.html"><span class="nav-icon">🐾</span>สัตว์</a>
+  <a class="nav-item active" href="anesthesia.html"><span class="nav-icon">💉</span>วางยา</a>
+  <a class="nav-item" href="surgery.html"><span class="nav-icon">📋</span>ผ่าตัด</a>
+  <a class="nav-item" href="recovery.html"><span class="nav-icon">❤️‍🩹</span>พักฟื้น</a>
 </nav>
 
 <script type="module">
 import { supabase } from './js/supabase.js';
 
-const container = document.getElementById("anesthesia-container");
+const listContainer = document.getElementById("anesthesiaList");
 const loading = document.getElementById("loading-overlay");
 
 async function loadAnesthesiaQueue() {
@@ -250,48 +299,52 @@ async function loadAnesthesiaQueue() {
       .order("created_at", { ascending: true });
 
     if (error) throw error;
-
-    // ซ่อน Loading ทันทีเมื่อดึงข้อมูลสำเร็จ
     loading.style.display = "none";
 
+    document.getElementById("countBadge").textContent = `${queueData ? queueData.length : 0} คิว`;
+
     if (!queueData || queueData.length === 0) {
-      container.innerHTML = `
-        <div style="text-align:center; padding:60px 20px; color:var(--slate-400);">
-          <div style="font-size: 40px; margin-bottom: 10px;">✅</div>
-          <div>ไม่มีเคสรอวางยาในขณะนี้</div>
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">✅</div>
+          <div>ไม่มีคิวรอวางยาในขณะนี้</div>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = "";
-    queueData.forEach(q => {
+    // เก็บสถานะการเปิด/ปิดของการ์ดไว้ก่อน Render ใหม่
+    const openIds = new Set([...listContainer.querySelectorAll(".animal-card.open")].map(el => el.dataset.id));
+
+    listContainer.innerHTML = "";
+    queueData.forEach((q, idx) => {
       const a = q.vasd_animal;
       const animalId = a.id;
       
-      const card = document.createElement("div");
-      card.className = "anesthesia-card";
-
-      // คำนวนข้อความให้สื่อความหมายมากขึ้น
       const speciesName = a.species === "ม" ? "แมว" : a.species === "ส" ? "สุนัข" : "ไม่ระบุ";
       const sexName = a.sex === "ผู้" ? "เพศผู้" : a.sex === "เมีย" ? "เพศเมีย" : (a.sex || "-");
-      const serviceName = a.vasd_service?.service_type || "ทำหมัน/ทั่วไป";
       
-      // ดึงน้ำหนักตั้งต้น
-      const initialWeight = a.actual_weight || a.est_weight || "";
+      // การจัดการบริการ (Services) แบบ Array
+      const services = a.vasd_service && a.vasd_service.length > 0
+        ? a.vasd_service.map(srv => `<span class="svc-chip">${srv.service_type}</span>`).join("")
+        : `<span style="font-size:11px; color:var(--text-faint);">ไม่ได้ระบุ</span>`;
 
-      // logic แสดงบันทึกสุขภาพ
-      const noteMarkup = a.health_note 
-        ? `<div class="health-note-strip">
+      // การจัดการข้อควรระวัง
+      const note = a.health_note ? a.health_note.trim() : "";
+      const hasNote = note.length > 0;
+      const noteMarkup = hasNote 
+        ? `<div class="health-note">
              <span style="font-size:18px;">⚠️</span>
              <div>
                <div style="font-size:10px; font-weight:800; text-transform:uppercase; opacity:0.8;">ระวังพิเศษ / บันทึกสุขภาพ</div>
-               <div style="font-weight:700;">${a.health_note}</div>
+               <div style="font-weight:700;">${note}</div>
              </div>
            </div>`
         : "";
 
-      // รายการยาพื้นฐาน (สำหรับทั้งคู่)
+      const initialWeight = a.actual_weight || a.est_weight || "";
+
+      // รายการยา (แยกหมาแมว)
       let drugRows = `
         <tr>
           <td><span class="drug-name">Adrenaline (1:10,000)</span><br><small>Dose 0.01 mg/kg (0.1mg/ml)</small></td>
@@ -311,80 +364,93 @@ async function loadAnesthesiaQueue() {
         </tr>
       `;
 
-      // ถัาเป็นสุนัข ให้เพิ่ม Thiopental
       if (a.species === "ส") {
         drugRows += `
         <tr>
           <td><span class="drug-name">Thiopental</span><br><small>5 mg/kg (10mg/ml)</small></td>
           <td class="drug-calc" id="calc-thio-${animalId}">-</td>
-        </tr>
-        `;
+        </tr>`;
       }
 
+      // สร้าง Card
+      const card = document.createElement("div");
+      card.className = "animal-card";
+      card.dataset.id = animalId;
+      card.style.animationDelay = `${idx * 0.03}s`;
+
       card.innerHTML = `
-        <div class="ac-header">
-          <div class="q-num">#${a.queue_number || '??'}</div>
-          <div class="animal-name">${a.animal_name}</div>
+        <div class="card-top" onclick="window.toggleCard(this)">
+          <div class="queue-badge">#${a.queue_number || '??'}</div>
+          <div class="card-info">
+            <div class="animal-name">${a.animal_name} ${hasNote ? '<span title="มีข้อควรระวัง" style="font-size:14px; margin-left:6px;">⚠️</span>' : ''}</div>
+            <div class="animal-meta">${a.species === 'ม' ? '🐱' : '🐶'} ${speciesName} · ${sexName}</div>
+          </div>
+          <span class="status-pill">⚪ รอวางยา</span>
+          <span class="expand-icon">⌄</span>
         </div>
-        
-        <div class="ac-body">
-          <div class="info-chips">
-            <div class="chip">${a.species === 'ม' ? '🐱' : '🐶'} ${speciesName}</div>
-            <div class="chip">⚧ ${sexName}</div>
-            <div class="chip">📋 ${serviceName}</div>
+
+        <div class="card-detail">
+          <div class="detail-body">
+            
+            <div style="margin-bottom: 16px;">
+              <div style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; margin-bottom:6px;">บริการที่เข้ารับ</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                ${services}
+              </div>
+            </div>
+
+            ${noteMarkup}
+
+            <div class="est-weight-strip">
+              <span class="est-label">น้ำหนักประเมินจากโต๊ะลงทะเบียน</span>
+              <span class="est-val">${a.est_weight ? a.est_weight + ' kg' : 'ยังไม่ประเมิน'}</span>
+            </div>
+
+            <label class="input-label">ระบุน้ำหนักจริง (Actual Weight - kg)</label>
+            <input type="number" step="0.01" class="weight-input" 
+              id="weight-${animalId}" 
+              placeholder="0.00"
+              value="${initialWeight}"
+              oninput="window.calcDrugs('${animalId}')"
+              onclick="event.stopPropagation()"> <table class="drug-table">
+              <thead><tr><th>รายการยา (Drug List)</th><th style="text-align:right">ปริมาณ (Dose)</th></tr></thead>
+              <tbody>${drugRows}</tbody>
+            </table>
+
+            <button class="btn-primary" onclick="window.sendToSurgery('${animalId}')">
+              <span>บันทึกและส่งเข้าโต๊ะผ่าตัด</span>
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14m-7-7l7 7-7 7"></path></svg>
+            </button>
+            
           </div>
-
-          ${noteMarkup}
-
-          <div class="est-weight-strip">
-            <span class="est-label">น้ำหนักประเมินจากโต๊ะลงทะเบียน</span>
-            <span class="est-val">${a.est_weight ? a.est_weight + ' kg' : 'ยังไม่ประเมิน'}</span>
-          </div>
-
-          <label class="input-label">ระบุน้ำหนักจริง (Actual Weight - kg)</label>
-          <input type="number" step="0.01" class="weight-input" 
-            id="weight-${animalId}" 
-            placeholder="0.00"
-            value="${initialWeight}"
-            oninput="window.calcDrugs('${animalId}')">
-
-          <table class="drug-table">
-            <thead>
-              <tr><th>Drug List</th><th style="text-align:right">Dose (ml)</th></tr>
-            </thead>
-            <tbody>
-              ${drugRows}
-            </tbody>
-          </table>
-
-          <button class="btn-primary" onclick="window.sendToSurgery('${animalId}')">
-            <span>บันทึกและส่งเข้าโต๊ะผ่าตัด</span>
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14m-7-7l7 7-7 7"></path></svg>
-          </button>
         </div>
       `;
-      container.appendChild(card);
+
+      // คืนค่าการขยาย (Open) ของการ์ดเดิม
+      if (openIds.has(animalId)) card.classList.add("open");
       
-      // สั่งคำนวณยาทันที (เนื่องจากมีการดึงค่าน้ำหนักประเมินมาใส่ช่องน้ำหนักจริงโดยปริยาย)
+      listContainer.appendChild(card);
       if(initialWeight) window.calcDrugs(animalId);
     });
 
   } catch (err) {
-    console.error("Critical Error:", err);
+    console.error(err);
     loading.style.display = "none";
-    container.innerHTML = `
-      <div style="background:var(--rose-soft); padding:20px; border-radius:12px; color:var(--rose); border:1px solid var(--rose);">
-        <strong>เกิดข้อผิดพลาดในการโหลดข้อมูล:</strong><br>
-        <small>${err.message}</small><br><br>
-        <button onclick="location.reload()" style="background:var(--rose); color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">ลองใหม่อีกครั้ง</button>
-      </div>
-    `;
+    listContainer.innerHTML = `<div style="padding:20px; color:var(--rose);">เกิดข้อผิดพลาด: ${err.message}</div>`;
   }
 }
 
+/* ── UI Toggles ── */
+window.toggleCard = function(el) {
+  el.closest('.animal-card').classList.toggle('open');
+};
+
 /* ── Logic ── */
 window.calcDrugs = function(animalId) {
-  const w = parseFloat(document.getElementById(`weight-${animalId}`).value);
+  const inputEl = document.getElementById(`weight-${animalId}`);
+  if(!inputEl) return;
+  
+  const w = parseFloat(inputEl.value);
   const setV = (id, val) => {
     const el = document.getElementById(id);
     if(el) {
@@ -398,12 +464,11 @@ window.calcDrugs = function(animalId) {
     return;
   }
 
-  // สูตรคำนวณ: (น้ำหนัก * Dose_mg_kg) / ความเข้มข้น_mg_ml
-  setV(`calc-adre-${animalId}`, ((w * 0.01) / 0.1).toFixed(2)); // Adrenaline 1:10000 = 0.1mg/ml
+  setV(`calc-adre-${animalId}`, ((w * 0.01) / 0.1).toFixed(2));
   setV(`calc-atro-${animalId}`, ((w * 0.04) / 1).toFixed(2));
   setV(`calc-xyla-${animalId}`, ((w * 1) / 20).toFixed(2));
   setV(`calc-zole-${animalId}`, ((w * 3) / 100).toFixed(2));
-  setV(`calc-thio-${animalId}`, ((w * 5) / 10).toFixed(2)); // จะถูกข้ามไปถ้าเป็นแมวและไม่มี element id นี้
+  setV(`calc-thio-${animalId}`, ((w * 5) / 10).toFixed(2)); 
 };
 
 window.sendToSurgery = async function(animalId) {
@@ -413,14 +478,8 @@ window.sendToSurgery = async function(animalId) {
   if (!confirm("ยืนยันการบันทึกน้ำหนักและส่งสัตว์เข้าโต๊ะผ่าตัด?")) return;
 
   try {
-    // อัปเดตน้ำหนัก
     await supabase.from("vasd_animal").update({ actual_weight: parseFloat(weight) }).eq("id", animalId);
-    // เปลี่ยนสถานะคิว
-    const { error } = await supabase.from("vasd_queue").update({ 
-      status: "surgery", 
-      updated_at: new Date() 
-    }).eq("animal_id", animalId);
-
+    const { error } = await supabase.from("vasd_queue").update({ status: "surgery", updated_at: new Date() }).eq("animal_id", animalId);
     if (error) throw error;
     loadAnesthesiaQueue();
   } catch (err) {
@@ -428,14 +487,12 @@ window.sendToSurgery = async function(animalId) {
   }
 };
 
-// Init
 loadAnesthesiaQueue();
 
-// Realtime
 supabase.channel('anes-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadAnesthesiaQueue)
   .subscribe();
-
 </script>
+   <script type="module" src="./js/global-alarm.js"></script>
 </body>
 </html>
