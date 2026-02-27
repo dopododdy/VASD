@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>โต๊ะจัดยา – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;600&family=Kanit:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════
@@ -19,6 +19,7 @@
   --emerald:       #10b981;
   --violet:        #8b5cf6;
   --rose:          #ef4444;
+  --amber:         #f59e0b;
 
   --surface:    rgba(255,255,255,0.04);
   --surface-2:  rgba(255,255,255,0.07);
@@ -39,9 +40,6 @@ body {
   overflow-x: hidden; padding-bottom: 100px;
 }
 
-/* ═══════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(11,25,41,0.88); backdrop-filter: blur(20px);
@@ -106,6 +104,11 @@ header {
 .rx-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 2px; }
 .rx-desc b { color: var(--sky-light); }
 
+.service-item {
+  background: rgba(245, 158, 11, 0.1); border: 1px dashed rgba(245, 158, 11, 0.3);
+  color: var(--amber); padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; font-weight: 500;
+}
+
 .btn-print-single {
   background: rgba(14, 165, 233, 0.1); border: 1px solid var(--sky);
   color: var(--sky-light); border-radius: 8px; padding: 8px 12px;
@@ -118,6 +121,9 @@ header {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
   padding: 16px; background: var(--surface-2); border-top: 1px solid var(--border);
 }
+.card-actions {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+}
 @media (max-width: 500px) { .card-footer { grid-template-columns: 1fr; } }
 
 .btn {
@@ -128,6 +134,8 @@ header {
 .btn-sky:hover { background: rgba(14, 165, 233, 0.25); }
 .btn-emerald { background: linear-gradient(135deg, var(--emerald), #34d399); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
 .btn-emerald:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-sm { padding: 8px 12px; font-size: 12px; background: var(--surface); border: 1px solid var(--border-2); color: var(--text); border-radius: 8px; cursor: pointer; }
+.btn-sm:hover { background: var(--surface-2); }
 
 /* ═══════════════════════════════════════════
    BOTTOM NAV
@@ -147,21 +155,6 @@ header {
 .nav-icon { font-size: 21px; line-height: 1; }
 
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ═══════════════════════════════════════════
-   PRINT STYLES
-═══════════════════════════════════════════ */
-#printArea { display: none; }
-@media print {
-  body > :not(#printArea) { display: none !important; }
-  #printArea { display: block !important; color: #000; background: #fff; }
-  .print-page { padding: 20px; page-break-after: always; font-family: "Sarabun", sans-serif; }
-  .p-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 10px; }
-  .p-meta { font-size: 14px; margin-bottom: 20px; }
-  .p-rx-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ccc; }
-  .p-rx-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-  .p-rx-desc { font-size: 14px; margin-bottom: 2px; }
-}
 </style>
 </head>
 <body>
@@ -171,7 +164,7 @@ header {
     <div class="brand-logo">💊</div>
     <div>
       <div class="brand-name">โต๊ะจัดยา (Pharmacy)</div>
-      <div class="brand-sub">จ่ายยาและให้คำแนะนำ</div>
+      <div class="brand-sub">จ่ายยา บริการ และให้คำแนะนำ</div>
     </div>
   </div>
   <div class="badge-count" id="count-badge">0 รอจัดยา</div>
@@ -189,26 +182,30 @@ header {
   <a class="nav-item" href="recovery.html"><span class="nav-icon">❤️‍🩹</span>พักฟื้น</a>
 </nav>
 
-<div id="printArea"></div>
-
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-// เก็บข้อมูลไว้สำหรับการพิมพ์
 window.rxDataMap = {}; 
+
+const getDates = () => {
+  const now = new Date();
+  const next7 = new Date(); next7.setDate(now.getDate() + 7);
+  const fmt = (d) => d.toLocaleDateString('th-TH', { day:'2-digit', month:'2-digit', year:'numeric' });
+  return { today: fmt(now), next: fmt(next7) };
+};
 
 async function loadRxQueue() {
   const container = document.getElementById("rx-container");
   
   try {
-    // ดึงคิวที่มีสถานะ ผ่าตัด, พักฟื้น หรือ พร้อมกลับบ้าน
     const { data: queueData, error } = await supabase
       .from("vasd_queue")
       .select(`
         id, animal_id, status, 
-        vasd_animal(id, queue_number, animal_name, species, actual_weight,
-          vasd_owner(owner_name),
-          vasd_prescription(*)
+        vasd_animal(id, queue_number, animal_name, species, sex, actual_weight,
+          vasd_owner(owner_name, owner_id, address, phone),
+          vasd_prescription(*),
+          vasd_treatment(*)
         )
       `)
       .in("status", ["surgery", "recovery", "ready_to_go_home"])
@@ -216,11 +213,11 @@ async function loadRxQueue() {
 
     if (error) throw error;
 
-    // กรองเอาเฉพาะเคสที่มียาสั่งมาแล้ว หรือเคสที่พร้อมกลับบ้านแล้ว
     const animals = (queueData || []).filter(q => {
       if (!q.vasd_animal) return false;
       const hasRx = q.vasd_animal.vasd_prescription && q.vasd_animal.vasd_prescription.length > 0;
-      return hasRx || q.status === "ready_to_go_home";
+      const hasService = q.vasd_animal.vasd_treatment && q.vasd_animal.vasd_treatment.length > 0;
+      return hasRx || hasService || q.status === "ready_to_go_home";
     });
     
     if (animals.length === 0) {
@@ -231,12 +228,12 @@ async function loadRxQueue() {
 
     document.getElementById("count-badge").innerText = `${animals.length} รอจัดยา`;
     container.innerHTML = "";
-    window.rxDataMap = {}; // Reset map
+    window.rxDataMap = {};
 
     animals.forEach(q => {
       const a = q.vasd_animal;
       const ownerName = a.vasd_owner?.owner_name || "-";
-      window.rxDataMap[a.id] = a; // Save for printing
+      window.rxDataMap[a.id] = a; 
       
       let rxHtml = "";
       if (a.vasd_prescription && a.vasd_prescription.length > 0) {
@@ -246,24 +243,41 @@ async function loadRxQueue() {
             <div class="rx-details">
               <div class="rx-name">${rx.drug_id}</div>
               <div class="rx-desc">วิธีใช้: ป้อน <b>${rx.dose}</b> · ${rx.freq}</div>
-              <div class="rx-desc">จำนวนที่จ่าย: <b>${rx.total_pills}</b> เม็ด (สำหรับ ${rx.days} วัน)</div>
+              <div class="rx-desc">จำนวนที่จ่าย: <b>${rx.total_pills}</b> เม็ด</div>
             </div>
-            <button class="btn-print-single" onclick="printSingleRx('${a.id}', ${i})">🖨️ พิมพ์</button>
+            <button class="btn-print-single" onclick="printSingleRx('${a.id}', ${i})">🖨️ สติกเกอร์</button>
           </div>
         `).join('');
       } else {
-        rxHtml = `<div style="color:var(--text-dim); font-size:13px; text-align:center; padding:20px; background:var(--surface-2); border-radius:10px;">ไม่มีการสั่งจ่ายยาสำหรับเคสนี้</div>`;
+        rxHtml = `<div style="color:var(--text-dim); font-size:13px; text-align:center; padding:15px; background:var(--surface-2); border-radius:10px;">ไม่มีการสั่งจ่ายยา</div>`;
       }
 
-      // สร้างป้ายกำกับสถานะ
-      let statusBadge = "";
-      if (q.status === 'surgery') {
-        statusBadge = '<span style="background:var(--rose); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">กำลังผ่าตัด</span>';
-      } else if (q.status === 'recovery') {
-        statusBadge = '<span style="background:var(--violet); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">กำลังพักฟื้น</span>';
-      } else if (q.status === 'ready_to_go_home') {
-        statusBadge = '<span style="background:var(--emerald); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">พร้อมกลับบ้าน</span>';
+      // เช็คบริการ
+      let serviceHtml = "";
+      let hasVaccine = false;
+      let hasMicrochip = false;
+
+      if (a.vasd_treatment && a.vasd_treatment.length > 0) {
+        serviceHtml += `<div class="rx-list-title" style="margin-top:20px;">บริการที่ได้รับ</div>`;
+        a.vasd_treatment.forEach(t => {
+          const tName = t.treatment_detail || t.treatment_name || t.type || "บริการ";
+          serviceHtml += `<div class="service-item">✨ ${tName}</div>`;
+          if (tName.includes("วัคซีน")) hasVaccine = true;
+          if (tName.includes("ไมโครชิพ") || tName.includes("ไมโครชิป")) hasMicrochip = true;
+        });
       }
+
+      let statusBadge = "";
+      if (q.status === 'surgery') statusBadge = '<span style="background:var(--rose); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">กำลังผ่าตัด</span>';
+      else if (q.status === 'recovery') statusBadge = '<span style="background:var(--violet); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">กำลังพักฟื้น</span>';
+      else if (q.status === 'ready_to_go_home') statusBadge = '<span style="background:var(--emerald); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">พร้อมกลับบ้าน</span>';
+
+      // ปุ่มอัจฉริยะ (Smart Actions)
+      let smartButtons = `
+        <button class="btn-sm" onclick="printStickerAction('drug_bag', '${a.id}')">🛍️ พิมพ์หน้าถุงยา</button>
+      `;
+      if(hasVaccine) smartButtons += `<button class="btn-sm" onclick="printStickerAction('vaccine', '${a.id}')">📒 สมุดวัคซีน</button>`;
+      if(hasMicrochip) smartButtons += `<button class="btn-sm" onclick="printStickerAction('microchip', '${a.id}')">💳 สมุดไมโครชิพ</button>`;
 
       const card = document.createElement("div");
       card.className = "rx-card";
@@ -282,9 +296,13 @@ async function loadRxQueue() {
         <div class="rx-list-container">
           <div class="rx-list-title">รายการยาที่สั่งจ่าย</div>
           ${rxHtml}
+          ${serviceHtml}
         </div>
         <div class="card-footer">
-          <button class="btn btn-sky" onclick="printRx('${a.id}')">🖨️ พิมพ์ใบสั่งยาทั้งหมด</button>
+          <div class="card-actions">
+             ${smartButtons}
+          </div>
+          <button class="btn btn-sky" onclick="printAllRx('${a.id}')">🖨️ พิมพ์สติกเกอร์ซองยาทั้งหมด</button>
           <button class="btn btn-emerald" onclick="markAsDone('${q.animal_id}', '${q.status}')">✅ จ่ายยาเรียบร้อย (กลับบ้าน)</button>
         </div>
       `;
@@ -297,73 +315,92 @@ async function loadRxQueue() {
   }
 }
 
-// ฟังก์ชันพิมพ์ใบสั่งยาทั้งหมด (สำหรับสัตว์ 1 ตัว)
-window.printRx = function(animalId) {
-  const a = window.rxDataMap[animalId];
-  if (!a) return;
+// ==========================================
+// ระบบพิมพ์ Sticker จาก Template
+// ==========================================
+async function renderStickers(templateType, dataArray) {
+  const { data } = await supabase.from("vasd_print_template").select("config").eq("template_type", templateType).maybeSingle();
+  const config = data?.config || [];
 
-  const ownerName = a.vasd_owner?.owner_name || "-";
-  const dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
-
-  let rxHtml = "";
-  if (a.vasd_prescription && a.vasd_prescription.length > 0) {
-    rxHtml = a.vasd_prescription.map(rx => `
-      <div class="p-rx-item">
-        <div class="p-rx-name">${rx.drug_id}</div>
-        <div class="p-rx-desc"><b>วิธีใช้:</b> ป้อนครั้งละ ${rx.dose} ${rx.freq}</div>
-        <div class="p-rx-desc"><b>จำนวน:</b> ${rx.total_pills} เม็ด (ทาน ${rx.days} วัน)</div>
-      </div>
-    `).join('');
-  } else {
-    rxHtml = `<div>ไม่มีรายการยา</div>`;
+  if (config.length === 0) {
+    alert("ยังไม่ได้ตั้งค่ารูปแบบสติกเกอร์สำหรับ: " + templateType + "\nกรุณาไปตั้งค่าในเมนู Designer Pro ก่อนครับ");
+    return;
   }
 
-  const printArea = document.getElementById("printArea");
-  printArea.innerHTML = `
-    <div class="print-page">
-      <div class="p-title">ใบสั่งยารวม / Prescriptions</div>
-      <div class="p-meta">
-        <b>วันที่:</b> ${dateStr} <br>
-        <b>ชื่อเจ้าของ:</b> ${ownerName} <br>
-        <b>ชื่อสัตว์:</b> ${a.animal_name} (คิวที่ ${a.queue_number}) <br>
-        <b>น้ำหนัก:</b> ${a.actual_weight || '-'} kg
-      </div>
-      <h3 style="margin-bottom: 10px;">รายการยา</h3>
-      ${rxHtml}
-      <div style="margin-top: 30px; text-align: center; font-size: 14px;">
-        *** โปรดป้อนยาให้ครบตามคำแนะนำของสัตวแพทย์ ***
-      </div>
-    </div>
-  `;
-  window.print();
+  const dates = getDates();
+  let htmlStr = "";
+
+  dataArray.forEach(item => {
+    htmlStr += `<div class="sticker">`;
+    config.forEach(l => {
+      let txt = l.text
+        .replace(/{{queue_number}}/g, item.queue_number || "")
+        .replace(/{{animal_name}}/g, item.animal_name || "")
+        .replace(/{{species}}/g, item.species || "")
+        .replace(/{{sex}}/g, item.sex || "")
+        .replace(/{{owner_name}}/g, item.owner_name || "")
+        .replace(/{{owner_id}}/g, item.owner_id || "")
+        .replace(/{{address}}/g, item.address || "")
+        .replace(/{{phone}}/g, item.phone || "")
+        .replace(/{{drug_name}}/g, item.drug_name || "")
+        .replace(/{{dose}}/g, item.dose || "")
+        .replace(/{{freq}}/g, item.freq || "")
+        .replace(/{{total_amount}}/g, item.total_amount || "")
+        .replace(/{{todayDate}}/g, dates.today)
+        .replace(/{{next7days}}/g, dates.next);
+
+      htmlStr += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; text-align:${l.align}; font-family:'${l.font}', sans-serif; font-weight:${l.bold?'600':'400'}; width:${l.align==='center'?'100%':`calc(100% - ${l.x}px)`}; ${l.align==='center'?'left:0px;':''}">${txt}</div>`;
+    });
+    htmlStr += `</div>`;
+  });
+
+  const pw = window.open("","_blank","width=800,height=600");
+  pw.document.write(`<html><head><style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Sarabun:wght@400;600&family=Prompt:wght@400;600&family=Kanit:wght@400;600&display=swap');
+    body{margin:0; background:#e2e8f0; display:flex; flex-direction:column; align-items:center; padding:20px;}
+    .sticker{position:relative; width:80mm; height:50mm; background:#fff; overflow:hidden; margin-bottom: 20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); page-break-after:always;}
+    .line{position:absolute; white-space:pre-wrap; word-break:break-word; color:#000; line-height:1.2;}
+    @page{size:80mm 50mm; margin:0;}
+    @media print { body{background:#fff; padding:0;} .sticker{margin:0; box-shadow:none;} }
+  </style></head><body>${htmlStr}
+  <script>window.onload=function(){window.print();window.close();};<\/script></body></html>`);
+  pw.document.close();
+}
+
+// เตรียม Data สำหรับพิมพ์ตามประเภท
+window.printStickerAction = (type, animalId) => {
+  const a = window.rxDataMap[animalId];
+  if (!a) return;
+  const baseData = {
+    queue_number: a.queue_number, animal_name: a.animal_name, species: a.species, sex: a.sex,
+    owner_name: a.vasd_owner?.owner_name, owner_id: a.vasd_owner?.owner_id, address: a.vasd_owner?.address, phone: a.vasd_owner?.phone
+  };
+  renderStickers(type, [baseData]);
 };
 
-// ฟังก์ชันพิมพ์ฉลากยาแบบรายตัว (Single Drug)
-window.printSingleRx = function(animalId, rxIndex) {
+window.printAllRx = (animalId) => {
+  const a = window.rxDataMap[animalId];
+  if (!a || !a.vasd_prescription || a.vasd_prescription.length === 0) return alert("ไม่มีรายการยา");
+  
+  const drugsData = a.vasd_prescription.map(rx => ({
+    queue_number: a.queue_number, animal_name: a.animal_name, species: a.species, sex: a.sex,
+    owner_name: a.vasd_owner?.owner_name, owner_id: a.vasd_owner?.owner_id, address: a.vasd_owner?.address, phone: a.vasd_owner?.phone,
+    drug_name: rx.drug_id, dose: rx.dose, freq: rx.freq, total_amount: rx.total_pills + " เม็ด"
+  }));
+  renderStickers('drug_envelope', drugsData);
+};
+
+window.printSingleRx = (animalId, rxIndex) => {
   const a = window.rxDataMap[animalId];
   if (!a || !a.vasd_prescription || !a.vasd_prescription[rxIndex]) return;
-
   const rx = a.vasd_prescription[rxIndex];
-  const ownerName = a.vasd_owner?.owner_name || "-";
-  const dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
-
-  const printArea = document.getElementById("printArea");
-  printArea.innerHTML = `
-    <div class="print-page">
-      <div class="p-title">ฉลากยา / Drug Label</div>
-      <div class="p-meta">
-        <b>วันที่:</b> ${dateStr} <br>
-        <b>ชื่อเจ้าของ:</b> ${ownerName} <br>
-        <b>ชื่อสัตว์:</b> ${a.animal_name} (คิวที่ ${a.queue_number})
-      </div>
-      <div class="p-rx-item" style="border: none; padding: 0;">
-        <div class="p-rx-name" style="font-size: 18px; color: #000;">${rx.drug_id}</div>
-        <div class="p-rx-desc" style="font-size: 15px; margin-top: 8px;"><b>วิธีใช้:</b> ป้อนครั้งละ ${rx.dose} ${rx.freq}</div>
-        <div class="p-rx-desc" style="font-size: 15px;"><b>จำนวน:</b> ${rx.total_pills} เม็ด (ทาน ${rx.days} วัน)</div>
-      </div>
-    </div>
-  `;
-  window.print();
+  
+  const drugData = {
+    queue_number: a.queue_number, animal_name: a.animal_name, species: a.species, sex: a.sex,
+    owner_name: a.vasd_owner?.owner_name, owner_id: a.vasd_owner?.owner_id, address: a.vasd_owner?.address, phone: a.vasd_owner?.phone,
+    drug_name: rx.drug_id, dose: rx.dose, freq: rx.freq, total_amount: rx.total_pills + " เม็ด"
+  };
+  renderStickers('drug_envelope', [drugData]);
 };
 
 // ฟังก์ชันอัปเดตสถานะให้เสร็จสิ้น (Done)
@@ -385,10 +422,11 @@ window.markAsDone = async function(animalId, currentStatus) {
   }
 };
 
-// Realtime Update (เฝ้าดูการเปลี่ยนแปลงของคิวและยา)
+// Realtime Update
 supabase.channel('rx-realtime')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadRxQueue)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_prescription' }, loadRxQueue)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_treatment' }, loadRxQueue)
   .subscribe();
 
 loadRxQueue();
