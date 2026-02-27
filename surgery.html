@@ -8,7 +8,7 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   TOKENS & BASE (คงเดิมตาม Design System)
+   TOKENS & BASE
 ═══════════════════════════════════════════ */
 :root {
   --navy:         #0b1929;
@@ -104,7 +104,7 @@ header {
 .tab-content { display: none; padding: 16px; flex: 1; }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
-/* ── Tab: Info (หัตถการ Checklist) ── */
+/* ── Tab: Info ── */
 .info-item { background: var(--surface-2); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px; }
 .info-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
 
@@ -199,17 +199,18 @@ header {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-const vitalsData = {};
-
 async function loadSurgeryQueue() {
   const container = document.getElementById("surgery-container");
   try {
     const { data: eventId } = await supabase.rpc("get_today_event");
+    
+    // ดึงข้อมูลสัตว์ พร้อมดึง vasd_vital_signs จากฐานข้อมูลโดยตรง
     const { data: queueData, error } = await supabase
       .from("vasd_queue")
       .select(`id, animal_id, status,
         vasd_animal(id, event_id, queue_number, animal_name, species, sex, actual_weight, 
-        vasd_service(id, service_type, is_done))
+        vasd_service(id, service_type, is_done),
+        vasd_vital_signs(*))
       `)
       .eq("status", "surgery")
       .order("updated_at", { ascending: true });
@@ -236,8 +237,18 @@ async function loadSurgeryQueue() {
         </label>
       `).join('') || '<div style="color:var(--text-faint);">ไม่มีข้อมูลหัตถการ</div>';
 
-      if(!vitalsData[a.id]) vitalsData[a.id] = [];
+      // จัดเรียงและสร้างตาราง Vital Signs จาก Database
+      const sortedVitals = (a.vasd_vital_signs || []).sort((x, y) => new Date(x.created_at) - new Date(y.created_at));
+      const vitalsHtml = sortedVitals.map(l => `
+        <tr>
+          <td style="color:var(--primary); font-weight:600;">${l.time_recorded || '-'}</td>
+          <td>${l.hr || '-'}</td><td>${l.rr || '-'}</td><td>${l.spo2 || '-'}</td>
+          <td>${l.temp || '-'}</td><td style="color:var(--teal-light);">${l.zoletil_top || '-'}</td>
+          <td style="text-align:left; font-size:11px;">${l.note || '-'}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="7" style="color:var(--text-faint);">ยังไม่มีการบันทึก</td></tr>`;
 
+      // คำนวณปริมาตรยา Emergency
       const weight = parseFloat(a.actual_weight) || 0;
       let adrVol = "N/A", atrVol = "N/A", atipVol = "N/A";
       if (weight > 0) {
@@ -280,16 +291,16 @@ async function loadSurgeryQueue() {
           <div class="monitor-inputs">
             <input type="number" id="hr-${a.id}" class="f-input third" placeholder="HR">
             <input type="number" id="rr-${a.id}" class="f-input third" placeholder="RR">
-            <input type="number" id="spo2-${a.id}" class="f-input third" placeholder="SpO2">
-            <input type="number" id="temp-${a.id}" class="f-input half" placeholder="T (°F)">
-            <input type="number" id="zol-${a.id}" class="f-input half" placeholder="Zol (ml)">
+            <input type="number" id="spo2-${a.id}" class="f-input third" placeholder="SpO2%">
+            <input type="number" step="0.1" id="temp-${a.id}" class="f-input half" placeholder="T (°C)">
+            <input type="number" step="0.01" id="zol-${a.id}" class="f-input half" placeholder="Zol (ml)">
             <input type="text" id="note-${a.id}" class="f-input wide" placeholder="บันทึกเพิ่มเติม...">
           </div>
-          <button class="btn btn-primary" onclick="addVitalSign('${a.id}')">+ บันทึก Monitoring</button>
+          <button class="btn btn-primary" onclick="addVitalSign('${a.id}')">+ บันทึก Monitoring ลงระบบ</button>
           <div class="table-wrapper">
             <table class="vitals-table">
               <thead><tr><th>เวลา</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th><th>Zol</th><th>Note</th></tr></thead>
-              <tbody id="vitals-tbody-${a.id}"></tbody>
+              <tbody id="vitals-tbody-${a.id}">${vitalsHtml}</tbody>
             </table>
           </div>
         </div>
@@ -313,7 +324,6 @@ async function loadSurgeryQueue() {
         </div>
       `;
       container.appendChild(card);
-      renderVitalsTable(a.id);
     });
 
   } catch (err) {
@@ -322,19 +332,12 @@ async function loadSurgeryQueue() {
   }
 }
 
-// ── ฟังก์ชันอัปเดตสถานะหัตถการ (Checkbox) ──
+// ฟังก์ชันอัปเดตสถานะหัตถการ (Checkbox)
 window.toggleServiceStatus = async function(serviceId, isDone) {
   try {
-    const { error } = await supabase
-      .from("vasd_service")
-      .update({ is_done: isDone })
-      .eq("id", serviceId);
-    
+    const { error } = await supabase.from("vasd_service").update({ is_done: isDone }).eq("id", serviceId);
     if (error) throw error;
-    console.log(`Service ${serviceId} updated: ${isDone}`);
-  } catch (err) {
-    alert("ไม่สามารถบันทึกสถานะได้: " + err.message);
-  }
+  } catch (err) { alert("ไม่สามารถบันทึกสถานะได้: " + err.message); }
 };
 
 window.switchTab = function(btn, targetId) {
@@ -345,37 +348,34 @@ window.switchTab = function(btn, targetId) {
   document.getElementById(targetId).classList.add('active');
 };
 
-window.addVitalSign = function(animalId) {
+// บันทึก Vital Sign ลง Database แทนการเก็บใน Memory
+window.addVitalSign = async function(animalId) {
   const hr = document.getElementById(`hr-${animalId}`).value;
   const rr = document.getElementById(`rr-${animalId}`).value;
   const spo2 = document.getElementById(`spo2-${animalId}`).value;
   const temp = document.getElementById(`temp-${animalId}`).value;
   const zol = document.getElementById(`zol-${animalId}`).value;
   const note = document.getElementById(`note-${animalId}`).value;
-  const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   if(!hr && !rr && !spo2 && !temp && !zol && !note) return;
-  vitalsData[animalId].push({ time: timeStr, hr, rr, spo2, temp, zol, note });
-  ['hr', 'rr', 'spo2', 'temp', 'zol', 'note'].forEach(k => document.getElementById(`${k}-${animalId}`).value = '');
-  renderVitalsTable(animalId);
-};
 
-window.renderVitalsTable = function(animalId) {
-  const tbody = document.getElementById(`vitals-tbody-${animalId}`);
-  if(!tbody) return;
-  const logs = vitalsData[animalId];
-  if(!logs || logs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--text-faint);">ยังไม่มีการบันทึก</td></tr>`;
-    return;
+  const data = {
+    animal_id: animalId,
+    time_recorded: timeStr,
+    hr: hr, rr: rr, spo2: spo2, temp: temp, zoletil_top: zol, note: note
+  };
+
+  // เคลียร์ค่าที่กรอกทันทีเพื่อ UX ที่ดี
+  ['hr', 'rr', 'spo2', 'temp', 'zol', 'note'].forEach(k => document.getElementById(`${k}-${animalId}`).value = '');
+
+  try {
+    const { error } = await supabase.from('vasd_vital_signs').insert(data);
+    if (error) throw error;
+    // ข้อมูลตารางจะถูกโหลดใหม่ด้วย Realtime event
+  } catch (err) {
+    alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
   }
-  tbody.innerHTML = logs.map(l => `
-    <tr>
-      <td style="color:var(--primary); font-weight:600;">${l.time}</td>
-      <td>${l.hr || '-'}</td><td>${l.rr || '-'}</td><td>${l.spo2 || '-'}</td>
-      <td>${l.temp || '-'}</td><td style="color:var(--teal-light);">${l.zol || '-'}</td>
-      <td style="text-align:left; font-size:11px;">${l.note || '-'}</td>
-    </tr>
-  `).join('');
 };
 
 window.finishSurgery = async function(animalId) {
@@ -393,9 +393,15 @@ window.finishSurgery = async function(animalId) {
       updated_at: new Date() 
     }).eq("animal_id", animalId);
     if (error) throw error;
-    loadSurgeryQueue();
   } catch (err) { alert(err.message); }
 };
+
+// ดักจับการเปลี่ยนแปลงเพื่อโหลดตารางอัตโนมัติ
+supabase.channel('surgery-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSurgeryQueue)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, loadSurgeryQueue)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_service' }, loadSurgeryQueue)
+  .subscribe();
 
 loadSurgeryQueue();
 </script>
