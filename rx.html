@@ -274,13 +274,13 @@ async function loadRxQueue() {
       else if (q.status === 'recovery') statusBadge = '<span style="background:var(--violet); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">กำลังพักฟื้น</span>';
       else if (q.status === 'ready_to_go_home') statusBadge = '<span style="background:var(--emerald); color:#fff; padding:2px 6px; border-radius:6px; font-size:10px;">พร้อมกลับบ้าน</span>';
 
-      // ปุ่มอัจฉริยะ (Smart Actions)
+     // ปุ่มอัจฉริยะ (Smart Actions)
       let smartButtons = `
         <button class="btn-sm" onclick="printStickerAction('drug_bag', '${a.id}')">🛍️ พิมพ์หน้าถุงยา</button>
+        <button class="btn-sm" onclick="printStickerAction('microchip_sticker', '${a.id}')">🏷️ สติกเกอร์ไมโครชิพ</button>
       `;
       if(hasVaccine) smartButtons += `<button class="btn-sm" onclick="printStickerAction('vaccine', '${a.id}')">📒 สมุดวัคซีน</button>`;
       if(hasMicrochip) smartButtons += `<button class="btn-sm" onclick="printStickerAction('microchip', '${a.id}')">💳 สมุดไมโครชิพ</button>`;
-
       const card = document.createElement("div");
       card.className = "rx-card";
       card.innerHTML = `
