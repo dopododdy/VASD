@@ -94,16 +94,25 @@ header {
 
 .rx-item {
   display: flex; gap: 12px; background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; align-items: flex-start;
+  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; align-items: center;
 }
 .rx-idx {
   width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1);
   display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-dim);
+  flex-shrink: 0; align-self: flex-start;
 }
 .rx-details { flex: 1; }
 .rx-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .rx-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 2px; }
 .rx-desc b { color: var(--sky-light); }
+
+.btn-print-single {
+  background: rgba(14, 165, 233, 0.1); border: 1px solid var(--sky);
+  color: var(--sky-light); border-radius: 8px; padding: 8px 12px;
+  cursor: pointer; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  transition: 0.2s; white-space: nowrap; flex-shrink: 0;
+}
+.btn-print-single:hover { background: var(--sky); color: #fff; }
 
 .card-footer {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -239,6 +248,7 @@ async function loadRxQueue() {
               <div class="rx-desc">วิธีใช้: ป้อน <b>${rx.dose}</b> · ${rx.freq}</div>
               <div class="rx-desc">จำนวนที่จ่าย: <b>${rx.total_pills}</b> เม็ด (สำหรับ ${rx.days} วัน)</div>
             </div>
+            <button class="btn-print-single" onclick="printSingleRx('${a.id}', ${i})">🖨️ พิมพ์</button>
           </div>
         `).join('');
       } else {
@@ -274,7 +284,7 @@ async function loadRxQueue() {
           ${rxHtml}
         </div>
         <div class="card-footer">
-          <button class="btn btn-sky" onclick="printRx('${a.id}')">🖨️ พิมพ์ใบสั่งยา</button>
+          <button class="btn btn-sky" onclick="printRx('${a.id}')">🖨️ พิมพ์ใบสั่งยาทั้งหมด</button>
           <button class="btn btn-emerald" onclick="markAsDone('${q.animal_id}', '${q.status}')">✅ จ่ายยาเรียบร้อย (กลับบ้าน)</button>
         </div>
       `;
@@ -287,7 +297,7 @@ async function loadRxQueue() {
   }
 }
 
-// ฟังก์ชันพิมพ์ใบสั่งยา
+// ฟังก์ชันพิมพ์ใบสั่งยาทั้งหมด (สำหรับสัตว์ 1 ตัว)
 window.printRx = function(animalId) {
   const a = window.rxDataMap[animalId];
   if (!a) return;
@@ -311,7 +321,7 @@ window.printRx = function(animalId) {
   const printArea = document.getElementById("printArea");
   printArea.innerHTML = `
     <div class="print-page">
-      <div class="p-title">ใบสั่งยา / Prescription</div>
+      <div class="p-title">ใบสั่งยารวม / Prescriptions</div>
       <div class="p-meta">
         <b>วันที่:</b> ${dateStr} <br>
         <b>ชื่อเจ้าของ:</b> ${ownerName} <br>
@@ -322,6 +332,34 @@ window.printRx = function(animalId) {
       ${rxHtml}
       <div style="margin-top: 30px; text-align: center; font-size: 14px;">
         *** โปรดป้อนยาให้ครบตามคำแนะนำของสัตวแพทย์ ***
+      </div>
+    </div>
+  `;
+  window.print();
+};
+
+// ฟังก์ชันพิมพ์ฉลากยาแบบรายตัว (Single Drug)
+window.printSingleRx = function(animalId, rxIndex) {
+  const a = window.rxDataMap[animalId];
+  if (!a || !a.vasd_prescription || !a.vasd_prescription[rxIndex]) return;
+
+  const rx = a.vasd_prescription[rxIndex];
+  const ownerName = a.vasd_owner?.owner_name || "-";
+  const dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+
+  const printArea = document.getElementById("printArea");
+  printArea.innerHTML = `
+    <div class="print-page">
+      <div class="p-title">ฉลากยา / Drug Label</div>
+      <div class="p-meta">
+        <b>วันที่:</b> ${dateStr} <br>
+        <b>ชื่อเจ้าของ:</b> ${ownerName} <br>
+        <b>ชื่อสัตว์:</b> ${a.animal_name} (คิวที่ ${a.queue_number})
+      </div>
+      <div class="p-rx-item" style="border: none; padding: 0;">
+        <div class="p-rx-name" style="font-size: 18px; color: #000;">${rx.drug_id}</div>
+        <div class="p-rx-desc" style="font-size: 15px; margin-top: 8px;"><b>วิธีใช้:</b> ป้อนครั้งละ ${rx.dose} ${rx.freq}</div>
+        <div class="p-rx-desc" style="font-size: 15px;"><b>จำนวน:</b> ${rx.total_pills} เม็ด (ทาน ${rx.days} วัน)</div>
       </div>
     </div>
   `;
