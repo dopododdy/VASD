@@ -16,6 +16,8 @@
   --teal:         #0ea5a0;
   --teal-light:   #14c4bc;
   --teal-glow:    rgba(14,165,160,0.25);
+  --rose:         #ef4444;
+  --rose-soft:    rgba(239,68,68,0.12);
 
   --surface:      rgba(255,255,255,0.04);
   --surface-2:    rgba(255,255,255,0.07);
@@ -160,6 +162,7 @@ header {
 .animal-name {
   font-size: 14px; font-weight: 700; color: #fff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: flex; align-items: center;
 }
 .animal-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
@@ -189,11 +192,23 @@ header {
   border-top: 0px solid var(--border);
 }
 .animal-card.open .card-detail {
-  max-height: 600px;
+  max-height: 800px;
   border-top: 1px solid var(--border);
 }
 
 .detail-body { padding: 14px; }
+
+/* Added parts: Services & Health Notes */
+.svc-chip {
+  background: var(--surface-3); border: 1px solid var(--border-2);
+  border-radius: 50px; padding: 4px 12px; font-size: 11px; font-weight: 500; color: var(--text);
+}
+.health-note {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--rose-soft); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  margin-bottom: 14px; color: var(--rose);
+}
 
 /* edit fields grid */
 .edit-grid {
@@ -400,9 +415,11 @@ let allData = [];
 
 async function loadAnimals() {
   const { data: eventId } = await supabase.rpc("get_today_event");
+  
+  // เพิ่มการดึงฟิลด์ health_note และ service_type
   const { data, error } = await supabase
     .from("vasd_animal")
-    .select(`id,queue_number,animal_name,species,sex,est_weight,vasd_owner(owner_name,phone),vasd_queue(status)`)
+    .select(`id,queue_number,animal_name,species,sex,est_weight,health_note,vasd_owner(owner_name,phone),vasd_queue(status),vasd_service(service_type)`)
     .eq("event_id", eventId)
     .order("queue_number");
 
@@ -434,6 +451,14 @@ function renderCards(data) {
     const s = statusMap[statusKey] || statusMap.waiting;
     const speciesText = a.species === "ม" ? "🐱 แมว" : "🐶 สุนัข";
 
+    // ประมวลผล ข้อควรระวัง และ บริการ
+    const note = a.health_note ? a.health_note.trim() : "";
+    const hasNote = note.length > 0;
+    
+    const services = a.vasd_service && a.vasd_service.length > 0
+      ? a.vasd_service.map(srv => `<span class="svc-chip">${srv.service_type}</span>`).join("")
+      : `<span style="font-size:11px; color:var(--text-faint);">ไม่ได้ระบุ</span>`;
+
     const card = document.createElement("div");
     card.className = `animal-card ${s.cls}`;
     card.dataset.id = a.id;
@@ -446,7 +471,7 @@ function renderCards(data) {
       <div class="card-top" onclick="toggleCard(this.closest('.animal-card'))">
         <div class="queue-badge">#${a.queue_number}</div>
         <div class="card-info">
-          <div class="animal-name">${a.animal_name}</div>
+          <div class="animal-name">${a.animal_name} ${hasNote ? '<span title="มีข้อควรระวัง" style="font-size:14px; margin-left:6px;">⚠️</span>' : ''}</div>
           <div class="animal-meta">${speciesText} · ${a.sex} · ${a.est_weight ?? "–"} กก.</div>
         </div>
         <span class="status-pill ${s.pill}">${s.dot} ${s.text}</span>
@@ -460,6 +485,23 @@ function renderCards(data) {
             <div class="owner-chip">👤 เจ้าของ: <span>${a.vasd_owner?.owner_name ?? "–"}</span></div>
             ${a.vasd_owner?.phone ? `<div class="owner-chip">📞 <a href="tel:${a.vasd_owner.phone}" style="color:var(--teal-light);text-decoration:none;">${a.vasd_owner.phone}</a></div>` : ""}
           </div>
+
+          <div style="margin-bottom: 14px;">
+            <div style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; margin-bottom:6px;">บริการที่เข้ารับ</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              ${services}
+            </div>
+          </div>
+
+          ${hasNote ? `
+          <div class="health-note">
+            <span style="font-size:18px;">⚠️</span>
+            <div>
+              <div style="font-size:10px; font-weight:800; text-transform:uppercase; opacity:0.8; margin-bottom:2px;">ระวังพิเศษ / บันทึกสุขภาพ</div>
+              <div style="font-weight:600; font-size:13px; line-height:1.4;">${note}</div>
+            </div>
+          </div>
+          ` : ""}
 
           <div class="edit-grid">
             <div class="field-group">
