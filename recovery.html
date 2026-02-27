@@ -89,6 +89,7 @@ header {
 
 /* Form Elements */
 .monitor-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+.monitor-inputs .wide { grid-column: span 4; }
 input {
   background: rgba(0,0,0,0.3); border: 1px solid var(--border);
   padding: 10px 8px; border-radius: 10px; color: white; width: 100%;
@@ -111,7 +112,7 @@ input:focus { border-color: var(--violet); }
 .btn-finish:hover { background: var(--violet-soft); }
 
 /* ═══════════════════════════════════════════
-   BOTTOM NAV (Same as index.html)
+   BOTTOM NAV
 ═══════════════════════════════════════════ */
 .bottom-nav {
   display: grid;
@@ -173,7 +174,7 @@ import { supabase } from "./js/supabase.js";
 async function loadRecovery() {
   const container = document.getElementById("recovery-list");
   
-  // ดึงข้อมูลสัตว์ พร้อมข้อมูลคิว (Status: recovery) และ Vital Signs ทั้งหมด (เรียงตามเวลา)
+  // ดึงข้อมูลสัตว์ พร้อมข้อมูลคิว และ Vital Signs ทั้งหมด (เรียงตามเวลาที่สร้าง)
   const { data: animals, error } = await supabase
     .from('vasd_animal')
     .select(`
@@ -199,18 +200,21 @@ async function loadRecovery() {
   }
 
   animals.forEach(ani => {
-    // เตรียมแถวข้อมูลตาราง (Vital Signs Trends) ที่บันทึกมาจากตอนผ่าตัดและตอนพักฟื้น
-    const vitalsRows = (ani.vasd_vital_signs || []).map(v => `
+    // จัดเรียงเวลาแสดงผล และเพิ่มคอลัมน์ Zol / Note
+    const sortedVitals = (ani.vasd_vital_signs || []).sort((x, y) => new Date(x.created_at) - new Date(y.created_at));
+    const vitalsRows = sortedVitals.map(v => `
       <tr>
         <td style="color:var(--teal-light)">${v.time_recorded || '-'}</td>
         <td>${v.hr || '-'}</td>
         <td>${v.rr || '-'}</td>
         <td>${v.spo2 || '-'}</td>
         <td>${v.temp || '-'}</td>
+        <td>${v.zoletil_top || '-'}</td>
+        <td style="text-align:left; font-size:11px;">${v.note || '-'}</td>
       </tr>
     `).join('');
 
-    // คำนวณปริมาตรยา Emergency แบบเดียวกับหน้า Surgery
+    // คำนวณปริมาตรยา Emergency 
     const weight = parseFloat(ani.actual_weight) || 0;
     let adrVol = "N/A", atrVol = "N/A", atipVol = "N/A";
     if (weight > 0) {
@@ -242,18 +246,19 @@ async function loadRecovery() {
           <input type="number" placeholder="RR" class="in-rr">
           <input type="number" placeholder="SpO2%" class="in-spo2">
           <input type="number" step="0.1" placeholder="T(°C)" class="in-temp">
+          <input type="text" placeholder="บันทึกเพิ่มเติม (Note)..." class="in-note wide">
         </div>
-        <button class="btn-save" onclick="saveVital('${ani.id}', this)">+ บันทึกสัญญาณชีพ</button>
+        <button class="btn-save" onclick="saveVital('${ani.id}', this)">+ บันทึกสัญญาณชีพลงระบบ</button>
 
         <div style="overflow-x:auto; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;">
           <table class="vitals-history">
             <thead>
               <tr>
-                <th>Time</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th>
+                <th>Time</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th><th>Zol</th><th>Note</th>
               </tr>
             </thead>
             <tbody>
-              ${vitalsRows || '<tr><td colspan="5" style="padding:20px; color:var(--text-dim)">ยังไม่มีข้อมูลสัญญาณชีพ</td></tr>'}
+              ${vitalsRows || '<tr><td colspan="7" style="padding:20px; color:var(--text-dim)">ยังไม่มีข้อมูลสัญญาณชีพ</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -288,15 +293,16 @@ window.switchTab = (btn, targetId) => {
   document.getElementById(targetId).classList.add("active");
 };
 
-// ฟังก์ชันบันทึกสัญญาณชีพใหม่ลงฐานข้อมูล (จะไปแสดงรวมกับของเดิมทันที)
+// ฟังก์ชันบันทึกสัญญาณชีพใหม่
 window.saveVital = async (animalId, btn) => {
   const panel = btn.closest(".panel");
   const inHr = panel.querySelector(".in-hr").value;
   const inRr = panel.querySelector(".in-rr").value;
   const inTemp = panel.querySelector(".in-temp").value;
   const inSpo2 = panel.querySelector(".in-spo2").value;
+  const inNote = panel.querySelector(".in-note").value;
 
-  if (!inHr && !inRr && !inTemp && !inSpo2) return; // ไม่บันทึกถ้าว่างเปล่าทั้งหมด
+  if (!inHr && !inRr && !inTemp && !inSpo2 && !inNote) return; 
 
   const data = {
     animal_id: animalId,
@@ -304,12 +310,13 @@ window.saveVital = async (animalId, btn) => {
     hr: inHr,
     rr: inRr,
     temp: inTemp,
-    spo2: inSpo2
+    spo2: inSpo2,
+    note: inNote
   };
 
   const { error } = await supabase.from('vasd_vital_signs').insert(data);
   if (error) alert("เกิดข้อผิดพลาด: " + error.message);
-  else loadRecovery();
+  // ข้อมูลตารางจะถูกโหลดใหม่ด้วย Realtime event
 };
 
 // ฟังก์ชันย้ายสถานะไปยัง "พร้อมกลับบ้าน"
@@ -317,10 +324,9 @@ window.moveToReady = async (animalId) => {
   if (!confirm("สัตว์ตัวนี้ฟื้นสลบสมบูรณ์และพร้อมกลับบ้านแล้วใช่หรือไม่?")) return;
   const { error } = await supabase.from('vasd_queue').update({ status: 'ready_to_go_home' }).eq('animal_id', animalId);
   if (error) alert(error.message);
-  else loadRecovery();
 };
 
-// Realtime Update: โหลดข้อมูลใหม่หากมีการเปลี่ยนแปลงจากหน้านี้หรือหน้าอื่น
+// Realtime Update
 supabase.channel('recovery-realtime')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, loadRecovery)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadRecovery)
