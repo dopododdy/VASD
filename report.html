@@ -54,7 +54,7 @@ header {
   width: 42px; height: 34px; background: linear-gradient(135deg, var(--teal), var(--teal-light));
   border-radius: 8px; display: flex; align-items: center; justify-content: center;
 }
-.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+.brand-name { font-family: "Sarabun", "Outfit", sans-serif; font-size: 16px; font-weight: 700; color: #fff; }
 
 .wrap {
   position: relative; z-index: 1;
@@ -133,7 +133,7 @@ header {
 <header>
   <div class="brand">
     <div class="brand-logo">📊</div>
-    <div class="brand-name">VASD REPORT</div>
+    <div class="brand-name">สรุปรายงานการผ่าตัด</div>
   </div>
   <button class="btn-logout" onclick="location.href='index.html'" style="background:none; border:1px solid var(--border); color:var(--text-dim); padding:5px 12px; border-radius:8px; cursor:pointer;">Back</button>
 </header>
@@ -162,16 +162,23 @@ header {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
+// ฟังก์ชันแปลงข้อความป้องกัน HTML injection
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 async function loadReport() {
   const container = document.getElementById("reportContainer");
   
   // 1. ดึงข้อมูลสัตว์ที่มีคิวสถานะ 'done'
+  // แก้ไข anesthetist ตามโครงสร้างฐานข้อมูลใหม่
   const { data: animals, error } = await supabase
     .from('vasd_animal')
     .select(`
       *,
       vasd_owner(owner_name, phone),
-      vasd_queue!inner(status, surgeon_name, anesthesiologist_name),
+      vasd_queue!inner(status, operating_table, surgeon_name, anesthetist),
       vasd_service(*),
       vasd_vital_signs(*),
       vasd_prescription(*)
@@ -201,26 +208,28 @@ async function loadReport() {
     // จัดการยากลับบ้าน
     const meds = ani.vasd_prescription.map(m => `<div class="tag" style="display:block; margin-bottom:4px;">💊 ${m.drug_id}: ${m.dose} (${m.freq}) x ${m.days} วัน</div>`).join("");
 
-    // จัดการตาราง Vitals
+    // จัดเรียงและจัดการตาราง Vitals
+    const sortedVitals = (ani.vasd_vital_signs || []).sort((x, y) => new Date(x.created_at) - new Date(y.created_at));
     let vitalsHtml = "";
-    if (ani.vasd_vital_signs.length > 0) {
+    if (sortedVitals.length > 0) {
       vitalsHtml = `
         <div class="vitals-scroll">
           <table class="vitals-table">
             <thead>
               <tr>
-                <th>เวลา</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th><th>CRT/MM</th>
+                <th>เวลา</th><th>HR</th><th>RR</th><th>SpO2</th><th>Temp</th><th>Zol</th><th>Note</th>
               </tr>
             </thead>
             <tbody>
-              ${ani.vasd_vital_signs.map(v => `
+              ${sortedVitals.map(v => `
                 <tr>
-                  <td>${v.time_recorded || '-'}</td>
+                  <td style="color:var(--teal-light);">${v.time_recorded || '-'}</td>
                   <td>${v.hr || '-'}</td>
                   <td>${v.rr || '-'}</td>
                   <td>${v.spo2 || '-'}</td>
                   <td>${v.temp || '-'}</td>
-                  <td>${v.crt || '-'}/${v.mm || '-'}</td>
+                  <td>${v.zoletil_top || '-'}</td>
+                  <td style="text-align:left; font-size:11px;">${v.note || '-'}</td>
                 </tr>
               `).join("")}
             </tbody>
@@ -228,6 +237,12 @@ async function loadReport() {
         </div>
       `;
     }
+
+    // ดึงข้อมูลคิว (หมอ / วิสัญญี / โต๊ะ)
+    const qData = Array.isArray(ani.vasd_queue) ? ani.vasd_queue[0] : ani.vasd_queue;
+    const table = escapeHtml(qData?.operating_table || '-');
+    const surgeon = escapeHtml(qData?.surgeon_name || '-');
+    const anes = escapeHtml(qData?.anesthetist || '-');
 
     card.innerHTML = `
       <div class="card-top">
@@ -244,8 +259,8 @@ async function loadReport() {
           <span>${ani.vasd_owner?.owner_name || '-'} (${ani.vasd_owner?.phone || '-'})</span>
         </div>
         <div class="data-item">
-          <label>ทีมผ่าตัด/วางยา</label>
-          <span>หมอ: ${ani.vasd_queue[0]?.surgeon_name || '-'}<br>ดมยา: ${ani.vasd_queue[0]?.anesthesiologist_name || '-'}</span>
+          <label>ทีมผ่าตัด/วางยา (โต๊ะ: ${table})</label>
+          <span>หมอ: ${surgeon}<br>ดมยา: ${anes}</span>
         </div>
         <div class="data-item">
           <label>หัตถการที่ดำเนินการ</label>
@@ -262,7 +277,7 @@ async function loadReport() {
       
       ${ani.health_note ? `
         <div style="margin-top:15px; padding:10px; background:rgba(245,158,11,0.1); border-radius:8px; font-size:13px;">
-          <strong style="color:var(--amber)">Note:</strong> ${ani.health_note}
+          <strong style="color:var(--amber)">Note ก่อนผ่า:</strong> ${ani.health_note}
         </div>
       ` : ''}
     `;
