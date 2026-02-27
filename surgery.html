@@ -93,11 +93,12 @@ header {
 .sc-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
 
 /* Tabs */
-.tabs-header { display: flex; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.tabs-header { display: flex; border-bottom: 1px solid var(--border); background: var(--surface-2); overflow-x: auto; scrollbar-width: none; }
+.tabs-header::-webkit-scrollbar { display: none; }
 .tab-btn {
-  flex: 1; padding: 12px 0; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  flex: 1; padding: 12px 10px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
   color: var(--text-dim); background: transparent; border: none; border-bottom: 2px solid transparent;
-  cursor: pointer; transition: all 0.2s;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center;
 }
 .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: rgba(59,130,246,0.05); }
 
@@ -142,6 +143,7 @@ header {
   transition: 0.2s; width: 100%;
 }
 .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.25); }
+.btn-teal { background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: #fff; box-shadow: 0 4px 12px rgba(14,165,160,0.25); }
 .btn-emerald { background: linear-gradient(135deg, var(--emerald), #34d399); color: #fff; font-size: 14px; padding: 14px; }
 
 .table-wrapper {
@@ -151,6 +153,28 @@ header {
 .vitals-table { width: 100%; min-width: 440px; border-collapse: collapse; font-size: 12px; text-align: center; }
 .vitals-table th { background: var(--surface-3); color: var(--text-dim); padding: 8px 6px; border-bottom: 1px solid var(--border); }
 .vitals-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
+
+/* ── Tab: Rx (Prescription) ── */
+.rx-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--surface-2); padding: 12px; border-radius: var(--radius-sm);
+  margin-bottom: 8px; border: 1px solid var(--border);
+}
+.rx-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--teal); cursor: pointer; }
+.rx-info { flex: 1; }
+.rx-name { font-weight: 600; color: #fff; margin-bottom: 6px; font-size: 14px; }
+.rx-inputs { display: grid; grid-template-columns: minmax(70px, 1fr) 2fr minmax(60px, 1fr) minmax(60px, 1fr); gap: 6px; align-items: center; }
+.rx-input-group { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+.rx-inputs input {
+  width: 100%; padding: 6px; font-size: 13px; font-family: "Sarabun", sans-serif;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border-2); border-radius: 6px; color: #fff; text-align: center;
+}
+.rx-inputs input[type="text"] { text-align: left; font-size: 11px; }
+
+@media (max-width: 500px) {
+  .rx-inputs { grid-template-columns: 1fr 1fr; }
+  .rx-input-group.freq { grid-column: span 2; }
+}
 
 .sc-footer { padding: 16px; background: var(--surface-2); border-top: 1px solid var(--border); }
 
@@ -198,6 +222,16 @@ header {
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
+
+// รายการยามาตรฐานที่สามารถจ่ายได้
+const drugList = [
+  { id: 'doxy100', name: 'ปฏิชีวนะ Doxycycline 100 mg', type: 'abx', mgPerKg: 10, mgPerTab: 100, freq: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', days: 7 },
+  { id: 'nor100', name: 'ปฏิชีวนะ Norfloxacin 100 mg', type: 'abx', mgPerKg: 10, mgPerTab: 100, freq: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', days: 7 },
+  { id: 'nor200', name: 'ปฏิชีวนะ Norfloxacin 200 mg', type: 'abx', mgPerKg: 10, mgPerTab: 200, freq: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', days: 7 },
+  { id: 'tol60', name: 'แก้ปวด Tolfedine 60 mg', type: 'nsaid', mgPerKg: 4, mgPerTab: 60, freq: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', days: 3 },
+  { id: 'tol6', name: 'แก้ปวด Tolfedine 6 mg', type: 'nsaid', mgPerKg: 4, mgPerTab: 6, freq: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', days: 3 },
+  { id: 'blood', name: 'บำรุงเลือด', type: 'supp', dosePerKg: 0.1, freq: 'วันละ 1 ครั้ง พร้อมอาหารเช้า', days: 7 }
+];
 
 async function loadSurgeryQueue() {
   const container = document.getElementById("surgery-container");
@@ -257,6 +291,45 @@ async function loadSurgeryQueue() {
         atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";
       }
 
+      // สร้าง HTML ฟอร์มคำนวณจ่ายยา Rx อัตโนมัติ
+      let rxHtml = drugList.map(d => {
+        let tabs = 0;
+        if (weight > 0) {
+          if (d.type === 'supp') {
+            tabs = Math.round((weight * d.dosePerKg) * 4) / 4; // บำรุงเลือด ปัดเศษปกติที่ 0.25
+          } else {
+            let exact = (weight * d.mgPerKg) / d.mgPerTab;
+            if (d.type === 'abx') tabs = Math.ceil(exact * 4) / 4;   // ปฏิชีวนะ ปัดเศษขึ้นที่ 0.25
+            if (d.type === 'nsaid') tabs = Math.floor(exact * 4) / 4; // แก้ปวด ปัดเศษลงที่ 0.25
+          }
+        }
+        if (tabs < 0) tabs = 0;
+        let total = Math.ceil(tabs * 1 * d.days); // สมมติป้อนวันละ 1 ครั้ง จำนวนยาปัดเศษขึ้นเป็นเม็ดเต็มเสมอ
+
+        return `
+          <label class="rx-item">
+            <input type="checkbox" id="chk-${d.id}-${a.id}" value="${d.id}">
+            <div class="rx-info">
+               <div class="rx-name">${d.name}</div>
+               <div class="rx-inputs">
+                  <div class="rx-input-group">
+                     <input type="number" step="0.25" id="dose-${d.id}-${a.id}" value="${tabs}" oninput="recalcRx('${d.id}', '${a.id}')"> เม็ด
+                  </div>
+                  <div class="rx-input-group freq">
+                     <input type="text" id="freq-${d.id}-${a.id}" value="${d.freq}" readonly>
+                  </div>
+                  <div class="rx-input-group">
+                     <input type="number" id="days-${d.id}-${a.id}" value="${d.days}" oninput="recalcRx('${d.id}', '${a.id}')"> วัน
+                  </div>
+                  <div class="rx-input-group">
+                     <input type="number" id="total-${d.id}-${a.id}" value="${total}"> รวม
+                  </div>
+               </div>
+            </div>
+          </label>
+        `;
+      }).join('');
+
       const card = document.createElement("div");
       card.className = "surg-card";
       card.innerHTML = `
@@ -271,7 +344,8 @@ async function loadSurgeryQueue() {
         <div class="tabs-header">
           <button class="tab-btn active" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}')">ข้อมูล</button>
           <button class="tab-btn" id="btn-tab-monitor-${a.id}" onclick="switchTab(this, 'tab-monitor-${a.id}')">Monitoring</button>
-          <button class="tab-btn" id="btn-tab-emergency-${a.id}" style="color:var(--rose);" onclick="switchTab(this, 'tab-emergency-${a.id}')">🚨 Emergency</button>
+          <button class="tab-btn" id="btn-tab-rx-${a.id}" style="color:var(--teal);" onclick="switchTab(this, 'tab-rx-${a.id}')">💊 Rx (จ่ายยา)</button>
+          <button class="tab-btn" id="btn-tab-emergency-${a.id}" style="color:var(--rose);" onclick="switchTab(this, 'tab-emergency-${a.id}')">🚨</button>
         </div>
 
         <div id="tab-info-${a.id}" class="tab-content active">
@@ -305,6 +379,11 @@ async function loadSurgeryQueue() {
           </div>
         </div>
 
+        <div id="tab-rx-${a.id}" class="tab-content">
+          <div class="rx-list" style="margin-bottom:12px;">${rxHtml}</div>
+          <button class="btn btn-teal" id="btn-save-rx-${a.id}" onclick="saveRx('${a.id}')">💾 สั่งยาและส่งไปห้องจัดยา</button>
+        </div>
+
         <div id="tab-emergency-${a.id}" class="tab-content">
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <div style="background: rgba(239,68,68,0.1); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between;">
@@ -332,6 +411,47 @@ async function loadSurgeryQueue() {
   }
 }
 
+// คำนวณยอดรวมเม็ดยาใหม่เมื่อมีการแก้ตัวเลข (โดส หรือ วัน)
+window.recalcRx = function(drugId, animalId) {
+  const dose = parseFloat(document.getElementById(`dose-${drugId}-${animalId}`).value) || 0;
+  const days = parseInt(document.getElementById(`days-${drugId}-${animalId}`).value) || 0;
+  const total = Math.ceil(dose * 1 * days);
+  document.getElementById(`total-${drugId}-${animalId}`).value = total;
+};
+
+// สั่งยาบันทึกเข้าฐานข้อมูล
+window.saveRx = async function(animalId) {
+  const inserts = [];
+  for (const d of drugList) {
+    const chk = document.getElementById(`chk-${d.id}-${animalId}`);
+    if (chk && chk.checked) {
+       inserts.push({
+         animal_id: animalId,
+         drug_id: d.name,
+         dose: document.getElementById(`dose-${d.id}-${animalId}`).value + ' เม็ด/ครั้ง',
+         freq: document.getElementById(`freq-${d.id}-${animalId}`).value,
+         days: parseInt(document.getElementById(`days-${d.id}-${animalId}`).value) || 0,
+         total_pills: parseInt(document.getElementById(`total-${d.id}-${animalId}`).value) || 0
+       });
+    }
+  }
+
+  if (inserts.length === 0) return alert("⚠️ กรุณาติ๊กเลือกยาอย่างน้อย 1 ชนิดก่อนสั่ง");
+
+  const btn = document.getElementById(`btn-save-rx-${animalId}`);
+  btn.disabled = true; btn.textContent = "⏳ กำลังบันทึก...";
+  
+  try {
+    const { error } = await supabase.from('vasd_prescription').insert(inserts);
+    if (error) throw error;
+    alert("✅ สั่งยาเรียบร้อยแล้ว รายการถูกส่งไปยังโต๊ะจัดยา");
+    btn.textContent = "✅ สั่งยาสำเร็จแล้ว";
+  } catch (err) {
+    alert("❌ เกิดข้อผิดพลาดในการสั่งยา: " + err.message);
+    btn.disabled = false; btn.textContent = "💾 สั่งยาและส่งไปห้องจัดยา";
+  }
+};
+
 // ฟังก์ชันอัปเดตสถานะหัตถการ (Checkbox)
 window.toggleServiceStatus = async function(serviceId, isDone) {
   try {
@@ -348,7 +468,7 @@ window.switchTab = function(btn, targetId) {
   document.getElementById(targetId).classList.add('active');
 };
 
-// บันทึก Vital Sign ลง Database แทนการเก็บใน Memory
+// บันทึก Vital Sign ลง Database 
 window.addVitalSign = async function(animalId) {
   const hr = document.getElementById(`hr-${animalId}`).value;
   const rr = document.getElementById(`rr-${animalId}`).value;
@@ -366,13 +486,11 @@ window.addVitalSign = async function(animalId) {
     hr: hr, rr: rr, spo2: spo2, temp: temp, zoletil_top: zol, note: note
   };
 
-  // เคลียร์ค่าที่กรอกทันทีเพื่อ UX ที่ดี
   ['hr', 'rr', 'spo2', 'temp', 'zol', 'note'].forEach(k => document.getElementById(`${k}-${animalId}`).value = '');
 
   try {
     const { error } = await supabase.from('vasd_vital_signs').insert(data);
     if (error) throw error;
-    // ข้อมูลตารางจะถูกโหลดใหม่ด้วย Realtime event
   } catch (err) {
     alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
   }
