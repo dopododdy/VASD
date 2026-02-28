@@ -34,7 +34,6 @@ body {
   font-family: "Sarabun", sans-serif;
   background: var(--navy);
   color: var(--text);
-  /* ใช้ dvh เพื่อหักลบพื้นที่แถบ URL ของ Safari ออกไป */
   height: 100dvh;
   width: 100vw;
   overflow: hidden;
@@ -72,9 +71,10 @@ body::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 32px;
-  /* เพิ่ม margin ด้านบนเล็กน้อยเพื่อดันทุกอย่างลงมาให้สมดุล */
-  margin-top: 2dvh; 
+  /* ลดช่องว่างตรงนี้ลง เพื่อดึงส่วนล่างให้สูงขึ้น */
+  gap: 24px; 
+  /* เพิ่มระยะขอบล่างเล็กน้อย ดันหนีขีด Home Indicator ของ iPad */
+  padding-bottom: 3dvh; 
 }
 
 /* 1. Header (Logo & Name) */
@@ -85,9 +85,9 @@ body::before {
   align-items: center;
 }
 .brand-logo {
-  height: 100px;
+  height: 90px; /* ปรับขนาดโลโก้ลงนิดนึงเพื่อประหยัดพื้นที่แนวตั้ง */
   width: auto;
-  margin-bottom: 24px; /* เพิ่มระยะห่างใต้โลโก้ให้โปร่งขึ้น */
+  margin-bottom: 16px; 
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
 .brand-th {
