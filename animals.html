@@ -107,7 +107,7 @@ header {
 /* ── Section Title & Controls ── */
 .section-header {
   display: flex; align-items: center; gap: 10px;
-  margin-bottom: 14px; flex-wrap: wrap;
+  margin-bottom: 12px; flex-wrap: wrap;
 }
 .section-title {
   font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
@@ -122,13 +122,28 @@ header {
   border-radius: 20px; padding: 2px 10px;
 }
 
-/* ── Sort Select ── */
+/* ── Search & Sort Controls ── */
+.controls-row {
+  display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  animation: slideUp 0.4s ease both;
+}
+.search-input {
+  flex: 1; min-width: 200px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  color: var(--text); font-family: "Sarabun", sans-serif; font-size: 13px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-glow);
+}
 .sort-select {
   background: var(--surface-2); border: 1px solid var(--border-2);
-  color: var(--text); padding: 6px 10px;
-  border-radius: var(--radius-sm); font-size: 12px; font-family: "Sarabun", sans-serif;
-  outline: none; cursor: pointer;
-  animation: slideUp 0.4s ease both;
+  color: var(--text); padding: 8px 12px;
+  border-radius: var(--radius-sm); font-size: 13px; font-family: "Sarabun", sans-serif;
+  outline: none; cursor: pointer; transition: border-color 0.2s;
 }
 .sort-select option { background: var(--navy-mid); }
 .sort-select:focus { border-color: var(--teal); }
@@ -383,6 +398,10 @@ header {
       แตะที่รายการเพื่อดูรายละเอียดและแก้ไข
       <span class="section-count" id="countBadge">0 รายการ</span>
     </div>
+  </div>
+
+  <div class="controls-row">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 ค้นหาด้วยชื่อสัตว์, เลขคิว, หรือชื่อเจ้าของ...">
     
     <select id="sortSelect" class="sort-select">
       <option value="queue">เรียงตาม: ลำดับคิว</option>
@@ -446,8 +465,15 @@ const statusWeight = {
 
 let allData = [];
 let currentSort = "queue"; // รูปแบบการเรียงเริ่มต้น
+let searchQuery = "";      // เก็บค่าการค้นหาปัจจุบัน
 
-// 🛠️ ตรวจจับการเปลี่ยนค่า Sort
+// 🛠️ Event Listener สำหรับ Search Box (พิมพ์แล้วกรองทันที)
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  searchQuery = e.target.value.toLowerCase().trim();
+  applySortAndRender();
+});
+
+// 🛠️ Event Listener สำหรับ Sort (เปลี่ยนแล้วเรียงใหม่โดยอิงจากที่ค้นหาไว้)
 document.getElementById("sortSelect").addEventListener("change", (e) => {
   currentSort = e.target.value;
   applySortAndRender();
@@ -475,25 +501,35 @@ async function loadAnimals() {
   // เก็บข้อมูลทั้งหมดลงตัวแปรหลัก
   allData = Array.from(uniqueQueues.values());
   
-  // เรียกใช้ฟังก์ชันเรียงและแสดงผล
+  // เรียกใช้ฟังก์ชัน กรอง -> เรียง -> แสดงผล
   applySortAndRender();
 }
 
-// 🛠️ ฟังก์ชันสำหรับเรียงข้อมูลก่อนแสดงผล
+// 🛠️ ฟังก์ชันสำหรับกรองค้นหา และเรียงข้อมูลก่อนแสดงผล
 function applySortAndRender() {
-  let sortedData = [...allData];
+  // 1. ค้นหา (Filter) ก่อน
+  let filteredData = allData.filter(a => {
+    if (!searchQuery) return true; // ถ้าไม่ได้พิมพ์อะไร ให้คืนค่าทั้งหมด
+    
+    const nameMatch = (a.animal_name || "").toLowerCase().includes(searchQuery);
+    const queueMatch = String(a.queue_number).toLowerCase().includes(searchQuery);
+    const ownerMatch = (a.vasd_owner?.owner_name || "").toLowerCase().includes(searchQuery);
+    
+    return nameMatch || queueMatch || ownerMatch;
+  });
 
+  // 2. จัดเรียง (Sort) ข้อมูลที่ถูกกรองแล้ว
   if (currentSort === "queue") {
     // เรียงตามเลขคิวจากน้อยไปมาก
-    sortedData.sort((a, b) => String(a.queue_number).localeCompare(String(b.queue_number), 'th', { numeric: true }));
+    filteredData.sort((a, b) => String(a.queue_number).localeCompare(String(b.queue_number), 'th', { numeric: true }));
   } 
   else if (currentSort === "name") {
     // เรียงตามชื่อ ก-ฮ
-    sortedData.sort((a, b) => String(a.animal_name).localeCompare(String(b.animal_name), 'th'));
+    filteredData.sort((a, b) => String(a.animal_name).localeCompare(String(b.animal_name), 'th'));
   } 
   else if (currentSort === "status") {
     // เรียงตามสถานะ (รอผ่าตัด -> วางยา -> ...)
-    sortedData.sort((a, b) => {
+    filteredData.sort((a, b) => {
       const wA = statusWeight[a.vasd_queue?.status || "waiting"] || 99;
       const wB = statusWeight[b.vasd_queue?.status || "waiting"] || 99;
       if (wA === wB) {
@@ -504,7 +540,8 @@ function applySortAndRender() {
     });
   }
 
-  renderCards(sortedData);
+  // 3. นำข้อมูลไปวาดลงหน้าจอ
+  renderCards(filteredData);
 }
 
 function renderCards(data) {
@@ -515,7 +552,7 @@ function renderCards(data) {
   if (data.length === 0) {
     list.innerHTML = "";
     empty.style.display = "block";
-    empty.querySelector(".empty-state-text").textContent = "ไม่พบรายการสัตว์";
+    empty.querySelector(".empty-state-text").textContent = searchQuery ? "ไม่พบข้อมูลที่ค้นหา" : "ไม่พบรายการสัตว์";
     list.appendChild(empty);
     return;
   }
