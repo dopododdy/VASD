@@ -425,7 +425,7 @@ consentChannel
   .on('broadcast', { event: 'consent-granted' }, (payload) => {
     if (isWaitingForConsent) {
       console.log("✅ ได้รับการยินยอมแล้ว! กำลังบันทึกข้อมูล...");
-      executeSave(); // ทริกเกอร์การบันทึกอัตโนมัติ
+      executeSave(); // ทริกเกอร์การบันทึกอัตโนมัติ ด้วยโครงสร้าง Database เดิม
     }
   })
   .subscribe();
@@ -632,7 +632,7 @@ async function executeSave() {
     const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
     if (evtErr) throw evtErr;
 
-    // บันทึก owner พร้อม consent_agreed = true เสมอ (เพราะทำผ่าน iPad มาแล้ว)
+    // *** แก้ไขตรงนี้: บันทึกข้อมูลเฉพาะคอลัมน์ที่มีในฐานข้อมูลเดิม (ตัด consent_agreed ออก) ***
     const { data: owner, error: ownerErr } = await supabase
       .from("vasd_owner")
       .insert({ 
@@ -640,8 +640,7 @@ async function executeSave() {
         owner_name: ownerName, 
         phone: phone,
         id_card: idCard,
-        address: address,
-        consent_agreed: true 
+        address: address
       })
       .select().single();
     if (ownerErr) throw ownerErr;
