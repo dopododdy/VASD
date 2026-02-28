@@ -434,8 +434,10 @@ async function loadAnimals() {
     }
   });
 
-  // แปลงจาก Map กลับเป็น Array และเรียงตาม id จากใหม่ไปเก่า
-  allData = Array.from(uniqueQueues.values()).sort((a, b) => b.id - a.id);
+  // แปลงจาก Map กลับเป็น Array และเรียงตามคิว (queue_number) จากน้อยไปมาก
+  allData = Array.from(uniqueQueues.values()).sort((a, b) => {
+    return String(a.queue_number).localeCompare(String(b.queue_number), 'th', { numeric: true });
+  });
   // ---------------------------------------------------------
 
   renderCards(allData);
