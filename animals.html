@@ -414,14 +414,15 @@ const statusMap = {
 let allData = [];
 
 async function loadAnimals() {
-  const { data: eventId } = await supabase.rpc("get_today_event");
+  // นำ get_today_event ออกเพื่อให้ดึงข้อมูลของเมื่อวานหรือวันก่อนๆ ได้
+  // const { data: eventId } = await supabase.rpc("get_today_event");
   
-  // เพิ่มการดึงฟิลด์ health_note และ service_type
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`id,queue_number,animal_name,species,sex,est_weight,health_note,vasd_owner(owner_name,phone),vasd_queue(status),vasd_service(service_type)`)
-    .eq("event_id", eventId)
-    .order("queue_number");
+    // ไม่ต้องกรอง .eq("event_id", eventId) แล้ว
+    .order("id", { ascending: false }) // เรียงจากตัวที่เพิ่งลงทะเบียนล่าสุดขึ้นบน
+    .limit(200); // ป้องกันไม่ให้โหลดข้อมูลเยอะเกินไปจนแอปค้าง (แสดง 200 ตัวล่าสุด)
 
   if (error) { console.error(error); return; }
   allData = data || [];
