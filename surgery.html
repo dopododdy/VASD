@@ -242,7 +242,8 @@ function escapeHtml(str) {
 async function loadSurgeryQueue() {
   const container = document.getElementById("surgery-container");
   try {
-    const { data: eventId } = await supabase.rpc("get_today_event");
+    // ปิดการใช้ get_today_event เพื่อให้เคสผ่าตัดข้ามวันยังคงแสดงอยู่
+    // const { data: eventId } = await supabase.rpc("get_today_event");
     
     // ดึงข้อมูลสัตว์ พร้อมดึง vasd_vital_signs และข้อมูลหมอ/วิสัญญี/โต๊ะ จากฐานข้อมูลโดยตรง
     const { data: queueData, error } = await supabase
@@ -257,13 +258,17 @@ async function loadSurgeryQueue() {
 
     if (error) throw error;
 
-    const animals = (queueData || []).filter(q => q.vasd_animal && q.vasd_animal.event_id === eventId);
+    // แก้ไขตรงนี้: เอาการกรองด้วย eventId ออก ให้เช็คแค่ว่ามีข้อมูลสัตว์เชื่อมโยงอยู่ก็พอ
+    const animals = (queueData || []).filter(q => q.vasd_animal);
+    
     container.innerHTML = "";
 
     if (animals.length === 0) {
       container.innerHTML = `<div style="text-align:center; padding: 60px 20px; color: var(--text-dim);">✅ ไม่มีเคสกำลังผ่าตัดในขณะนี้</div>`;
       return;
     }
+
+    // (ส่วนที่เหลือของฟังก์ชันปล่อยไว้เหมือนเดิมตั้งแต่ animals.forEach...)
 
     animals.forEach((q, idx) => {
       const a = q.vasd_animal;
