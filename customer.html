@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>ติดตามสถานะสัตว์เลี้ยง – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════
@@ -13,14 +13,14 @@
 :root {
   --navy:         #0b1929;
   --text:         #f8fafc;
-  --text-dark:    #0f172a;
+  --text-dark:    #064e3b;
   
-  /* Status Colors */
-  --c-wait:       #9ca3af; /* สีเทา - รอผ่าตัด */
-  --c-anes:       #3b82f6; /* สีฟ้า - วางยา */
-  --c-surg:       #ef4444; /* สีแดง - กำลังผ่า */
-  --c-rec:        #86efac; /* สีเขียวอ่อน - พักฟื้น */
-  --c-ready:      #14532d; /* สีเขียวแก่ - รอรับกลับ */
+  /* Status Gradients */
+  --g-wait:       linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  --g-anes:       linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  --g-surg:       linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+  --g-rec:        linear-gradient(135deg, #a7f3d0 0%, #34d399 100%);
+  --g-ready:      linear-gradient(135deg, #10b981 0%, #047857 100%);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,133 +31,155 @@ body {
   min-height: 100vh;
   display: flex; flex-direction: column;
   overflow-x: hidden;
-  padding-bottom: 20px;
+  padding-bottom: 40px;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background: radial-gradient(circle at 50% -20%, rgba(14,165,160,0.15) 0%, transparent 70%);
 }
 
 /* ═══════════════════════════════════════════
-   HEADER
+   HEADER (Glassmorphism)
 ═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(11,25,41,0.9);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  padding: 12px 16px;
+  background: rgba(11, 25, 41, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: clamp(12px, 2vw, 24px) 24px;
   text-align: center;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
 }
-.brand-title { font-family: "Outfit", "Sarabun", sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
+.brand-title { 
+  font-family: "Sarabun", sans-serif; 
+  font-size: clamp(20px, 3vw, 36px); 
+  font-weight: 800; color: #fff; 
+  letter-spacing: 0.5px;
+}
 .live-indicator {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  font-size: 10px; font-weight: 600; color: #cbd5e1; margin-top: 4px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: clamp(12px, 1.5vw, 18px); font-weight: 600; color: #cbd5e1; margin-top: 8px;
 }
 .live-dot {
-  width: 6px; height: 6px; background: #34d399; border-radius: 50%;
+  width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); 
+  background: #34d399; border-radius: 50%;
   animation: pulseDot 2s infinite;
 }
 
 /* ═══════════════════════════════════════════
-   MAIN GRID (4 Columns for Mobile)
+   MAIN GRID (Auto Responsive)
 ═══════════════════════════════════════════ */
-.wrap { padding: 16px; width: 100%; max-width: 800px; margin: 0 auto; }
+.wrap { 
+  padding: clamp(16px, 3vw, 40px); 
+  width: 100%; 
+  max-width: 1920px; /* ปลดล็อกขนาดให้รองรับจอทีวี 4K */
+  margin: 0 auto; 
+}
 
 #animalList {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px; /* ระยะห่างระหว่างกล่อง */
+  /* หัวใจสำคัญ: ย่อขยายคอลัมน์ตามขนาดจออัตโนมัติ */
+  grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 20vw, 280px), 1fr));
+  gap: clamp(12px, 2vw, 32px); 
 }
 
-/* การ์ดสี่เหลี่ยมมุมมน */
+/* การ์ดสี่เหลี่ยม */
 .pet-card {
-  aspect-ratio: 1; /* ทำให้เป็นสี่เหลี่ยมจัตุรัส */
-  border-radius: 12px;
+  aspect-ratio: 1; 
+  border-radius: clamp(16px, 2vw, 32px);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 6px;
+  padding: clamp(10px, 2vw, 24px);
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  transition: transform 0.2s;
-  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+  border: 1px solid rgba(255,255,255,0.1);
+  /* เปิดใช้งาน View Transition */
+  view-transition-name: card-var(--id); 
 }
+.pet-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
 
 .pet-card .q-num {
   font-family: "Outfit", sans-serif;
-  font-size: 20px; font-weight: 800; line-height: 1;
-  margin-bottom: 4px;
+  font-size: clamp(32px, 6vw, 80px); 
+  font-weight: 900; line-height: 1;
+  margin-bottom: clamp(4px, 1vw, 12px);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 .pet-card .name {
-  font-size: 11px; font-weight: 700;
+  font-size: clamp(14px, 2.5vw, 28px); font-weight: 700;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  width: 100%; margin-bottom: 4px;
+  width: 100%; margin-bottom: clamp(6px, 1.5vw, 16px);
 }
 .pet-card .status {
-  font-size: 10px; font-weight: 600;
-  background: rgba(255,255,255,0.2);
-  padding: 2px 6px; border-radius: 6px;
-  white-space: nowrap; width: 100%; overflow: hidden; text-overflow: ellipsis;
+  font-size: clamp(12px, 2vw, 24px); font-weight: 700;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(5px);
+  padding: clamp(4px, 1vw, 8px) clamp(10px, 2vw, 20px); 
+  border-radius: 50px;
+  white-space: nowrap; width: max-content; max-width: 100%; 
+  overflow: hidden; text-overflow: ellipsis;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 /* ═══════════════════════════════════════════
    COLORS CLASSES
 ═══════════════════════════════════════════ */
-.bg-wait  { background: var(--c-wait); color: #fff; }
-.bg-anes  { background: var(--c-anes); color: #fff; }
-.bg-surg  { background: var(--c-surg); color: #fff; }
-.bg-ready { background: var(--c-ready); color: #fff; }
-.bg-rec   { background: var(--c-rec); color: var(--text-dark); } /* พื้นสว่าง ตัวหนังสือเข้ม */
-.bg-rec .status { background: rgba(0,0,0,0.1); }
+.bg-wait  { background: var(--g-wait); color: #fff; }
+.bg-anes  { background: var(--g-anes); color: #fff; }
+.bg-surg  { background: var(--g-surg); color: #fff; }
+.bg-ready { background: var(--g-ready); color: #fff; }
+.bg-rec   { background: var(--g-rec); color: var(--text-dark); } 
+.bg-rec .status { background: rgba(0,0,0,0.08); }
 
 .empty-state {
-  grid-column: 1 / -1; text-align: center; padding: 40px 10px; color: #94a3b8;
+  grid-column: 1 / -1; text-align: center; padding: 10vh 20px; color: #94a3b8;
+  font-size: clamp(18px, 3vw, 32px); font-weight: 600;
 }
 
 /* ═══════════════════════════════════════════
-   FULLSCREEN POPUP ANIMATION
+   FULLSCREEN POPUP ANIMATION (TV Ready)
 ═══════════════════════════════════════════ */
 #popupOverlay {
   position: fixed; inset: 0; z-index: 9999;
-  background: rgba(11,25,41,0.8);
-  backdrop-filter: blur(5px);
+  background: rgba(11,25,41,0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
-#popupOverlay.active {
-  opacity: 1; pointer-events: auto;
-}
+#popupOverlay.active { opacity: 1; pointer-events: auto; }
 
 .popup-box {
-  width: 280px; height: 280px;
-  border-radius: 30px;
+  width: min(80vw, 600px); aspect-ratio: 1;
+  border-radius: clamp(30px, 5vw, 60px);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 20px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  transform: scale(0.5);
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center; padding: 32px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 2px 10px rgba(255,255,255,0.3);
+  transform: scale(0.5) translateY(50px);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-#popupOverlay.active .popup-box {
-  transform: scale(1);
-}
+#popupOverlay.active .popup-box { transform: scale(1) translateY(0); }
 
-.popup-box .q-num { font-family: "Outfit", sans-serif; font-size: 60px; font-weight: 800; line-height: 1; margin-bottom: 10px; }
-.popup-box .name { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
-.popup-box .status { font-size: 20px; font-weight: 700; background: rgba(255,255,255,0.25); padding: 8px 20px; border-radius: 12px; }
+.popup-box .q-num { font-family: "Outfit", sans-serif; font-size: clamp(80px, 15vw, 200px); font-weight: 900; line-height: 1; margin-bottom: 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.3);}
+.popup-box .name { font-size: clamp(30px, 5vw, 56px); font-weight: 800; margin-bottom: 24px; }
+.popup-box .status { font-size: clamp(24px, 4vw, 42px); font-weight: 700; background: rgba(255,255,255,0.25); padding: 12px 32px; border-radius: 50px; }
 
 @keyframes pulseDot {
   0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.7); }
-  70% { box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+  70% { box-shadow: 0 0 0 clamp(6px, 1vw, 12px) rgba(52,211,153,0); }
   100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
 }
 
-@media (max-width: 360px) {
-  #animalList { gap: 4px; }
-  .pet-card .q-num { font-size: 16px; }
-  .pet-card .name, .pet-card .status { font-size: 9px; }
-}
+/* ตั้งค่าให้ View Transition นุ่มนวลขึ้น */
+::view-transition-group(*) { animation-duration: 0.5s; animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand-title">🐾 สถานะคิวสัตว์เลี้ยง</div>
+  <div class="brand-title">🐾 สถานะคิวสัตว์เลี้ยง VASD</div>
   <div class="live-indicator"><div class="live-dot"></div> อัปเดตล่าสุด (Real-Time)</div>
 </header>
 
@@ -179,13 +201,11 @@ header {
 import { supabase } from "./js/supabase.js";
 
 let isFirstLoad = true;
-let oldStatuses = {}; // เก็บสถานะเก่าเพื่อเปรียบเทียบ { animal_id: "status" }
+let oldStatuses = {}; 
 
-// คิวสำหรับแสดง Popup (เผื่ออัปเดตพร้อมกันหลายตัว จะได้แสดงทีละตัว)
 let popupQueue = [];
 let isPopupShowing = false;
 
-// แผนที่สถานะและสี
 const statusMap = {
   ready_to_go_home: { text: "รอรับกลับ", colorClass: "bg-ready", weight: 1 },
   done:             { text: "รอรับกลับ", colorClass: "bg-ready", weight: 1 }, 
@@ -197,7 +217,6 @@ const statusMap = {
 };
 
 async function loadAnimals() {
-  // ดึงข้อมูลทั้งหมดโดยไม่กรอง event_id และวันที่
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`id, queue_number, animal_name, vasd_queue(status)`);
@@ -210,7 +229,6 @@ async function loadAnimals() {
   
   const formattedData = data || [];
   
-  // เรียงลำดับตาม Weight > คิว
   formattedData.sort((a, b) => {
     const qDataA = Array.isArray(a.vasd_queue) ? a.vasd_queue[0] : a.vasd_queue;
     const qDataB = Array.isArray(b.vasd_queue) ? b.vasd_queue[0] : b.vasd_queue;
@@ -229,51 +247,54 @@ async function loadAnimals() {
 function renderGrid(data) {
   const list = document.getElementById("animalList");
   
-  // กรองตัวยกเลิกออก
   const activeData = data.filter(a => {
     const qData = Array.isArray(a.vasd_queue) ? a.vasd_queue[0] : a.vasd_queue;
     return (qData?.status || "waiting") !== "cancel";
   });
 
-  if (activeData.length === 0) {
-    list.innerHTML = `<div class="empty-state">ยังไม่มีรายการคิวในขณะนี้</div>`;
-    return;
-  }
-
   let htmlContent = "";
 
-  activeData.forEach(a => {
-    const qData = Array.isArray(a.vasd_queue) ? a.vasd_queue[0] : a.vasd_queue;
-    const newStatus = qData?.status || "waiting";
-    const s = statusMap[newStatus] || statusMap.waiting;
-    
-    // ตรวจจับการเปลี่ยนแปลงสถานะ (ข้ามรอบโหลดครั้งแรก)
-    if (!isFirstLoad && oldStatuses[a.id] && oldStatuses[a.id] !== newStatus) {
-      // เอาเข้าคิวแสดง Popup
-      enqueuePopup({
-        queue: a.queue_number,
-        name: a.animal_name,
-        text: s.text,
-        colorClass: s.colorClass
-      });
-    }
-    oldStatuses[a.id] = newStatus; // อัปเดตสถานะใน Memory
+  if (activeData.length === 0) {
+    htmlContent = `<div class="empty-state">ยังไม่มีรายการคิวในขณะนี้</div>`;
+  } else {
+    activeData.forEach(a => {
+      const qData = Array.isArray(a.vasd_queue) ? a.vasd_queue[0] : a.vasd_queue;
+      const newStatus = qData?.status || "waiting";
+      const s = statusMap[newStatus] || statusMap.waiting;
+      
+      if (!isFirstLoad && oldStatuses[a.id] && oldStatuses[a.id] !== newStatus) {
+        enqueuePopup({
+          queue: a.queue_number,
+          name: a.animal_name,
+          text: s.text,
+          colorClass: s.colorClass
+        });
+      }
+      oldStatuses[a.id] = newStatus; 
 
-    // สร้างกล่อง Grid
-    htmlContent += `
-      <div class="pet-card ${s.colorClass}">
-        <div class="q-num">#${a.queue_number}</div>
-        <div class="name">${a.animal_name || "ไม่ระบุ"}</div>
-        <div class="status">${s.text}</div>
-      </div>
-    `;
-  });
+      // ใส่ style view-transition-name เพื่อให้การ์ดลอยสลับตำแหน่งได้ (เฉพาะเบราว์เซอร์ที่รองรับ)
+      htmlContent += `
+        <div class="pet-card ${s.colorClass}" style="view-transition-name: card-${a.id};">
+          <div class="q-num">#${a.queue_number}</div>
+          <div class="name">${a.animal_name || "ไม่ระบุ"}</div>
+          <div class="status">${s.text}</div>
+        </div>
+      `;
+    });
+  }
 
-  list.innerHTML = htmlContent;
+  // 🪄 ใช้ View Transitions API เพื่อสร้างแอนิเมชันเวลาคิวขยับสลับตำแหน่ง
+  if (!isFirstLoad && document.startViewTransition) {
+    document.startViewTransition(() => {
+      list.innerHTML = htmlContent;
+    });
+  } else {
+    list.innerHTML = htmlContent;
+  }
+  
   isFirstLoad = false;
 }
 
-// ── ระบบคิวแจ้งเตือน Popup ──
 function enqueuePopup(animalData) {
   popupQueue.push(animalData);
   processPopupQueue();
@@ -287,35 +308,28 @@ function processPopupQueue() {
   const overlay = document.getElementById("popupOverlay");
   const box = document.getElementById("popupBox");
   
-  // เซ็ตข้อมูล
   document.getElementById("popupQ").textContent = `#${target.queue}`;
   document.getElementById("popupName").textContent = target.name || "ไม่ระบุชื่อ";
   document.getElementById("popupStatus").textContent = target.text;
   
-  // ล้างคลาสสีเก่า แล้วใส่คลาสสีใหม่
   box.className = `popup-box ${target.colorClass}`;
   
-  // แสดง Popup
   overlay.classList.add("active");
   
-  // หน่วงเวลา 3 วินาที แล้วหดกลับ
   setTimeout(() => {
     overlay.classList.remove("active");
-    // รอ Animation หดกลับเสร็จ (0.3s) แล้วรันคิวต่อไป
     setTimeout(() => {
       isPopupShowing = false;
       processPopupQueue();
-    }, 300);
-  }, 3000);
+    }, 400); // เผื่อเวลาให้ Animation CSS หดกลับเสร็จ
+  }, 4000); // ให้อยู่บนจอนานขึ้นนิดนึง (4 วินาที) เผื่อจอทีวีคนมองไม่ทัน
 }
 
-// ── Real-time Listener ──
 supabase.channel("vasd-customer-live")
   .on("postgres_changes", { event: "*", schema: "public", table: "vasd_queue" }, loadAnimals)
   .on("postgres_changes", { event: "*", schema: "public", table: "vasd_animal" }, loadAnimals)
   .subscribe();
 
-// โหลดข้อมูลครั้งแรก
 loadAnimals();
 </script>
 
