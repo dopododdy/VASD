@@ -464,20 +464,28 @@ const statusWeight = {
 };
 
 let allData = [];
-let currentSort = "queue"; // รูปแบบการเรียงเริ่มต้น
-let searchQuery = "";      // เก็บค่าการค้นหาปัจจุบัน
 
-// 🛠️ Event Listener สำหรับ Search Box (พิมพ์แล้วกรองทันที)
-document.getElementById("searchInput").addEventListener("input", (e) => {
-  searchQuery = e.target.value.toLowerCase().trim();
-  applySortAndRender();
-});
+// ดึง Elements
+const searchInput = document.getElementById("searchInput");
+const sortSelect = document.getElementById("sortSelect");
 
-// 🛠️ Event Listener สำหรับ Sort (เปลี่ยนแล้วเรียงใหม่โดยอิงจากที่ค้นหาไว้)
-document.getElementById("sortSelect").addEventListener("change", (e) => {
-  currentSort = e.target.value;
+// กำหนดค่าเริ่มต้น
+let currentSort = sortSelect.value || "queue"; 
+let searchQuery = searchInput.value.toLowerCase().trim() || "";
+
+// 🛠️ ฟังก์ชันกลางสำหรับอัปเดตและแสดงผล
+function updateFiltersAndRender() {
+  searchQuery = searchInput.value.toLowerCase().trim();
+  currentSort = sortSelect.value;
   applySortAndRender();
-});
+}
+
+// 🛠️ ผูก Event ดักจับการค้นหา (ทำงานทันทีที่พิมพ์/ลบ/วางข้อความ)
+searchInput.addEventListener("input", updateFiltersAndRender);
+searchInput.addEventListener("keyup", updateFiltersAndRender); // สำรองเผื่อบางเบราว์เซอร์
+
+// 🛠️ ผูก Event ดักจับการเรียงลำดับ
+sortSelect.addEventListener("change", updateFiltersAndRender);
 
 async function loadAnimals() {
   const { data, error } = await supabase
