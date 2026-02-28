@@ -280,12 +280,16 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 
 .submit-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; animation: slideUp 0.4s 0.2s ease both; }
 
+/* ═══════════════════════════════════════════
+   BOTTOM NAVIGATION (UPDATED ICONS & SIZES)
+═══════════════════════════════════════════ */
 .bottom-nav {
   display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
   background: rgba(11,25,41,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border-2);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom)); grid-template-columns: repeat(5, 1fr);
 }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px; font-size: 9px; color: var(--text-dim); text-decoration: none; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; font-size: 11px; color: var(--text-dim); text-decoration: none; }
+.nav-icon { font-size: 20px; line-height: 1; }
 .nav-item.active { color: var(--teal); }
 .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
 
@@ -632,7 +636,7 @@ async function executeSave() {
     const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
     if (evtErr) throw evtErr;
 
-    // *** แก้ไขตรงนี้: บันทึกข้อมูลเฉพาะคอลัมน์ที่มีในฐานข้อมูลเดิม (ตัด consent_agreed ออก) ***
+    // บันทึกข้อมูล Owner
     const { data: owner, error: ownerErr } = await supabase
       .from("vasd_owner")
       .insert({ 
@@ -645,11 +649,16 @@ async function executeSave() {
       .select().single();
     if (ownerErr) throw ownerErr;
 
-    const { count, error: cntErr } = await supabase
-      .from("vasd_animal").select("*", { count: "exact", head: true }).eq("event_id", eventId);
-    if (cntErr) throw cntErr;
+    // *** แก้ไขการรันเลขคิว: ค้นหาคิวสูงสุดจากฐานข้อมูลทั้งหมด แล้วนำมา +1 ***
+    const { data: lastAnimal, error: qErr } = await supabase
+      .from("vasd_animal")
+      .select("queue_number")
+      .order("queue_number", { ascending: false })
+      .limit(1);
+    if (qErr) throw qErr;
 
-    let q = (count || 0) + 1, svcs = [], queues = [], forPrint = [];
+    let q = (lastAnimal && lastAnimal.length > 0) ? lastAnimal[0].queue_number + 1 : 1;
+    let svcs = [], queues = [], forPrint = [];
 
     for (const card of cards) {
       const spVal = card.querySelector(".species").value;
@@ -676,6 +685,7 @@ async function executeSave() {
     if (svcs.length)   await supabase.from("vasd_service").insert(svcs);
     if (queues.length) await supabase.from("vasd_queue").insert(queues);
 
+    // พิมพ์สติกเกอร์คิว
     const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
     if (tmplData?.config) {
       let html = "";
