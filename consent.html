@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>หนังสือยินยอมการรักษา – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS (Match with Main App)
+═══════════════════════════════════════════ */
+:root {
+  --navy:       #0b1929;
+  --navy-mid:   #112240;
+  --teal:       #0ea5a0;
+  --teal-light: #14c4bc;
+  --teal-glow:  rgba(14,165,160,0.3);
+  --emerald:    #10b981;
+  --amber:      #f59e0b;
+  --rose:       #ef4444;
+
+  --surface:    rgba(255,255,255,0.05);
+  --surface-2:  rgba(255,255,255,0.08);
+  --border:     rgba(255,255,255,0.1);
+  --text:       #f8fafc;
+  --text-dim:   #94a3b8;
+  --text-faint: #64748b;
+
+  --radius-lg:  24px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background: radial-gradient(circle at 50% 0%, rgba(14,165,160,0.15) 0%, transparent 60%);
+}
+
+.container {
+  width: 100%; max-width: 800px;
+  padding: 20px;
+}
+
+/* ── STATES ── */
+#standbyScreen, #successScreen {
+  text-align: center; padding: 60px 20px;
+  animation: fadeIn 0.5s ease;
+}
+#consentScreen {
+  display: none; /* ซ่อนไว้รอข้อมูลเข้า */
+  animation: slideUp 0.5s ease;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.card-title {
+  font-size: 22px; font-weight: 700; color: var(--teal-light);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border); padding-bottom: 12px;
+}
+
+/* ── OWNER INFO ── */
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.info-item { display: flex; flex-direction: column; gap: 4px; }
+.info-label { font-size: 14px; color: var(--text-dim); text-transform: uppercase; font-weight: 600; letter-spacing: 1px;}
+.info-value { font-size: 20px; font-weight: 600; color: #fff; }
+
+/* ── ANIMALS LIST ── */
+.animal-item {
+  background: var(--surface-2); border-radius: 12px;
+  padding: 16px; margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.animal-name { font-size: 20px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;}
+.animal-spc { font-size: 14px; color: var(--text-dim); background: var(--surface); padding: 4px 10px; border-radius: 20px;}
+.animal-svcs { font-size: 16px; color: var(--amber); font-weight: 600; text-align: right;}
+
+/* ── CONSENT TEXT ── */
+.consent-box {
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.consent-box h3 { color: var(--amber); font-size: 24px; margin-bottom: 16px; text-align: center;}
+.consent-box p { font-size: 18px; line-height: 1.6; color: var(--text); margin-bottom: 16px; }
+.consent-box p:last-child { margin-bottom: 0; }
+
+/* ── BUTTON ── */
+.btn-accept {
+  width: 100%;
+  background: linear-gradient(135deg, var(--emerald), #34d399);
+  color: #fff; font-size: 28px; font-weight: 700; font-family: "Sarabun", sans-serif;
+  padding: 20px; border: none; border-radius: var(--radius-lg);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+  transition: transform 0.2s, filter 0.2s;
+}
+.btn-accept:active { transform: scale(0.98); }
+
+/* ไอคอนหมุนรอ */
+.spinner {
+  width: 60px; height: 60px;
+  border: 5px solid var(--surface-2); border-top-color: var(--teal);
+  border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div id="standbyScreen">
+    <div class="spinner"></div>
+    <h2 style="font-size: 28px; color: var(--text);">กรุณารอสักครู่...</h2>
+    <p style="font-size: 18px; color: var(--text-dim); margin-top: 10px;">กำลังเตรียมข้อมูลสำหรับหนังสือยินยอม</p>
+  </div>
+
+  <div id="consentScreen">
+    
+    <div class="card">
+      <div class="card-title">👤 ข้อมูลเจ้าของสัตว์</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">ชื่อ-นามสกุล</span><span class="info-value" id="dispName">-</span></div>
+        <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span class="info-value" id="dispPhone">-</span></div>
+        <div class="info-item"><span class="info-label">เลขบัตรประชาชน</span><span class="info-value" id="dispId">-</span></div>
+        <div class="info-item"><span class="info-label">ที่อยู่</span><span class="info-value" id="dispAddress" style="font-size: 16px;">-</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🐾 รายการสัตว์และบริการ (<span id="dispCount">0</span> ตัว)</div>
+      <div id="dispAnimals">
+        </div>
+    </div>
+
+    <div class="consent-box">
+      <h3>⚖️ ข้อตกลงและหนังสือยินยอม</h3>
+      <p><strong>1. การงดน้ำและอาหาร:</strong> ข้าพเจ้ายืนยันว่าสัตว์เลี้ยงได้รับการงดน้ำและอาหารมาแล้วไม่ต่ำกว่า 8-12 ชั่วโมง เพื่อป้องกันอันตรายถึงชีวิตจากการสำลักระหว่างวางยาสลบ</p>
+      <p><strong>2. ความเสี่ยงจากการรักษา:</strong> ข้าพเจ้ารับทราบว่าการวางยาสลบและการทำศัลยกรรมมีความเสี่ยง แม้สัตวแพทย์จะปฏิบัติหน้าที่อย่างระมัดระวังที่สุดแล้วก็ตาม</p>
+      <p><strong>3. การยินยอม:</strong> ข้าพเจ้ายินยอมให้สัตวแพทย์ทำการรักษาและตัดสินใจช่วยชีวิตตามความเหมาะสม หากเกิดเหตุฉุกเฉิน</p>
+    </div>
+
+    <button type="button" class="btn-accept" onclick="acceptConsent()">
+      ✅ ข้าพเจ้ายอมรับข้อตกลงและเงื่อนไข
+    </button>
+  </div>
+
+  <div id="successScreen" style="display:none;">
+    <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+    <h2 style="font-size: 32px; color: var(--emerald);">ขอบคุณค่ะ/ครับ</h2>
+    <p style="font-size: 20px; color: var(--text-dim); margin-top: 10px;">กรุณาส่งคืนหน้าจอนี้ให้เจ้าหน้าที่ เพื่อทำการพิมพ์คิว</p>
+  </div>
+
+</div>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+// สร้างการเชื่อมต่อห้องเดียวกันกับ registration.html
+const consentChannel = supabase.channel('vasd-consent-room');
+
+// ฟังเสียงเรียกจาก Registration
+consentChannel
+  .on('broadcast', { event: 'request-consent' }, (payload) => {
+    console.log("📥 ได้รับข้อมูลคำขอ:", payload);
+    const data = payload.payload; // ดึงก้อนข้อมูลออกมา
+    showConsentForm(data);
+  })
+  .subscribe();
+
+// ฟังก์ชันนำข้อมูลมาแสดงบนหน้าจอ
+function showConsentForm(data) {
+  // ซ่อนหน้าจอ Standby
+  document.getElementById("standbyScreen").style.display = "none";
+  document.getElementById("successScreen").style.display = "none";
+  
+  // ใส่ข้อมูลเจ้าของ
+  document.getElementById("dispName").textContent = data.owner.name;
+  document.getElementById("dispPhone").textContent = data.owner.phone;
+  document.getElementById("dispId").textContent = data.owner.idCard;
+  document.getElementById("dispAddress").textContent = data.owner.address;
+  document.getElementById("dispCount").textContent = data.animals.length;
+
+  // ใส่ข้อมูลสัตว์
+  const container = document.getElementById("dispAnimals");
+  container.innerHTML = "";
+  data.animals.forEach(anim => {
+    const icon = anim.species === "แมว" ? "🐱" : "🐶";
+    const svcs = anim.services.join(", ");
+    container.innerHTML += `
+      <div class="animal-item">
+        <div class="animal-name">${icon} ${anim.name} <span class="animal-spc">${anim.sex}</span></div>
+        <div class="animal-svcs">${svcs}</div>
+      </div>
+    `;
+  });
+
+  // โชว์หน้า Consent
+  document.getElementById("consentScreen").style.display = "block";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// เมื่อลูกค้ากดปุ่ม "ยอมรับข้อตกลง"
+window.acceptConsent = function() {
+  // ส่งสัญญาณกลับไปที่ Registration ว่ายอมรับแล้ว
+  consentChannel.send({
+    type: 'broadcast',
+    event: 'consent-granted',
+    payload: { status: 'accepted', timestamp: new Date().toISOString() }
+  });
+
+  // ซ่อนฟอร์ม โชว์หน้าสำเร็จ
+  document.getElementById("consentScreen").style.display = "none";
+  document.getElementById("successScreen").style.display = "block";
+
+  // หน่วงเวลา 5 วินาที แล้วรีเซ็ตกลับไปหน้าสแตนด์บาย
+  setTimeout(() => {
+    document.getElementById("successScreen").style.display = "none";
+    document.getElementById("standbyScreen").style.display = "block";
+  }, 5000);
+}
+</script>
+</body>
+</html>
