@@ -8,7 +8,7 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS (iPad Landscape - No Scroll)
+   DESIGN TOKENS
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
@@ -34,7 +34,8 @@ body {
   font-family: "Sarabun", sans-serif;
   background: var(--navy);
   color: var(--text);
-  height: 100vh;
+  /* ใช้ dvh เพื่อหักลบพื้นที่แถบ URL ของ Safari ออกไป */
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
   display: flex; 
@@ -50,7 +51,7 @@ body::before {
 .container {
   width: 100%; height: 100%;
   max-width: 1366px;
-  padding: 32px 40px;
+  padding: 24px 40px;
   display: flex;
   flex-direction: column;
 }
@@ -64,14 +65,16 @@ body::before {
 #successScreen { display: none; text-align: center; flex-direction: column; justify-content: center; align-items: center; }
 
 /* ═══════════════════════════════════════════
-   STANDBY SCREEN (Single Column Centered)
+   STANDBY SCREEN
 ═══════════════════════════════════════════ */
 #standbyScreen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 32px;
+  /* เพิ่ม margin ด้านบนเล็กน้อยเพื่อดันทุกอย่างลงมาให้สมดุล */
+  margin-top: 2dvh; 
 }
 
 /* 1. Header (Logo & Name) */
@@ -82,22 +85,16 @@ body::before {
   align-items: center;
 }
 .brand-logo {
-  height: 100px; /* ย่อขนาดโลโก้ลงให้พอดีจอ */
+  height: 100px;
   width: auto;
-  margin-bottom: 16px;
+  margin-bottom: 24px; /* เพิ่มระยะห่างใต้โลโก้ให้โปร่งขึ้น */
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
 .brand-th {
-  font-size: 26px;
+  font-size: 28px;
   color: var(--teal-light);
   font-weight: 800;
   line-height: 1.4;
-}
-.brand-en {
-  font-size: 18px;
-  color: var(--text-dim);
-  letter-spacing: 0.5px;
-  margin-top: 4px;
 }
 
 /* 2. Warning Box */
@@ -136,7 +133,7 @@ body::before {
 .warning-footer {
   border-top: 1px solid rgba(255,255,255,0.1);
   padding-top: 16px;
-  color: var(--text-faint);
+  color: var(--text-dim);
   font-size: 20px;
   text-align: center;
 }
@@ -237,7 +234,6 @@ body::before {
     <div class="standby-header">
       <img src="logo.png" alt="VASD Logo" class="brand-logo" onerror="this.style.display='none'">
       <div class="brand-th">หน่วยบริการวิชาการ คณะสัตวแพทยศาสตร์ มหาวิทยาลัยเทคโนโลยีราชมงคลตะวันออก</div>
-      <div class="brand-en">(Veterinary Academic Service Division: VASD)</div>
     </div>
 
     <div class="standby-warning">
@@ -356,7 +352,7 @@ window.acceptConsent = function() {
 
   setTimeout(() => {
     document.getElementById("successScreen").style.display = "none";
-    document.getElementById("standbyScreen").style.display = "flex"; // กลับไปหน้า Standby ที่เป็นแบบ Flex (จัดกลาง)
+    document.getElementById("standbyScreen").style.display = "flex"; 
   }, 5000);
 }
 </script>
