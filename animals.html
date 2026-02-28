@@ -411,7 +411,7 @@ header {
   </div>
 
   <div id="animalList">
-    <div class="empty-state" id="emptyState">
+    <div class="empty-state">
       <div class="empty-state-icon">🐾</div>
       <div class="empty-state-text">กำลังโหลดข้อมูล...</div>
     </div>
@@ -452,40 +452,13 @@ const statusMap = {
   cancel:           { text: "ยกเลิก",            cls: "ac-cancel", pill: "sp-cancel", dot: "⬛" }
 };
 
-// น้ำหนักสำหรับเรียงตามสถานะตาม Workflow
-const statusWeight = {
-  waiting: 1,
-  anesthesia: 2,
-  surgery: 3,
-  recovery: 4,
-  ready_to_go_home: 5,
-  done: 6,
-  cancel: 7
-};
+const statusWeight = { waiting: 1, anesthesia: 2, surgery: 3, recovery: 4, ready_to_go_home: 5, done: 6, cancel: 7 };
 
 let allData = [];
 
-// ดึง Elements
-const searchInput = document.getElementById("searchInput");
-const sortSelect = document.getElementById("sortSelect");
-
-// กำหนดค่าเริ่มต้น
-let currentSort = sortSelect.value || "queue"; 
-let searchQuery = searchInput.value.toLowerCase().trim() || "";
-
-// 🛠️ ฟังก์ชันกลางสำหรับอัปเดตและแสดงผล
-function updateFiltersAndRender() {
-  searchQuery = searchInput.value.toLowerCase().trim();
-  currentSort = sortSelect.value;
-  applySortAndRender();
-}
-
-// 🛠️ ผูก Event ดักจับการค้นหา (ทำงานทันทีที่พิมพ์/ลบ/วางข้อความ)
-searchInput.addEventListener("input", updateFiltersAndRender);
-searchInput.addEventListener("keyup", updateFiltersAndRender); // สำรองเผื่อบางเบราว์เซอร์
-
-// 🛠️ ผูก Event ดักจับการเรียงลำดับ
-sortSelect.addEventListener("change", updateFiltersAndRender);
+// 🛠️ 1. ผูก Event ตรงๆ ให้ทำงานทันทีที่มีการขยับคีย์บอร์ดหรือเปลี่ยน Dropdown
+document.getElementById("searchInput").addEventListener("input", applySortAndRender);
+document.getElementById("sortSelect").addEventListener("change", applySortAndRender);
 
 async function loadAnimals() {
   const { data, error } = await supabase
@@ -496,9 +469,7 @@ async function loadAnimals() {
 
   if (error) { console.error(error); return; }
 
-  // ---------------------------------------------------------
-  // กรองไม่ให้เลขคิว (queue_number) ซ้ำกัน
-  // ---------------------------------------------------------
+  // กรองเฉพาะคิวล่าสุด ป้องกันข้อมูลซ้ำซ้อน
   const uniqueQueues = new Map();
   (data || []).forEach(item => {
     if (!uniqueQueues.has(item.queue_number) || uniqueQueues.get(item.queue_number).id < item.id) {
@@ -506,76 +477,74 @@ async function loadAnimals() {
     }
   });
 
-  // เก็บข้อมูลทั้งหมดลงตัวแปรหลัก
   allData = Array.from(uniqueQueues.values());
-  
-  // เรียกใช้ฟังก์ชัน กรอง -> เรียง -> แสดงผล
   applySortAndRender();
 }
 
-// 🛠️ ฟังก์ชันสำหรับกรองค้นหา และเรียงข้อมูลก่อนแสดงผล
+// 🛠️ 2. จัดการ Logic กรองและเรียง (ตัวจบเรื่องทุกบั๊ก)
 function applySortAndRender() {
-  // 1. ค้นหา (Filter) ก่อน
+  // ดึงค่าสดๆ จากหน้าจอเสมอ ป้องกันการทำงานเพี้ยน
+  const rawQuery = document.getElementById("searchInput").value || "";
+  const query = rawQuery.trim().toLowerCase();
+  const sortBy = document.getElementById("sortSelect").value;
+
+  // กรองข้อมูล (Filter)
   let filteredData = allData.filter(a => {
-    if (!searchQuery) return true; // ถ้าไม่ได้พิมพ์อะไร ให้คืนค่าทั้งหมด
+    if (query === "") return true; // ทันทีที่ลบข้อความทิ้งหมด บรรทัดนี้จะคืนค่าทุกรายการให้ทันที
     
-    const nameMatch = (a.animal_name || "").toLowerCase().includes(searchQuery);
-    const queueMatch = String(a.queue_number).toLowerCase().includes(searchQuery);
-    const ownerMatch = (a.vasd_owner?.owner_name || "").toLowerCase().includes(searchQuery);
+    const name = String(a.animal_name || "").toLowerCase();
+    const queue = String(a.queue_number || "").toLowerCase();
+    const ownerName = String(a.vasd_owner?.owner_name || "").toLowerCase();
     
-    return nameMatch || queueMatch || ownerMatch;
+    return name.includes(query) || queue.includes(query) || ownerName.includes(query);
   });
 
-  // 2. จัดเรียง (Sort) ข้อมูลที่ถูกกรองแล้ว
-  if (currentSort === "queue") {
-    // เรียงตามเลขคิวจากน้อยไปมาก
+  // จัดเรียง (Sort)
+  if (sortBy === "queue") {
     filteredData.sort((a, b) => String(a.queue_number).localeCompare(String(b.queue_number), 'th', { numeric: true }));
-  } 
-  else if (currentSort === "name") {
-    // เรียงตามชื่อ ก-ฮ
+  } else if (sortBy === "name") {
     filteredData.sort((a, b) => String(a.animal_name).localeCompare(String(b.animal_name), 'th'));
-  } 
-  else if (currentSort === "status") {
-    // เรียงตามสถานะ (รอผ่าตัด -> วางยา -> ...)
+  } else if (sortBy === "status") {
     filteredData.sort((a, b) => {
       const wA = statusWeight[a.vasd_queue?.status || "waiting"] || 99;
       const wB = statusWeight[b.vasd_queue?.status || "waiting"] || 99;
-      if (wA === wB) {
-        // ถ้าสถานะเดียวกัน ให้เรียงคิวต่อ
-        return String(a.queue_number).localeCompare(String(b.queue_number), 'th', { numeric: true });
-      }
+      if (wA === wB) return String(a.queue_number).localeCompare(String(b.queue_number), 'th', { numeric: true });
       return wA - wB;
     });
   }
 
-  // 3. นำข้อมูลไปวาดลงหน้าจอ
-  renderCards(filteredData);
+  // ส่งข้อมูลไปวาด
+  renderCards(filteredData, query);
 }
 
-function renderCards(data) {
+// 🛠️ 3. จัดการวาดหน้าจอแบบปลอดภัย (Safe DOM Rendering)
+function renderCards(data, query) {
   const list = document.getElementById("animalList");
-  const empty = document.getElementById("emptyState");
   document.getElementById("countBadge").textContent = `${data.length} รายการ`;
 
-  if (data.length === 0) {
-    list.innerHTML = "";
-    empty.style.display = "block";
-    empty.querySelector(".empty-state-text").textContent = searchQuery ? "ไม่พบข้อมูลที่ค้นหา" : "ไม่พบรายการสัตว์";
-    list.appendChild(empty);
-    return;
-  }
-  if (empty.parentNode === list) list.removeChild(empty);
-
-  /* keep open states */
+  // สำรองสถานะการ์ดที่ถูกเปิดทิ้งไว้
   const openIds = new Set([...list.querySelectorAll(".animal-card.open")].map(el => el.dataset.id));
 
+  // ล้างเนื้อหาเก่าทิ้งหมด
   list.innerHTML = "";
+
+  // กรณีไม่พบข้อมูล จะสร้าง HTML ขึ้นมาใหม่สดๆ ป้องกันการขัดข้องทาง Reference
+  if (data.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🐾</div>
+        <div class="empty-state-text">${query ? 'ไม่พบข้อมูลที่ตรงกับคำค้นหา' : 'ไม่พบรายการสัตว์'}</div>
+      </div>
+    `;
+    return;
+  }
+
+  // กรณีมีข้อมูล ก็วาดการ์ดปกติ
   data.forEach((a, idx) => {
     const statusKey = a.vasd_queue?.status || "waiting";
     const s = statusMap[statusKey] || statusMap.waiting;
     const speciesText = a.species === "ม" ? "🐱 แมว" : "🐶 สุนัข";
 
-    // ประมวลผล ข้อควรระวัง และ บริการ
     const note = a.health_note ? a.health_note.trim() : "";
     const hasNote = note.length > 0;
     
@@ -586,9 +555,6 @@ function renderCards(data) {
     const card = document.createElement("div");
     card.className = `animal-card ${s.cls}`;
     card.dataset.id = a.id;
-    card.dataset.status = statusKey;
-    card.dataset.name = (a.animal_name || "").toLowerCase();
-    card.dataset.owner = (a.vasd_owner?.owner_name || "").toLowerCase();
     card.style.animationDelay = `${idx * 0.03}s`;
 
     card.innerHTML = `
