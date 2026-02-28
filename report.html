@@ -182,7 +182,7 @@ header {
   <div class="action-bar">
     <div class="section-title">
       <h2>รายงานเคสที่เสร็จสิ้นแล้ว</h2>
-      <p>รายการสัตว์ที่รักษาเสร็จสิ้นและรับกลับบ้านแล้วประจำวัน</p>
+      <p>รายการสัตว์ที่รักษาเสร็จสิ้นและรับกลับบ้านแล้ว</p>
     </div>
     <div class="export-btns">
       <button class="btn-export btn-csv" onclick="exportCSV()">📄 CSV (ทั้งหมด)</button>
@@ -219,21 +219,8 @@ function escapeHtml(str) {
 async function loadReport() {
   const container = document.getElementById("reportContainer");
   
-  // 🟢 แก้บั๊กเที่ยงคืน: ดึง Event ล่าสุดที่สร้าง แทนการใช้วันที่ปัจจุบัน
-  const { data: latestEvent, error: eventError } = await supabase
-    .from('vasd_event')
-    .select('id')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  if (eventError || !latestEvent) {
-    container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--rose)">ไม่พบข้อมูลรอบการทำงาน</div>`;
-    return;
-  }
-
-  const eventId = latestEvent.id;
-
+  // 🟢 แก้ปัญหาเด็ดขาด: เอาการกรอง Event ออกทั้งหมด 
+  // ให้ดึง "ทุกเคส" ที่ผ่าตัดเสร็จแล้ว (done) ที่อยู่ในฐานข้อมูลขึ้นมาแสดงเสมอ
   const { data: animals, error } = await supabase
     .from('vasd_animal')
     .select(`
@@ -245,8 +232,7 @@ async function loadReport() {
       vasd_prescription(*)
     `)
     .eq('vasd_queue.status', 'done')
-    .eq('event_id', eventId)
-    .order('queue_number', { ascending: true });
+    .order('queue_number', { ascending: true }); // เรียงตามลำดับคิว
 
   if (error) {
     container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--rose)">เกิดข้อผิดพลาด: ${error.message}</div>`;
@@ -254,7 +240,7 @@ async function loadReport() {
   }
 
   if (!animals || animals.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:var(--text-dim); background:var(--surface); border-radius:var(--radius); border:1px dashed var(--border);">ไม่พบข้อมูลเคสที่รักษาเสร็จสิ้นในรอบนี้</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:var(--text-dim); background:var(--surface); border-radius:var(--radius); border:1px dashed var(--border);">ไม่พบข้อมูลเคสที่รักษาเสร็จสิ้น</div>`;
     globalReportData = [];
     return;
   }
@@ -364,7 +350,7 @@ async function loadReport() {
 }
 
 // ── ฟังก์ชัน Export CSV ──
-// 🟢 แก้ไข: รองรับการรับ Parameter animalId ถ้ามีค่า จะพิมพ์แค่ตัวเดียว ถ้าไม่มี จะพิมพ์ทั้งหมด
+// รองรับการรับ Parameter animalId ถ้ามีค่า จะพิมพ์แค่ตัวเดียว ถ้าไม่มี จะพิมพ์ทั้งหมด
 window.exportCSV = function(animalId = null) {
   const dataToExport = animalId 
     ? globalReportData.filter(a => a.id === animalId) 
@@ -415,7 +401,7 @@ window.exportCSV = function(animalId = null) {
 };
 
 // ── ฟังก์ชัน Export PDF (A4 Print) ──
-// 🟢 แก้ไข: รองรับการรับ Parameter animalId เพื่อพิมพ์เฉพาะเคส
+// รองรับการรับ Parameter animalId เพื่อพิมพ์เฉพาะเคส
 window.exportPDF = function(animalId = null) {
   const dataToExport = animalId 
     ? globalReportData.filter(a => a.id === animalId) 
