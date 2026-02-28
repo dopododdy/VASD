@@ -414,18 +414,30 @@ const statusMap = {
 let allData = [];
 
 async function loadAnimals() {
-  // นำ get_today_event ออกเพื่อให้ดึงข้อมูลของเมื่อวานหรือวันก่อนๆ ได้
-  // const { data: eventId } = await supabase.rpc("get_today_event");
-  
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`id,queue_number,animal_name,species,sex,est_weight,health_note,vasd_owner(owner_name,phone),vasd_queue(status),vasd_service(service_type)`)
-    // ไม่ต้องกรอง .eq("event_id", eventId) แล้ว
-    .order("id", { ascending: false }) // เรียงจากตัวที่เพิ่งลงทะเบียนล่าสุดขึ้นบน
-    .limit(200); // ป้องกันไม่ให้โหลดข้อมูลเยอะเกินไปจนแอปค้าง (แสดง 200 ตัวล่าสุด)
+    .order("id", { ascending: false }) 
+    .limit(200);
 
   if (error) { console.error(error); return; }
-  allData = data || [];
+
+  // ---------------------------------------------------------
+  // 🛠️ ส่วนที่กรองไม่ให้เลขคิว (queue_number) ซ้ำกัน
+  // ---------------------------------------------------------
+  const uniqueQueues = new Map();
+
+  (data || []).forEach(item => {
+    // ถ้ารหัสคิวยังไม่เคยมี หรือถ้ามีแล้วแต่รายการนี้ id มากกว่า (ใหม่กว่า) ให้บันทึกทับ
+    if (!uniqueQueues.has(item.queue_number) || uniqueQueues.get(item.queue_number).id < item.id) {
+      uniqueQueues.set(item.queue_number, item);
+    }
+  });
+
+  // แปลงจาก Map กลับเป็น Array และเรียงตาม id จากใหม่ไปเก่า
+  allData = Array.from(uniqueQueues.values()).sort((a, b) => b.id - a.id);
+  // ---------------------------------------------------------
+
   renderCards(allData);
 }
 
