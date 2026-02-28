@@ -34,13 +34,13 @@ body {
   font-family: "Sarabun", sans-serif;
   background: var(--navy);
   color: var(--text);
-  height: 100vh;         /* ล็อคความสูงเท่าหน้าจอเป๊ะๆ */
+  height: 100vh;
   width: 100vw;
-  overflow: hidden;      /* 🛑 ปิดการเลื่อนจอทุกทิศทาง */
+  overflow: hidden;
   display: flex; 
   align-items: center; 
   justify-content: center;
-  touch-action: none;    /* ป้องกันการลาก/ซูมบน iPad */
+  touch-action: none;
 }
 body::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
@@ -49,109 +49,133 @@ body::before {
 
 .container {
   width: 100%; height: 100%;
-  max-width: 1366px;     /* รองรับ iPad Pro */
+  max-width: 1366px;
   padding: 32px 40px;
   display: flex;
   flex-direction: column;
 }
 
-/* ── TWO COLUMN LAYOUT (แบ่งซ้าย-ขวา) ── */
-.grid-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  height: 100%;
-}
-
 /* ── STATES ── */
 #standbyScreen, #successScreen, #consentScreen {
-  height: 100%;
-  width: 100%;
+  height: 100%; width: 100%;
   animation: fadeIn 0.4s ease;
 }
 #consentScreen { display: none; }
 #successScreen { display: none; text-align: center; flex-direction: column; justify-content: center; align-items: center; }
 
-/* ── STANDBY LEFT: คำเตือนความเสี่ยง ── */
-.standby-left {
-  background: rgba(239, 68, 68, 0.06);
-  border: 2px solid rgba(239, 68, 68, 0.25);
-  border-radius: var(--radius-xl);
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.warning-icon { font-size: 64px; line-height: 1; margin-bottom: 16px; text-align: center; }
-.standby-left h2 { color: var(--amber); font-size: 40px; font-weight: 800; text-align: center; margin-bottom: 30px; }
-.standby-left p { font-size: 26px; line-height: 1.6; color: var(--text); margin-bottom: 20px; }
-.standby-left ul { margin-left: 40px; margin-bottom: 30px; font-size: 26px; line-height: 1.7; color: var(--text-dim); }
-.standby-left li { margin-bottom: 12px; }
-
-.highlight-rose { color: var(--rose); font-weight: 700; font-size: 28px; }
-.highlight-amber { color: var(--amber); font-weight: 700; }
-
-.standby-footer {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 24px;
-  color: var(--text-dim);
-  font-size: 24px;
-  margin-top: auto; /* ดันลงล่างสุด */
-}
-
-/* ── STANDBY RIGHT: โลโก้และหน่วยงาน ── */
-.standby-right {
+/* ═══════════════════════════════════════════
+   STANDBY SCREEN (Single Column Centered)
+═══════════════════════════════════════════ */
+#standbyScreen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 30px;
+}
+
+/* 1. Header (Logo & Name) */
+.standby-header {
   text-align: center;
-  padding: 40px;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .brand-logo {
-  max-width: 280px; /* ขนาดโลโก้ปรับได้ตามสัดส่วนจริง */
-  height: auto;
-  margin-bottom: 32px;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+  height: 100px; /* ย่อขนาดโลโก้ลงให้พอดีจอ */
+  width: auto;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
 .brand-th {
-  font-size: 32px;
+  font-size: 26px;
   color: var(--teal-light);
   font-weight: 800;
   line-height: 1.4;
-  margin-bottom: 12px;
 }
 .brand-en {
-  font-size: 22px;
+  font-size: 18px;
   color: var(--text-dim);
-  margin-bottom: 50px;
   letter-spacing: 0.5px;
+  margin-top: 4px;
 }
 
-/* Loading Box */
-.loading-box {
-  display: flex; flex-direction: column; align-items: center; gap: 16px;
-  background: rgba(0,0,0,0.2);
-  padding: 24px 40px;
-  border-radius: 100px;
+/* 2. Warning Box */
+.standby-warning {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-xl);
+  padding: 32px 48px;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.warning-title {
+  color: var(--amber);
+  font-size: 28px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.warning-body {
+  font-size: 22px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.warning-body ul {
+  margin-left: 30px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  color: var(--text-dim);
+}
+.warning-body li { margin-bottom: 8px; }
+.warning-footer {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 16px;
+  color: var(--text-faint);
+  font-size: 20px;
+  text-align: center;
+}
+
+.highlight-rose { color: var(--rose); font-weight: 700; }
+.highlight-amber { color: var(--amber); font-weight: 700; }
+
+/* 3. Loading Area */
+.standby-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 32px;
+  border-radius: 50px;
 }
 .spinner {
-  width: 48px; height: 48px;
-  border: 5px solid var(--surface-2); border-top-color: var(--teal-light);
+  width: 32px; height: 32px;
+  border: 4px solid var(--surface-2); border-top-color: var(--teal-light);
   border-radius: 50%; animation: spin 1s linear infinite;
 }
+.standby-loading span {
+  font-size: 20px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
 
-/* ── CARDS (หน้า Consent - ซ้าย) ── */
+/* ═══════════════════════════════════════════
+   CONSENT SCREEN (2-Column Grid)
+═══════════════════════════════════════════ */
+.grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; height: 100%; }
 .col-left { display: flex; flex-direction: column; gap: 24px; }
 .col-right { display: flex; flex-direction: column; gap: 24px; }
 
 .card {
   background: var(--surface); border: 2px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 32px;
+  border-radius: var(--radius-xl); padding: 32px;
 }
 .card.flex-1 { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
@@ -166,7 +190,6 @@ body::before {
 .info-label { font-size: 20px; color: var(--text-dim); font-weight: 600; }
 .info-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1.3; }
 
-/* ── ANIMALS LIST ── */
 #dispAnimals { flex: 1; overflow-y: auto; padding-right: 10px; } 
 #dispAnimals::-webkit-scrollbar { width: 8px; }
 #dispAnimals::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 10px; }
@@ -180,19 +203,15 @@ body::before {
 .animal-spc { font-size: 20px; color: var(--navy); background: var(--teal-light); font-weight: 700; padding: 6px 16px; border-radius: 30px;}
 .animal-svcs { font-size: 26px; color: var(--amber); font-weight: 700; }
 
-/* ── CONSENT TEXT (หน้า Consent - ขวา) ── */
 .consent-box {
   background: rgba(245, 158, 11, 0.06); border: 2px solid rgba(245, 158, 11, 0.25);
-  border-radius: var(--radius-xl);
-  padding: 40px;
-  flex: 1; 
-  display: flex; flex-direction: column; justify-content: space-evenly;
+  border-radius: var(--radius-xl); padding: 40px;
+  flex: 1; display: flex; flex-direction: column; justify-content: space-evenly;
 }
 .consent-box h3 { color: var(--amber); font-size: 34px; margin-bottom: 20px; text-align: center; font-weight: 800;}
 .consent-box p { font-size: 24px; line-height: 1.7; color: var(--text); }
 .consent-box strong { font-size: 26px; color: var(--amber); }
 
-/* ── BUTTON ── */
 .btn-accept {
   width: 100%; height: 100px;
   background: linear-gradient(135deg, var(--emerald), #059669);
@@ -213,50 +232,43 @@ body::before {
 
 <div class="container">
 
-  <div id="standbyScreen" class="grid-layout">
+  <div id="standbyScreen">
     
-    <div class="standby-left">
-      <div class="warning-icon">⚠️</div>
-      <h2>โปรดอ่าน และทำความเข้าใจ</h2>
-      
-      <p>
-        <span class="highlight-amber">การวางยาสลบมีความเสี่ยง</span> 
-        สัตว์ที่มีโรคประจำตัว เช่น หัวใจ ตับ ไต หรือสัตว์สูงอายุ จะทำให้มีความเสี่ยงเพิ่มขึ้น
-      </p>
-      
-      <p>ภาวะแทรกซ้อนที่อาจเกิดขึ้น ได้แก่ :</p>
-      <ul>
-        <li>ความดันเลือดต่ำ / หัวใจเต้นผิดจังหวะ</li>
-        <li>ภาวะหัวใจล้มเหลว / การแพ้ยา</li>
-        <li class="highlight-rose">การเสียชีวิต (พบได้น้อยมาก แต่สามารถเกิดขึ้นได้)</li>
-      </ul>
+    <div class="standby-header">
+      <img src="logo.png" alt="VASD Logo" class="brand-logo" onerror="this.style.display='none'">
+      <div class="brand-th">หน่วยบริการวิชาการ คณะสัตวแพทยศาสตร์ มหาวิทยาลัยเทคโนโลยีราชมงคลตะวันออก</div>
+      <div class="brand-en">(Veterinary Academic Service Division: VASD)</div>
+    </div>
 
-      <div class="standby-footer">
+    <div class="standby-warning">
+      <div class="warning-title">⚠️ โปรดอ่าน และทำความเข้าใจ</div>
+      
+      <div class="warning-body">
+        <p>
+          <span class="highlight-amber">การวางยาสลบมีความเสี่ยง</span> 
+          สัตว์ที่มีโรคประจำตัว เช่น หัวใจ ตับ ไต หรือสัตว์สูงอายุ จะทำให้มีความเสี่ยงเพิ่มขึ้น
+        </p>
+        <p style="margin-top: 16px;">ภาวะแทรกซ้อนที่อาจเกิดขึ้น ได้แก่ :</p>
+        <ul>
+          <li>ความดันเลือดต่ำ / หัวใจเต้นผิดจังหวะ</li>
+          <li>ภาวะหายใจล้มเหลว / การแพ้ยา</li>
+          <li class="highlight-rose">การเสียชีวิต (พบได้น้อยมาก แต่สามารถเกิดขึ้นได้)</li>
+        </ul>
+      </div>
+
+      <div class="warning-footer">
         * ระหว่างการวางยาสลบ จะมีการติดตามสัญญาณชีพอย่างใกล้ชิด
       </div>
     </div>
 
-    <div class="standby-right">
-      <img src="logo.png" alt="VASD Logo" class="brand-logo" onerror="this.style.display='none'"> 
-      
-      <div class="brand-th">
-        หน่วยบริการวิชาการ คณะสัตวแพทยศาสตร์<br>
-        มหาวิทยาลัยเทคโนโลยีราชมงคลตะวันออก
-      </div>
-      <div class="brand-en">
-        (Veterinary Academic Service Division: VASD)
-      </div>
-
-      <div class="loading-box">
-        <div class="spinner"></div>
-        <span style="font-size: 26px; color: #fff; font-weight: 600;">รอเจ้าหน้าที่เตรียมข้อมูลสักครู่...</span>
-      </div>
+    <div class="standby-loading">
+      <div class="spinner"></div>
+      <span>รอเจ้าหน้าที่เตรียมข้อมูลสักครู่...</span>
     </div>
 
   </div>
 
   <div id="consentScreen" class="grid-layout">
-    
     <div class="col-left">
       <div class="card">
         <div class="card-title">👤 ข้อมูลเจ้าของสัตว์</div>
@@ -267,7 +279,6 @@ body::before {
           <div class="info-item"><span class="info-label">ที่อยู่</span><span class="info-value" id="dispAddress" style="font-size: 22px;">-</span></div>
         </div>
       </div>
-
       <div class="card flex-1">
         <div class="card-title">🐾 รายการสัตว์และบริการ (<span id="dispCount">0</span>)</div>
         <div id="dispAnimals"></div>
@@ -281,12 +292,10 @@ body::before {
         <p><strong>2. ความเสี่ยงจากการรักษา:</strong><br> ข้าพเจ้ารับทราบว่าการวางยาสลบและการทำศัลยกรรมมีความเสี่ยง แม้สัตวแพทย์จะระมัดระวังที่สุดแล้วก็ตาม</p>
         <p><strong>3. การยินยอม:</strong><br> ข้าพเจ้ายินยอมให้สัตวแพทย์ทำการรักษาและตัดสินใจช่วยชีวิตตามความเหมาะสม หากเกิดเหตุฉุกเฉิน</p>
       </div>
-
       <button type="button" class="btn-accept" onclick="acceptConsent()">
         ✅ ยอมรับข้อตกลงและเงื่อนไข
       </button>
     </div>
-
   </div>
 
   <div id="successScreen">
@@ -347,7 +356,7 @@ window.acceptConsent = function() {
 
   setTimeout(() => {
     document.getElementById("successScreen").style.display = "none";
-    document.getElementById("standbyScreen").style.display = "grid";
+    document.getElementById("standbyScreen").style.display = "flex"; // กลับไปหน้า Standby ที่เป็นแบบ Flex (จัดกลาง)
   }, 5000);
 }
 </script>
