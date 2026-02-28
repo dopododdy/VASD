@@ -435,7 +435,7 @@ footer {
 </header>
 
 <div class="wrap">
-  <button id="emergencyCallBtn" class="btn-call" onclick="triggerEmergencyCall()">
+<button id="emergencyCallBtn" class="btn-call" onclick="triggerEmergencyCall()" style="display: none;">
     <span style="font-size: 32px; flex-shrink: 0;">🚨</span>
     <div class="call-text-wrapper">
       <span style="font-size: 20px; font-weight: 700;">EMERGENCY CALL</span>
@@ -534,9 +534,11 @@ function updateCallButtonVisibility() {
   const btn = document.getElementById("emergencyCallBtn");
   if (!btn) return;
 
-  if (["ผู้ดูแลระบบ", "อาจารย์", "สัตวแพทย์"].includes(role)) {
+  // ถ้ายังไม่ล็อกอิน (ไม่มี role) หรือล็อกอินด้วย 3 บทบาทนี้ -> ให้ซ่อนปุ่ม
+  if (!role || ["ผู้ดูแลระบบ", "อาจารย์", "สัตวแพทย์"].includes(role)) {
     btn.style.display = "none";
   } else {
+    // ล็อกอินด้วยบทบาทอื่นๆ (เช่น นศ.) -> ให้แสดงปุ่ม
     btn.style.display = "flex";
   }
 }
