@@ -185,8 +185,8 @@ header {
       <p>รายการสัตว์ที่รักษาเสร็จสิ้นและรับกลับบ้านแล้วประจำวัน</p>
     </div>
     <div class="export-btns">
-      <button class="btn-export btn-csv" onclick="exportCSV()">📄 ดาวน์โหลด CSV</button>
-      <button class="btn-export btn-pdf" onclick="exportPDF()">🖨️ พิมพ์รายงาน (A4)</button>
+      <button class="btn-export btn-csv" onclick="exportCSV()">📄 CSV (ทั้งหมด)</button>
+      <button class="btn-export btn-pdf" onclick="exportPDF()">🖨️ พิมพ์ (ทั้งหมด)</button>
     </div>
   </div>
 
@@ -218,7 +218,21 @@ function escapeHtml(str) {
 
 async function loadReport() {
   const container = document.getElementById("reportContainer");
-  const { data: eventId } = await supabase.rpc("get_today_event");
+  
+  // 🟢 แก้บั๊กเที่ยงคืน: ดึง Event ล่าสุดที่สร้าง แทนการใช้วันที่ปัจจุบัน
+  const { data: latestEvent, error: eventError } = await supabase
+    .from('vasd_event')
+    .select('id')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (eventError || !latestEvent) {
+    container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--rose)">ไม่พบข้อมูลรอบการทำงาน</div>`;
+    return;
+  }
+
+  const eventId = latestEvent.id;
 
   const { data: animals, error } = await supabase
     .from('vasd_animal')
@@ -240,7 +254,7 @@ async function loadReport() {
   }
 
   if (!animals || animals.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:var(--text-dim); background:var(--surface); border-radius:var(--radius); border:1px dashed var(--border);">ไม่พบข้อมูลเคสที่รักษาเสร็จสิ้นในวันนี้</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:var(--text-dim); background:var(--surface); border-radius:var(--radius); border:1px dashed var(--border);">ไม่พบข้อมูลเคสที่รักษาเสร็จสิ้นในรอบนี้</div>`;
     globalReportData = [];
     return;
   }
@@ -338,6 +352,11 @@ async function loadReport() {
       </div>
 
       ${vitalsHtml}
+
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="btn-export btn-csv" style="padding: 6px 12px; font-size: 11px;" onclick="exportCSV('${ani.id}')">📄 CSV (ตัวนี้)</button>
+        <button class="btn-export btn-pdf" style="padding: 6px 12px; font-size: 11px;" onclick="exportPDF('${ani.id}')">🖨️ พิมพ์ (ตัวนี้)</button>
+      </div>
     `;
 
     container.appendChild(card);
@@ -345,18 +364,22 @@ async function loadReport() {
 }
 
 // ── ฟังก์ชัน Export CSV ──
-window.exportCSV = function() {
-  if (globalReportData.length === 0) return alert("ไม่มีข้อมูลสำหรับ Export");
+// 🟢 แก้ไข: รองรับการรับ Parameter animalId ถ้ามีค่า จะพิมพ์แค่ตัวเดียว ถ้าไม่มี จะพิมพ์ทั้งหมด
+window.exportCSV = function(animalId = null) {
+  const dataToExport = animalId 
+    ? globalReportData.filter(a => a.id === animalId) 
+    : globalReportData;
+
+  if (dataToExport.length === 0) return alert("ไม่มีข้อมูลสำหรับ Export");
   
   let csvContent = "\uFEFF"; // BOM เพื่อให้ Excel อ่านภาษาไทยได้
   csvContent += "คิว,ชื่อสัตว์,ชนิด,เพศ,น้ำหนัก(กก.),ชื่อเจ้าของ,เบอร์โทร,โต๊ะผ่าตัด,ศัลยแพทย์,วิสัญญีแพทย์,หัตถการ,ข้อควรระวัง,ยากลับบ้าน\n";
 
-  globalReportData.forEach(ani => {
+  dataToExport.forEach(ani => {
     const qData = Array.isArray(ani.vasd_queue) ? ani.vasd_queue[0] : ani.vasd_queue;
     const services = ani.vasd_service?.map(s => s.service_type).join("; ") || "";
     const meds = ani.vasd_prescription?.map(m => `${m.drug_id} ${m.dose}(${m.freq})x${m.days}d`).join("; ") || "";
     
-    // จัดการข้อความที่มีลูกน้ำ (,) หรือขึ้นบรรทัดใหม่
     const row = [
       ani.queue_number,
       ani.animal_name,
@@ -380,19 +403,28 @@ window.exportCSV = function() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `VASD_Report_${new Date().toISOString().split('T')[0]}.csv`);
+  
+  const fileName = animalId 
+    ? `VASD_Report_Q${dataToExport[0].queue_number}_${new Date().toISOString().split('T')[0]}.csv`
+    : `VASD_Report_All_${new Date().toISOString().split('T')[0]}.csv`;
+    
+  link.setAttribute("download", fileName);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
 
 // ── ฟังก์ชัน Export PDF (A4 Print) ──
-window.exportPDF = function() {
-  if (globalReportData.length === 0) return alert("ไม่มีข้อมูลสำหรับ Print");
+// 🟢 แก้ไข: รองรับการรับ Parameter animalId เพื่อพิมพ์เฉพาะเคส
+window.exportPDF = function(animalId = null) {
+  const dataToExport = animalId 
+    ? globalReportData.filter(a => a.id === animalId) 
+    : globalReportData;
+
+  if (dataToExport.length === 0) return alert("ไม่มีข้อมูลสำหรับ Print");
 
   const printWindow = window.open('', '_blank');
   
-  // สร้างโครงสร้าง HTML สำหรับ Print A4
   let html = `
     <!DOCTYPE html>
     <html lang="th">
@@ -422,13 +454,13 @@ window.exportPDF = function() {
     </head>
     <body>
       <div class="header">
-        <h1>รายงานสรุปผลการผ่าตัดและทำหมันสัตว์</h1>
+        <h1>${animalId ? 'รายงานสรุปผลการผ่าตัด (รายบุคคล)' : 'รายงานสรุปผลการผ่าตัดและทำหมันสัตว์'}</h1>
         <p>หน่วยบริการวิชาการสัตวแพทย์ (VASD) มหาวิทยาลัยเทคโนโลยีราชมงคลตะวันออก</p>
         <p>วันที่พิมพ์: ${new Date().toLocaleDateString('th-TH')} เวลา ${new Date().toLocaleTimeString('th-TH')}</p>
       </div>
   `;
 
-  globalReportData.forEach(ani => {
+  dataToExport.forEach(ani => {
     const qData = Array.isArray(ani.vasd_queue) ? ani.vasd_queue[0] : ani.vasd_queue;
     const services = ani.vasd_service?.map(s => s.service_type).join(", ") || "-";
     const meds = ani.vasd_prescription?.map(m => `${m.drug_id}: ${m.dose} (${m.freq}) x ${m.days}d`).join(", ") || "-";
