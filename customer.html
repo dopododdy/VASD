@@ -17,7 +17,7 @@
   
   /* Status Colors */
   --c-wait:       #9ca3af; /* สีเทา - รอผ่าตัด */
-  --c-anes:       #3b82f6; /* สีฟ้า - วางยา (เพิ่มให้ครบ flow) */
+  --c-anes:       #3b82f6; /* สีฟ้า - วางยา */
   --c-surg:       #ef4444; /* สีแดง - กำลังผ่า */
   --c-rec:        #86efac; /* สีเขียวอ่อน - พักฟื้น */
   --c-ready:      #14532d; /* สีเขียวแก่ - รอรับกลับ */
@@ -147,7 +147,6 @@ header {
   100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
 }
 
-/* รองรับจอที่เล็กมากๆ ให้บีบช่องว่างลง */
 @media (max-width: 360px) {
   #animalList { gap: 4px; }
   .pet-card .q-num { font-size: 16px; }
@@ -179,9 +178,6 @@ header {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-// ตัวแปรเช็คข้ามวันและข้อมูลล่าสุด
-let todayString = new Date().toDateString(); 
-let currentEventId = null;
 let isFirstLoad = true;
 let oldStatuses = {}; // เก็บสถานะเก่าเพื่อเปรียบเทียบ { animal_id: "status" }
 
@@ -192,7 +188,7 @@ let isPopupShowing = false;
 // แผนที่สถานะและสี
 const statusMap = {
   ready_to_go_home: { text: "รอรับกลับ", colorClass: "bg-ready", weight: 1 },
-  done:             { text: "รอรับกลับ", colorClass: "bg-ready", weight: 1 }, // ให้ done แสดงเหมือนรอรับกลับ หรือซ่อนก็ได้
+  done:             { text: "รอรับกลับ", colorClass: "bg-ready", weight: 1 }, 
   recovery:         { text: "พักฟื้น",   colorClass: "bg-rec",   weight: 2 },
   surgery:          { text: "กำลังผ่า",  colorClass: "bg-surg",  weight: 3 },
   anesthesia:       { text: "วางยา",     colorClass: "bg-anes",  weight: 4 },
@@ -201,24 +197,16 @@ const statusMap = {
 };
 
 async function loadAnimals() {
-  // 1. เช็คข้ามวัน
-  if (new Date().toDateString() !== todayString) {
-    location.reload(); return;
-  }
-
-  // 2. ดึง Event ID
-  if (!currentEventId) {
-    const { data: eventId } = await supabase.rpc("get_today_event");
-    currentEventId = eventId;
-  }
-  
-  // 3. ดึงข้อมูล
+  // ดึงข้อมูลทั้งหมดโดยไม่กรอง event_id และวันที่
   const { data, error } = await supabase
     .from("vasd_animal")
-    .select(`id, queue_number, animal_name, vasd_queue(status)`)
-    .eq("event_id", currentEventId);
+    .select(`id, queue_number, animal_name, vasd_queue(status)`);
 
-  if (error) return;
+  if (error) {
+    console.error("Database Fetch Error:", error);
+    document.getElementById("animalList").innerHTML = `<div class="empty-state">เกิดข้อผิดพลาดในการโหลดข้อมูลคิว</div>`;
+    return;
+  }
   
   const formattedData = data || [];
   
@@ -327,15 +315,9 @@ supabase.channel("vasd-customer-live")
   .on("postgres_changes", { event: "*", schema: "public", table: "vasd_animal" }, loadAnimals)
   .subscribe();
 
-// เช็คข้ามวันทุกๆ 1 ชั่วโมง
-setInterval(() => {
-  if (new Date().toDateString() !== todayString) location.reload();
-}, 3600000); 
-
 // โหลดข้อมูลครั้งแรก
 loadAnimals();
 </script>
 
-<script type="module" src="./js/global-alarm.js"></script>
 </body>
 </html>
