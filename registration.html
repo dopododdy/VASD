@@ -106,7 +106,7 @@ header {
 .wrap {
   position: relative; z-index: 1;
   max-width: 960px; margin: 0 auto;
-  padding: 24px 16px 100px; /* Padding bottom allows space for nav */
+  padding: 24px 16px 100px;
   width: 100%; display: flex; flex-direction: column; gap: 16px;
 }
 
@@ -119,14 +119,6 @@ header {
   font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
 }
 .page-sub { font-size: 12px; color: var(--text-dim); }
-
-/* ─── Section Title ─── */
-.section-title {
-  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--text-faint); margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 
 /* ═══════════════════════════════════════════
    CARD
@@ -190,17 +182,11 @@ select { cursor: pointer; }
 select option { background: var(--navy-mid); color: var(--text); }
 textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 
-/* Owner row */
 .owner-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 12px; align-items: end;
-  margin-bottom: 12px;
+  display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 12px;
 }
 .owner-row-2 {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 12px; align-items: end;
+  display: grid; grid-template-columns: 1fr 2fr; gap: 12px; align-items: end;
 }
 @media (max-width: 560px) {
   .owner-row { grid-template-columns: 1fr; margin-bottom: 0; gap: 12px; }
@@ -214,67 +200,49 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   padding: 10px 16px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
   border: none; border-radius: var(--radius-sm); cursor: pointer;
   display: inline-flex; align-items: center; gap: 6px;
-  transition: opacity 0.2s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  white-space: nowrap;
+  transition: opacity 0.2s, transform 0.15s, background 0.3s;
+  -webkit-tap-highlight-color: transparent; white-space: nowrap;
 }
 .btn:active { transform: scale(0.96); }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
 
-.btn-ghost {
-  background: var(--surface-2); color: var(--text-dim);
-  border: 1px solid var(--border-2);
-}
-.btn-ghost:hover { background: var(--surface-3); color: var(--text); }
-
-.btn-paste {
-  background: var(--emerald-soft); color: var(--emerald);
-  border: 1px solid rgba(16,185,129,0.3);
-}
+.btn-paste { background: var(--emerald-soft); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); }
 .btn-paste:hover { background: rgba(16,185,129,0.22); }
-
-.btn-add {
-  background: var(--surface-3); color: var(--text);
-  border: 1px solid var(--border-2);
-}
+.btn-add { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-2); }
 .btn-add:hover { background: rgba(14,165,160,0.12); border-color: var(--teal); color: var(--teal-light); }
-
-.btn-del {
-  padding: 7px 10px; font-size: 14px;
-  background: var(--rose-soft); color: var(--rose);
-  border: 1px solid rgba(239,68,68,0.3);
-}
+.btn-del { padding: 7px 10px; font-size: 14px; background: var(--rose-soft); color: var(--rose); border: 1px solid rgba(239,68,68,0.3); }
 .btn-del:hover { background: rgba(239,68,68,0.22); }
 
 .btn-submit {
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
   color: #fff; font-size: 15px; padding: 14px 36px;
   border-radius: var(--radius); width: 100%; justify-content: center;
-  box-shadow: 0 4px 24px var(--teal-glow);
-  letter-spacing: 0.3px;
+  box-shadow: 0 4px 24px var(--teal-glow); letter-spacing: 0.3px;
 }
-.btn-submit:hover { opacity: 0.9; box-shadow: 0 6px 30px var(--teal-glow); }
+.btn-submit:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 6px 30px var(--teal-glow); }
+
+/* สไตล์ปุ่มตอนรอ Consent */
+.btn-submit.waiting {
+  background: linear-gradient(135deg, var(--amber), #fbbf24);
+  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.3);
+  animation: pulse-amber 1.5s infinite alternate;
+}
+@keyframes pulse-amber {
+  from { opacity: 0.8; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+  to { opacity: 1; box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); }
+}
 
 /* ═══════════════════════════════════════════
-   ANIMAL CARDS (mobile-first, card per row)
+   ANIMAL CARDS
 ═══════════════════════════════════════════ */
 #animalList { display: flex; flex-direction: column; gap: 12px; }
-
 .animal-card {
-  background: var(--surface-2);
-  border: 1px solid var(--border-2);
-  border-radius: var(--radius);
-  padding: 16px;
-  position: relative;
-  animation: slideUp 0.3s ease both;
-  transition: border-color 0.2s;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius); padding: 16px; position: relative;
+  animation: slideUp 0.3s ease both; transition: border-color 0.2s;
 }
 .animal-card:hover { border-color: rgba(14,165,160,0.3); }
-
-.animal-card-header {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 14px;
-}
+.animal-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .animal-card-num {
   width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
@@ -282,147 +250,61 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
   font-family: "Outfit", sans-serif;
 }
-.animal-card-label {
-  font-size: 13px; font-weight: 600; color: var(--text); flex: 1;
-}
+.animal-card-label { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
 
-/* animal fields grid */
-.animal-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 80px;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-@media (max-width: 560px) {
-  .animal-fields { grid-template-columns: 1fr 1fr; }
-}
+.animal-fields { display: grid; grid-template-columns: 1fr 1fr 1fr 80px; gap: 10px; margin-bottom: 14px; }
+@media (max-width: 560px) { .animal-fields { grid-template-columns: 1fr 1fr; } }
 
-/* service checkboxes */
 .svc-section { margin-bottom: 12px; }
-.svc-label-row {
-  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text-faint); margin-bottom: 8px;
-}
-.svc-grid {
-  display: flex; flex-wrap: wrap; gap: 7px;
-}
+.svc-label-row { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px; }
+.svc-grid { display: flex; flex-wrap: wrap; gap: 7px; }
 .svc-chip {
-  display: flex; align-items: center; gap: 6px;
-  cursor: pointer; font-size: 12px; font-weight: 500;
-  background: var(--surface); border: 1px solid var(--border-2);
-  color: var(--text-dim); border-radius: 20px;
-  padding: 6px 12px;
-  user-select: none;
-  transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent;
+  display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; font-weight: 500;
+  background: var(--surface); border: 1px solid var(--border-2); color: var(--text-dim);
+  border-radius: 20px; padding: 6px 12px; user-select: none; transition: all 0.2s; -webkit-tap-highlight-color: transparent;
 }
 .svc-chip:hover { background: var(--surface-3); border-color: var(--teal); color: var(--text); }
 .svc-chip input[type="checkbox"] { display: none; }
-.svc-chip.checked {
-  background: rgba(14,165,160,0.15);
-  border-color: var(--teal);
-  color: var(--teal-light);
-  font-weight: 600;
-}
+.svc-chip.checked { background: rgba(14,165,160,0.15); border-color: var(--teal); color: var(--teal-light); font-weight: 600; }
 .svc-chip.checked::before { content: "✓ "; font-size: 11px; }
 
-/* health note */
-.note-section { }
-.note-section textarea {
-  font-size: 13px; min-height: 52px;
-}
-.note-section textarea.has-content {
-  border-color: var(--amber);
-  background: rgba(245,158,11,0.06);
-  color: var(--amber);
-}
+.note-section textarea { font-size: 13px; min-height: 52px; }
+.note-section textarea.has-content { border-color: var(--amber); background: rgba(245,158,11,0.06); color: var(--amber); }
 .note-section textarea.has-content::placeholder { color: rgba(245,158,11,0.4); }
 
-/* delete btn position */
-.btn-del-animal {
-  position: absolute; top: 12px; right: 12px;
-}
+.btn-del-animal { position: absolute; top: 12px; right: 12px; }
 
-/* Empty state */
-.empty-state {
-  text-align: center; padding: 32px 16px;
-  color: var(--text-faint);
-}
+.empty-state { text-align: center; padding: 32px 16px; color: var(--text-faint); }
 .empty-state-icon { font-size: 40px; margin-bottom: 10px; }
 .empty-state-text { font-size: 13px; }
 
-/* ═══════════════════════════════════════════
-   SUBMIT AREA
-═══════════════════════════════════════════ */
-.submit-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  animation: slideUp 0.4s 0.2s ease both;
-}
+.submit-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; animation: slideUp 0.4s 0.2s ease both; }
 
-/* ═══════════════════════════════════════════
-   MOBILE BOTTOM NAV (≤ 640px)
-═══════════════════════════════════════════ */
 .bottom-nav {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: rgba(11,25,41,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-2);
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-  grid-template-columns: repeat(5, 1fr);
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom)); grid-template-columns: repeat(5, 1fr);
 }
-.nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 6px 4px;
-  font-size: 9px; color: var(--text-dim);
-  text-decoration: none; cursor: pointer;
-  transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.nav-item:active { color: var(--teal); }
-.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px; font-size: 9px; color: var(--text-dim); text-decoration: none; }
 .nav-item.active { color: var(--teal); }
 .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
 
-/* ═══════════════════════════════════════════
-   PRINT
-═══════════════════════════════════════════ */
 #printArea { display: none; }
 @media print {
   body > :not(#printArea) { display: none !important; }
   #printArea { display: block !important; }
-  .sticker-page {
-    position: relative; width: 80mm; height: 50mm;
-    page-break-after: always; overflow: hidden; background: #fff;
-  }
-  .line {
-    position: absolute; white-space: pre-wrap; word-break: break-word;
-    box-sizing: border-box; padding-right: 5px; color: #000 !important;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
+  .sticker-page { position: relative; width: 80mm; height: 50mm; page-break-after: always; overflow: hidden; background: #fff; }
+  .line { position: absolute; white-space: pre-wrap; word-break: break-word; box-sizing: border-box; padding-right: 5px; color: #000 !important; }
   @page { size: 80mm 50mm; margin: 0; }
 }
 
-/* ═══════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════ */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE TWEAKS
-═══════════════════════════════════════════ */
 @media (max-width: 640px) {
   header { height: 56px; padding: 0 14px; }
   .brand-sub { display: none; }
   .brand-name { font-size: 14px; }
-  .wrap { padding: 18px 12px 90px; } /* Increased bottom padding for nav */
+  .wrap { padding: 18px 12px 90px; }
   .page-title { font-size: 18px; }
   .card-body { padding: 14px; }
   .card-footer { padding: 10px 14px; }
@@ -454,7 +336,7 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   <div class="page-title-row">
     <div>
       <div class="page-title">ลงทะเบียนสัตว์เข้ารับบริการ</div>
-      <div class="page-sub">กรอกข้อมูลเจ้าของและสัตว์ที่ต้องการรับบริการ</div>
+      <div class="page-sub">กรอกข้อมูลและส่งคำขอให้เจ้าของสัตว์กดยืนยัน (Consent)</div>
     </div>
   </div>
 
@@ -511,29 +393,19 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   </div>
 
   <div class="submit-card">
-    <button type="button" id="btnSaveAll" class="btn btn-submit" onclick="window.saveAll()">
-      💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว
+    <button type="button" id="btnRequestConsent" class="btn btn-submit" onclick="window.requestConsent()">
+      📲 ส่งคำขอ Consent ไปยังหน้าจอ iPad
     </button>
   </div>
 
 </div>
 
 <nav class="bottom-nav">
-  <a class="nav-item" href="index.html">
-    <span class="nav-icon">🏠</span>หน้าหลัก
-  </a>
-  <a class="nav-item" href="animals.html">
-    <span class="nav-icon">🐾</span>สัตว์
-  </a>
-  <a class="nav-item" href="anesthesia.html">
-    <span class="nav-icon">🩺</span>วางยา
-  </a>
-  <a class="nav-item" href="surgery.html">
-    <span class="nav-icon">📋</span>ผ่าตัด
-  </a>
-  <a class="nav-item" href="recovery.html">
-    <span class="nav-icon">🛏️</span>พักฟื้น
-  </a>
+  <a class="nav-item active" href="registration.html"><span class="nav-icon">📝</span>ลงทะเบียน</a>
+  <a class="nav-item" href="animals.html"><span class="nav-icon">🐾</span>สัตว์</a>
+  <a class="nav-item" href="anesthesia.html"><span class="nav-icon">🩺</span>วางยา</a>
+  <a class="nav-item" href="surgery.html"><span class="nav-icon">📋</span>ผ่าตัด</a>
+  <a class="nav-item" href="recovery.html"><span class="nav-icon">🛏️</span>พักฟื้น</a>
 </nav>
 
 <div id="printArea"></div>
@@ -542,13 +414,27 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 import { supabase } from "./js/supabase.js";
 
 let animalCount = 0;
+let isWaitingForConsent = false;
+
+/* ── SETTING UP SUPABASE REALTIME (BROADCAST) ── */
+// สร้างห้องเชื่อมต่อชื่อ vasd-consent-room เพื่อคุยกับ iPad
+const consentChannel = supabase.channel('vasd-consent-room');
+
+// รอรับสัญญาณ 'consent-granted' จาก iPad
+consentChannel
+  .on('broadcast', { event: 'consent-granted' }, (payload) => {
+    if (isWaitingForConsent) {
+      console.log("✅ ได้รับการยินยอมแล้ว! กำลังบันทึกข้อมูล...");
+      executeSave(); // ทริกเกอร์การบันทึกอัตโนมัติ
+    }
+  })
+  .subscribe();
 
 /* ── Count display ── */
 function refreshCount() {
   const rows = document.querySelectorAll(".animal-card");
   document.getElementById("animalCount").textContent = `${rows.length} รายการ`;
   document.getElementById("emptyState").style.display = rows.length === 0 ? "block" : "none";
-  /* re-number badges */
   rows.forEach((card, i) => {
     const num = card.querySelector(".animal-card-num");
     if (num) num.textContent = i + 1;
@@ -665,7 +551,6 @@ window.addAnimal = function () {
   sex.addEventListener("change", refreshSvc);
   note.addEventListener("input", () => note.classList.toggle("has-content", note.value.trim() !== ""));
 
-  /* expose refreshCount globally so inline onclick works */
   window.refreshCount = refreshCount;
 
   const list = document.getElementById("animalList");
@@ -674,38 +559,80 @@ window.addAnimal = function () {
   card.scrollIntoView({ behavior: "smooth", block: "nearest" });
 };
 
-/* ── Save All ── */
-window.saveAll = async function () {
-  const btnSave = document.getElementById("btnSaveAll");
+/* ── 1. Request Consent from iPad ── */
+window.requestConsent = function() {
   const ownerNameInput = document.getElementById("ownerName");
   const ownerName = ownerNameInput.value.trim();
   const phone     = document.getElementById("phone").value.trim();
-  
-  // ดึงค่าเลขบัตรประชาชนและที่อยู่
   const idCard    = document.getElementById("idCard").value.trim();
   const address   = document.getElementById("address").value.trim();
 
+  // Validate
   if (!ownerName) { alert("❌ กรุณาระบุชื่อเจ้าของสัตว์"); ownerNameInput.focus(); return; }
   const cards = document.querySelectorAll(".animal-card");
   if (cards.length === 0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
 
   let hasError = false;
+  let animalsData = []; // เก็บข้อมูลสัตว์เพื่อส่งไป iPad
+
   cards.forEach((card, i) => {
     const ni = card.querySelector(".animalName");
     if (!ni.value.trim()) {
       alert(`❌ กรุณาระบุชื่อสัตว์รายการที่ ${i + 1}`);
       ni.focus(); ni.style.borderColor = "var(--rose)"; hasError = true;
+    } else {
+      let svcs = [];
+      card.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
+      animalsData.push({
+        name: ni.value.trim(),
+        species: card.querySelector(".species").value === "ม" ? "แมว" : "สุนัข",
+        sex: card.querySelector(".sex").value,
+        services: svcs
+      });
     }
   });
+
   if (hasError) return;
 
-  btnSave.disabled = true; btnSave.textContent = "⏳ กำลังบันทึก...";
+  // แพ็กข้อมูลสำหรับส่งไปแสดงที่จอ iPad
+  const payloadData = {
+    owner: { name: ownerName, phone: phone || "-", idCard: idCard || "-", address: address || "-" },
+    animals: animalsData
+  };
+
+  // เปลี่ยนสถานะปุ่ม
+  const btn = document.getElementById("btnRequestConsent");
+  btn.disabled = true;
+  btn.classList.add("waiting");
+  btn.textContent = "⏳ กำลังรอเจ้าของสัตว์กดยืนยัน (ดูที่ iPad)...";
+  isWaitingForConsent = true;
+
+  // ส่งข้อมูล (Broadcast) ไปให้ iPad
+  consentChannel.send({
+    type: 'broadcast',
+    event: 'request-consent',
+    payload: payloadData
+  });
+};
+
+/* ── 2. Execute Save (ทำงานอัตโนมัติเมื่อ iPad กดยอมรับ) ── */
+async function executeSave() {
+  isWaitingForConsent = false;
+  const btnSave = document.getElementById("btnRequestConsent");
+  btnSave.classList.remove("waiting");
+  btnSave.textContent = "💾 ได้รับคำยินยอมแล้ว... กำลังบันทึกข้อมูลและพิมพ์คิว";
+
+  const ownerName = document.getElementById("ownerName").value.trim();
+  const phone     = document.getElementById("phone").value.trim();
+  const idCard    = document.getElementById("idCard").value.trim();
+  const address   = document.getElementById("address").value.trim();
+  const cards = document.querySelectorAll(".animal-card");
 
   try {
     const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
     if (evtErr) throw evtErr;
 
-    // เพิ่ม id_card และ address ในการ insert
+    // บันทึก owner พร้อม consent_agreed = true เสมอ (เพราะทำผ่าน iPad มาแล้ว)
     const { data: owner, error: ownerErr } = await supabase
       .from("vasd_owner")
       .insert({ 
@@ -713,7 +640,8 @@ window.saveAll = async function () {
         owner_name: ownerName, 
         phone: phone,
         id_card: idCard,
-        address: address 
+        address: address,
+        consent_agreed: true 
       })
       .select().single();
     if (ownerErr) throw ownerErr;
@@ -780,15 +708,15 @@ window.saveAll = async function () {
 
   } catch (err) {
     console.error(err);
-    alert("❌ เกิดข้อผิดพลาด: " + (err.message || "โปรดลองใหม่"));
+    alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + (err.message || "โปรดลองใหม่"));
     btnSave.disabled = false;
-    btnSave.innerHTML = "💾 บันทึกข้อมูลเข้าระบบ และพิมพ์คิว";
+    btnSave.textContent = "📲 ส่งคำขอ Consent ไปยังหน้าจอ iPad อีกครั้ง";
   }
-};
+}
 
 /* auto-add first animal */
 window.addAnimal();
 </script>
-   <script type="module" src="./js/global-alarm.js"></script>
+<script type="module" src="./js/global-alarm.js"></script>
 </body>
 </html>
