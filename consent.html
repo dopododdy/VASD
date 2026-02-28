@@ -4,30 +4,30 @@
 <meta charset="UTF-8">
 <title>หนังสือยินยอมการรักษา – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS (Optimized for Elderly & iPad Landscape)
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
   --navy-mid:   #112240;
   --teal:       #0ea5a0;
-  --teal-light: #14c4bc;
-  --teal-glow:  rgba(14,165,160,0.3);
+  --teal-light: #2dd4bf; /* สว่างขึ้นเพื่อผู้สูงอายุ */
+  --teal-glow:  rgba(20,196,188,0.3);
   --emerald:    #10b981;
-  --amber:      #f59e0b;
-  --rose:       #ef4444;
+  --amber:      #fbbf24; /* สว่างขึ้น */
+  --rose:       #f87171; /* สว่างขึ้น */
 
-  --surface:    rgba(255,255,255,0.05);
-  --surface-2:  rgba(255,255,255,0.08);
-  --border:     rgba(255,255,255,0.1);
-  --text:       #f8fafc;
-  --text-dim:   #94a3b8;
-  --text-faint: #64748b;
+  --surface:    rgba(255,255,255,0.06);
+  --surface-2:  rgba(255,255,255,0.1);
+  --border:     rgba(255,255,255,0.15);
+  --text:       #ffffff;
+  --text-dim:   #cbd5e1; /* ปรับให้สว่างกว่าเดิม */
 
   --radius-lg:  24px;
+  --radius-xl:  32px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,113 +39,120 @@ body {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow-x: hidden;
+  /* ป้องกันการเผลอซูมของ iPad */
+  touch-action: pan-y;
 }
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -1;
   background: radial-gradient(circle at 50% 0%, rgba(14,165,160,0.15) 0%, transparent 60%);
 }
 
+/* ขยาย Container สำหรับ iPad แนวนอน */
 .container {
-  width: 100%; max-width: 800px;
-  padding: 20px;
+  width: 100%; max-width: 1100px;
+  padding: 40px 30px;
 }
 
 /* ── STATES ── */
 #standbyScreen, #successScreen {
-  text-align: center; padding: 40px 20px;
+  text-align: center;
   animation: fadeIn 0.5s ease;
 }
 #consentScreen {
-  display: none; /* ซ่อนไว้รอข้อมูลเข้า */
+  display: none;
   animation: slideUp 0.5s ease;
 }
 
-/* ── CARDS ── */
+/* ── STANDBY NOTICE (คำเตือนขนาดใหญ่) ── */
+.standby-notice {
+  background: rgba(239, 68, 68, 0.08);
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-xl);
+  padding: 50px 60px; margin-bottom: 40px;
+  text-align: left;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+.warning-icon { font-size: 80px; text-align: center; margin-bottom: 20px; line-height: 1; }
+.standby-notice h2 { color: var(--amber); font-size: 42px; text-align: center; margin-bottom: 30px; font-weight: 800; }
+.standby-notice p { font-size: 28px; line-height: 1.6; color: var(--text); margin-bottom: 16px; }
+.standby-notice ul { margin-left: 50px; margin-bottom: 30px; font-size: 28px; line-height: 1.8; color: var(--text-dim); }
+.standby-notice ul li { margin-bottom: 12px; }
+.standby-notice .highlight-rose { color: var(--rose); font-weight: 700; font-size: 30px; }
+.standby-notice .highlight-amber { color: var(--amber); font-weight: 700; font-size: 26px; }
+
+/* ── CARDS (ข้อมูลเจ้าของและสัตว์) ── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  margin-bottom: 20px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 36px 40px;
+  margin-bottom: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 .card-title {
-  font-size: 22px; font-weight: 700; color: var(--teal-light);
-  margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
-  border-bottom: 1px solid var(--border); padding-bottom: 12px;
+  font-size: 32px; font-weight: 800; color: var(--teal-light);
+  margin-bottom: 24px; display: flex; align-items: center; gap: 14px;
+  border-bottom: 2px solid var(--border); padding-bottom: 20px;
 }
 
 /* ── OWNER INFO ── */
 .info-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 30px 20px;
 }
-.info-item { display: flex; flex-direction: column; gap: 4px; }
-.info-label { font-size: 14px; color: var(--text-dim); text-transform: uppercase; font-weight: 600; letter-spacing: 1px;}
-.info-value { font-size: 20px; font-weight: 600; color: #fff; }
+.info-item { display: flex; flex-direction: column; gap: 8px; }
+.info-label { font-size: 20px; color: var(--text-dim); text-transform: uppercase; font-weight: 600; letter-spacing: 1px;}
+.info-value { font-size: 32px; font-weight: 700; color: #fff; line-height: 1.3; }
 
 /* ── ANIMALS LIST ── */
 .animal-item {
-  background: var(--surface-2); border-radius: 12px;
-  padding: 16px; margin-bottom: 12px;
+  background: var(--surface-2); border-radius: 20px;
+  padding: 24px 30px; margin-bottom: 16px;
   display: flex; justify-content: space-between; align-items: center;
+  border: 1px solid var(--border);
 }
-.animal-name { font-size: 20px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;}
-.animal-spc { font-size: 14px; color: var(--text-dim); background: var(--surface); padding: 4px 10px; border-radius: 20px;}
-.animal-svcs { font-size: 16px; color: var(--amber); font-weight: 600; text-align: right;}
+.animal-name { font-size: 32px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 14px;}
+.animal-spc { font-size: 20px; color: var(--navy); background: var(--teal-light); font-weight: 700; padding: 6px 16px; border-radius: 30px;}
+.animal-svcs { font-size: 28px; color: var(--amber); font-weight: 700; text-align: right;}
 
 /* ── CONSENT TEXT ── */
 .consent-box {
-  background: rgba(245, 158, 11, 0.05);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 24px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 2px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-xl);
+  padding: 40px 50px;
+  margin-bottom: 40px;
 }
-.consent-box h3 { color: var(--amber); font-size: 24px; margin-bottom: 16px; text-align: center;}
-.consent-box p { font-size: 18px; line-height: 1.6; color: var(--text); margin-bottom: 16px; }
+.consent-box h3 { color: var(--amber); font-size: 36px; margin-bottom: 24px; text-align: center; font-weight: 800;}
+.consent-box p { font-size: 26px; line-height: 1.8; color: var(--text); margin-bottom: 24px; }
 .consent-box p:last-child { margin-bottom: 0; }
 
-/* ── STANDBY NOTICE ── */
-.standby-notice {
-  background: rgba(239, 68, 68, 0.05);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--radius-lg);
-  padding: 30px; margin-bottom: 30px;
-  text-align: left;
-}
-.standby-notice h2 { color: var(--amber); font-size: 24px; text-align: center; margin-bottom: 20px; }
-.standby-notice p { font-size: 18px; line-height: 1.6; color: var(--text); margin-bottom: 12px; }
-.standby-notice ul { margin-left: 30px; margin-bottom: 16px; font-size: 18px; line-height: 1.6; color: var(--text-dim); }
-.standby-notice ul li { margin-bottom: 6px; }
-.standby-notice .highlight-rose { color: var(--rose); font-weight: 600; }
-.standby-notice .highlight-amber { color: var(--amber); font-weight: 600; }
-
-/* ── BUTTON ── */
+/* ── BUTTON (ปุ่มกดยักษ์) ── */
 .btn-accept {
   width: 100%;
-  background: linear-gradient(135deg, var(--emerald), #34d399);
-  color: #fff; font-size: 28px; font-weight: 700; font-family: "Sarabun", sans-serif;
-  padding: 20px; border: none; border-radius: var(--radius-lg);
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
-  transition: transform 0.2s, filter 0.2s;
+  background: linear-gradient(135deg, var(--emerald), #059669);
+  color: #fff; font-size: 42px; font-weight: 800; font-family: "Sarabun", sans-serif;
+  padding: 36px; border: none; border-radius: 100px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 16px;
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+  transition: transform 0.2s, background 0.2s;
 }
-.btn-accept:active { transform: scale(0.98); }
+.btn-accept:active { transform: scale(0.97); background: #059669; }
 
 /* ไอคอนหมุนรอ */
 .spinner {
-  width: 30px; height: 30px;
-  border: 3px solid var(--surface-2); border-top-color: var(--teal);
+  width: 40px; height: 40px;
+  border: 4px solid var(--surface-2); border-top-color: var(--teal-light);
   border-radius: 50%; animation: spin 1s linear infinite;
 }
 .loading-row {
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  background: var(--surface); padding: 16px 30px; border-radius: 50px;
-  display: inline-flex;
+  display: inline-flex; align-items: center; justify-content: center; gap: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 20px 40px; border-radius: 50px;
 }
+.loading-row span { font-size: 26px; color: #fff; font-weight: 600; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
@@ -156,7 +163,7 @@ body::before {
   <div id="standbyScreen">
     
     <div class="standby-notice">
-      <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">⚠️</div>
+      <div class="warning-icon">⚠️</div>
       <h2>*** โปรดอ่าน และทำความเข้าใจ ***</h2>
       
       <p><strong>การวางยาสลบมีความเสี่ยง</strong> แม้จะมีการประเมินสุขภาพก่อนทำหัตถการแล้วก็ตาม</p>
@@ -169,12 +176,14 @@ body::before {
         <li class="highlight-rose">การเสียชีวิต (พบได้น้อยมาก แต่สามารถเกิดขึ้นได้)</li>
       </ul>
       <p class="highlight-amber">สัตว์ที่มีโรคประจำตัว เช่น โรคหัวใจ โรคไต โรคตับ หรือสัตว์สูงอายุ อาจมีความเสี่ยงเพิ่มขึ้น</p>
-      <p style="color: var(--text-dim); font-size: 16px;">ระหว่างการวางยาสลบ จะมีการติดตามสัญญาณชีพ เช่น ชีพจร การหายใจ อุณหภูมิ และค่าออกซิเจนในเลือดอย่างใกล้ชิด</p>
+      <p style="color: var(--text-dim); font-size: 22px; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+        * ระหว่างการวางยาสลบ จะมีการติดตามสัญญาณชีพ เช่น ชีพจร การหายใจ อุณหภูมิ และค่าออกซิเจนในเลือดอย่างใกล้ชิด
+      </p>
     </div>
 
     <div class="loading-row">
       <div class="spinner"></div>
-      <span style="font-size: 18px; color: var(--text-dim); font-weight: 500;">รอเจ้าหน้าที่เตรียมข้อมูลสักครู่...</span>
+      <span>รอเจ้าหน้าที่เตรียมข้อมูลสักครู่...</span>
     </div>
 
   </div>
@@ -187,7 +196,7 @@ body::before {
         <div class="info-item"><span class="info-label">ชื่อ-นามสกุล</span><span class="info-value" id="dispName">-</span></div>
         <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span class="info-value" id="dispPhone">-</span></div>
         <div class="info-item"><span class="info-label">เลขบัตรประชาชน</span><span class="info-value" id="dispId">-</span></div>
-        <div class="info-item"><span class="info-label">ที่อยู่</span><span class="info-value" id="dispAddress" style="font-size: 16px;">-</span></div>
+        <div class="info-item"><span class="info-label">ที่อยู่</span><span class="info-value" id="dispAddress" style="font-size: 24px;">-</span></div>
       </div>
     </div>
 
@@ -198,8 +207,8 @@ body::before {
 
     <div class="consent-box">
       <h3>⚖️ ข้อตกลงและหนังสือยินยอม</h3>
-      <p><strong>1. การงดน้ำและอาหาร:</strong> ข้าพเจ้ายืนยันว่าสัตว์เลี้ยงได้รับการงดน้ำและอาหารมาแล้วไม่ต่ำกว่า 8-12 ชั่วโมง เพื่อป้องกันอันตรายถึงชีวิตจากการสำลักระหว่างวางยาสลบ</p>
-      <p><strong>2. ความเสี่ยงจากการรักษา:</strong> ข้าพเจ้ารับทราบว่าการวางยาสลบและการทำศัลยกรรมมีความเสี่ยง แม้สัตวแพทย์จะปฏิบัติหน้าที่อย่างระมัดระวังที่สุดแล้วก็ตาม</p>
+      <p><strong>1. การงดน้ำและอาหาร:</strong> ข้าพเจ้ายืนยันว่าสัตว์เลี้ยงได้รับการงดน้ำและอาหารมาแล้วไม่ต่ำกว่า 8-12 ชั่วโมง เพื่อป้องกันอันตรายจากการสำลัก</p>
+      <p><strong>2. ความเสี่ยงจากการรักษา:</strong> ข้าพเจ้ารับทราบว่าการวางยาสลบและการทำศัลยกรรมมีความเสี่ยง แม้สัตวแพทย์จะระมัดระวังที่สุดแล้วก็ตาม</p>
       <p><strong>3. การยินยอม:</strong> ข้าพเจ้ายินยอมให้สัตวแพทย์ทำการรักษาและตัดสินใจช่วยชีวิตตามความเหมาะสม หากเกิดเหตุฉุกเฉิน</p>
     </div>
 
@@ -208,10 +217,11 @@ body::before {
     </button>
   </div>
 
-  <div id="successScreen" style="display:none;">
-    <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
-    <h2 style="font-size: 32px; color: var(--emerald);">ขอบคุณค่ะ/ครับ</h2>
-    <p style="font-size: 20px; color: var(--text-dim); margin-top: 10px;">กรุณาส่งคืนหน้าจอนี้ให้เจ้าหน้าที่ เพื่อทำการพิมพ์คิว</p>
+  <div id="successScreen" style="display:none; padding-top: 100px;">
+    <div style="font-size: 120px; margin-bottom: 30px;">🎉</div>
+    <h2 style="font-size: 54px; color: var(--emerald); font-weight: 800;">ขอบคุณค่ะ/ครับ</h2>
+    <p style="font-size: 32px; color: #fff; margin-top: 20px;">กรุณาส่งคืนหน้าจอให้เจ้าหน้าที่</p>
+    <p style="font-size: 24px; color: var(--text-dim); margin-top: 10px;">เพื่อทำการพิมพ์คิวเข้ารับบริการ</p>
   </div>
 
 </div>
@@ -230,20 +240,16 @@ consentChannel
   })
   .subscribe();
 
-// ฟังก์ชันนำข้อมูลมาแสดงบนหน้าจอ
 function showConsentForm(data) {
-  // ซ่อนหน้าจอ Standby
   document.getElementById("standbyScreen").style.display = "none";
   document.getElementById("successScreen").style.display = "none";
   
-  // ใส่ข้อมูลเจ้าของ
   document.getElementById("dispName").textContent = data.owner.name;
   document.getElementById("dispPhone").textContent = data.owner.phone;
   document.getElementById("dispId").textContent = data.owner.idCard;
   document.getElementById("dispAddress").textContent = data.owner.address;
   document.getElementById("dispCount").textContent = data.animals.length;
 
-  // ใส่ข้อมูลสัตว์
   const container = document.getElementById("dispAnimals");
   container.innerHTML = "";
   data.animals.forEach(anim => {
@@ -257,25 +263,22 @@ function showConsentForm(data) {
     `;
   });
 
-  // โชว์หน้า Consent
   document.getElementById("consentScreen").style.display = "block";
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// เมื่อลูกค้ากดปุ่ม "ยอมรับข้อตกลง"
 window.acceptConsent = function() {
-  // ส่งสัญญาณกลับไปที่ Registration ว่ายอมรับแล้ว
   consentChannel.send({
     type: 'broadcast',
     event: 'consent-granted',
     payload: { status: 'accepted', timestamp: new Date().toISOString() }
   });
 
-  // ซ่อนฟอร์ม โชว์หน้าสำเร็จ
   document.getElementById("consentScreen").style.display = "none";
   document.getElementById("successScreen").style.display = "block";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
-  // หน่วงเวลา 5 วินาที แล้วรีเซ็ตกลับไปหน้าสแตนด์บาย (ให้แสดงข้อความเตือนอีกครั้งสำหรับคิวถัดไป)
+  // กลับหน้าเตือนหลังผ่านไป 5 วินาที
   setTimeout(() => {
     document.getElementById("successScreen").style.display = "none";
     document.getElementById("standbyScreen").style.display = "block";
