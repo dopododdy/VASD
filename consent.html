@@ -3,31 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <title>หนังสือยินยอมการรักษา – VASD</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS (Optimized for Elderly & iPad Landscape)
+   DESIGN TOKENS (iPad Landscape - No Scroll)
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
   --navy-mid:   #112240;
   --teal:       #0ea5a0;
-  --teal-light: #2dd4bf; /* สว่างขึ้นเพื่อผู้สูงอายุ */
-  --teal-glow:  rgba(20,196,188,0.3);
+  --teal-light: #2dd4bf;
   --emerald:    #10b981;
-  --amber:      #fbbf24; /* สว่างขึ้น */
-  --rose:       #f87171; /* สว่างขึ้น */
+  --amber:      #fbbf24;
+  --rose:       #f87171;
 
   --surface:    rgba(255,255,255,0.06);
   --surface-2:  rgba(255,255,255,0.1);
   --border:     rgba(255,255,255,0.15);
   --text:       #ffffff;
-  --text-dim:   #cbd5e1; /* ปรับให้สว่างกว่าเดิม */
+  --text-dim:   #cbd5e1;
 
-  --radius-lg:  24px;
-  --radius-xl:  32px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,124 +34,148 @@ body {
   font-family: "Sarabun", sans-serif;
   background: var(--navy);
   color: var(--text);
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  overflow-x: hidden;
-  /* ป้องกันการเผลอซูมของ iPad */
-  touch-action: pan-y;
+  height: 100vh;         /* ล็อคความสูงเท่าหน้าจอเป๊ะๆ */
+  width: 100vw;
+  overflow: hidden;      /* 🛑 ปิดการเลื่อนจอทุกทิศทาง */
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  touch-action: none;    /* ป้องกันการลาก/ซูมบน iPad */
 }
 body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1;
+  content: ""; position: absolute; inset: 0; z-index: -1;
   background: radial-gradient(circle at 50% 0%, rgba(14,165,160,0.15) 0%, transparent 60%);
 }
 
-/* ขยาย Container สำหรับ iPad แนวนอน */
 .container {
-  width: 100%; max-width: 1100px;
-  padding: 40px 30px;
+  width: 100%; height: 100%;
+  max-width: 1366px;     /* รองรับ iPad Pro */
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TWO COLUMN LAYOUT (แบ่งซ้าย-ขวา) ── */
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  height: 100%;
 }
 
 /* ── STATES ── */
-#standbyScreen, #successScreen {
-  text-align: center;
-  animation: fadeIn 0.5s ease;
+#standbyScreen, #successScreen, #consentScreen {
+  height: 100%;
+  width: 100%;
+  animation: fadeIn 0.4s ease;
 }
-#consentScreen {
-  display: none;
-  animation: slideUp 0.5s ease;
-}
+#consentScreen { display: none; }
+#successScreen { display: none; text-align: center; flex-direction: column; justify-content: center; align-items: center; }
 
-/* ── STANDBY NOTICE (คำเตือนขนาดใหญ่) ── */
-.standby-notice {
+/* ── STANDBY NOTICE (หน้าจอคำเตือน) ── */
+.standby-wrapper {
   background: rgba(239, 68, 68, 0.08);
   border: 2px solid rgba(239, 68, 68, 0.3);
   border-radius: var(--radius-xl);
-  padding: 50px 60px; margin-bottom: 40px;
-  text-align: left;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  padding: 32px 40px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
-.warning-icon { font-size: 80px; text-align: center; margin-bottom: 20px; line-height: 1; }
-.standby-notice h2 { color: var(--amber); font-size: 42px; text-align: center; margin-bottom: 30px; font-weight: 800; }
-.standby-notice p { font-size: 28px; line-height: 1.6; color: var(--text); margin-bottom: 16px; }
-.standby-notice ul { margin-left: 50px; margin-bottom: 30px; font-size: 28px; line-height: 1.8; color: var(--text-dim); }
-.standby-notice ul li { margin-bottom: 12px; }
-.standby-notice .highlight-rose { color: var(--rose); font-weight: 700; font-size: 30px; }
-.standby-notice .highlight-amber { color: var(--amber); font-weight: 700; font-size: 26px; }
+.standby-header { text-align: center; margin-bottom: 20px; }
+.warning-icon { font-size: 64px; line-height: 1; margin-bottom: 10px; }
+.standby-header h2 { color: var(--amber); font-size: 36px; font-weight: 800; }
+.standby-header p { font-size: 24px; margin-top: 10px; color: var(--text); }
 
-/* ── CARDS (ข้อมูลเจ้าของและสัตว์) ── */
-.card {
-  background: var(--surface);
-  border: 2px solid var(--border);
+.standby-content { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly;}
+.standby-content p { font-size: 24px; color: var(--text); }
+.standby-content ul { margin-left: 40px; font-size: 24px; color: var(--text-dim); line-height: 1.6; }
+.standby-content li { margin-bottom: 8px; }
+.highlight-rose { color: var(--rose); font-weight: 700; font-size: 26px; }
+.highlight-amber { color: var(--amber); font-weight: 700; font-size: 22px; }
+
+.standby-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  color: var(--text-dim);
+  font-size: 20px;
+}
+
+/* Loading ในหน้า Standby */
+.loading-box {
+  background: var(--surface); border: 2px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: 36px 40px;
-  margin-bottom: 30px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  height: 100%;
 }
-.card-title {
-  font-size: 32px; font-weight: 800; color: var(--teal-light);
-  margin-bottom: 24px; display: flex; align-items: center; gap: 14px;
-  border-bottom: 2px solid var(--border); padding-bottom: 20px;
+.spinner {
+  width: 60px; height: 60px;
+  border: 6px solid var(--surface-2); border-top-color: var(--teal-light);
+  border-radius: 50%; animation: spin 1s linear infinite;
 }
 
-/* ── OWNER INFO ── */
-.info-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 30px 20px;
+/* ── CARDS (ข้อมูลเจ้าของและสัตว์ - คอลัมน์ซ้าย) ── */
+.col-left { display: flex; flex-direction: column; gap: 20px; }
+.col-right { display: flex; flex-direction: column; gap: 20px; }
+
+.card {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px 32px;
 }
-.info-item { display: flex; flex-direction: column; gap: 8px; }
-.info-label { font-size: 20px; color: var(--text-dim); text-transform: uppercase; font-weight: 600; letter-spacing: 1px;}
-.info-value { font-size: 32px; font-weight: 700; color: #fff; line-height: 1.3; }
+.card.flex-1 { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+.card-title {
+  font-size: 28px; font-weight: 800; color: var(--teal-light);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 2px solid var(--border); padding-bottom: 12px;
+}
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.info-item { display: flex; flex-direction: column; gap: 4px; }
+.info-label { font-size: 18px; color: var(--text-dim); font-weight: 600; }
+.info-value { font-size: 26px; font-weight: 700; color: #fff; line-height: 1.2; }
 
 /* ── ANIMALS LIST ── */
+#dispAnimals { flex: 1; overflow-y: auto; padding-right: 10px; } /* ให้เลื่อนได้เฉพาะรายการสัตว์เผื่อมีหลายตัว */
+#dispAnimals::-webkit-scrollbar { width: 6px; }
+#dispAnimals::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 10px; }
+
 .animal-item {
-  background: var(--surface-2); border-radius: 20px;
-  padding: 24px 30px; margin-bottom: 16px;
+  background: var(--surface-2); border-radius: 16px; border: 1px solid var(--border);
+  padding: 16px 20px; margin-bottom: 12px;
   display: flex; justify-content: space-between; align-items: center;
-  border: 1px solid var(--border);
 }
-.animal-name { font-size: 32px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 14px;}
-.animal-spc { font-size: 20px; color: var(--navy); background: var(--teal-light); font-weight: 700; padding: 6px 16px; border-radius: 30px;}
-.animal-svcs { font-size: 28px; color: var(--amber); font-weight: 700; text-align: right;}
+.animal-name { font-size: 26px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;}
+.animal-spc { font-size: 18px; color: var(--navy); background: var(--teal-light); font-weight: 700; padding: 4px 12px; border-radius: 20px;}
+.animal-svcs { font-size: 24px; color: var(--amber); font-weight: 700; }
 
-/* ── CONSENT TEXT ── */
+/* ── CONSENT TEXT (คอลัมน์ขวา) ── */
 .consent-box {
-  background: rgba(245, 158, 11, 0.08);
-  border: 2px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.08); border: 2px solid rgba(245, 158, 11, 0.3);
   border-radius: var(--radius-xl);
-  padding: 40px 50px;
-  margin-bottom: 40px;
+  padding: 32px;
+  flex: 1; /* ดันให้เต็มพื้นที่ */
+  display: flex; flex-direction: column; justify-content: space-evenly;
 }
-.consent-box h3 { color: var(--amber); font-size: 36px; margin-bottom: 24px; text-align: center; font-weight: 800;}
-.consent-box p { font-size: 26px; line-height: 1.8; color: var(--text); margin-bottom: 24px; }
-.consent-box p:last-child { margin-bottom: 0; }
+.consent-box h3 { color: var(--amber); font-size: 32px; margin-bottom: 16px; text-align: center; font-weight: 800;}
+.consent-box p { font-size: 22px; line-height: 1.6; color: var(--text); }
+.consent-box strong { font-size: 24px; color: var(--amber); }
 
-/* ── BUTTON (ปุ่มกดยักษ์) ── */
+/* ── BUTTON ── */
 .btn-accept {
-  width: 100%;
+  width: 100%; height: 90px;
   background: linear-gradient(135deg, var(--emerald), #059669);
-  color: #fff; font-size: 42px; font-weight: 800; font-family: "Sarabun", sans-serif;
-  padding: 36px; border: none; border-radius: 100px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 16px;
-  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+  color: #fff; font-size: 36px; font-weight: 800; font-family: "Sarabun", sans-serif;
+  border: none; border-radius: 100px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
   transition: transform 0.2s, background 0.2s;
+  flex-shrink: 0;
 }
 .btn-accept:active { transform: scale(0.97); background: #059669; }
 
-/* ไอคอนหมุนรอ */
-.spinner {
-  width: 40px; height: 40px;
-  border: 4px solid var(--surface-2); border-top-color: var(--teal-light);
-  border-radius: 50%; animation: spin 1s linear infinite;
-}
-.loading-row {
-  display: inline-flex; align-items: center; justify-content: center; gap: 20px;
-  background: var(--surface); border: 1px solid var(--border);
-  padding: 20px 40px; border-radius: 50px;
-}
-.loading-row span { font-size: 26px; color: #fff; font-weight: 600; }
-
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
@@ -160,68 +183,76 @@ body::before {
 
 <div class="container">
 
-  <div id="standbyScreen">
+  <div id="standbyScreen" class="grid-layout">
     
-    <div class="standby-notice">
-      <div class="warning-icon">⚠️</div>
-      <h2>*** โปรดอ่าน และทำความเข้าใจ ***</h2>
+    <div class="standby-wrapper">
+      <div class="standby-header">
+        <div class="warning-icon">⚠️</div>
+        <h2>โปรดอ่าน และทำความเข้าใจ</h2>
+        <p><strong>การวางยาสลบมีความเสี่ยง</strong> แม้จะประเมินสุขภาพก่อนแล้วก็ตาม</p>
+      </div>
       
-      <p><strong>การวางยาสลบมีความเสี่ยง</strong> แม้จะมีการประเมินสุขภาพก่อนทำหัตถการแล้วก็ตาม</p>
-      <p>ภาวะแทรกซ้อนที่อาจเกิดขึ้น ได้แก่ :</p>
-      <ul>
-        <li>ความดันโลหิตต่ำ</li>
-        <li>หัวใจเต้นผิดจังหวะ</li>
-        <li>ภาวะหายใจล้มเหลว</li>
-        <li>การแพ้ยา</li>
-        <li class="highlight-rose">การเสียชีวิต (พบได้น้อยมาก แต่สามารถเกิดขึ้นได้)</li>
-      </ul>
-      <p class="highlight-amber">สัตว์ที่มีโรคประจำตัว เช่น โรคหัวใจ โรคไต โรคตับ หรือสัตว์สูงอายุ อาจมีความเสี่ยงเพิ่มขึ้น</p>
-      <p style="color: var(--text-dim); font-size: 22px; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
-        * ระหว่างการวางยาสลบ จะมีการติดตามสัญญาณชีพ เช่น ชีพจร การหายใจ อุณหภูมิ และค่าออกซิเจนในเลือดอย่างใกล้ชิด
-      </p>
-    </div>
+      <div class="standby-content">
+        <p>ภาวะแทรกซ้อนที่อาจเกิดขึ้น ได้แก่ :</p>
+        <ul>
+          <li>ความดันโลหิตต่ำ / หัวใจเต้นผิดจังหวะ</li>
+          <li>ภาวะหายใจล้มเหลว / การแพ้ยา</li>
+          <li class="highlight-rose">การเสียชีวิต (พบได้น้อยมาก แต่สามารถเกิดขึ้นได้)</li>
+        </ul>
+        <p class="highlight-amber">สัตว์ที่มีโรคประจำตัว (หัวใจ ไต ตับ) หรือสัตว์สูงอายุ อาจมีความเสี่ยงเพิ่มขึ้น</p>
+      </div>
 
-    <div class="loading-row">
-      <div class="spinner"></div>
-      <span>รอเจ้าหน้าที่เตรียมข้อมูลสักครู่...</span>
-    </div>
-
-  </div>
-
-  <div id="consentScreen">
-    
-    <div class="card">
-      <div class="card-title">👤 ข้อมูลเจ้าของสัตว์</div>
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">ชื่อ-นามสกุล</span><span class="info-value" id="dispName">-</span></div>
-        <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span class="info-value" id="dispPhone">-</span></div>
-        <div class="info-item"><span class="info-label">เลขบัตรประชาชน</span><span class="info-value" id="dispId">-</span></div>
-        <div class="info-item"><span class="info-label">ที่อยู่</span><span class="info-value" id="dispAddress" style="font-size: 24px;">-</span></div>
+      <div class="standby-footer">
+        * ระหว่างการวางยาสลบ จะมีการติดตามสัญญาณชีพอย่างใกล้ชิด
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">🐾 รายการสัตว์และบริการ (<span id="dispCount">0</span> ตัว)</div>
-      <div id="dispAnimals"></div>
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <span style="font-size: 28px; color: #fff; font-weight: 600;">รอเจ้าหน้าที่เตรียมข้อมูลสักครู่...</span>
     </div>
 
-    <div class="consent-box">
-      <h3>⚖️ ข้อตกลงและหนังสือยินยอม</h3>
-      <p><strong>1. การงดน้ำและอาหาร:</strong> ข้าพเจ้ายืนยันว่าสัตว์เลี้ยงได้รับการงดน้ำและอาหารมาแล้วไม่ต่ำกว่า 8-12 ชั่วโมง เพื่อป้องกันอันตรายจากการสำลัก</p>
-      <p><strong>2. ความเสี่ยงจากการรักษา:</strong> ข้าพเจ้ารับทราบว่าการวางยาสลบและการทำศัลยกรรมมีความเสี่ยง แม้สัตวแพทย์จะระมัดระวังที่สุดแล้วก็ตาม</p>
-      <p><strong>3. การยินยอม:</strong> ข้าพเจ้ายินยอมให้สัตวแพทย์ทำการรักษาและตัดสินใจช่วยชีวิตตามความเหมาะสม หากเกิดเหตุฉุกเฉิน</p>
-    </div>
-
-    <button type="button" class="btn-accept" onclick="acceptConsent()">
-      ✅ ข้าพเจ้ายอมรับข้อตกลงและเงื่อนไข
-    </button>
   </div>
 
-  <div id="successScreen" style="display:none; padding-top: 100px;">
-    <div style="font-size: 120px; margin-bottom: 30px;">🎉</div>
-    <h2 style="font-size: 54px; color: var(--emerald); font-weight: 800;">ขอบคุณค่ะ/ครับ</h2>
-    <p style="font-size: 32px; color: #fff; margin-top: 20px;">กรุณาส่งคืนหน้าจอให้เจ้าหน้าที่</p>
-    <p style="font-size: 24px; color: var(--text-dim); margin-top: 10px;">เพื่อทำการพิมพ์คิวเข้ารับบริการ</p>
+  <div id="consentScreen" class="grid-layout">
+    
+    <div class="col-left">
+      <div class="card">
+        <div class="card-title">👤 ข้อมูลเจ้าของสัตว์</div>
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">ชื่อ-นามสกุล</span><span class="info-value" id="dispName">-</span></div>
+          <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span class="info-value" id="dispPhone">-</span></div>
+          <div class="info-item"><span class="info-label">เลขบัตรประชาชน</span><span class="info-value" id="dispId">-</span></div>
+          <div class="info-item"><span class="info-label">ที่อยู่</span><span class="info-value" id="dispAddress" style="font-size: 20px;">-</span></div>
+        </div>
+      </div>
+
+      <div class="card flex-1">
+        <div class="card-title">🐾 รายการสัตว์และบริการ (<span id="dispCount">0</span>)</div>
+        <div id="dispAnimals"></div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="consent-box">
+        <h3>⚖️ ข้อตกลงและหนังสือยินยอม</h3>
+        <p><strong>1. การงดน้ำและอาหาร:</strong><br> ข้าพเจ้ายืนยันว่าสัตว์เลี้ยงได้รับการงดน้ำและอาหารมาแล้วไม่ต่ำกว่า 8-12 ชั่วโมง เพื่อป้องกันอันตรายจากการสำลัก</p>
+        <p><strong>2. ความเสี่ยงจากการรักษา:</strong><br> ข้าพเจ้ารับทราบว่าการวางยาสลบและการทำศัลยกรรมมีความเสี่ยง แม้สัตวแพทย์จะระมัดระวังที่สุดแล้วก็ตาม</p>
+        <p><strong>3. การยินยอม:</strong><br> ข้าพเจ้ายินยอมให้สัตวแพทย์ทำการรักษาและตัดสินใจช่วยชีวิตตามความเหมาะสม หากเกิดเหตุฉุกเฉิน</p>
+      </div>
+
+      <button type="button" class="btn-accept" onclick="acceptConsent()">
+        ✅ ยอมรับข้อตกลงและเงื่อนไข
+      </button>
+    </div>
+
+  </div>
+
+  <div id="successScreen">
+    <div style="font-size: 100px; margin-bottom: 20px;">🎉</div>
+    <h2 style="font-size: 60px; color: var(--emerald); font-weight: 800;">ขอบคุณค่ะ/ครับ</h2>
+    <p style="font-size: 36px; color: #fff; margin-top: 20px;">กรุณาส่งคืนหน้าจอให้เจ้าหน้าที่</p>
+    <p style="font-size: 28px; color: var(--text-dim); margin-top: 10px;">เพื่อทำการพิมพ์คิวเข้ารับบริการ</p>
   </div>
 
 </div>
@@ -231,18 +262,18 @@ import { supabase } from "./js/supabase.js";
 
 const consentChannel = supabase.channel('vasd-consent-room');
 
-// ฟังเสียงเรียกจาก Registration
 consentChannel
   .on('broadcast', { event: 'request-consent' }, (payload) => {
-    console.log("📥 ได้รับข้อมูลคำขอ:", payload);
     const data = payload.payload;
     showConsentForm(data);
   })
   .subscribe();
 
 function showConsentForm(data) {
+  // สลับหน้าจอแบบ Flex
   document.getElementById("standbyScreen").style.display = "none";
   document.getElementById("successScreen").style.display = "none";
+  document.getElementById("consentScreen").style.display = "grid"; // ใช้ Grid สำหรับหน้า Consent
   
   document.getElementById("dispName").textContent = data.owner.name;
   document.getElementById("dispPhone").textContent = data.owner.phone;
@@ -262,9 +293,6 @@ function showConsentForm(data) {
       </div>
     `;
   });
-
-  document.getElementById("consentScreen").style.display = "block";
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 window.acceptConsent = function() {
@@ -275,13 +303,11 @@ window.acceptConsent = function() {
   });
 
   document.getElementById("consentScreen").style.display = "none";
-  document.getElementById("successScreen").style.display = "block";
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  document.getElementById("successScreen").style.display = "flex";
 
-  // กลับหน้าเตือนหลังผ่านไป 5 วินาที
   setTimeout(() => {
     document.getElementById("successScreen").style.display = "none";
-    document.getElementById("standbyScreen").style.display = "block";
+    document.getElementById("standbyScreen").style.display = "grid"; // กลับไปหน้า Standby แบบ Grid
   }, 5000);
 }
 </script>
