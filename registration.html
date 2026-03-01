@@ -298,6 +298,7 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   body > :not(#printArea) { display: none !important; }
   #printArea { display: block !important; }
   .sticker-page { position: relative; width: 80mm; height: 50mm; page-break-after: always; overflow: hidden; background: #fff; }
+  /* ลบ style บังคับของ line ออก เพื่อให้ Inline CSS ควบคุมได้ 100% เหมือนใน Preview */
   .line { position: absolute; white-space: pre-wrap; word-break: break-word; box-sizing: border-box; padding-right: 5px; color: #000 !important; }
   @page { size: 80mm 50mm; margin: 0; }
 }
@@ -690,25 +691,42 @@ async function executeSave() {
         let imgSpc = a.spc === "แมว" ? "cat.png" : "dog.png";
         let imgSex = a.sex === "ผู้" ? "male.png" : "female.png";
 
-        // 2. สร้าง Tag HTML สำหรับรูปภาพ
-        let iconSpc = `<img src="${imgSpc}" style="height:1.2em; vertical-align:text-bottom; margin-right:4px;">`;
-        let iconSex = `<img src="${imgSex}" style="height:1.2em; vertical-align:text-bottom; margin-right:4px;">`;
+        // 2. สร้าง Tag HTML สำหรับรูปภาพให้มีความสูง 1em เพื่อพอดีกับฟอนต์
+        let iconSpc = `<img src="${imgSpc}" style="height:1em; width:auto; vertical-align:middle; margin-right:4px;">`;
+        let iconSex = `<img src="${imgSex}" style="height:1em; width:auto; vertical-align:middle; margin-right:4px;">`;
 
         tmplData.config.forEach(l => {
-          // 3. แทรกรูปภาพเข้าไปตรงตำแหน่ง {{species_icon}} และ {{sex_icon}}
+          // 3. ทำการ Replace ข้อความและตัวแปรทั้งหมดให้ครบถ้วน รวมถึง {{species_icon}}
           let txt = l.text
-            .replace("{{queue_number}}", a.q)
-            .replace("{{animal_name}}", a.name)
-            .replace("{{species_icon}}", iconSpc) // แปลง tag species_icon เป็นรูป
-            .replace("{{sex_icon}}", iconSex)     // แปลง tag sex_icon เป็นรูป
-            .replace("{{species}}", a.spc)        // ตัวหนังสือชนิดสัตว์ (แมว/สุนัข)
-            .replace("{{sex}}", a.sex)            // ตัวหนังสือเพศ (ผู้/เมีย)
-            .replace("{{owner_name}}", ownerName)
-            .replace("{{phone}}", phone || "ไม่ระบุ")
-            .replace("{{services}}", a.svc);
-            
-          let fnt = (l.font || "'Segoe UI'").replace(/"/g, "'");
-          page += `<div class="line" style="left:${l.x||0}px;width:calc(100% - ${l.x||0}px);top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${fnt};text-align:${l.align||"left"};">${txt}</div>`;
+            .replace(/{{queue_number}}/g, a.q)
+            .replace(/{{animal_name}}/g, a.name)
+            .replace(/{{species_icon}}/g, iconSpc)
+            .replace(/{{sex_icon}}/g, iconSex)
+            .replace(/{{species}}/g, a.spc)
+            .replace(/{{sex}}/g, a.sex)
+            .replace(/{{owner_name}}/g, ownerName)
+            .replace(/{{phone}}/g, phone || "ไม่ระบุ")
+            .replace(/{{services}}/g, a.svc);
+          
+          // 4. จัดการ Formatting ให้เป๊ะเหมือนหน้า Setting-Sticker.html
+          let cleanFont = (l.font || "Sarabun").replace(/['"]/g, "").trim();
+          let fnt = `'${cleanFont}', sans-serif`;
+          let fontWeight = l.bold ? "600" : "400";
+          let align = l.align || "left";
+          let leftPos = align === 'center' ? "0px" : `${l.x || 0}px`;
+          let widthStr = align === 'center' ? "100%" : `calc(100% - ${l.x || 0}px)`;
+          
+          page += `<div class="line" style="
+            position: absolute;
+            left: ${leftPos};
+            width: ${widthStr};
+            top: ${l.y || 0}px;
+            font-size: ${l.size}px;
+            font-weight: ${fontWeight};
+            font-family: ${fnt};
+            text-align: ${align};
+            line-height: 1.2;
+          ">${txt}</div>`;
         });
         html += page + "</div>";
       });
@@ -719,10 +737,11 @@ async function executeSave() {
         await document.fonts.load("16px 'Kanit'");
         await document.fonts.load("16px 'Prompt'");
         await document.fonts.load("16px 'Sarabun'");
+        await document.fonts.load("16px 'Outfit'");
       } catch(e) {}
       await document.fonts.ready;
       
-      // หน่วงเวลาให้เบราว์เซอร์ดาวน์โหลดไฟล์รูปภาพ (png) ทัน
+      // หน่วงเวลาเล็กน้อยให้ Browser โหลดรูปภาพและจัดฟอนต์เสร็จก่อนเข้าหน้าต่างพิมพ์
       await new Promise(r => setTimeout(r, 500));
       window.print();
     }
