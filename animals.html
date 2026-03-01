@@ -656,31 +656,57 @@ window.printQueue = async function(animalId) {
     .eq("id", animalId).single();
   if (!a) return alert("ไม่พบข้อมูล");
 
+  // แปลงค่าจากฐานข้อมูลให้เป็น Text ปกติ
   const spcText  = a.species === "ส" ? "สุนัข" : "แมว";
   const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
   const phone    = a.vasd_owner?.phone || "ไม่ระบุ";
   const ownerName= a.vasd_owner?.owner_name || "";
+
+  // 🐾 สร้าง HTML ของ Icon ไว้สำหรับ Replace
+  const spcImg = (a.species === "ม" || a.species === "แมว") 
+    ? `<img src="./cat.png" style="height: 1em; width: auto; vertical-align: middle;">`
+    : `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
+  const sexImg = (a.sex === "ผู้" || a.sex === "Male")
+    ? `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`
+    : `<img src="./female.png" style="height: 1em; width: auto; vertical-align: middle;">`;
 
   const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
   if (!tmplData?.config) return alert("⚠️ ยังไม่ได้บันทึก Template สติ๊กเกอร์คิว กรุณาตั้งค่าเครื่องพิมพ์ก่อน");
 
   let printContents = "";
   tmplData.config.forEach(l => {
+    // ใช้ Regular Expression (/.../g) ในการ Replace เพื่อให้เปลี่ยนทุกจุดในบรรทัด (ถ้ามีซ้ำ)
     let text = l.text
-      .replace("{{queue_number}}", a.queue_number)
-      .replace("{{animal_name}}", a.animal_name)
-      .replace("{{species}}", spcText).replace("{{sex}}", a.sex)
-      .replace("{{owner_name}}", ownerName).replace("{{phone}}", phone)
-      .replace("{{services}}", services);
-    printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${l.font};text-align:${l.align||"left"};">${text}</div>`;
+      .replace(/{{queue_number}}/g, a.queue_number)
+      .replace(/{{animal_name}}/g, a.animal_name)
+      .replace(/{{species}}/g, spcText)
+      .replace(/{{species_icon}}/g, spcImg)  // ใส่ Icon ชนิดสัตว์
+      .replace(/{{sex}}/g, a.sex)
+      .replace(/{{sex_icon}}/g, sexImg)      // ใส่ Icon เพศ
+      .replace(/{{owner_name}}/g, ownerName)
+      .replace(/{{phone}}/g, phone)
+      .replace(/{{services}}/g, services);
+    
+    printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
   });
 
   const pw = window.open("","_blank","width=800,height=600");
   pw.document.write(`<html><head><title>Print</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;color:#000!important}@page{size:80mm 50mm;margin:0}</style>
+    <style>body{margin:0}.sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden}.line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;color:#000!important; line-height: 1.2;}@page{size:80mm 50mm;margin:0}</style>
     </head><body><div class="sticker">${printContents}</div>
-    <script>window.onload=function(){document.fonts.ready.then(()=>{setTimeout(()=>{window.print();window.close();},200)})}<\/script></body></html>`);
+    <script>
+      window.onload = function() {
+        document.fonts.ready.then(() => {
+          // หน่วงเวลาเพิ่มเป็น 500ms เพื่อให้แน่ใจว่าโหลดรูป .png เสร็จสมบูรณ์
+          setTimeout(() => {
+            window.print();
+            window.close();
+          }, 500);
+        });
+      }
+    <\/script></body></html>`);
   pw.document.close();
 };
 
