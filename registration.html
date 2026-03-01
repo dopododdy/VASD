@@ -281,7 +281,7 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 .submit-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; animation: slideUp 0.4s 0.2s ease both; }
 
 /* ═══════════════════════════════════════════
-   BOTTOM NAVIGATION (UPDATED ICONS & SIZES)
+   BOTTOM NAVIGATION
 ═══════════════════════════════════════════ */
 .bottom-nav {
   display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
@@ -421,15 +421,13 @@ let animalCount = 0;
 let isWaitingForConsent = false;
 
 /* ── SETTING UP SUPABASE REALTIME (BROADCAST) ── */
-// สร้างห้องเชื่อมต่อชื่อ vasd-consent-room เพื่อคุยกับ iPad
 const consentChannel = supabase.channel('vasd-consent-room');
 
-// รอรับสัญญาณ 'consent-granted' จาก iPad
 consentChannel
   .on('broadcast', { event: 'consent-granted' }, (payload) => {
     if (isWaitingForConsent) {
       console.log("✅ ได้รับการยินยอมแล้ว! กำลังบันทึกข้อมูล...");
-      executeSave(); // ทริกเกอร์การบันทึกอัตโนมัติ ด้วยโครงสร้าง Database เดิม
+      executeSave(); 
     }
   })
   .subscribe();
@@ -577,7 +575,7 @@ window.requestConsent = function() {
   if (cards.length === 0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
 
   let hasError = false;
-  let animalsData = []; // เก็บข้อมูลสัตว์เพื่อส่งไป iPad
+  let animalsData = []; 
 
   cards.forEach((card, i) => {
     const ni = card.querySelector(".animalName");
@@ -598,20 +596,17 @@ window.requestConsent = function() {
 
   if (hasError) return;
 
-  // แพ็กข้อมูลสำหรับส่งไปแสดงที่จอ iPad
   const payloadData = {
     owner: { name: ownerName, phone: phone || "-", idCard: idCard || "-", address: address || "-" },
     animals: animalsData
   };
 
-  // เปลี่ยนสถานะปุ่ม
   const btn = document.getElementById("btnRequestConsent");
   btn.disabled = true;
   btn.classList.add("waiting");
   btn.textContent = "⏳ กำลังรอเจ้าของสัตว์กดยืนยัน (ดูที่ iPad)...";
   isWaitingForConsent = true;
 
-  // ส่งข้อมูล (Broadcast) ไปให้ iPad
   consentChannel.send({
     type: 'broadcast',
     event: 'request-consent',
@@ -636,7 +631,6 @@ async function executeSave() {
     const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
     if (evtErr) throw evtErr;
 
-    // บันทึกข้อมูล Owner
     const { data: owner, error: ownerErr } = await supabase
       .from("vasd_owner")
       .insert({ 
@@ -649,7 +643,6 @@ async function executeSave() {
       .select().single();
     if (ownerErr) throw ownerErr;
 
-    // *** แก้ไขการรันเลขคิว: ค้นหาคิวสูงสุดจากฐานข้อมูลทั้งหมด แล้วนำมา +1 ***
     const { data: lastAnimal, error: qErr } = await supabase
       .from("vasd_animal")
       .select("queue_number")
@@ -685,31 +678,50 @@ async function executeSave() {
     if (svcs.length)   await supabase.from("vasd_service").insert(svcs);
     if (queues.length) await supabase.from("vasd_queue").insert(queues);
 
-    // พิมพ์สติกเกอร์คิว
+    // พิมพ์สติกเกอร์คิว (อัปเดตแทรกรูปภาพ dog.png, cat.png, male.png, female.png)
     const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
+    
     if (tmplData?.config) {
       let html = "";
       forPrint.forEach(a => {
         let page = "<div class='sticker-page'>";
+        
+        // 1. ตรวจสอบเงื่อนไขเพื่อดึงชื่อไฟล์รูป
+        let imgSpc = a.spc === "แมว" ? "cat.png" : "dog.png";
+        let imgSex = a.sex === "ผู้" ? "male.png" : "female.png";
+
+        // 2. สร้าง Tag HTML สำหรับรูปภาพ (ปรับขนาดด้วย 1.2em เพื่อให้สัมพันธ์กับขนาด Font ใน Template)
+        let iconSpc = `<img src="${imgSpc}" style="height:1.2em; vertical-align:text-bottom; margin-right:4px;">`;
+        let iconSex = `<img src="${imgSex}" style="height:1.2em; vertical-align:text-bottom; margin-right:4px;">`;
+
         tmplData.config.forEach(l => {
+          // 3. แทรกรูปภาพเข้าไปพร้อมกับการ Replace ข้อความเดิม
           let txt = l.text
-            .replace("{{queue_number}}", a.q).replace("{{animal_name}}", a.name)
-            .replace("{{species}}", a.spc).replace("{{sex}}", a.sex)
-            .replace("{{owner_name}}", ownerName).replace("{{phone}}", phone || "ไม่ระบุ")
+            .replace("{{queue_number}}", a.q)
+            .replace("{{animal_name}}", a.name)
+            .replace("{{species}}", `${iconSpc}${a.spc}`)
+            .replace("{{sex}}", `${iconSex}${a.sex}`)
+            .replace("{{owner_name}}", ownerName)
+            .replace("{{phone}}", phone || "ไม่ระบุ")
             .replace("{{services}}", a.svc);
+            
           let fnt = (l.font || "'Segoe UI'").replace(/"/g, "'");
           page += `<div class="line" style="left:${l.x||0}px;width:calc(100% - ${l.x||0}px);top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.weight};font-family:${fnt};text-align:${l.align||"left"};">${txt}</div>`;
         });
         html += page + "</div>";
       });
+      
       document.getElementById("printArea").innerHTML = html;
+      
       try {
         await document.fonts.load("16px 'Kanit'");
         await document.fonts.load("16px 'Prompt'");
         await document.fonts.load("16px 'Sarabun'");
       } catch(e) {}
       await document.fonts.ready;
-      await new Promise(r => setTimeout(r, 300));
+      
+      // เพิ่มเวลาหน่วงเล็กน้อยเป็น 500ms เพื่อให้ Browser โหลดไฟล์รูปภาพ .png เสร็จก่อนทำการสั่ง Print
+      await new Promise(r => setTimeout(r, 500));
       window.print();
     }
 
