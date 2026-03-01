@@ -99,6 +99,7 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; 
     <code>{{animal_name}}</code> ชื่อสัตว์ | <code>{{species}}</code> ชนิด | <code>{{sex}}</code> เพศ<br>
     <code>{{owner_name}}</code> ชื่อเจ้าของ | <code>{{owner_id}}</code> เลขปชช.<br>
     <code>{{address}}</code> ที่อยู่ | <code>{{phone}}</code> เบอร์โทร<br>
+    <code>{{services}}</code> บริการที่รับ<br>
     <code>{{drug_name}}</code> ชื่อยา | <code>{{dose}}</code> จำนวน/ครั้ง | <code>{{freq}}</code> ความถี่<br>
     <code>{{total_amount}}</code> จำนวนยารวมทั้งซอง<br>
     <code>{{todayDate}}</code> วันที่ปัจจุบัน | <code>{{next7days}}</code> วันตัดไหม (อีก 7 วัน)
@@ -149,6 +150,7 @@ function renderPreview() {
       .replace(/{{owner_id}}/g, "1234567890123")
       .replace(/{{address}}/g, "123 ม.4 ต.บางพระ อ.ศรีราชา จ.ชลบุรี")
       .replace(/{{phone}}/g, "081-234-5678")
+      .replace(/{{services}}/g, "ตรวจสุขภาพ, ทำหมันเพศผู้")
       .replace(/{{drug_name}}/g, "Amoxicillin (500mg)")
       .replace(/{{dose}}/g, "1 เม็ด")
       .replace(/{{freq}}/g, "เช้า - เย็น หลังอาหาร")
