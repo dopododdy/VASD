@@ -678,7 +678,7 @@ async function executeSave() {
     if (svcs.length)   await supabase.from("vasd_service").insert(svcs);
     if (queues.length) await supabase.from("vasd_queue").insert(queues);
 
-    // พิมพ์สติกเกอร์คิว (อัปเดตแทรกรูปภาพ dog.png, cat.png, male.png, female.png)
+    // พิมพ์สติกเกอร์คิว
     const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
     
     if (tmplData?.config) {
@@ -690,17 +690,19 @@ async function executeSave() {
         let imgSpc = a.spc === "แมว" ? "cat.png" : "dog.png";
         let imgSex = a.sex === "ผู้" ? "male.png" : "female.png";
 
-        // 2. สร้าง Tag HTML สำหรับรูปภาพ (ปรับขนาดด้วย 1.2em เพื่อให้สัมพันธ์กับขนาด Font ใน Template)
+        // 2. สร้าง Tag HTML สำหรับรูปภาพ
         let iconSpc = `<img src="${imgSpc}" style="height:1.2em; vertical-align:text-bottom; margin-right:4px;">`;
         let iconSex = `<img src="${imgSex}" style="height:1.2em; vertical-align:text-bottom; margin-right:4px;">`;
 
         tmplData.config.forEach(l => {
-          // 3. แทรกรูปภาพเข้าไปพร้อมกับการ Replace ข้อความเดิม
+          // 3. แทรกรูปภาพเข้าไปตรงตำแหน่ง {{species_icon}} และ {{sex_icon}}
           let txt = l.text
             .replace("{{queue_number}}", a.q)
             .replace("{{animal_name}}", a.name)
-            .replace("{{species}}", `${iconSpc}${a.spc}`)
-            .replace("{{sex}}", `${iconSex}${a.sex}`)
+            .replace("{{species_icon}}", iconSpc) // แปลง tag species_icon เป็นรูป
+            .replace("{{sex_icon}}", iconSex)     // แปลง tag sex_icon เป็นรูป
+            .replace("{{species}}", a.spc)        // ตัวหนังสือชนิดสัตว์ (แมว/สุนัข)
+            .replace("{{sex}}", a.sex)            // ตัวหนังสือเพศ (ผู้/เมีย)
             .replace("{{owner_name}}", ownerName)
             .replace("{{phone}}", phone || "ไม่ระบุ")
             .replace("{{services}}", a.svc);
@@ -720,7 +722,7 @@ async function executeSave() {
       } catch(e) {}
       await document.fonts.ready;
       
-      // เพิ่มเวลาหน่วงเล็กน้อยเป็น 500ms เพื่อให้ Browser โหลดไฟล์รูปภาพ .png เสร็จก่อนทำการสั่ง Print
+      // หน่วงเวลาให้เบราว์เซอร์ดาวน์โหลดไฟล์รูปภาพ (png) ทัน
       await new Promise(r => setTimeout(r, 500));
       window.print();
     }
