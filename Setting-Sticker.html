@@ -120,7 +120,7 @@ let currentConfig = [];
 const getDates = () => {
   const now = new Date();
   const next7 = new Date(); next7.setDate(now.getDate() + 7);
-  const fmt = (d) => d.toLocaleDateString('th-TH', { day:'2-digit', month:'2-digit', year:'numeric' }); // ปรับเป็นปีเต็มเพื่อให้เป็นทางการขึ้น
+  const fmt = (d) => d.toLocaleDateString('th-TH', { day:'2-digit', month:'2-digit', year:'numeric' }); 
   return { today: fmt(now), next: fmt(next7) };
 };
 
@@ -141,14 +141,18 @@ function renderPreview() {
     div.style.width = l.align === 'center' ? "100%" : `calc(100% - ${l.x}px)`;
     if(l.align === 'center') div.style.left = "0px";
 
+    // สร้าง HTML Tag ของรูปภาพ โดยกำหนดความสูงเป็น 1em เพื่อให้พอดีกับขนาดฟอนต์
+    let iconDog = `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+    let iconMale = `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
     // แทนค่าตัวแปรจำลองเพื่อให้เห็นภาพจริงใน Preview
     let txt = l.text
       .replace(/{{queue_number}}/g, "A001")
       .replace(/{{animal_name}}/g, "น้องนำโชค")
       .replace(/{{species}}/g, "สุนัข (Beagle)")
-      .replace(/{{species_icon}}/g, "🐶")
+      .replace(/{{species_icon}}/g, iconDog)
       .replace(/{{sex}}/g, "ผู้")
-      .replace(/{{sex_icon}}/g, "♂")
+      .replace(/{{sex_icon}}/g, iconMale)
       .replace(/{{owner_name}}/g, "คุณสมชาย ใจดี")
       .replace(/{{owner_id}}/g, "1234567890123")
       .replace(/{{address}}/g, "123 ม.4 ต.บางพระ อ.ศรีราชา จ.ชลบุรี")
@@ -161,7 +165,8 @@ function renderPreview() {
       .replace(/{{todayDate}}/g, dates.today)
       .replace(/{{next7days}}/g, dates.next);
     
-    div.innerText = txt;
+    // เปลี่ยนจาก innerText เป็น innerHTML เพื่อให้แสดงรูปภาพได้
+    div.innerHTML = txt;
     box.appendChild(div);
   });
 }
@@ -256,7 +261,15 @@ window.printTest = () => {
     .line{position:absolute; white-space:pre-wrap; word-break:break-word; color:#000;}
     @page{size:80mm 50mm; margin:0;}
   </style></head><body><div class="sticker">${contents}</div>
-  <script>window.onload=function(){window.print();window.close();};<\/script></body></html>`);
+  <script>
+    window.onload = function() {
+      // หน่วงเวลา 500ms เพื่อให้เบราว์เซอร์ดาวน์โหลดรูปภาพมาแสดงผลให้เสร็จก่อนสั่งพิมพ์
+      setTimeout(function() {
+        window.print();
+        window.close();
+      }, 500);
+    };
+  <\/script></body></html>`);
   pw.document.close();
 };
 
