@@ -97,6 +97,7 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; 
     <strong>📌 ตัวแปรที่สามารถใช้งานได้ (คัดลอกไปวางได้เลย):</strong><br>
     <code>{{queue_number}}</code> คิว<br>
     <code>{{animal_name}}</code> ชื่อสัตว์ | <code>{{species}}</code> ชนิด | <code>{{sex}}</code> เพศ<br>
+    <code>{{species_icon}}</code> ไอคอน 🐶/🐱 | <code>{{sex_icon}}</code> สัญลักษณ์ ♂/♀<br>
     <code>{{owner_name}}</code> ชื่อเจ้าของ | <code>{{owner_id}}</code> เลขปชช.<br>
     <code>{{address}}</code> ที่อยู่ | <code>{{phone}}</code> เบอร์โทร<br>
     <code>{{services}}</code> บริการที่รับ<br>
@@ -145,7 +146,9 @@ function renderPreview() {
       .replace(/{{queue_number}}/g, "A001")
       .replace(/{{animal_name}}/g, "น้องนำโชค")
       .replace(/{{species}}/g, "สุนัข (Beagle)")
+      .replace(/{{species_icon}}/g, "🐶")
       .replace(/{{sex}}/g, "ผู้")
+      .replace(/{{sex_icon}}/g, "♂")
       .replace(/{{owner_name}}/g, "คุณสมชาย ใจดี")
       .replace(/{{owner_id}}/g, "1234567890123")
       .replace(/{{address}}/g, "123 ม.4 ต.บางพระ อ.ศรีราชา จ.ชลบุรี")
