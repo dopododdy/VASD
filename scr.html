@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VASD Test Card Reader</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h2 { color: #2c3e50; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #34495e; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; background-color: #fafafa; }
+        button { 
+            width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; 
+            border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s;
+        }
+        button:hover { background-color: #219150; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        #status { text-align: center; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🪪 ระบบอ่านบัตรประชาชน (VASD)</h2>
+    
+    <div class="form-group">
+        <label>เลขบัตรประชาชน:</label>
+        <input type="text" id="idCard" placeholder="ระบบจะเติมให้อัตโนมัติ" readonly>
+    </div>
+
+    <div class="form-group">
+        <label>ชื่อ-นามสกุล:</label>
+        <input type="text" id="fullName" placeholder="ระบบจะเติมให้อัตโนมัติ" readonly>
+    </div>
+
+    <div class="form-group">
+        <label>ที่อยู่ตามบัตร:</label>
+        <input type="text" id="address" placeholder="ระบบจะเติมให้อัตโนมัติ" readonly>
+    </div>
+
+    <button id="btnRead" onclick="readSmartCard()">🚀 อ่านบัตรประชาชน</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    async function readSmartCard() {
+        const btn = document.getElementById('btnRead');
+        const status = document.getElementById('status');
+        
+        // ล้างค่าเก่าก่อนอ่าน
+        document.getElementById('idCard').value = '';
+        document.getElementById('fullName').value = '';
+        document.getElementById('address').value = '';
+
+        try {
+            btn.disabled = true;
+            status.innerHTML = "⏳ กำลังสื่อสารกับเครื่องอ่านบัตร...";
+            status.style.color = "blue";
+
+            // เรียกไปที่ Python Agent
+            const response = await fetch('http://127.0.0.1:8080/read');
+            const result = await response.json();
+
+            if (result.status === "success") {
+                const p = result.data;
+                // เติมข้อมูลลงในฟอร์ม
+                document.getElementById('idCard').value = p.cid;
+                document.getElementById('fullName').value = p.prefix + p.firstname + " " + p.lastname;
+                document.getElementById('address').value = p.address;
+                
+                status.innerHTML = "✅ อ่านข้อมูลสำเร็จ!";
+                status.style.color = "green";
+            } else {
+                status.innerHTML = "❌ Error: " + result.message;
+                status.style.color = "red";
+            }
+        } catch (error) {
+            console.error(error);
+            status.innerHTML = "❌ ไม่สามารถติดต่อ Agent ได้ (ลืมเปิดโปรแกรมจอดำ?)";
+            status.style.color = "red";
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
