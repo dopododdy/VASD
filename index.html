@@ -8,218 +8,388 @@
 
 <style>
 /* ═══════════════════════════════════════════
-    DESIGN TOKENS (LIGHT MEDICAL THEME)
+   DESIGN TOKENS
 ═══════════════════════════════════════════ */
 :root {
-  /* Core Colors */
-  --bg-main:      #f8fafc;
-  --bg-card:      #ffffff;
-  --primary:      #0284c7; /* Medical Blue */
-  --primary-light:#e0f2fe;
-  --secondary:    #0f172a;
-  
-  /* Status Colors (Medical Standard) */
-  --c-waiting:    #f59e0b; /* Amber */
-  --c-surgery:    #dc2626; /* Red */
-  --c-recovery:   #7c3aed; /* Violet */
-  --c-ready:      #2563eb; /* Blue */
-  --c-done:       #16a34a; /* Green */
-  --c-total:      #64748b; /* Slate */
+  --navy:       #0b1929;
+  --navy-mid:   #112240;
+  --navy-card:  #162d4a;
+  --teal:       #0ea5a0;
+  --teal-light: #14c4bc;
+  --teal-glow:  rgba(14,165,160,0.25);
+  --amber:      #f59e0b;
+  --amber-soft: rgba(245,158,11,0.15);
+  --rose:       #ef4444;
+  --violet:     #8b5cf6;
+  --sky:        #3b82f6;
+  --emerald:    #10b981;
+  --slate:      #64748b;
 
-  /* Surface & Border */
-  --border:       #e2e8f0;
-  --border-focus: #0284c7;
-  --text-main:    #1e293b;
-  --text-dim:     #64748b;
-  --text-faint:   #94a3b8;
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --border:     rgba(255,255,255,0.08);
+  --border-2:   rgba(255,255,255,0.14);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #4a5568;
 
-  /* Spacing & Radius */
-  --radius-sm:    8px;
-  --radius:       12px;
-  --radius-lg:    16px;
-  
-  /* Shadows */
-  --shadow-sm:    0 1px 3px rgba(0,0,0,0.1);
-  --shadow-md:    0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  --shadow-lg:    0 10px 15px -3px rgba(0,0,0,0.1);
+  --radius-xs:  6px;
+  --radius-sm:  10px;
+  --radius:     16px;
+  --radius-lg:  22px;
+  --radius-xl:  28px;
+
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-glow: 0 0 30px rgba(14,165,160,0.2);
+
+  /* status palette */
+  --c-waiting:  #f59e0b;
+  --c-surgery:  #ef4444;
+  --c-recovery: #8b5cf6;
+  --c-ready:    #3b82f6;
+  --c-done:     #10b981;
+  --c-total:    #94a3b8;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { scroll-behavior: smooth; }
+
 body {
   font-family: "Sarabun", "Outfit", sans-serif;
-  background-color: var(--bg-main);
-  color: var(--text-main);
+  background: var(--navy);
+  color: var(--text);
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
-/* Subtle Medical Grid Background */
+/* Mesh background */
 body::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: radial-gradient(var(--border) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.4;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 90% 20%, rgba(245,158,11,0.05) 0%, transparent 50%);
 }
 
 /* ═══════════════════════════════════════════
-    HEADER (CLEAN WHITE)
+   HEADER
 ═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 200;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
+  background: rgba(11,25,41,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--border);
-  padding: 10px 24px;
-  min-height: 70px;
+  padding: 10px 20px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: var(--shadow-sm);
+  gap: 12px;
 }
 
-.brand { display: flex; align-items: center; gap: 12px; }
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
 .brand-logo {
-  width: 44px; height: 44px;
-  background: var(--primary);
+  width: 48px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  color: white;
+  font-size: 16px;
+  box-shadow: 0 0 20px var(--teal-glow);
+  letter-spacing: -1px;
 }
 .brand-name {
   font-family: "Outfit", sans-serif;
-  font-size: 18px; font-weight: 700;
-  color: var(--secondary);
-  letter-spacing: -0.5px;
+  font-size: 15px; font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.3px;
 }
-.brand-sub { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
 
-/* Login Panel */
-#loginPanel { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-.login-row { display: flex; align-items: center; gap: 8px; }
-
+/* ── Login Panel ── */
+#loginPanel {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+}
+.login-row {
+  display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+}
 .input-field {
-  padding: 9px 12px; font-size: 13px;
-  background: #fff;
-  border: 1px solid var(--border);
+  padding: 8px 10px; font-size: 12px; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
   border-radius: var(--radius-sm);
-  color: var(--text-main);
-  transition: all 0.2s;
+  color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.input-field:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+.input-field::placeholder { color: var(--text-faint); }
+.input-field:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
+.input-field option { background: var(--navy-mid); }
+#userName  { width: 96px; }
+#userRole  { width: 116px; cursor: pointer; }
+#adminPwd  { width: 82px; }
+
+.input-hint {
+  font-size: 10px;
+  color: var(--teal-light);
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
 
 .btn-login {
-  padding: 9px 18px; font-size: 13px; font-weight: 600;
-  background: var(--primary);
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
   color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer;
-  transition: background 0.2s;
+  white-space: nowrap; letter-spacing: 0.3px;
+  box-shadow: 0 2px 12px var(--teal-glow);
+  transition: opacity 0.2s, transform 0.15s;
 }
-.btn-login:hover { background: #0270a9; }
+.btn-login:active { opacity: 0.85; transform: scale(0.97); }
 
-#userInfo { display: none; align-items: center; gap: 12px; }
+/* ── User Info ── */
+#userInfo { display: none; align-items: center; gap: 8px; }
 .user-pill {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--primary-light); border: 1px solid rgba(2, 132, 199, 0.2);
-  border-radius: 30px; padding: 6px 14px 6px 8px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: 30px; padding: 5px 12px 5px 7px;
 }
 .user-avatar {
-  width: 28px; height: 28px; background: var(--primary);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;
+  width: 26px; height: 26px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
 }
-#showUser { font-size: 13px; color: var(--primary); font-weight: 600; }
-.btn-logout { font-size: 12px; color: var(--text-dim); background: none; border: none; cursor: pointer; text-decoration: underline; }
+#showUser { font-size: 12px; color: var(--text); font-weight: 500; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-logout {
+  padding: 6px 12px; font-size: 12px; font-family: "Sarabun", sans-serif;
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-logout:hover { background: var(--surface-2); color: var(--text); }
 
 /* ═══════════════════════════════════════════
-    MAIN CONTENT
+   MAIN CONTENT & CALL BUTTON
 ═══════════════════════════════════════════ */
 .wrap {
   position: relative; z-index: 1;
-  max-width: 1000px; margin: 0 auto;
-  padding: 32px 20px 100px; width: 100%;
+  max-width: 900px; margin: 0 auto;
+  padding: 28px 18px 100px;
+  width: 100%;
 }
 
 .btn-call {
-  width: 100%; background: #dc2626; color: white; border: none;
-  padding: 16px; border-radius: var(--radius-lg); margin-bottom: 30px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 16px;
-  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3); transition: 0.2s;
+  width: 100%;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: white;
+  border: none;
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  font-family: "Sarabun", sans-serif;
+  margin-bottom: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition: transform 0.2s;
+  animation: pulseAlert 2s infinite;
 }
-.btn-call:hover { background: #b91c1c; transform: translateY(-1px); }
+.btn-call:active { transform: scale(0.97); }
+
+.call-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.3;
+}
+
+@keyframes pulseAlert {
+  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70%  { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
 
 /* ═══════════════════════════════════════════
-    MENU GRID (MEDICAL CARDS)
+   MENU GRID
 ═══════════════════════════════════════════ */
 .menu-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .menu-card {
-  background: var(--bg-card);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 24px 20px;
-  text-decoration: none; position: relative;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
-  display: flex; flex-direction: column;
+  padding: 20px 18px 18px;
+  cursor: pointer; text-decoration: none; display: block;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  animation: slideUp 0.5s ease both;
+  -webkit-tap-highlight-color: transparent;
 }
 .menu-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary);
+  border-color: var(--teal);
+  background: rgba(14,165,160,0.06);
+  box-shadow: 0 8px 32px rgba(14,165,160,0.12);
+  transform: translateY(-2px);
 }
+.menu-card:active { transform: scale(0.97); }
+
+.menu-card::after {
+  content: "›";
+  position: absolute; bottom: 14px; right: 16px;
+  font-size: 18px; color: var(--teal);
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.menu-card:hover::after { opacity: 1; transform: translateX(0); }
+
+.menu-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-card:nth-child(2) { animation-delay: 0.13s; }
+.menu-card:nth-child(3) { animation-delay: 0.16s; }
+.menu-card:nth-child(4) { animation-delay: 0.19s; }
+.menu-card:nth-child(5) { animation-delay: 0.22s; }
+.menu-card:nth-child(6) { animation-delay: 0.25s; }
+.menu-card:nth-child(7) { animation-delay: 0.28s; }
+.menu-card:nth-child(8) { animation-delay: 0.31s; }
 
 .card-emoji {
-  width: 50px; height: 50px; background: var(--bg-main);
-  border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  font-size: 26px; margin-bottom: 16px;
+  font-size: 28px; display: block; margin-bottom: 12px; line-height: 1;
 }
-.card-title { font-size: 16px; font-weight: 700; color: var(--secondary); margin-bottom: 6px; }
-.card-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.card-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: #fff; margin-bottom: 4px; letter-spacing: -0.2px;
+}
+.card-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; padding-right: 16px; }
 
-/* Notif Badges */
+/* ── Notification Badge ── */
 .notif-badge {
-  position: absolute; top: 16px; right: 16px;
-  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px;
+  position: absolute; top: 14px; right: 14px;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: 0.3px; display: none;
+  animation: pulse 2.5s ease-in-out infinite;
 }
-.nb-waiting  { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-.nb-surgery  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-.nb-recovery { background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; }
-.nb-ready    { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-.nb-done     { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.nb-total    { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+.nb-waiting  { background: rgba(245,158,11,0.2); color: var(--c-waiting); border: 1px solid rgba(245,158,11,0.4); }
+.nb-surgery  { background: rgba(239,68,68,0.2);  color: var(--c-surgery);  border: 1px solid rgba(239,68,68,0.4); }
+.nb-recovery { background: rgba(139,92,246,0.2); color: var(--c-recovery); border: 1px solid rgba(139,92,246,0.4); }
+.nb-ready    { background: rgba(59,130,246,0.2);  color: var(--c-ready);   border: 1px solid rgba(59,130,246,0.4); }
+.nb-done     { background: rgba(16,185,129,0.2); color: var(--c-done); border: 1px solid rgba(16,185,129,0.4); }
+.nb-total    { background: rgba(148,163,184,0.2); color: var(--c-total);   border: 1px solid rgba(148,163,184,0.4); }
 
 /* ═══════════════════════════════════════════
-    MOBILE & FOOTER
+   MOBILE BOTTOM NAV (≤ 640px)
 ═══════════════════════════════════════════ */
 .bottom-nav {
-  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: #fff; border-top: 1px solid var(--border);
-  padding: 8px 0 max(10px, env(safe-area-inset-bottom));
-  grid-template-columns: repeat(5, 1fr); box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  grid-template-columns: repeat(5, 1fr);
 }
 .nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  font-size: 10px; color: var(--text-dim); text-decoration: none;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px;
+  font-size: 9px; color: var(--text-dim);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
-.nav-item.active { color: var(--primary); font-weight: 600; }
-.nav-icon { font-size: 20px; }
+.nav-item:active { color: var(--teal); }
+.nav-icon { font-size: 21px; line-height: 1; }
+.nav-item.active { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
 
+/* ── Floating Action Button ── */
+.fab {
+  display: none;
+  position: fixed; bottom: 90px; right: 20px; z-index: 250;
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 50%; border: none; cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 20px var(--teal-glow), 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.fab:active { transform: scale(0.93); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
 footer {
-  text-align: center; font-size: 12px; color: var(--text-faint);
-  padding: 30px; margin-top: auto; border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 11px; color: var(--text-faint);
+  padding: 18px;
+  border-top: 1px solid var(--border);
+  position: relative; z-index: 1;
 }
 
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .bottom-nav { display: grid; }
-  header { padding: 10px 16px; }
+  header { padding: 8px 14px; }
   .brand-sub { display: none; }
-  .wrap { padding-top: 20px; }
+  .brand-name { font-size: 14px; }
+  #userName  { width: 78px; }
+  #userRole  { width: 100px; }
+  #adminPwd  { width: 72px; }
+  .btn-login { padding: 8px 11px; }
+
+  .wrap { padding: 20px 14px 80px; }
+
+  .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .menu-card { padding: 16px 14px 14px; border-radius: var(--radius); }
+  .card-emoji { font-size: 24px; margin-bottom: 10px; }
+  .card-title { font-size: 13px; }
+
+  .bottom-nav { display: grid; }
+  .fab { display: flex; align-items: center; justify-content: center; }
+}
+
+@media (max-width: 380px) {
+  .login-row { gap: 4px; }
+  #userName  { width: 68px; font-size: 11px; }
+  #userRole  { width: 90px; font-size: 11px; }
+}
+
+@media (min-width: 641px) {
+  .menu-grid { grid-template-columns: repeat(4, 1fr); }
+  .input-hint { align-self: flex-start; }
+}
+
+@media (min-width: 900px) {
+  .wrap { padding: 36px 24px 60px; }
 }
 </style>
 </head>
@@ -227,7 +397,7 @@ footer {
 
 <header>
   <div class="brand">
-    <div class="brand-logo">🩺</div>
+    <div class="brand-logo">🚐🐾</div>
     <div>
       <div class="brand-name">RMUTTO – VASD</div>
       <div class="brand-sub">Veterinary Academic Service Division</div>
@@ -236,9 +406,9 @@ footer {
 
   <div id="loginPanel">
     <div class="login-row">
-      <input id="userName" class="input-field" placeholder="ชื่อผู้ใช้" style="width: 110px;">
-      <select id="userRole" class="input-field" style="width: 130px;">
-        <option value="">เลือกบทบาท</option>
+      <input id="userName" class="input-field" placeholder="ชื่อผู้ใช้">
+      <select id="userRole" class="input-field">
+        <option value="">บทบาท</option>
         <option value="ผู้ดูแลระบบ">ผู้ดูแลระบบ</option>
         <option value="อาจารย์">อาจารย์</option>
         <option value="สัตวแพทย์">สัตวแพทย์</option>
@@ -249,9 +419,10 @@ footer {
         <option value="นศ ผู้ช่วยผ่าตัด">นศ ผู้ช่วยผ่าตัด</option>
         <option value="นศ ช่วยงานทั่วไป">นศ ช่วยงานทั่วไป</option>
       </select>
-      <input id="adminPwd" type="password" class="input-field" placeholder="รหัสผ่าน" style="display:none; width: 90px;">
+      <input id="adminPwd" type="password" class="input-field" placeholder="รหัสผ่าน" style="display:none">
       <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
     </div>
+    <div class="input-hint">ตัวอย่าง: ต้น-วิสัญญี-โต๊ะ5 (ห้ามเว้นวรรค)</div>
   </div>
 
   <div id="userInfo">
@@ -259,86 +430,100 @@ footer {
       <div class="user-avatar">👤</div>
       <span id="showUser"></span>
     </div>
-    <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+    <button class="btn-logout" onclick="logout()">ออก</button>
   </div>
 </header>
 
 <div class="wrap">
-  <button id="emergencyCallBtn" class="btn-call" onclick="triggerEmergencyCall()" style="display: none;">
-    <span style="font-size: 28px;">🚨</span>
-    <div style="text-align: left; line-height: 1.2;">
-      <div style="font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">EMERGENCY CALL</div>
-      <div style="font-size: 12px; font-weight: 400; opacity: 0.9;">กดเรียกสัตวแพทย์ด่วน (แล้วยกมือขึ้น)</div>
+<button id="emergencyCallBtn" class="btn-call" onclick="triggerEmergencyCall()" style="display: none;">
+    <span style="font-size: 32px; flex-shrink: 0;">🚨</span>
+    <div class="call-text-wrapper">
+      <span style="font-size: 20px; font-weight: 700;">EMERGENCY CALL</span>
+      <span style="font-size: 13px; font-weight: 500; opacity: 0.9;">(ยกมือขึ้น เมื่อกดเรียกแล้ว)</span>
     </div>
   </button>
 
   <div class="menu-grid">
     <a class="menu-card" href="registration.html">
       <div class="notif-badge nb-total" id="badge-total-menu"></div>
-      <div class="card-emoji">📝</div>
+      <span class="card-emoji">📝</span>
       <div class="card-title">โต๊ะลงทะเบียน</div>
-      <div class="card-desc">บันทึกข้อมูลสัตว์และเจ้าของใหม่</div>
+      <div class="card-desc">บันทึกข้อมูลสัตว์และเจ้าของ</div>
     </a>
 
     <a class="menu-card" href="animals.html">
       <div class="notif-badge nb-ready" id="badge-ready-menu"></div>
-      <div class="card-emoji">🐾</div>
+      <span class="card-emoji">🐾</span>
       <div class="card-title">สถานะสัตว์</div>
-      <div class="card-desc">ติดตามคิวและสถานะการรักษา</div>
+      <div class="card-desc">ดูรายชื่อและสถานะสัตว์ทั้งหมด</div>
     </a>
 
     <a class="menu-card" href="surgery.html">
       <div class="notif-badge nb-surgery" id="badge-surgery-menu"></div>
-      <div class="card-emoji">✂️</div>
+      <span class="card-emoji">🛏️</span>
       <div class="card-title">โต๊ะผ่าตัด</div>
-      <div class="card-desc">จัดการเคสและบันทึกการผ่าตัด</div>
+      <div class="card-desc">รับเคสเข้าห้องผ่าตัด</div>
     </a>
 
     <a class="menu-card" href="anesthesia.html">
       <div class="notif-badge nb-waiting" id="badge-anes-menu"></div>
-      <div class="card-emoji">💉</div>
-      <div class="card-title">วางยาสลบ</div>
-      <div class="card-desc">คำนวณโดสและบันทึกสัญญาณชีพ</div>
+      <span class="card-emoji">💉</span>
+      <div class="card-title">โต๊ะวางยาสลบ</div>
+      <div class="card-desc">คำนวณยา · วางยา · Vitals</div>
     </a>
 
     <a class="menu-card" href="recovery.html">
       <div class="notif-badge nb-recovery" id="badge-recovery-menu"></div>
-      <div class="card-emoji">🩹</div>
-      <div class="card-title">ห้องพักฟื้น</div>
-      <div class="card-desc">ดูแลสัตว์หลังผ่าตัดจนกว่าจะตื่น</div>
+      <span class="card-emoji">❤️‍🩹</span>
+      <div class="card-title">พักฟื้น</div>
+      <div class="card-desc">ติดตามการฟื้นตัวหลังผ่าตัด</div>
     </a>
 
     <a class="menu-card" href="rx.html">
       <div class="notif-badge nb-ready" id="badge-rx-menu"></div>
-      <div class="card-emoji">💊</div>
+      <span class="card-emoji">💊</span>
       <div class="card-title">โต๊ะจัดยา</div>
-      <div class="card-desc">จัดเตรียมยาและพิมพ์ฉลาก</div>
+      <div class="card-desc">จัดการและพิมพ์ใบสั่งยา</div>
     </a>
 
     <a class="menu-card" href="report.html">
       <div class="notif-badge nb-done" id="badge-report-menu"></div>
-      <div class="card-emoji">📊</div>
-      <div class="card-title">รายงานสรุป</div>
-      <div class="card-desc">สถิติและข้อมูลการดำเนินงาน</div>
+      <span class="card-emoji">📊</span>
+      <div class="card-title">รายงาน</div>
+      <div class="card-desc">สรุปข้อมูลและสถิติ</div>
     </a>
 
     <a class="menu-card" href="settings.html">
-      <div class="card-emoji">⚙️</div>
-      <div class="card-title">ตั้งค่าระบบ</div>
-      <div class="card-desc">จัดการเครื่องพิมพ์และข้อมูลพื้นฐาน</div>
+      <span class="card-emoji">⚙️</span>
+      <div class="card-title">ตั้งค่า</div>
+      <div class="card-desc">ตั้งค่าเครื่องพิมพ์และกระดาษ</div>
     </a>
   </div>
 </div>
 
 <nav class="bottom-nav">
-  <a class="nav-item active" href="index.html"><span class="nav-icon">🏠</span>หน้าหลัก</a>
-  <a class="nav-item" href="animals.html"><span class="nav-icon">🐾</span>สัตว์</a>
-  <a class="nav-item" href="anesthesia.html"><span class="nav-icon">💉</span>วางยา</a>
-  <a class="nav-item" href="surgery.html"><span class="nav-icon">✂️</span>ผ่าตัด</a>
-  <a class="nav-item" href="recovery.html"><span class="nav-icon">🩹</span>พักฟื้น</a>
+  <a class="nav-item active" href="index.html">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a class="nav-item" href="animals.html">
+    <span class="nav-icon">🐾</span>สัตว์
+  </a>
+  <a class="nav-item" href="anesthesia.html">
+    <span class="nav-icon">💉</span>วางยา
+  </a>
+  <a class="nav-item" href="surgery.html">
+    <span class="nav-icon">🛏️</span>ผ่าตัด
+  </a>
+  <a class="nav-item" href="recovery.html">
+    <span class="nav-icon">❤️‍🩹</span>พักฟื้น
+  </a>
 </nav>
 
-<footer>RMUTTO – VASD · Veterinary Academic Service Division © 2026</footer>
+<button class="fab" onclick="location.href='registration.html'" title="ลงทะเบียน">
+  ➕
+</button>
+
+<footer>RMUTTO – VASD © 2026  ·  Veterinary Academic Service Division</footer>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -348,9 +533,12 @@ function updateCallButtonVisibility() {
   const role = (localStorage.getItem("vasd_role") || "").trim();
   const btn = document.getElementById("emergencyCallBtn");
   if (!btn) return;
+
+  // ถ้ายังไม่ล็อกอิน (ไม่มี role) หรือล็อกอินด้วย 3 บทบาทนี้ -> ให้ซ่อนปุ่ม
   if (!role || ["ผู้ดูแลระบบ", "อาจารย์", "สัตวแพทย์"].includes(role)) {
     btn.style.display = "none";
   } else {
+    // ล็อกอินด้วยบทบาทอื่นๆ (เช่น นศ.) -> ให้แสดงปุ่ม
     btn.style.display = "flex";
   }
 }
@@ -371,12 +559,19 @@ window.login = function () {
   const name = nameInput.value.trim();
   const role = roleSelect.value.trim();
   if (!name || !role) { alert("กรุณาใส่ชื่อและเลือกบทบาท"); return; }
-  if (role === "ผู้ดูแลระบบ" && pwdInput.value !== "2500") { alert("รหัสผ่านผู้ดูแลระบบไม่ถูกต้อง"); return; }
+  
+  if (role === "ผู้ดูแลระบบ" && pwdInput.value !== "2500") { 
+    alert("รหัสผ่านผู้ดูแลระบบไม่ถูกต้อง"); 
+    return; 
+  }
+  
   localStorage.setItem("vasd_user", name);
   localStorage.setItem("vasd_role", role);
   showUser.innerText = `${name} (${role})`;
+  
   loginPanel.style.display = "none";
   userInfo.style.display = "flex";
+  
   updateCallButtonVisibility();
 };
 
@@ -393,6 +588,7 @@ if (savedName && savedRole) {
   loginPanel.style.display = "none";
   userInfo.style.display = "flex";
 }
+
 updateCallButtonVisibility();
 
 /* ── Dashboard Badges ── */
@@ -404,6 +600,7 @@ async function loadSummary() {
   const { count: done }     = await supabase.from("vasd_queue").select("*",{count:"exact",head:true}).eq("status","done");
   const { count: total }    = await supabase.from("vasd_animal").select("*",{count:"exact",head:true});
 
+  // ค้นหาจำนวน "ซองยา" ของสัตว์ที่กำลังอยู่ในขั้นตอนรักษาหรือรอรับกลับ (ยังไม่ done)
   let rxCount = 0;
   const { data: activeQueues } = await supabase.from("vasd_queue").select("animal_id").in("status", ["surgery", "recovery", "ready_to_go_home"]);
   if (activeQueues && activeQueues.length > 0) {
@@ -421,22 +618,23 @@ async function loadSummary() {
   };
   
   setBadge("badge-total-menu",    total || 0,    "ลงทะเบียน");
-  setBadge("badge-anes-menu",     waiting || 0,  "รอวางยา");
+  setBadge("badge-anes-menu",     waiting || 0,  "นั่งรอเรียกวางยา");
   setBadge("badge-surgery-menu",  surgery || 0,  "กำลังผ่า");
-  setBadge("badge-recovery-menu", recovery || 0, "พักฟื้น");
-  setBadge("badge-ready-menu",    ready || 0,    "รอรับกลับ");
-  setBadge("badge-rx-menu",       rxCount,       "ซองยา");
-  setBadge("badge-report-menu",   done || 0,     "รับกลับแล้ว");
+  setBadge("badge-recovery-menu", recovery || 0, "กำลังพักฟื้น");
+  setBadge("badge-ready-menu",    ready || 0,    "ตื่นแล้วรอรับกลับ");    // ย้ายไปไว้ที่เมนู "สถานะสัตว์"
+  setBadge("badge-rx-menu",       rxCount,       "ซองยา - รอจัด");  // คำนวณจากจำนวนซองยา
+  setBadge("badge-report-menu",   done || 0,     "รับกลับแล้ว");    // ไว้ที่เมนู "รายงาน"
 }
 
 loadSummary();
 
 /* ── Realtime Data Sync ── */
 const dashboardChannel = supabase.channel('dashboard-live');
+
 dashboardChannel
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadSummary)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadSummary)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_prescription' }, loadSummary)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_prescription' }, loadSummary) // เพื่อให้ยอดซองยาเด้งทันที
   .subscribe();
 
 /* ── Emergency Broadcast Sending ── */
@@ -446,14 +644,16 @@ emergencyChannel.subscribe();
 window.triggerEmergencyCall = async function() {
   const name = localStorage.getItem("vasd_user") || "ผู้ใช้งาน";
   const role = localStorage.getItem("vasd_role") || "ไม่ได้ระบุ";
-  if (!confirm("🚨 ยืนยันการส่งสัญญาณเรียก สัตวแพทย์/อาจารย์ ด่วน?")) return;
+
+  if (!confirm("🚨 ยืนยันการส่งสัญญาณเรียก สัตวแพทย์/อาจารย์/ผู้ดูแลระบบ ด่วน?")) return;
+
   try {
     await emergencyChannel.send({
       type: 'broadcast',
       event: 'emergency_call',
       payload: { sender: name, role: role, time: new Date().toLocaleTimeString('th-TH') }
     });
-    alert("✅ ส่งสัญญาณเรียกเรียบร้อยแล้ว");
+    alert("✅ ส่งสัญญาณเรียกเรียบร้อยแล้วครับ");
   } catch (error) { 
     alert("❌ ไม่สามารถส่งสัญญาณได้: " + error.message); 
   }
