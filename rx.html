@@ -187,11 +187,24 @@ import { supabase } from "./js/supabase.js";
 
 window.rxDataMap = {}; 
 
+// ฟังก์ชันจัดการวันที่ (ปรับปรุงเป็นรูปแบบ พ.ศ. ภาษาไทยเต็มรูปแบบ)
 const getDates = () => {
   const now = new Date();
   const next7 = new Date(); next7.setDate(now.getDate() + 7);
-  const fmt = (d) => d.toLocaleDateString('th-TH', { day:'2-digit', month:'2-digit', year:'numeric' });
-  return { today: fmt(now), next: fmt(next7) };
+  
+  // กำหนดรูปแบบภาษาไทย: วัน เดือนปี พ.ศ. (เช่น 2 มีนาคม 2569)
+  const options = { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  };
+  
+  const fmt = (d) => d.toLocaleDateString('th-TH', options); 
+  
+  return { 
+    today: fmt(now), 
+    next: fmt(next7) 
+  };
 };
 
 async function loadRxQueue() {
