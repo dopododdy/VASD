@@ -8,7 +8,7 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS (matches index.html)
+    DESIGN TOKENS (คงเดิม)
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
@@ -51,7 +51,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Mesh background */
 body::before {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
@@ -59,12 +58,8 @@ body::before {
     radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.07) 0%, transparent 60%);
 }
 
-/* Font preload */
 .font-preload { position: absolute; opacity: 0; pointer-events: none; z-index: -9999; }
 
-/* ═══════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(11,25,41,0.88);
@@ -100,9 +95,6 @@ header {
 }
 .btn-home:hover { background: var(--surface-3); color: var(--text); }
 
-/* ═══════════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════════ */
 .wrap {
   position: relative; z-index: 1;
   max-width: 960px; margin: 0 auto;
@@ -120,9 +112,6 @@ header {
 }
 .page-sub { font-size: 12px; color: var(--text-dim); }
 
-/* ═══════════════════════════════════════════
-   CARD
-═══════════════════════════════════════════ */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -132,7 +121,6 @@ header {
 }
 .card:nth-child(1) { animation-delay: 0.05s; }
 .card:nth-child(2) { animation-delay: 0.10s; }
-.card:nth-child(3) { animation-delay: 0.15s; }
 
 .card-header {
   padding: 14px 18px;
@@ -156,9 +144,6 @@ header {
   background: var(--surface-2);
 }
 
-/* ═══════════════════════════════════════════
-   FORM FIELDS
-═══════════════════════════════════════════ */
 .field-group { display: flex; flex-direction: column; gap: 5px; }
 .field-label { font-size: 11px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.5px; text-transform: uppercase; }
 
@@ -178,24 +163,19 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px var(--teal-glow);
   background: rgba(255,255,255,0.08);
 }
-select { cursor: pointer; }
-select option { background: var(--navy-mid); color: var(--text); }
-textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 
+/* ปรับ Grid ให้รองรับปุ่ม 2 ปุ่มในแถวเดียว */
 .owner-row {
-  display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 12px;
+  display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 12px; align-items: end; margin-bottom: 12px;
 }
 .owner-row-2 {
   display: grid; grid-template-columns: 1fr 2fr; gap: 12px; align-items: end;
 }
-@media (max-width: 560px) {
+@media (max-width: 768px) {
   .owner-row { grid-template-columns: 1fr; margin-bottom: 0; gap: 12px; }
   .owner-row-2 { grid-template-columns: 1fr; margin-top: 12px; }
 }
 
-/* ═══════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════ */
 .btn {
   padding: 10px 16px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
   border: none; border-radius: var(--radius-sm); cursor: pointer;
@@ -206,12 +186,23 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 .btn:active { transform: scale(0.96); }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
 
-.btn-paste { background: var(--emerald-soft); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); }
-.btn-paste:hover { background: rgba(16,185,129,0.22); }
+.btn-paste { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border-2); }
+.btn-paste:hover { background: var(--surface-3); color: var(--text); }
+
+/* สไตล์ปุ่มอ่านบัตรประชาชน */
+.btn-read-card { 
+  background: rgba(14,165,160,0.15); 
+  color: var(--teal-light); 
+  border: 1px solid rgba(14,165,160,0.4);
+}
+.btn-read-card:hover { 
+  background: rgba(14,165,160,0.25); 
+  box-shadow: 0 0 15px var(--teal-glow);
+}
+
 .btn-add { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-2); }
 .btn-add:hover { background: rgba(14,165,160,0.12); border-color: var(--teal); color: var(--teal-light); }
 .btn-del { padding: 7px 10px; font-size: 14px; background: var(--rose-soft); color: var(--rose); border: 1px solid rgba(239,68,68,0.3); }
-.btn-del:hover { background: rgba(239,68,68,0.22); }
 
 .btn-submit {
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
@@ -219,36 +210,21 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   border-radius: var(--radius); width: 100%; justify-content: center;
   box-shadow: 0 4px 24px var(--teal-glow); letter-spacing: 0.3px;
 }
-.btn-submit:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 6px 30px var(--teal-glow); }
+.btn-submit.waiting { background: linear-gradient(135deg, var(--amber), #fbbf24); animation: pulse-amber 1.5s infinite alternate; }
 
-/* สไตล์ปุ่มตอนรอ Consent */
-.btn-submit.waiting {
-  background: linear-gradient(135deg, var(--amber), #fbbf24);
-  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.3);
-  animation: pulse-amber 1.5s infinite alternate;
-}
-@keyframes pulse-amber {
-  from { opacity: 0.8; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
-  to { opacity: 1; box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); }
-}
+@keyframes pulse-amber { from { opacity: 0.8; } to { opacity: 1; } }
 
-/* ═══════════════════════════════════════════
-   ANIMAL CARDS
-═══════════════════════════════════════════ */
 #animalList { display: flex; flex-direction: column; gap: 12px; }
 .animal-card {
   background: var(--surface-2); border: 1px solid var(--border-2);
   border-radius: var(--radius); padding: 16px; position: relative;
-  animation: slideUp 0.3s ease both; transition: border-color 0.2s;
+  animation: slideUp 0.3s ease both;
 }
-.animal-card:hover { border-color: rgba(14,165,160,0.3); }
-.animal-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .animal-card-num {
   width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
-  font-family: "Outfit", sans-serif;
+  font-size: 12px; font-weight: 700; color: #fff;
 }
 .animal-card-label { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
 
@@ -261,58 +237,37 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 .svc-chip {
   display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; font-weight: 500;
   background: var(--surface); border: 1px solid var(--border-2); color: var(--text-dim);
-  border-radius: 20px; padding: 6px 12px; user-select: none; transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+  border-radius: 20px; padding: 6px 12px; transition: all 0.2s;
 }
-.svc-chip:hover { background: var(--surface-3); border-color: var(--teal); color: var(--text); }
-.svc-chip input[type="checkbox"] { display: none; }
-.svc-chip.checked { background: rgba(14,165,160,0.15); border-color: var(--teal); color: var(--teal-light); font-weight: 600; }
-.svc-chip.checked::before { content: "✓ "; font-size: 11px; }
-
-.note-section textarea { font-size: 13px; min-height: 52px; }
-.note-section textarea.has-content { border-color: var(--amber); background: rgba(245,158,11,0.06); color: var(--amber); }
-.note-section textarea.has-content::placeholder { color: rgba(245,158,11,0.4); }
-
-.btn-del-animal { position: absolute; top: 12px; right: 12px; }
+.svc-chip.checked { background: rgba(14,165,160,0.15); border-color: var(--teal); color: var(--teal-light); }
+.svc-chip input { display: none; }
 
 .empty-state { text-align: center; padding: 32px 16px; color: var(--text-faint); }
-.empty-state-icon { font-size: 40px; margin-bottom: 10px; }
-.empty-state-text { font-size: 13px; }
+.submit-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; }
 
-.submit-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; animation: slideUp 0.4s 0.2s ease both; }
-
-/* ═══════════════════════════════════════════
-   BOTTOM NAVIGATION
-═══════════════════════════════════════════ */
 .bottom-nav {
   display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
   background: rgba(11,25,41,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border-2);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom)); grid-template-columns: repeat(5, 1fr);
 }
 .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; font-size: 11px; color: var(--text-dim); text-decoration: none; }
-.nav-icon { font-size: 20px; line-height: 1; }
+.nav-icon { font-size: 20px; }
 .nav-item.active { color: var(--teal); }
-.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
 
 #printArea { display: none; }
 @media print {
   body > :not(#printArea) { display: none !important; }
   #printArea { display: block !important; }
   .sticker-page { position: relative; width: 80mm; height: 50mm; page-break-after: always; overflow: hidden; background: #fff; }
-  /* ลบ style บังคับของ line ออก เพื่อให้ Inline CSS ควบคุมได้ 100% เหมือนใน Preview */
-  .line { position: absolute; white-space: pre-wrap; word-break: break-word; box-sizing: border-box; padding-right: 5px; color: #000 !important; }
+  .line { position: absolute; white-space: pre-wrap; word-break: break-word; color: #000 !important; }
   @page { size: 80mm 50mm; margin: 0; }
 }
 
 @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 640px) {
-  header { height: 56px; padding: 0 14px; }
   .brand-sub { display: none; }
-  .brand-name { font-size: 14px; }
   .wrap { padding: 18px 12px 90px; }
-  .page-title { font-size: 18px; }
-  .card-body { padding: 14px; }
-  .card-footer { padding: 10px 14px; }
   .bottom-nav { display: grid; }
 }
 </style>
@@ -321,7 +276,6 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 
 <div class="font-preload">
   <span style="font-family:'Kanit',sans-serif;">โหลด</span>
-  <span style="font-family:'Prompt',sans-serif;">โหลด</span>
   <span style="font-family:'Sarabun',sans-serif;">โหลด</span>
 </div>
 
@@ -360,11 +314,18 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
           <label class="field-label">เบอร์โทร</label>
           <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
         </div>
+        
         <div class="field-group">
-          <label class="field-label" style="opacity:0">ดึงชื่อ</label>
-          <button type="button" class="btn btn-paste" onclick="window.pasteOwnerName()">📋 วางจากคลิปบอร์ด</button>
+          <label class="field-label" style="opacity:0">Read</label>
+          <button type="button" id="btnReadCard" class="btn btn-read-card" onclick="window.readSmartCard()">🪪 อ่านบัตร</button>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" style="opacity:0">Paste</label>
+          <button type="button" class="btn btn-paste" onclick="window.pasteOwnerName()">📋 วาง</button>
         </div>
       </div>
+      
       <div class="owner-row-2">
         <div class="field-group">
           <label class="field-label">หมายเลขบัตรประชาชน</label>
@@ -433,6 +394,38 @@ consentChannel
   })
   .subscribe();
 
+/* ── [NEW] SMART CARD READER FUNCTION ── */
+window.readSmartCard = async function() {
+    const btn = document.getElementById('btnReadCard');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = "⏳...";
+        
+        const response = await fetch('http://127.0.0.1:8080/read');
+        const result = await response.json();
+
+        if (result.status === "success") {
+            const p = result.data;
+            // ใส่ข้อมูลลงฟอร์ม
+            document.getElementById("ownerName").value = p.prefix + p.firstname + " " + p.lastname;
+            document.getElementById("idCard").value = p.cid;
+            document.getElementById("address").value = p.address;
+            
+            // Focus ไปที่ช่องเบอร์โทรเพื่อให้ จนท. พิมพ์ต่อได้เลย
+            document.getElementById("phone").focus();
+        } else {
+            alert("❌ " + result.message);
+        }
+    } catch (error) {
+        alert("❌ ติดต่อโปรแกรมอ่านบัตรไม่ได้ (อย่าลืมเปิดโปรแกรมจอดำ Python นะครับ)");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+};
+
 /* ── Count display ── */
 function refreshCount() {
   const rows = document.querySelectorAll(".animal-card");
@@ -478,7 +471,6 @@ function buildSvcChips(container, sex, species) {
   services.forEach((svc, idx) => {
     const lbl = document.createElement("label");
     lbl.className = "svc-chip" + (idx === 0 ? " checked" : "");
-    lbl.dataset.value = svc;
     lbl.innerHTML = `<input type="checkbox" class="svc" value="${svc}" ${idx === 0 ? "checked" : ""}>${svc}`;
     lbl.addEventListener("click", (e) => {
       e.preventDefault();
@@ -544,9 +536,6 @@ window.addAnimal = function () {
   const species  = card.querySelector(".species");
   const sex      = card.querySelector(".sex");
   const note     = card.querySelector(".healthNote");
-  const nameInput= card.querySelector(".animalName");
-
-  nameInput.addEventListener("input", () => { nameInput.style.borderColor = ""; });
 
   function refreshSvc() { buildSvcChips(svcGrid, sex.value, species.value); }
   refreshSvc();
@@ -555,52 +544,33 @@ window.addAnimal = function () {
   note.addEventListener("input", () => note.classList.toggle("has-content", note.value.trim() !== ""));
 
   window.refreshCount = refreshCount;
-
-  const list = document.getElementById("animalList");
-  list.appendChild(card);
+  document.getElementById("animalList").appendChild(card);
   refreshCount();
   card.scrollIntoView({ behavior: "smooth", block: "nearest" });
 };
 
-/* ── 1. Request Consent from iPad ── */
+/* ── 1. Request Consent ── */
 window.requestConsent = function() {
-  const ownerNameInput = document.getElementById("ownerName");
-  const ownerName = ownerNameInput.value.trim();
+  const ownerName = document.getElementById("ownerName").value.trim();
   const phone     = document.getElementById("phone").value.trim();
   const idCard    = document.getElementById("idCard").value.trim();
   const address   = document.getElementById("address").value.trim();
 
-  // Validate
-  if (!ownerName) { alert("❌ กรุณาระบุชื่อเจ้าของสัตว์"); ownerNameInput.focus(); return; }
+  if (!ownerName) return alert("❌ กรุณาระบุชื่อเจ้าของสัตว์");
   const cards = document.querySelectorAll(".animal-card");
   if (cards.length === 0) return alert("❌ กรุณาเพิ่มข้อมูลสัตว์อย่างน้อย 1 รายการ");
 
-  let hasError = false;
   let animalsData = []; 
-
-  cards.forEach((card, i) => {
-    const ni = card.querySelector(".animalName");
-    if (!ni.value.trim()) {
-      alert(`❌ กรุณาระบุชื่อสัตว์รายการที่ ${i + 1}`);
-      ni.focus(); ni.style.borderColor = "var(--rose)"; hasError = true;
-    } else {
-      let svcs = [];
-      card.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
-      animalsData.push({
-        name: ni.value.trim(),
-        species: card.querySelector(".species").value === "ม" ? "แมว" : "สุนัข",
-        sex: card.querySelector(".sex").value,
-        services: svcs
-      });
-    }
+  cards.forEach(card => {
+    let svcs = [];
+    card.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
+    animalsData.push({
+      name: card.querySelector(".animalName").value.trim(),
+      species: card.querySelector(".species").value === "ม" ? "แมว" : "สุนัข",
+      sex: card.querySelector(".sex").value,
+      services: svcs
+    });
   });
-
-  if (hasError) return;
-
-  const payloadData = {
-    owner: { name: ownerName, phone: phone || "-", idCard: idCard || "-", address: address || "-" },
-    animals: animalsData
-  };
 
   const btn = document.getElementById("btnRequestConsent");
   btn.disabled = true;
@@ -611,16 +581,19 @@ window.requestConsent = function() {
   consentChannel.send({
     type: 'broadcast',
     event: 'request-consent',
-    payload: payloadData
+    payload: {
+      owner: { name: ownerName, phone, idCard, address },
+      animals: animalsData
+    }
   });
 };
 
-/* ── 2. Execute Save (ทำงานอัตโนมัติเมื่อ iPad กดยอมรับ) ── */
+/* ── 2. Execute Save ── */
 async function executeSave() {
   isWaitingForConsent = false;
   const btnSave = document.getElementById("btnRequestConsent");
   btnSave.classList.remove("waiting");
-  btnSave.textContent = "💾 ได้รับคำยินยอมแล้ว... กำลังบันทึกข้อมูลและพิมพ์คิว";
+  btnSave.textContent = "💾 กำลังบันทึกข้อมูล...";
 
   const ownerName = document.getElementById("ownerName").value.trim();
   const phone     = document.getElementById("phone").value.trim();
@@ -629,43 +602,22 @@ async function executeSave() {
   const cards = document.querySelectorAll(".animal-card");
 
   try {
-    const { data: eventId, error: evtErr } = await supabase.rpc("get_today_event");
-    if (evtErr) throw evtErr;
-
-    const { data: owner, error: ownerErr } = await supabase
-      .from("vasd_owner")
-      .insert({ 
-        event_id: eventId, 
-        owner_name: ownerName, 
-        phone: phone,
-        id_card: idCard,
-        address: address
-      })
-      .select().single();
-    if (ownerErr) throw ownerErr;
-
-    const { data: lastAnimal, error: qErr } = await supabase
-      .from("vasd_animal")
-      .select("queue_number")
-      .order("queue_number", { ascending: false })
-      .limit(1);
-    if (qErr) throw qErr;
+    const { data: eventId } = await supabase.rpc("get_today_event");
+    const { data: owner } = await supabase.from("vasd_owner").insert({ event_id: eventId, owner_name: ownerName, phone, id_card: idCard, address }).select().single();
+    const { data: lastAnimal } = await supabase.from("vasd_animal").select("queue_number").order("queue_number", { ascending: false }).limit(1);
 
     let q = (lastAnimal && lastAnimal.length > 0) ? lastAnimal[0].queue_number + 1 : 1;
     let svcs = [], queues = [], forPrint = [];
 
     for (const card of cards) {
       const spVal = card.querySelector(".species").value;
-      const { data: animal, error: animalErr } = await supabase
-        .from("vasd_animal").insert({
-          event_id: eventId, owner_id: owner.id, queue_number: q++,
-          species: spVal,
+      const { data: animal } = await supabase.from("vasd_animal").insert({
+          event_id: eventId, owner_id: owner.id, queue_number: q++, species: spVal,
           animal_name: card.querySelector(".animalName").value.trim(),
           sex: card.querySelector(".sex").value,
           est_weight: card.querySelector(".estWeight").value || 0,
           health_note: card.querySelector(".healthNote").value.trim()
-        }).select().single();
-      if (animalErr) throw animalErr;
+      }).select().single();
 
       let sNames = [];
       card.querySelectorAll(".svc:checked").forEach(s => {
@@ -679,86 +631,30 @@ async function executeSave() {
     if (svcs.length)   await supabase.from("vasd_service").insert(svcs);
     if (queues.length) await supabase.from("vasd_queue").insert(queues);
 
-    // พิมพ์สติกเกอร์คิว
+    // พิมพ์สติกเกอร์ (ใช้ Template เดิม)
     const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type", "queue").single();
-    
     if (tmplData?.config) {
       let html = "";
       forPrint.forEach(a => {
         let page = "<div class='sticker-page'>";
-        
-        // 1. ตรวจสอบเงื่อนไขเพื่อดึงชื่อไฟล์รูป
-        let imgSpc = a.spc === "แมว" ? "cat.png" : "dog.png";
-        let imgSex = a.sex === "ผู้" ? "male.png" : "female.png";
-
-        // 2. สร้าง Tag HTML สำหรับรูปภาพให้มีความสูง 1em เพื่อพอดีกับฟอนต์
-        let iconSpc = `<img src="${imgSpc}" style="height:1em; width:auto; vertical-align:middle; margin-right:4px;">`;
-        let iconSex = `<img src="${imgSex}" style="height:1em; width:auto; vertical-align:middle; margin-right:4px;">`;
-
         tmplData.config.forEach(l => {
-          // 3. ทำการ Replace ข้อความและตัวแปรทั้งหมดให้ครบถ้วน รวมถึง {{species_icon}}
-          let txt = l.text
-            .replace(/{{queue_number}}/g, a.q)
-            .replace(/{{animal_name}}/g, a.name)
-            .replace(/{{species_icon}}/g, iconSpc)
-            .replace(/{{sex_icon}}/g, iconSex)
-            .replace(/{{species}}/g, a.spc)
-            .replace(/{{sex}}/g, a.sex)
-            .replace(/{{owner_name}}/g, ownerName)
-            .replace(/{{phone}}/g, phone || "ไม่ระบุ")
-            .replace(/{{services}}/g, a.svc);
-          
-          // 4. จัดการ Formatting ให้เป๊ะเหมือนหน้า Setting-Sticker.html
-          let cleanFont = (l.font || "Sarabun").replace(/['"]/g, "").trim();
-          let fnt = `'${cleanFont}', sans-serif`;
-          let fontWeight = l.bold ? "600" : "400";
-          let align = l.align || "left";
-          let leftPos = align === 'center' ? "0px" : `${l.x || 0}px`;
-          let widthStr = align === 'center' ? "100%" : `calc(100% - ${l.x || 0}px)`;
-          
-          page += `<div class="line" style="
-            position: absolute;
-            left: ${leftPos};
-            width: ${widthStr};
-            top: ${l.y || 0}px;
-            font-size: ${l.size}px;
-            font-weight: ${fontWeight};
-            font-family: ${fnt};
-            text-align: ${align};
-            line-height: 1.2;
-          ">${txt}</div>`;
+          let txt = l.text.replace(/{{queue_number}}/g, a.q).replace(/{{animal_name}}/g, a.name).replace(/{{owner_name}}/g, ownerName).replace(/{{services}}/g, a.svc);
+          page += `<div class="line" style="position:absolute; left:${l.align==='center'?'0':l.x+'px'}; width:${l.align==='center'?'100%':'auto'}; top:${l.y}px; font-size:${l.size}px; font-weight:${l.bold?'600':'400'}; font-family:'Sarabun'; text-align:${l.align||'left'};">${txt}</div>`;
         });
         html += page + "</div>";
       });
-      
       document.getElementById("printArea").innerHTML = html;
-      
-      try {
-        await document.fonts.load("16px 'Kanit'");
-        await document.fonts.load("16px 'Prompt'");
-        await document.fonts.load("16px 'Sarabun'");
-        await document.fonts.load("16px 'Outfit'");
-      } catch(e) {}
-      await document.fonts.ready;
-      
-      // หน่วงเวลาเล็กน้อยให้ Browser โหลดรูปภาพและจัดฟอนต์เสร็จก่อนเข้าหน้าต่างพิมพ์
-      await new Promise(r => setTimeout(r, 500));
       window.print();
     }
 
     setTimeout(() => { location.href = "index.html"; }, 1000);
-
   } catch (err) {
-    console.error(err);
-    alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + (err.message || "โปรดลองใหม่"));
+    alert("❌ Error: " + err.message);
     btnSave.disabled = false;
-    btnSave.textContent = "📲 ส่งคำขอ Consent ไปยังหน้าจอ iPad อีกครั้ง";
   }
 }
 
-/* auto-add first animal */
 window.addAnimal();
 </script>
-<script type="module" src="./js/global-alarm.js"></script>
 </body>
 </html>
