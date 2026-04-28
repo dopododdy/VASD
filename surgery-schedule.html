@@ -205,15 +205,10 @@
   .species-icon.is-dog { border-color: rgba(245,158,11,0.45); }
   .species-icon.is-cat { border-color: rgba(139,92,246,0.45); }
   .species-icon.is-other { border-color: var(--border-2); }
-  .species-icon img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .species-icon .other-emoji {
-    font-size: 38px;
+  .species-icon .species-emoji {
+    font-size: 44px;
     line-height: 1;
-    filter: grayscale(0.2);
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
   }
 
   .sched-time {
@@ -381,7 +376,7 @@
     .sched-procedure { font-size: 12px; }
     .sched-left { min-width: 60px; }
     .species-icon { width: 60px; height: 60px; }
-    .species-icon .other-emoji { font-size: 30px; }
+    .species-icon .species-emoji { font-size: 36px; }
   }
 </style>
 </head>
@@ -549,12 +544,12 @@
 
   function speciesIconHTML(species) {
     if (species === "สุนัข") {
-      return `<div class="species-icon is-dog"><img src="dog.png" alt="สุนัข"></div>`;
+      return `<div class="species-icon is-dog"><span class="species-emoji">🐶</span></div>`;
     }
     if (species === "แมว") {
-      return `<div class="species-icon is-cat"><img src="cat.png" alt="แมว"></div>`;
+      return `<div class="species-icon is-cat"><span class="species-emoji">🐱</span></div>`;
     }
-    return `<div class="species-icon is-other"><span class="other-emoji">🐾</span></div>`;
+    return `<div class="species-icon is-other"><span class="species-emoji">🐾</span></div>`;
   }
 
   function renderCard(r) {

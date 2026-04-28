@@ -254,15 +254,10 @@
   .item-species-icon.is-dog { border-color: rgba(245,158,11,0.45); }
   .item-species-icon.is-cat { border-color: rgba(139,92,246,0.45); }
   .item-species-icon.is-other { border-color: var(--border-2); }
-  .item-species-icon img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .item-species-icon .other-emoji {
-    font-size: 28px;
+  .item-species-icon .species-emoji {
+    font-size: 32px;
     line-height: 1;
-    filter: grayscale(0.2);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
   }
 
   .item-main { min-width: 0; }
@@ -435,7 +430,7 @@
     .header-title { font-size: 14px; }
     .item { grid-template-columns: 48px 1fr; gap: 10px; }
     .item-species-icon { width: 48px; height: 48px; }
-    .item-species-icon .other-emoji { font-size: 24px; }
+    .item-species-icon .species-emoji { font-size: 26px; }
     .item-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; margin-top: 4px; }
   }
 </style>
@@ -766,12 +761,12 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
 
   function speciesIconHTML(species) {
     if (species === "สุนัข") {
-      return `<div class="item-species-icon is-dog"><img src="dog.png" alt="สุนัข"></div>`;
+      return `<div class="item-species-icon is-dog"><span class="species-emoji">🐶</span></div>`;
     }
     if (species === "แมว") {
-      return `<div class="item-species-icon is-cat"><img src="cat.png" alt="แมว"></div>`;
+      return `<div class="item-species-icon is-cat"><span class="species-emoji">🐱</span></div>`;
     }
-    return `<div class="item-species-icon is-other"><span class="other-emoji">🐾</span></div>`;
+    return `<div class="item-species-icon is-other"><span class="species-emoji">🐾</span></div>`;
   }
 
   /* ── Render List ── */
