@@ -212,6 +212,15 @@
     color: var(--text-dim);
     padding: 2px 8px; border-radius: 6px;
   }
+  .sched-hn {
+    font-family: "Outfit", sans-serif;
+    font-size: 10px; font-weight: 700;
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    color: #fde68a;
+    padding: 2px 8px; border-radius: 999px;
+    letter-spacing: 0.3px;
+  }
   .sched-procedure { font-size: 13px; color: var(--text); margin-bottom: 4px; }
   .sched-meta {
     display: flex; gap: 12px; flex-wrap: wrap;
@@ -356,7 +365,7 @@
     <button class="chip" data-filter="today">เฉพาะวันนี้</button>
     <button class="chip" data-filter="week">7 วันข้างหน้า</button>
     <button class="chip" data-filter="all">ทั้งหมด</button>
-    <input type="text" id="searchInput" class="search-input" placeholder="🔍 ค้นหา ชื่อสัตว์ / เจ้าของ / ศัลยแพทย์">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 ค้นหา HN / ชื่อสัตว์ / เจ้าของ / เบอร์โทร / ศัลยแพทย์">
   </div>
 
   <div id="loading" class="loading">กำลังโหลดตารางผ่าตัด...</div>
@@ -440,8 +449,10 @@
 
     if (search) {
       rows = rows.filter(r =>
+        (r.hn            || "").toLowerCase().includes(search) ||
         (r.animal_name   || "").toLowerCase().includes(search) ||
         (r.owner_name    || "").toLowerCase().includes(search) ||
+        (r.phone         || "").toLowerCase().includes(search) ||
         (r.surgeon       || "").toLowerCase().includes(search) ||
         (r.procedure     || "").toLowerCase().includes(search) ||
         (r.animal_species|| "").toLowerCase().includes(search)
@@ -519,10 +530,12 @@
           <div class="sched-animal">
             🐾 ${escapeHtml(r.animal_name || "ไม่ระบุชื่อสัตว์")}
             ${r.animal_species ? `<span class="sched-species">${escapeHtml(r.animal_species)}</span>` : ""}
+            ${r.hn ? `<span class="sched-hn">HN ${escapeHtml(r.hn)}</span>` : ""}
           </div>
           <div class="sched-procedure">${escapeHtml(r.procedure || "—")}</div>
           <div class="sched-meta">
             ${r.owner_name ? `<span>👤 ${escapeHtml(r.owner_name)}</span>` : ""}
+            ${r.phone      ? `<span>📞 ${escapeHtml(r.phone)}</span>` : ""}
             ${r.surgeon    ? `<span>🩺 ${escapeHtml(r.surgeon)}</span>` : ""}
           </div>
           ${r.notes ? `<div class="sched-notes">📝 ${escapeHtml(r.notes)}</div>` : ""}

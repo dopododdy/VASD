@@ -254,6 +254,16 @@
     font-family: "Outfit", sans-serif;
     font-weight: 700; font-size: 12px; color: var(--text);
   }
+  .item-hn {
+    font-family: "Outfit", sans-serif;
+    font-weight: 700; font-size: 11px;
+    color: #fde68a;
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+  }
   .item-status {
     font-size: 10px; font-weight: 700;
     padding: 2px 8px;
@@ -451,17 +461,31 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
       </div>
 
       <div class="field">
+        <label>HN</label>
+        <input class="input" id="hn" placeholder="Hospital Number">
+      </div>
+      <div class="field">
+        <label>ชนิดสัตว์</label>
+        <select class="select" id="animalSpecies">
+          <option value="">— เลือกชนิด —</option>
+          <option value="สุนัข">สุนัข</option>
+          <option value="แมว">แมว</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+      </div>
+
+      <div class="field">
         <label>ชื่อสัตว์ <span class="req">*</span></label>
         <input class="input" id="animalName" placeholder="เช่น น้องมิ้น" required>
       </div>
       <div class="field">
-        <label>ชนิด/พันธุ์</label>
-        <input class="input" id="animalSpecies" placeholder="เช่น สุนัข พันธุ์ปอม">
+        <label>ชื่อเจ้าของ</label>
+        <input class="input" id="ownerName" placeholder="ชื่อ-นามสกุล">
       </div>
 
       <div class="field">
-        <label>ชื่อเจ้าของ</label>
-        <input class="input" id="ownerName" placeholder="ชื่อ-นามสกุล">
+        <label>เบอร์โทร</label>
+        <input class="input" id="phone" type="tel" inputmode="tel" placeholder="0xx-xxx-xxxx">
       </div>
       <div class="field">
         <label>ศัลยแพทย์</label>
@@ -508,7 +532,7 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
     </div>
 
     <div class="list-toolbar">
-      <input type="text" id="listSearch" class="list-search" placeholder="🔍 ค้นหา ชื่อสัตว์ / เจ้าของ / ศัลยแพทย์ / รายการ">
+      <input type="text" id="listSearch" class="list-search" placeholder="🔍 ค้นหา HN / ชื่อสัตว์ / เจ้าของ / เบอร์โทร / ศัลยแพทย์ / รายการ">
       <select class="select" id="filterStatus" style="max-width:160px;">
         <option value="">สถานะทั้งหมด</option>
         <option value="scheduled">นัดไว้</option>
@@ -573,9 +597,11 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
     return {
       schedule_date:   $("scheduleDate").value || null,
       schedule_time:   $("scheduleTime").value || null,
+      hn:              $("hn").value.trim() || null,
+      animal_species:  $("animalSpecies").value || null,
       animal_name:     $("animalName").value.trim() || null,
-      animal_species:  $("animalSpecies").value.trim() || null,
       owner_name:      $("ownerName").value.trim() || null,
+      phone:           $("phone").value.trim() || null,
       surgeon:         $("surgeon").value.trim() || null,
       procedure:       $("procedure").value.trim() || null,
       status:          $("status").value || "scheduled",
@@ -586,9 +612,11 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
     $("recordId").value      = r.id || "";
     $("scheduleDate").value  = r.schedule_date || "";
     $("scheduleTime").value  = (r.schedule_time || "").slice(0,5);
-    $("animalName").value    = r.animal_name || "";
+    $("hn").value            = r.hn || "";
     $("animalSpecies").value = r.animal_species || "";
+    $("animalName").value    = r.animal_name || "";
     $("ownerName").value     = r.owner_name || "";
+    $("phone").value         = r.phone || "";
     $("surgeon").value       = r.surgeon || "";
     $("procedure").value     = r.procedure || "";
     $("status").value        = r.status || "scheduled";
@@ -717,9 +745,11 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
     if (filterStatus) rows = rows.filter(r => r.status === filterStatus);
     if (search) {
       rows = rows.filter(r =>
+        (r.hn             || "").toLowerCase().includes(search) ||
         (r.animal_name    || "").toLowerCase().includes(search) ||
         (r.animal_species || "").toLowerCase().includes(search) ||
         (r.owner_name     || "").toLowerCase().includes(search) ||
+        (r.phone          || "").toLowerCase().includes(search) ||
         (r.surgeon        || "").toLowerCase().includes(search) ||
         (r.procedure      || "").toLowerCase().includes(search)
       );
@@ -749,12 +779,14 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
             <div class="item-row1">
               <span class="item-date">${escapeHtml(formatThaiDate(r.schedule_date))}</span>
               <span class="item-time">⏰ ${escapeHtml(formatTime(r.schedule_time))}</span>
+              ${r.hn ? `<span class="item-hn">HN ${escapeHtml(r.hn)}</span>` : ""}
               <span class="item-status ${stCls}">${stLabel}</span>
             </div>
             <div class="item-animal">🐾 ${escapeHtml(r.animal_name || "—")} ${r.animal_species ? `<span style="font-weight:500;color:var(--text-dim);font-size:11px;">(${escapeHtml(r.animal_species)})</span>` : ""}</div>
             <div class="item-procedure">${escapeHtml(r.procedure || "—")}</div>
             <div class="item-meta">
               ${r.owner_name ? `<span>👤 ${escapeHtml(r.owner_name)}</span>` : ""}
+              ${r.phone      ? `<span>📞 ${escapeHtml(r.phone)}</span>` : ""}
               ${r.surgeon    ? `<span>🩺 ${escapeHtml(r.surgeon)}</span>` : ""}
             </div>
             ${r.notes ? `<div class="item-notes">📝 ${escapeHtml(r.notes)}</div>` : ""}
