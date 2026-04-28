@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>ตารางผ่าตัด รพส. – RMUTTO VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1929;
+    --navy-mid: #112240;
+    --navy-card: #162d4a;
+    --teal: #0ea5a0;
+    --teal-light: #14c4bc;
+    --rose: #ef4444;
+    --rose-dark: #b91c1c;
+    --amber: #f59e0b;
+    --emerald: #10b981;
+    --slate: #64748b;
+    --surface: rgba(255,255,255,0.04);
+    --surface-2: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.10);
+    --border-2: rgba(255,255,255,0.16);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-faint: #4a5568;
+    --radius-sm: 10px;
+    --radius: 16px;
+    --radius-lg: 22px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: "Sarabun", sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 0%, rgba(239,68,68,0.10), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.07), transparent 60%);
+  }
+
+  /* ── Header ── */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,25,41,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.12); }
+  .header-title {
+    font-family: "Outfit", sans-serif;
+    font-size: 18px; font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.2px;
+    flex: 1;
+  }
+  .header-title .accent {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    margin-right: 6px;
+    vertical-align: middle;
+    box-shadow: 0 2px 8px rgba(239,68,68,0.4);
+  }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.12); }
+
+  /* ── Wrap ── */
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 18px 16px 24px;
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: "Sarabun", sans-serif;
+  }
+  .chip:hover { color: var(--text); }
+  .chip.active {
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff;
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 2px 12px rgba(239,68,68,0.4);
+  }
+  .search-input {
+    flex: 1; min-width: 140px;
+    padding: 9px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    color: var(--text); font-size: 12px; outline: none;
+    font-family: "Sarabun", sans-serif;
+  }
+  .search-input:focus { border-color: var(--rose); }
+  .search-input::placeholder { color: var(--text-faint); }
+
+  /* ── Day group ── */
+  .day-group { margin-bottom: 24px; }
+  .day-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+  .day-pill {
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: "Outfit", sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 10px rgba(239,68,68,0.35);
+  }
+  .day-meta { font-size: 11px; color: var(--text-dim); }
+
+  /* ── Schedule item card ── */
+  .sched-list { display: grid; gap: 10px; }
+  .sched-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--rose);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .sched-card:hover { background: var(--surface-2); border-color: var(--border-2); border-left-color: var(--rose); }
+  .sched-card.is-cancelled { opacity: 0.55; border-left-color: var(--slate); }
+  .sched-card.is-completed { border-left-color: var(--emerald); }
+
+  .sched-time {
+    font-family: "Outfit", sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+    color: #fff;
+    text-align: center;
+    min-width: 64px;
+    line-height: 1.1;
+  }
+  .sched-time small {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-top: 2px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .sched-body { min-width: 0; }
+  .sched-animal {
+    font-size: 14px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .sched-species {
+    font-size: 10px; font-weight: 600;
+    background: var(--surface-2); border: 1px solid var(--border-2);
+    color: var(--text-dim);
+    padding: 2px 8px; border-radius: 6px;
+  }
+  .sched-procedure { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+  .sched-meta {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    font-size: 11px; color: var(--text-dim);
+  }
+  .sched-meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .sched-notes {
+    margin-top: 6px;
+    font-size: 11px; color: var(--text-faint);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .sched-status {
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+  .status-scheduled { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .status-completed { background: rgba(16,185,129,0.18); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); }
+  .status-cancelled { background: rgba(100,116,139,0.18); color: #cbd5e1; border: 1px solid rgba(100,116,139,0.4); }
+
+  /* ── Empty / loading state ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+  .empty-state .icon { font-size: 50px; margin-bottom: 12px; opacity: 0.6; }
+  .empty-state h3 { font-family: "Outfit", sans-serif; font-size: 17px; color: var(--text); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; line-height: 1.5; }
+  .empty-state .hint {
+    margin-top: 16px;
+    display: inline-block;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .empty-state .hint:hover { color: var(--text); }
+  .loading {
+    text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 13px;
+  }
+
+  /* ── Bottom nav ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(11,25,41,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-2);
+    display: flex;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    text-decoration: none; color: var(--text-dim);
+    flex: 1; transition: color 0.2s;
+    font-size: 10px; font-weight: 600;
+  }
+  .nav-item.active { color: var(--rose); }
+  .nav-icon { font-size: 20px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .header-title { font-size: 15px; }
+    .header-title .accent { font-size: 11px; padding: 2px 8px; }
+    .sched-card { grid-template-columns: auto 1fr; padding: 12px 14px; gap: 12px; }
+    .sched-status { grid-column: 1 / -1; justify-self: end; }
+    .sched-time { min-width: 56px; font-size: 16px; }
+    .sched-animal { font-size: 13px; }
+    .sched-procedure { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back-btn" title="กลับ">‹</a>
+  <div class="header-title"><span class="accent">รพส.</span> ตารางผ่าตัด</div>
+  <div class="header-actions">
+    <button class="icon-btn" id="refreshBtn" title="รีเฟรช">↻</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="filter-bar">
+    <button class="chip active" data-filter="upcoming">วันนี้และวันถัดไป</button>
+    <button class="chip" data-filter="today">เฉพาะวันนี้</button>
+    <button class="chip" data-filter="week">7 วันข้างหน้า</button>
+    <button class="chip" data-filter="all">ทั้งหมด</button>
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 ค้นหา ชื่อสัตว์ / เจ้าของ / ศัลยแพทย์">
+  </div>
+
+  <div id="loading" class="loading">กำลังโหลดตารางผ่าตัด...</div>
+  <div id="scheduleContainer"></div>
+
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div class="icon">📅</div>
+    <h3>ยังไม่มีรายการผ่าตัดที่นัดไว้</h3>
+    <p>การเพิ่มหรือแก้ไขตารางผ่าตัดทำได้ผ่านเมนู<br><b>ตั้งค่า → จัดการตารางผ่าตัด รพส.</b></p>
+    <a href="settings.html" class="hint">⚙️ ไปที่หน้าตั้งค่า</a>
+  </div>
+
+  <div id="errorState" class="empty-state" style="display:none;">
+    <div class="icon">⚠️</div>
+    <h3>ยังไม่ได้ตั้งค่าฐานข้อมูล</h3>
+    <p>โปรดสร้างตาราง <code>vasd_vh_surgery_schedule</code> บน Supabase ก่อน<br>(ดูคำแนะนำใน README.md)</p>
+    <a href="settings.html" class="hint">⚙️ ไปที่หน้าตั้งค่า</a>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a href="surgery-schedule.html" class="nav-item active">
+    <span class="nav-icon">📅</span>ตารางผ่าตัด
+  </a>
+  <a href="settings.html" class="nav-item">
+    <span class="nav-icon">⚙️</span>ตั้งค่า
+  </a>
+</nav>
+
+<script type="module">
+  import { supabase } from "./js/supabase.js";
+
+  /* ── Helpers ── */
+  const TH_DAYS   = ["อา.","จ.","อ.","พ.","พฤ.","ศ.","ส."];
+  const TH_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+
+  function todayISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+  function addDaysISO(daysFromToday) {
+    const d = new Date();
+    d.setDate(d.getDate() + daysFromToday);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+  function formatThaiDate(iso) {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    const buddhistYear = y + 543;
+    return `${TH_DAYS[dt.getDay()]} ${d} ${TH_MONTHS[m-1]} ${String(buddhistYear).slice(-2)}`;
+  }
+  function formatTime(t) {
+    if (!t) return "—";
+    // Accept HH:MM or HH:MM:SS
+    return t.slice(0,5);
+  }
+  function escapeHtml(s) {
+    if (s == null) return "";
+    return String(s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  /* ── State ── */
+  let allRows = [];
+  let currentFilter = "upcoming";
+
+  /* ── Render ── */
+  function applyFilters() {
+    const search = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+    const today = todayISO();
+    const wkLater = addDaysISO(7);
+
+    let rows = allRows.slice();
+
+    if (currentFilter === "today")    rows = rows.filter(r => r.schedule_date === today);
+    if (currentFilter === "upcoming") rows = rows.filter(r => r.schedule_date >= today);
+    if (currentFilter === "week")     rows = rows.filter(r => r.schedule_date >= today && r.schedule_date <= wkLater);
+    // "all" => no date filter
+
+    if (search) {
+      rows = rows.filter(r =>
+        (r.animal_name   || "").toLowerCase().includes(search) ||
+        (r.owner_name    || "").toLowerCase().includes(search) ||
+        (r.surgeon       || "").toLowerCase().includes(search) ||
+        (r.procedure     || "").toLowerCase().includes(search) ||
+        (r.animal_species|| "").toLowerCase().includes(search)
+      );
+    }
+
+    // Sort: date asc, then time asc, with cancelled at the bottom of each day
+    rows.sort((a, b) => {
+      if (a.schedule_date !== b.schedule_date) return a.schedule_date.localeCompare(b.schedule_date);
+      const ac = a.status === "cancelled" ? 1 : 0;
+      const bc = b.status === "cancelled" ? 1 : 0;
+      if (ac !== bc) return ac - bc;
+      const at = a.schedule_time || "99:99";
+      const bt = b.schedule_time || "99:99";
+      return at.localeCompare(bt);
+    });
+
+    renderRows(rows);
+  }
+
+  function renderRows(rows) {
+    const container = document.getElementById("scheduleContainer");
+    const empty = document.getElementById("emptyState");
+
+    if (!rows.length) {
+      container.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    // Group by date
+    const groups = {};
+    rows.forEach(r => {
+      const d = r.schedule_date || "ไม่ระบุวัน";
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(r);
+    });
+
+    let html = "";
+    Object.keys(groups).sort().forEach(date => {
+      const items = groups[date];
+      html += `
+        <div class="day-group">
+          <div class="day-header">
+            <span class="day-pill">${escapeHtml(formatThaiDate(date))}</span>
+            <span class="day-meta">${items.length} รายการ</span>
+          </div>
+          <div class="sched-list">
+            ${items.map(renderCard).join("")}
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  function renderCard(r) {
+    const cls = r.status === "cancelled" ? "is-cancelled"
+              : r.status === "completed" ? "is-completed" : "";
+    const statusLabel = r.status === "cancelled" ? "ยกเลิก"
+                       : r.status === "completed" ? "เสร็จสิ้น"
+                       : "นัดไว้";
+    const statusCls   = r.status === "cancelled" ? "status-cancelled"
+                       : r.status === "completed" ? "status-completed"
+                       : "status-scheduled";
+
+    return `
+      <div class="sched-card ${cls}">
+        <div class="sched-time">
+          ${escapeHtml(formatTime(r.schedule_time))}
+          <small>เวลา</small>
+        </div>
+        <div class="sched-body">
+          <div class="sched-animal">
+            🐾 ${escapeHtml(r.animal_name || "ไม่ระบุชื่อสัตว์")}
+            ${r.animal_species ? `<span class="sched-species">${escapeHtml(r.animal_species)}</span>` : ""}
+          </div>
+          <div class="sched-procedure">${escapeHtml(r.procedure || "—")}</div>
+          <div class="sched-meta">
+            ${r.owner_name ? `<span>👤 ${escapeHtml(r.owner_name)}</span>` : ""}
+            ${r.surgeon    ? `<span>🩺 ${escapeHtml(r.surgeon)}</span>` : ""}
+          </div>
+          ${r.notes ? `<div class="sched-notes">📝 ${escapeHtml(r.notes)}</div>` : ""}
+        </div>
+        <div class="sched-status ${statusCls}">${statusLabel}</div>
+      </div>
+    `;
+  }
+
+  /* ── Load ── */
+  async function loadSchedule() {
+    const loading = document.getElementById("loading");
+    const errorBox = document.getElementById("errorState");
+    const empty = document.getElementById("emptyState");
+    const container = document.getElementById("scheduleContainer");
+    loading.style.display = "block";
+    errorBox.style.display = "none";
+    empty.style.display = "none";
+
+    try {
+      const { data, error } = await supabase
+        .from("vasd_vh_surgery_schedule")
+        .select("*")
+        .order("schedule_date", { ascending: true })
+        .order("schedule_time", { ascending: true });
+      if (error) throw error;
+      allRows = data || [];
+      loading.style.display = "none";
+      applyFilters();
+    } catch (e) {
+      console.error("[VH-Schedule] load error:", e);
+      loading.style.display = "none";
+      container.innerHTML = "";
+      errorBox.style.display = "block";
+    }
+  }
+
+  /* ── Wiring ── */
+  document.querySelectorAll(".chip[data-filter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".chip[data-filter]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentFilter = btn.dataset.filter;
+      applyFilters();
+    });
+  });
+  document.getElementById("searchInput").addEventListener("input", applyFilters);
+  document.getElementById("refreshBtn").addEventListener("click", loadSchedule);
+
+  loadSchedule();
+
+  /* ── Realtime ── */
+  try {
+    supabase
+      .channel("vh-schedule-live")
+      .on("postgres_changes",
+          { event: "*", schema: "public", table: "vasd_vh_surgery_schedule" },
+          loadSchedule)
+      .subscribe();
+  } catch (e) { /* ignore */ }
+</script>
+<script type="module" src="./js/global-alarm.js"></script>
+</body>
+</html>

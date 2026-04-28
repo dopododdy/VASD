@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>จัดการตารางผ่าตัด รพส. – RMUTTO VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1929;
+    --navy-mid: #112240;
+    --teal: #0ea5a0;
+    --teal-light: #14c4bc;
+    --rose: #ef4444;
+    --rose-dark: #b91c1c;
+    --emerald: #10b981;
+    --slate: #64748b;
+    --surface: rgba(255,255,255,0.05);
+    --surface-2: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.10);
+    --border-2: rgba(255,255,255,0.16);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-faint: #4a5568;
+    --radius-sm: 10px;
+    --radius: 14px;
+    --radius-lg: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: "Sarabun", sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(239,68,68,0.12), transparent 45%),
+      radial-gradient(circle at 90% 100%, rgba(14,165,160,0.10), transparent 45%);
+  }
+
+  /* ── Header ── */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,25,41,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.12); }
+  .header-title {
+    font-family: "Outfit", sans-serif;
+    font-size: 17px; font-weight: 800;
+    color: #fff;
+    flex: 1;
+  }
+
+  /* ── Wrap ── */
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 18px 16px 24px;
+    display: grid;
+    gap: 18px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+  }
+  .card-title {
+    font-family: "Outfit", sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+    letter-spacing: 0.2px;
+  }
+  .card-title .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--rose); box-shadow: 0 0 8px var(--rose);
+  }
+
+  /* ── Form ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .field label .req { color: var(--rose); }
+  .input, .select, textarea {
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px; outline: none;
+    font-family: "Sarabun", sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  .input:focus, .select:focus, textarea:focus {
+    border-color: var(--rose);
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.18);
+  }
+  .input::placeholder, textarea::placeholder { color: var(--text-faint); }
+  textarea { min-height: 70px; resize: vertical; font-family: "Sarabun", sans-serif; }
+  .select option { background: var(--navy-mid); color: var(--text); }
+
+  .form-actions {
+    grid-column: 1 / -1;
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .btn {
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 13px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: "Sarabun", sans-serif;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: opacity 0.2s, transform 0.15s, background 0.2s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(239,68,68,0.35);
+  }
+  .btn-primary:hover { opacity: 0.95; }
+  .btn-ghost {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border-2);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+  .btn-danger {
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.4);
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+  .btn-success {
+    background: rgba(16,185,129,0.15);
+    color: #6ee7b7;
+    border: 1px solid rgba(16,185,129,0.4);
+  }
+  .btn-success:hover { background: rgba(16,185,129,0.25); }
+
+  .toast {
+    position: fixed; bottom: calc(110px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%);
+    background: var(--navy-mid);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  .toast.ok    { border-color: rgba(16,185,129,0.5); color: #6ee7b7; }
+  .toast.err   { border-color: rgba(239,68,68,0.5); color: #fca5a5; }
+
+  /* ── List ── */
+  .list-toolbar {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .list-search {
+    flex: 1; min-width: 160px;
+    padding: 9px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    color: var(--text); font-size: 12px; outline: none;
+    font-family: "Sarabun", sans-serif;
+  }
+  .list-search:focus { border-color: var(--rose); }
+  .pill-count {
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+    box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+  }
+
+  .item {
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-left: 3px solid var(--rose);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .item:hover { background: rgba(255,255,255,0.10); }
+  .item.is-completed { border-left-color: var(--emerald); }
+  .item.is-cancelled { border-left-color: var(--slate); opacity: 0.65; }
+  .item.editing      { border-left-color: var(--teal); background: rgba(14,165,160,0.06); }
+
+  .item-main { min-width: 0; }
+  .item-row1 {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .item-date {
+    font-family: "Outfit", sans-serif;
+    font-weight: 700; font-size: 13px; color: #fff;
+    background: rgba(239,68,68,0.18);
+    border: 1px solid rgba(239,68,68,0.4);
+    padding: 2px 10px;
+    border-radius: 999px;
+  }
+  .item-time {
+    font-family: "Outfit", sans-serif;
+    font-weight: 700; font-size: 12px; color: var(--text);
+  }
+  .item-status {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+  }
+  .ist-scheduled { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .ist-completed { background: rgba(16,185,129,0.18); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); }
+  .ist-cancelled { background: rgba(100,116,139,0.18); color: #cbd5e1; border: 1px solid rgba(100,116,139,0.4); }
+
+  .item-animal { font-weight: 700; color: #fff; font-size: 13px; }
+  .item-procedure { font-size: 12px; color: var(--text); margin-top: 2px; }
+  .item-meta {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-size: 11px; color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .item-notes {
+    font-size: 11px; color: var(--text-faint);
+    font-style: italic; margin-top: 4px;
+  }
+
+  .item-actions {
+    display: flex; flex-direction: column; gap: 6px;
+    flex-shrink: 0;
+  }
+  .icon-action {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border-2);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .icon-action:hover { background: var(--surface-2); }
+  .icon-action.edit:hover  { color: var(--teal-light); border-color: var(--teal); }
+  .icon-action.del:hover   { color: #fca5a5; border-color: var(--rose); }
+
+  .empty-state {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .empty-state .icon { font-size: 36px; opacity: 0.6; margin-bottom: 8px; }
+
+  /* ── Bottom nav ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(11,25,41,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-2);
+    display: flex;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    text-decoration: none; color: var(--text-dim);
+    flex: 1;
+    font-size: 10px; font-weight: 600;
+  }
+  .nav-item.active { color: var(--rose); }
+  .nav-icon { font-size: 20px; }
+
+  /* ── DB-not-ready notice ── */
+  .db-notice {
+    background: rgba(245,158,11,0.10);
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    color: #fcd34d;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .db-notice b { color: #fde68a; }
+  .db-notice pre {
+    margin-top: 10px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border-2);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    color: var(--text);
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .header-title { font-size: 14px; }
+    .item { grid-template-columns: 1fr; }
+    .item-actions { flex-direction: row; justify-content: flex-end; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="settings.html" class="back-btn" title="กลับ">‹</a>
+  <div class="header-title">📅 จัดการตารางผ่าตัด รพส.</div>
+</header>
+
+<div class="wrap">
+
+  <!-- ── DB notice (visible if table missing) ── -->
+  <div id="dbNotice" class="db-notice" style="display:none;">
+    <b>⚠️ ยังไม่ได้สร้างตารางบน Supabase</b><br>
+    โปรดรันคำสั่ง SQL ด้านล่างใน Supabase SQL Editor เพื่อสร้างตาราง <code>vasd_vh_surgery_schedule</code> ก่อน
+<pre>create table public.vasd_vh_surgery_schedule (
+  id              bigserial primary key,
+  schedule_date   date not null,
+  schedule_time   time,
+  animal_name     text,
+  animal_species  text,
+  owner_name      text,
+  procedure       text,
+  surgeon         text,
+  notes           text,
+  status          text default 'scheduled',  -- scheduled | completed | cancelled
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
+alter table public.vasd_vh_surgery_schedule enable row level security;
+create policy "vh_sched_all" on public.vasd_vh_surgery_schedule
+  for all using (true) with check (true);
+
+alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</pre>
+  </div>
+
+  <!-- ── Form Card ── -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span> <span id="formTitle">เพิ่มรายการใหม่</span></div>
+    <form id="scheduleForm" class="form-grid" onsubmit="return false;">
+      <input type="hidden" id="recordId">
+
+      <div class="field">
+        <label>วันที่ผ่าตัด <span class="req">*</span></label>
+        <input class="input" type="date" id="scheduleDate" required>
+      </div>
+      <div class="field">
+        <label>เวลา</label>
+        <input class="input" type="time" id="scheduleTime">
+      </div>
+
+      <div class="field">
+        <label>ชื่อสัตว์ <span class="req">*</span></label>
+        <input class="input" id="animalName" placeholder="เช่น น้องมิ้น" required>
+      </div>
+      <div class="field">
+        <label>ชนิด/พันธุ์</label>
+        <input class="input" id="animalSpecies" placeholder="เช่น สุนัข พันธุ์ปอม">
+      </div>
+
+      <div class="field">
+        <label>ชื่อเจ้าของ</label>
+        <input class="input" id="ownerName" placeholder="ชื่อ-นามสกุล">
+      </div>
+      <div class="field">
+        <label>ศัลยแพทย์</label>
+        <input class="input" id="surgeon" placeholder="ผู้ทำการผ่าตัด">
+      </div>
+
+      <div class="field full">
+        <label>รายการผ่าตัด <span class="req">*</span></label>
+        <input class="input" id="procedure" placeholder="เช่น ทำหมันสุนัขเพศเมีย" required>
+      </div>
+
+      <div class="field">
+        <label>สถานะ</label>
+        <select class="select" id="status">
+          <option value="scheduled">นัดไว้</option>
+          <option value="completed">เสร็จสิ้น</option>
+          <option value="cancelled">ยกเลิก</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <!-- spacer to keep grid aligned -->
+        <div></div>
+      </div>
+
+      <div class="field full">
+        <label>หมายเหตุ</label>
+        <textarea id="notes" placeholder="ข้อมูลเพิ่มเติม"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="saveBtn" type="button">💾 บันทึก</button>
+        <button class="btn btn-ghost"   id="cancelBtn" type="button" style="display:none;">ยกเลิก</button>
+        <button class="btn btn-ghost"   id="resetBtn"  type="button">↺ ล้างฟอร์ม</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ── List Card ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="dot"></span> รายการตารางผ่าตัดทั้งหมด
+      <span id="countPill" class="pill-count" style="margin-left:auto;">0 รายการ</span>
+    </div>
+
+    <div class="list-toolbar">
+      <input type="text" id="listSearch" class="list-search" placeholder="🔍 ค้นหา ชื่อสัตว์ / เจ้าของ / ศัลยแพทย์ / รายการ">
+      <select class="select" id="filterStatus" style="max-width:160px;">
+        <option value="">สถานะทั้งหมด</option>
+        <option value="scheduled">นัดไว้</option>
+        <option value="completed">เสร็จสิ้น</option>
+        <option value="cancelled">ยกเลิก</option>
+      </select>
+    </div>
+
+    <div id="listContainer"></div>
+    <div id="listEmpty" class="empty-state" style="display:none;">
+      <div class="icon">📭</div>ยังไม่มีรายการ
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span>หน้าหลัก
+  </a>
+  <a href="surgery-schedule.html" class="nav-item">
+    <span class="nav-icon">📅</span>ตารางผ่าตัด
+  </a>
+  <a href="settings.html" class="nav-item active">
+    <span class="nav-icon">⚙️</span>ตั้งค่า
+  </a>
+</nav>
+
+<script type="module">
+  import { supabase } from "./js/supabase.js";
+
+  /* ── Helpers ── */
+  const TH_DAYS   = ["อา.","จ.","อ.","พ.","พฤ.","ศ.","ส."];
+  const TH_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+  function formatThaiDate(iso) {
+    if (!iso) return "—";
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    const buddhistYear = y + 543;
+    return `${TH_DAYS[dt.getDay()]} ${d} ${TH_MONTHS[m-1]} ${String(buddhistYear).slice(-2)}`;
+  }
+  function formatTime(t) { return t ? t.slice(0,5) : "—"; }
+  function escapeHtml(s) {
+    if (s == null) return "";
+    return String(s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+  function toast(msg, kind = "ok") {
+    const el = document.getElementById("toast");
+    el.className = `toast show ${kind}`;
+    el.innerText = msg;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.className = "toast"; }, 2200);
+  }
+
+  /* ── State ── */
+  let allRows = [];
+  let editingId = null;
+
+  /* ── Form helpers ── */
+  const $ = (id) => document.getElementById(id);
+
+  function readForm() {
+    return {
+      schedule_date:   $("scheduleDate").value || null,
+      schedule_time:   $("scheduleTime").value || null,
+      animal_name:     $("animalName").value.trim() || null,
+      animal_species:  $("animalSpecies").value.trim() || null,
+      owner_name:      $("ownerName").value.trim() || null,
+      surgeon:         $("surgeon").value.trim() || null,
+      procedure:       $("procedure").value.trim() || null,
+      status:          $("status").value || "scheduled",
+      notes:           $("notes").value.trim() || null,
+    };
+  }
+  function fillForm(r) {
+    $("recordId").value      = r.id || "";
+    $("scheduleDate").value  = r.schedule_date || "";
+    $("scheduleTime").value  = (r.schedule_time || "").slice(0,5);
+    $("animalName").value    = r.animal_name || "";
+    $("animalSpecies").value = r.animal_species || "";
+    $("ownerName").value     = r.owner_name || "";
+    $("surgeon").value       = r.surgeon || "";
+    $("procedure").value     = r.procedure || "";
+    $("status").value        = r.status || "scheduled";
+    $("notes").value         = r.notes || "";
+  }
+  function resetForm() {
+    document.getElementById("scheduleForm").reset();
+    $("recordId").value = "";
+    editingId = null;
+    $("formTitle").innerText = "เพิ่มรายการใหม่";
+    $("cancelBtn").style.display = "none";
+    $("saveBtn").innerText = "💾 บันทึก";
+    document.querySelectorAll(".item.editing").forEach(el => el.classList.remove("editing"));
+  }
+
+  /* ── Validation ── */
+  function validate(payload) {
+    if (!payload.schedule_date) { toast("กรุณาเลือกวันที่ผ่าตัด", "err"); return false; }
+    if (!payload.animal_name)   { toast("กรุณาใส่ชื่อสัตว์", "err"); return false; }
+    if (!payload.procedure)     { toast("กรุณาใส่รายการผ่าตัด", "err"); return false; }
+    return true;
+  }
+
+  /* ── Save (insert / update) ── */
+  async function saveRecord() {
+    const payload = readForm();
+    if (!validate(payload)) return;
+
+    const btn = $("saveBtn");
+    btn.disabled = true;
+    const originalText = btn.innerText;
+    btn.innerText = "กำลังบันทึก...";
+
+    try {
+      let res;
+      if (editingId) {
+        payload.updated_at = new Date().toISOString();
+        res = await supabase.from("vasd_vh_surgery_schedule")
+          .update(payload).eq("id", editingId);
+      } else {
+        res = await supabase.from("vasd_vh_surgery_schedule")
+          .insert([payload]);
+      }
+      if (res.error) throw res.error;
+
+      toast(editingId ? "✅ อัปเดตเรียบร้อย" : "✅ เพิ่มรายการเรียบร้อย", "ok");
+      resetForm();
+      await loadList();
+    } catch (e) {
+      console.error("[save] error:", e);
+      toast("❌ บันทึกไม่สำเร็จ: " + (e.message || e), "err");
+      maybeShowDbNotice(e);
+    } finally {
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  }
+
+  /* ── Delete ── */
+  async function deleteRecord(id, label) {
+    if (!confirm(`ยืนยันลบรายการ:\n${label}\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+    try {
+      const { error } = await supabase.from("vasd_vh_surgery_schedule").delete().eq("id", id);
+      if (error) throw error;
+      toast("🗑️ ลบเรียบร้อย", "ok");
+      if (editingId === id) resetForm();
+      await loadList();
+    } catch (e) {
+      console.error("[delete] error:", e);
+      toast("❌ ลบไม่สำเร็จ: " + (e.message || e), "err");
+    }
+  }
+
+  /* ── Edit ── */
+  function startEdit(id) {
+    const row = allRows.find(r => r.id === id);
+    if (!row) return;
+    editingId = id;
+    fillForm(row);
+    $("formTitle").innerText = `แก้ไขรายการ #${id}`;
+    $("cancelBtn").style.display = "inline-flex";
+    $("saveBtn").innerText = "💾 บันทึกการแก้ไข";
+    document.querySelectorAll(".item.editing").forEach(el => el.classList.remove("editing"));
+    const itemEl = document.querySelector(`.item[data-id="${id}"]`);
+    if (itemEl) {
+      itemEl.classList.add("editing");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ── Load List ── */
+  async function loadList() {
+    try {
+      const { data, error } = await supabase
+        .from("vasd_vh_surgery_schedule")
+        .select("*")
+        .order("schedule_date", { ascending: true })
+        .order("schedule_time", { ascending: true });
+      if (error) throw error;
+      allRows = data || [];
+      $("dbNotice").style.display = "none";
+      renderList();
+    } catch (e) {
+      console.error("[load] error:", e);
+      maybeShowDbNotice(e);
+      allRows = [];
+      renderList();
+    }
+  }
+
+  function maybeShowDbNotice(e) {
+    const msg = (e?.message || "").toLowerCase();
+    if (msg.includes("relation") || msg.includes("does not exist") || msg.includes("schema cache")) {
+      $("dbNotice").style.display = "block";
+    }
+  }
+
+  /* ── Render List ── */
+  function renderList() {
+    const container = $("listContainer");
+    const empty = $("listEmpty");
+    const search = ($("listSearch").value || "").toLowerCase().trim();
+    const filterStatus = $("filterStatus").value;
+
+    let rows = allRows.slice();
+    if (filterStatus) rows = rows.filter(r => r.status === filterStatus);
+    if (search) {
+      rows = rows.filter(r =>
+        (r.animal_name    || "").toLowerCase().includes(search) ||
+        (r.animal_species || "").toLowerCase().includes(search) ||
+        (r.owner_name     || "").toLowerCase().includes(search) ||
+        (r.surgeon        || "").toLowerCase().includes(search) ||
+        (r.procedure      || "").toLowerCase().includes(search)
+      );
+    }
+    $("countPill").innerText = `${rows.length} รายการ`;
+
+    if (!rows.length) {
+      container.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    container.innerHTML = rows.map(r => {
+      const cls = r.status === "completed" ? "is-completed"
+                : r.status === "cancelled" ? "is-cancelled" : "";
+      const stCls = r.status === "completed" ? "ist-completed"
+                  : r.status === "cancelled" ? "ist-cancelled" : "ist-scheduled";
+      const stLabel = r.status === "completed" ? "เสร็จสิ้น"
+                    : r.status === "cancelled" ? "ยกเลิก" : "นัดไว้";
+      const editingCls = (editingId === r.id) ? "editing" : "";
+      const safeLabel = `${r.animal_name || ""} • ${r.procedure || ""} (${r.schedule_date || "—"})`
+        .replace(/`/g, "");
+      return `
+        <div class="item ${cls} ${editingCls}" data-id="${r.id}">
+          <div class="item-main">
+            <div class="item-row1">
+              <span class="item-date">${escapeHtml(formatThaiDate(r.schedule_date))}</span>
+              <span class="item-time">⏰ ${escapeHtml(formatTime(r.schedule_time))}</span>
+              <span class="item-status ${stCls}">${stLabel}</span>
+            </div>
+            <div class="item-animal">🐾 ${escapeHtml(r.animal_name || "—")} ${r.animal_species ? `<span style="font-weight:500;color:var(--text-dim);font-size:11px;">(${escapeHtml(r.animal_species)})</span>` : ""}</div>
+            <div class="item-procedure">${escapeHtml(r.procedure || "—")}</div>
+            <div class="item-meta">
+              ${r.owner_name ? `<span>👤 ${escapeHtml(r.owner_name)}</span>` : ""}
+              ${r.surgeon    ? `<span>🩺 ${escapeHtml(r.surgeon)}</span>` : ""}
+            </div>
+            ${r.notes ? `<div class="item-notes">📝 ${escapeHtml(r.notes)}</div>` : ""}
+          </div>
+          <div class="item-actions">
+            <button class="icon-action edit" title="แก้ไข"
+              onclick="window.__vh.startEdit(${r.id})">✏️</button>
+            <button class="icon-action del" title="ลบ"
+              onclick="window.__vh.deleteRecord(${r.id}, \`${escapeHtml(safeLabel)}\`)">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  /* ── Wire up ── */
+  window.__vh = { startEdit, deleteRecord };
+
+  $("saveBtn").addEventListener("click", saveRecord);
+  $("resetBtn").addEventListener("click", resetForm);
+  $("cancelBtn").addEventListener("click", resetForm);
+  $("listSearch").addEventListener("input", renderList);
+  $("filterStatus").addEventListener("change", renderList);
+
+  // Default the date field to today on first load
+  (function defaultToday() {
+    const d = new Date();
+    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    $("scheduleDate").value = iso;
+  })();
+
+  loadList();
+
+  /* ── Realtime ── */
+  try {
+    supabase
+      .channel("vh-schedule-admin")
+      .on("postgres_changes",
+          { event: "*", schema: "public", table: "vasd_vh_surgery_schedule" },
+          loadList)
+      .subscribe();
+  } catch (e) { /* ignore */ }
+</script>
+<script type="module" src="./js/global-alarm.js"></script>
+</body>
+</html>
