@@ -303,23 +303,70 @@
   }
   .empty-state .icon { font-size: 36px; opacity: 0.6; margin-bottom: 8px; }
 
-  /* ── Bottom nav ── */
+  /* ── Bottom nav (single-icon toggle to viewer page) ── */
   .bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
     background: rgba(11,25,41,0.95);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--border-2);
     display: flex;
-    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px calc(12px + env(safe-area-inset-bottom));
   }
-  .nav-item {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    text-decoration: none; color: var(--text-dim);
-    flex: 1;
-    font-size: 10px; font-weight: 600;
+  .nav-toggle {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow:
+      0 4px 18px rgba(239,68,68,0.45),
+      0 2px 6px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
   }
-  .nav-item.active { color: var(--rose); }
-  .nav-icon { font-size: 20px; }
+  .nav-toggle:hover {
+    transform: scale(1.06);
+    box-shadow:
+      0 6px 26px rgba(239,68,68,0.6),
+      0 2px 8px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.22);
+  }
+  .nav-toggle:active { transform: scale(0.94); }
+  .nav-toggle-icon { font-size: 26px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25)); }
+  /* Tooltip on hover (desktop only) */
+  .nav-toggle .nav-toggle-tip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--navy-mid);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    font-family: "Sarabun", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .nav-toggle:hover .nav-toggle-tip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (hover: none) {
+    .nav-toggle .nav-toggle-tip { display: none; }
+  }
 
   /* ── DB-not-ready notice ── */
   .db-notice {
@@ -480,14 +527,10 @@ alter publication supabase_realtime add table public.vasd_vh_surgery_schedule;</
 <div id="toast" class="toast"></div>
 
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <span class="nav-icon">🏠</span>หน้าหลัก
-  </a>
-  <a href="surgery-schedule.html" class="nav-item">
-    <span class="nav-icon">📅</span>ตารางผ่าตัด
-  </a>
-  <a href="settings.html" class="nav-item active">
-    <span class="nav-icon">⚙️</span>ตั้งค่า
+  <a href="surgery-schedule.html" class="nav-toggle"
+     title="ดูตารางผ่าตัด" aria-label="ดูตารางผ่าตัด">
+    <span class="nav-toggle-icon">📅</span>
+    <span class="nav-toggle-tip">ดูตารางผ่าตัด</span>
   </a>
 </nav>
 
