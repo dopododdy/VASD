@@ -7,9 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <style>
-/* ═══════════════════════════════════════════
-    DESIGN TOKENS & BASE
-═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
   --navy-mid:   #112240;
@@ -46,9 +43,6 @@ body::before {
   background: radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.10) 0%, transparent 70%);
 }
 
-/* ═══════════════════════════════════════════
-    HEADER & LAYOUT
-═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(11,25,41,0.88); backdrop-filter: blur(20px);
@@ -63,9 +57,6 @@ header {
 .wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 24px 16px 100px; width: 100%; display: flex; flex-direction: column; gap: 16px; }
 .page-title { font-family: "Outfit", sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px; }
 
-/* ═══════════════════════════════════════════
-    CARDS & FORM
-═══════════════════════════════════════════ */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface-2); }
 .card-header-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 15px; }
@@ -75,13 +66,12 @@ header {
 .field-group { display: flex; flex-direction: column; gap: 5px; }
 .field-label { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
 
-input, select, textarea { 
-  width: 100%; padding: 10px 12px; font-size: 14px; font-family: "Sarabun", sans-serif; 
+input, select, textarea {
+  width: 100%; padding: 10px 12px; font-size: 14px; font-family: "Sarabun", sans-serif;
   background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-sm); color: var(--text); outline: none; transition: 0.2s;
 }
 input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
 
-/* Grid Layouts */
 .owner-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 12px; align-items: end; margin-bottom: 12px; }
 .owner-row-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
 .animal-fields { display: grid; grid-template-columns: 1fr 1fr 1fr 80px; gap: 10px; margin-bottom: 14px; }
@@ -90,9 +80,6 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
   .owner-row, .owner-row-2, .animal-fields { grid-template-columns: 1fr; }
 }
 
-/* ═══════════════════════════════════════════
-    BUTTONS
-═══════════════════════════════════════════ */
 .btn { padding: 10px 16px; font-size: 13px; font-weight: 600; border: none; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; white-space: nowrap; }
 .btn:active { transform: scale(0.96); }
 
@@ -105,16 +92,23 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 .btn-del-animal { margin-left: auto; padding: 6px 12px; font-size: 12px; background: var(--rose-soft); color: var(--rose); border: 1px solid rgba(239,68,68,0.2); }
 .btn-del-animal:hover { background: var(--rose); color: #fff; }
 
-.btn-submit { 
-  background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: #fff; 
+.btn-submit {
+  background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: #fff;
   font-size: 15px; padding: 16px; border-radius: var(--radius); width: 100%; justify-content: center; margin-top: 20px;
   box-shadow: 0 4px 20px var(--teal-glow);
 }
 .btn-submit.waiting { background: var(--amber); animation: pulse 1.5s infinite alternate; }
+.btn-submit.saving { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 
-/* ═══════════════════════════════════════════
-    ANIMAL CARDS & CHIPS
-═══════════════════════════════════════════ */
+.btn-cancel-wait {
+  background: var(--rose-soft); color: var(--rose);
+  border: 1px solid rgba(239,68,68,0.3);
+  padding: 8px 14px; font-size: 12px;
+  border-radius: var(--radius-sm); cursor: pointer;
+  margin-top: 8px; display: none;
+}
+.btn-cancel-wait.show { display: inline-block; }
+
 .animal-card { background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; animation: slideUp 0.3s ease both; }
 .animal-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
 .animal-card-num { width: 26px; height: 26px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
@@ -148,14 +142,14 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 
 <div class="wrap">
   <h2 class="page-title">ลงทะเบียนสัตว์</h2>
-  
+
   <div class="card">
     <div class="card-header"><div class="card-header-icon">👤</div><h4>ข้อมูลเจ้าของสัตว์</h4></div>
     <div class="card-body">
       <div class="owner-row">
         <div class="field-group"><label class="field-label">ชื่อเจ้าของ *</label><input id="ownerName" placeholder="ระบุชื่อ-นามสกุล"></div>
         <div class="field-group"><label class="field-label">เบอร์โทร</label><input id="phone" type="tel" placeholder="08x-xxx-xxxx"></div>
-        <div class="field-group"><label class="field-label" style="opacity:0">Read</label><button type="button" class="btn btn-read-card" onclick="window.readSmartCard()">🪪 อ่านบัตร</button></div>
+        <div class="field-group"><label class="field-label" style="opacity:0">Read</label><button type="button" class="btn btn-read-card" onclick="window.readSmartCard(event)">🪪 อ่านบัตร</button></div>
         <div class="field-group"><label class="field-label" style="opacity:0">Paste</label><button type="button" class="btn btn-paste" onclick="window.pasteOwnerName()">📋 วาง</button></div>
       </div>
       <div class="owner-row-2">
@@ -174,6 +168,7 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
   </div>
 
   <button type="button" id="btnRequestConsent" class="btn btn-submit" onclick="window.requestConsent()">📲 ส่งคำขอ Consent ไปยัง iPad</button>
+  <button type="button" id="btnCancelWait" class="btn btn-cancel-wait" onclick="window.cancelWait()">✖ ยกเลิกและเริ่มใหม่</button>
 </div>
 
 <div id="printArea"></div>
@@ -183,6 +178,8 @@ import { supabase } from "./js/supabase.js";
 
 let animalCount = 0;
 let isWaitingForConsent = false;
+let pendingSaveData = null;  // ★ เก็บข้อมูลรอบันทึกหลัง iPad ตอบรับ
+
 const consentChannel = supabase.channel('vasd-consent-room');
 
 // Listen for iPad Approval
@@ -190,9 +187,9 @@ consentChannel.on('broadcast', { event: 'consent-granted' }, () => {
     if (isWaitingForConsent) executeSave();
 }).subscribe();
 
-/* ── ฟังก์ชันอ่านบัตรประชาชน ── */
-window.readSmartCard = async function() {
-    const btn = event.currentTarget;
+/* ── อ่านบัตรประชาชน ── */
+window.readSmartCard = async function(ev) {
+    const btn = ev.currentTarget;
     const originalText = btn.innerHTML;
     try {
         btn.disabled = true;
@@ -210,7 +207,7 @@ window.readSmartCard = async function() {
     finally { btn.disabled = false; btn.innerHTML = originalText; }
 };
 
-/* ── ฟังก์ชันวางชื่อจากคลิปบอร์ด ── */
+/* ── วางชื่อจากคลิปบอร์ด ── */
 window.pasteOwnerName = async function() {
     try {
         const text = await navigator.clipboard.readText();
@@ -218,7 +215,7 @@ window.pasteOwnerName = async function() {
     } catch (e) { alert("ไม่สามารถเข้าถึงคลิปบอร์ดได้"); }
 };
 
-/* ── ฟังก์ชันเพิ่มการ์ดสัตว์ ── */
+/* ── เพิ่มการ์ดสัตว์ ── */
 window.addAnimal = function () {
     animalCount++;
     const card = document.createElement("div");
@@ -244,7 +241,7 @@ window.addAnimal = function () {
         <div class="svc-label-row field-label">บริการที่ต้องการ</div>
         <div class="svc-grid"></div>
     `;
-    
+
     const svcGrid = card.querySelector(".svc-grid");
     const species = card.querySelector(".species");
     const sex = card.querySelector(".sex");
@@ -277,41 +274,170 @@ window.refreshCount = () => {
     cards.forEach((c, i) => c.querySelector(".animal-card-num").textContent = i + 1);
 };
 
-/* ── ฟังก์ชันส่ง Consent ── */
+/* ── ส่ง Consent ไป iPad ── */
 window.requestConsent = function() {
     const ownerName = document.getElementById("ownerName").value.trim();
     if (!ownerName) return alert("กรุณาระบุชื่อเจ้าของ");
-    
+
+    const phone   = document.getElementById("phone").value.trim();
+    const idCard  = document.getElementById("idCard").value.trim();
+    const address = document.getElementById("address").value.trim();
+
     const animals = [];
+    let invalidName = false;
     document.querySelectorAll(".animal-card").forEach(c => {
+        const animalName = c.querySelector(".animalName").value.trim();
+        if (!animalName) { invalidName = true; return; }
         const svcs = [];
         c.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
         animals.push({
-            name: c.querySelector(".animalName").value,
-            species: c.querySelector(".species").value === "ม" ? "แมว" : "สุนัข",
+            name: animalName,
+            species: c.querySelector(".species").value,   // เก็บเป็น ม/ส
             sex: c.querySelector(".sex").value,
+            estWeight: parseFloat(c.querySelector(".estWeight").value) || null,
             services: svcs
         });
     });
 
+    if (invalidName) return alert("กรุณาระบุชื่อสัตว์ทุกรายการ");
     if (animals.length === 0) return alert("กรุณาเพิ่มสัตว์อย่างน้อย 1 รายการ");
+
+    // ★ เก็บข้อมูลไว้ใช้ตอน save (หลัง iPad ตอบรับ)
+    pendingSaveData = {
+        owner: { name: ownerName, phone, idCard, address },
+        animals
+    };
 
     const btn = document.getElementById("btnRequestConsent");
     btn.disabled = true; btn.classList.add("waiting");
     btn.textContent = "⏳ รอการยืนยันจาก iPad...";
+    document.getElementById("btnCancelWait").classList.add("show");
     isWaitingForConsent = true;
 
+    // ★ ส่งข้อมูลครบให้ iPad (รวม phone/idCard/address + แปลง ม/ส → แมว/สุนัข)
     consentChannel.send({
         type: 'broadcast', event: 'request-consent',
-        payload: { owner: { name: ownerName }, animals }
+        payload: {
+            owner: { name: ownerName, phone, idCard, address },
+            animals: animals.map(a => ({
+                name: a.name,
+                species: a.species === "ม" ? "แมว" : "สุนัข",
+                sex: a.sex,
+                services: a.services
+            }))
+        }
     });
 };
 
-// บันทึกข้อมูล (จำลอง logic หลัก)
+/* ── ยกเลิกการรอ ── */
+window.cancelWait = function() {
+    if (!confirm("ยกเลิกการรอและเริ่มใหม่?")) return;
+    isWaitingForConsent = false;
+    pendingSaveData = null;
+    const btn = document.getElementById("btnRequestConsent");
+    btn.disabled = false;
+    btn.classList.remove("waiting");
+    btn.textContent = "📲 ส่งคำขอ Consent ไปยัง iPad";
+    document.getElementById("btnCancelWait").classList.remove("show");
+};
+
+/* ── ★ บันทึกลง Supabase (เรียกหลัง iPad ตอบรับ) ── */
 async function executeSave() {
-    alert("✅ ได้รับการยินยอมแล้ว! ระบบจะทำการบันทึกข้อมูล...");
-    // Logic บันทึก Supabase และสั่งพิมพ์
-    location.reload(); 
+    if (!pendingSaveData) {
+        alert("❌ ไม่พบข้อมูลที่จะบันทึก กรุณาเริ่มใหม่");
+        location.reload();
+        return;
+    }
+
+    const btn = document.getElementById("btnRequestConsent");
+    btn.classList.remove("waiting");
+    btn.classList.add("saving");
+    btn.textContent = "💾 กำลังบันทึก...";
+    document.getElementById("btnCancelWait").classList.remove("show");
+    isWaitingForConsent = false;
+
+    try {
+        // 1. ดึง event_id ของวันนี้ (ใช้ฟังก์ชัน get_today_event() ที่เรามีอยู่)
+        const { data: eventId, error: evtErr } = await supabase.rpc('get_today_event');
+        if (evtErr) throw new Error('Event: ' + evtErr.message);
+
+        // 2. บันทึกเจ้าของ
+        const { data: ownerData, error: ownerErr } = await supabase
+            .from('vasd_owner')
+            .insert({
+                event_id: eventId,
+                owner_name: pendingSaveData.owner.name,
+                phone:   pendingSaveData.owner.phone   || null,
+                id_card: pendingSaveData.owner.idCard  || null,
+                address: pendingSaveData.owner.address || null
+            })
+            .select()
+            .single();
+        if (ownerErr) throw new Error('Owner: ' + ownerErr.message);
+
+        // 3. หา queue_number ถัดไป (นับสัตว์ทั้งหมดของวันนี้)
+        const { count: existingCount } = await supabase
+            .from('vasd_animal')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', eventId);
+        let nextQueue = (existingCount || 0) + 1;
+
+        // 4. บันทึกสัตว์ + บริการ + คิว
+        const saved = [];
+        for (const anim of pendingSaveData.animals) {
+            const { data: animalData, error: animErr } = await supabase
+                .from('vasd_animal')
+                .insert({
+                    event_id: eventId,
+                    owner_id: ownerData.id,
+                    queue_number: nextQueue,
+                    species: anim.species,         // เก็บเป็น ม/ส ตาม schema
+                    animal_name: anim.name,
+                    sex: anim.sex,
+                    est_weight: anim.estWeight
+                })
+                .select()
+                .single();
+            if (animErr) throw new Error('Animal: ' + animErr.message);
+
+            saved.push({ ...animalData, services: anim.services });
+            nextQueue++;
+
+            // บริการ
+            if (anim.services && anim.services.length > 0) {
+                const svcRows = anim.services.map(s => ({
+                    animal_id: animalData.id,
+                    service_type: s,
+                    is_done: false
+                }));
+                const { error: svcErr } = await supabase.from('vasd_service').insert(svcRows);
+                if (svcErr) throw new Error('Service: ' + svcErr.message);
+            }
+
+            // คิว
+            const { error: qErr } = await supabase.from('vasd_queue').insert({
+                animal_id: animalData.id,
+                status: 'waiting'
+            });
+            if (qErr) throw new Error('Queue: ' + qErr.message);
+        }
+
+        const queueList = saved.map(a => `#${a.queue_number} ${a.animal_name}`).join('\n');
+        alert(
+            `✅ บันทึกข้อมูลเรียบร้อยแล้ว!\n\n` +
+            `เจ้าของ: ${pendingSaveData.owner.name}\n` +
+            `สัตว์ ${pendingSaveData.animals.length} ตัว:\n${queueList}`
+        );
+        pendingSaveData = null;
+        location.reload();
+
+    } catch (e) {
+        console.error('Save failed:', e);
+        alert("❌ บันทึกไม่สำเร็จ: " + e.message + "\n\nลองใหม่อีกครั้ง");
+        btn.disabled = false;
+        btn.classList.remove("saving");
+        btn.textContent = "📲 ส่งคำขอ Consent ไปยัง iPad";
+    }
 }
 
 window.addAnimal();
