@@ -46,7 +46,7 @@ body::before {
     radial-gradient(ellipse 40% 30% at 80% 90%, rgba(239,68,68,0.04) 0%, transparent 60%);
 }
 
-/* ── HEADER (top of page) ── */
+/* ── HEADER ── */
 header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(11,25,41,0.92);
@@ -130,6 +130,7 @@ header {
   animation: cardIn 0.4s ease both;
   transition: border-color 0.3s, box-shadow 0.3s;
   display: flex; flex-direction: column;
+  cursor: pointer;
 }
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -148,7 +149,7 @@ header {
 }
 .mon-card.status-nodata { border-color: rgba(100,116,139,0.25); opacity: 0.85; }
 
-/* ★ Table-number hero header */
+/* Hero header with big table number */
 .mc-header {
   padding: 10px 14px;
   background: linear-gradient(135deg, rgba(59,130,246,0.10), rgba(59,130,246,0.03));
@@ -198,7 +199,7 @@ header {
 .mc-elapsed-icon { font-size: 14px; opacity: 0.7; }
 .mc-elapsed-val { font-size: 18px; letter-spacing: -0.5px; }
 
-/* Animal info row */
+/* Animal info */
 .mc-animal {
   padding: 8px 12px;
   background: rgba(0,0,0,0.15);
@@ -237,7 +238,7 @@ header {
 }
 .mc-staff b { color: var(--text); font-weight: 600; }
 
-/* Vitals */
+/* Vitals (with sparkline) */
 .vitals {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -246,11 +247,11 @@ header {
 }
 .vital {
   background: var(--surface);
-  padding: 10px 8px 8px;
+  padding: 10px 8px 4px;
   display: flex; flex-direction: column; align-items: center;
   position: relative;
   transition: background 0.3s;
-  min-height: 92px;
+  min-height: 116px;
 }
 .vital.v-normal   { background: rgba(16,185,129,0.06); }
 .vital.v-warn     { background: rgba(245,158,11,0.10); }
@@ -316,11 +317,17 @@ header {
   position: absolute; top: 5px; left: 8px;
 }
 
-.spo2-bar {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 3px; background: rgba(0,0,0,0.3);
+/* ★ Sparkline */
+.sparkline {
+  width: 100%;
+  height: 22px;
+  margin-top: 4px;
+  display: block;
 }
-.spo2-fill { height: 100%; transition: width 0.6s ease, background 0.3s; }
+.sparkline-empty {
+  font-size: 8px; color: var(--text-faint);
+  text-anchor: middle;
+}
 
 .mc-footer {
   padding: 6px 10px;
@@ -352,6 +359,101 @@ header {
   font-size: 11px; color: var(--amber);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+/* ── Modal (big trend charts) ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-box {
+  background: var(--navy);
+  border: 2px solid var(--primary);
+  border-radius: 20px;
+  max-width: 1000px; width: 100%; max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  padding: 16px 20px;
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--primary);
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 1;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(10px);
+}
+.modal-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 22px; font-weight: 800; color: #fff;
+}
+.modal-title .table-mark {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  font-weight: 900;
+}
+.modal-close {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.modal-close:hover { background: var(--rose); }
+
+.modal-body { padding: 20px; }
+.big-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 600px) { .big-charts { grid-template-columns: 1fr; } }
+
+.big-chart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+.big-chart-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.big-chart-current {
+  font-size: 24px; font-weight: 900;
+  color: #fff;
+}
+.big-chart-svg { width: 100%; height: 140px; display: block; }
+
+.modal-meta {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  font-size: 13px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-meta-item { color: var(--text-dim); }
+.modal-meta-item b { color: var(--text); font-weight: 600; }
 
 /* Bottom nav */
 .bottom-nav {
@@ -387,49 +489,37 @@ header {
   to   { transform: translate(-50%, 0); opacity: 1; }
 }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-
-/* Tablet & smaller PC */
+/* RESPONSIVE */
 @media (min-width: 600px) and (max-width: 1279px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
   .vital-value { font-size: 30px; }
   .vital-icon { font-size: 22px; }
-  .vital { min-height: 96px; }
+  .vital { min-height: 120px; }
   .mc-table-num { font-size: 60px; }
 }
-
-/* PC standard */
 @media (min-width: 1280px) {
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 10px;
-  }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
 }
-
-/* PC big - 5 columns for 10 cards in 2 rows */
 @media (min-width: 1600px) {
   .grid { grid-template-columns: repeat(5, 1fr); gap: 12px; }
   .mc-header { min-height: 84px; padding: 12px 16px; }
   .mc-table-num { font-size: 68px; letter-spacing: -4px; }
   .mc-table-label { font-size: 17px; }
   .mc-elapsed-val { font-size: 20px; }
+  .sparkline { height: 26px; }
+  .vital { min-height: 124px; }
 }
-
-/* 4K TV display */
 @media (min-width: 2000px) {
   .grid { grid-template-columns: repeat(6, 1fr); }
   .mc-table-num { font-size: 76px; }
   .vital-value { font-size: 34px; }
-  .vital { min-height: 110px; }
+  .vital { min-height: 138px; }
   .vital-icon { font-size: 26px; }
+  .sparkline { height: 30px; }
 }
-
-/* Mobile - 1 column, bigger fonts for close viewing */
 @media (max-width: 599px) {
   .grid { gap: 10px; grid-template-columns: 1fr; }
-  .vital { min-height: 100px; padding: 12px 10px 10px; }
+  .vital { min-height: 130px; padding: 12px 10px 6px; }
   .vital-icon { font-size: 24px; }
   .vital-value { font-size: 32px; }
   .vital-value .sub { font-size: 17px; }
@@ -438,10 +528,12 @@ header {
   .mc-table-label { font-size: 18px; }
   .mc-header { min-height: 90px; padding: 12px 16px; }
   .mc-elapsed-val { font-size: 20px; }
+  .sparkline { height: 32px; }
   .header-stats { font-size: 11px; }
   .brand-sub { display: none; }
+  .modal-body { padding: 14px; }
+  .big-chart-svg { height: 120px; }
 }
-
 @media (max-width: 380px) {
   .stat-pill { padding: 4px 7px; font-size: 10px; }
   .btn-sound { padding: 5px 8px; font-size: 10px; }
@@ -477,6 +569,17 @@ header {
   </div>
 </div>
 
+<!-- Modal for detailed trend charts -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">โต๊ะ —</div>
+      <button class="modal-close" onclick="closeModal()">✖</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span>หน้าหลัก</span></a>
   <a href="animals.html" class="nav-item"><span class="nav-icon">🐾</span><span>สัตว์</span></a>
@@ -488,19 +591,14 @@ header {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-// ═══════════════════════════════════════════
-// VITAL RANGES (Temp = °F โดยตรงจาก surgery.html)
-//   95°F = 35°C    | 97.7°F = 36.5°C
-//   103.1°F = 39.5°C | 105.8°F = 41°C
-// ═══════════════════════════════════════════
 const VITAL_RANGES = {
-  'ส': { // สุนัข
+  'ส': {
     hr:   { critLow: 50,  warnLow: 60,   warnHigh: 180,   critHigh: 220 },
     rr:   { critLow: 5,   warnLow: 8,    warnHigh: 30,    critHigh: 50 },
     spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,   critHigh: 102 },
     temp: { critLow: 95.0, warnLow: 97.7, warnHigh: 103.1, critHigh: 105.8 }
   },
-  'ม': { // แมว
+  'ม': {
     hr:   { critLow: 80,  warnLow: 100,  warnHigh: 200,   critHigh: 230 },
     rr:   { critLow: 5,   warnLow: 10,   warnHigh: 30,    critHigh: 50 },
     spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,   critHigh: 102 },
@@ -508,10 +606,18 @@ const VITAL_RANGES = {
   }
 };
 
+const STATUS_COLOR = {
+  normal:   '#34d399',
+  warn:     '#fbbf24',
+  critical: '#fca5a5',
+  nodata:   '#64748b'
+};
+
 let lastStatus = {};
 let lastReloadAt = 0;
 let audioContext = null;
 let soundEnabled = false;
+let currentData = [];  // cache สำหรับ modal
 
 // ═══════════════════════════════════════════
 // Audio
@@ -532,7 +638,7 @@ window.toggleSound = async function() {
   if (!soundEnabled) {
     const ctx = await ensureAudio();
     if (!ctx || ctx.state !== 'running') {
-      alert('⚠️ ไม่สามารถเปิดเสียงได้ — เบราว์เซอร์บล็อก autoplay');
+      alert('⚠️ ไม่สามารถเปิดเสียงได้');
       return;
     }
     playBeep(880, 0.15, 0.2);
@@ -553,20 +659,15 @@ function playBeep(freq, duration, volume = 0.3) {
     const o = audioContext.createOscillator();
     const g = audioContext.createGain();
     o.connect(g).connect(audioContext.destination);
-    o.frequency.value = freq;
-    o.type = 'sine';
+    o.frequency.value = freq; o.type = 'sine';
     g.gain.setValueAtTime(volume, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + duration);
-    o.start(t);
-    o.stop(t + duration);
+    o.start(t); o.stop(t + duration);
   } catch (e) {}
 }
-
 function playAlarmSiren() {
   if (!soundEnabled || !audioContext || audioContext.state !== 'running') return;
-  for (let i = 0; i < 3; i++) {
-    setTimeout(() => playBeep(1000, 0.2, 0.4), i * 250);
-  }
+  for (let i = 0; i < 3; i++) setTimeout(() => playBeep(1000, 0.2, 0.4), i * 250);
 }
 
 // ═══════════════════════════════════════════
@@ -593,9 +694,13 @@ function rankStatus(...statuses) {
   return 'nodata';
 }
 
-function getLatestVital(vitals) {
-  if (!vitals || vitals.length === 0) return null;
-  return [...vitals].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+function getSortedVitals(vitals) {
+  if (!vitals || vitals.length === 0) return [];
+  return [...vitals].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+}
+
+function getLatestVital(sortedVitals) {
+  return sortedVitals.length > 0 ? sortedVitals[sortedVitals.length - 1] : null;
 }
 
 function formatElapsed(startStr) {
@@ -612,12 +717,201 @@ function formatElapsed(startStr) {
 
 function formatRelative(dateStr) {
   if (!dateStr) return '-';
-  const ms = Date.now() - new Date(dateStr).getTime();
-  const sec = Math.floor(ms / 1000);
+  const sec = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (sec < 60)   return `${sec}s`;
   if (sec < 3600) return `${Math.floor(sec/60)}m`;
   return `${Math.floor(sec/3600)}h`;
 }
+
+// ═══════════════════════════════════════════
+// ★ SPARKLINE RENDERER (mini SVG line chart)
+// ═══════════════════════════════════════════
+function renderSparkline(values, status, options = {}) {
+  const nums = values.map(v => parseFloat(v)).filter(v => !isNaN(v));
+  const W = 100, H = 30, PAD = 3;
+
+  if (nums.length === 0) {
+    return `<svg class="sparkline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><text x="${W/2}" y="${H/2+3}" class="sparkline-empty">no data</text></svg>`;
+  }
+  if (nums.length === 1) {
+    // Single dot in middle
+    const color = STATUS_COLOR[status];
+    return `<svg class="sparkline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <line x1="0" y1="${H/2}" x2="${W}" y2="${H/2}" stroke="${color}" stroke-width="1" stroke-dasharray="2,2" opacity="0.4"/>
+      <circle cx="${W/2}" cy="${H/2}" r="3" fill="${color}"/>
+    </svg>`;
+  }
+
+  let min = Math.min(...nums);
+  let max = Math.max(...nums);
+  if (max - min < 0.5) { min -= 0.5; max += 0.5; }   // avoid flatline
+  const range = max - min;
+
+  const pts = nums.map((v, i) => {
+    const x = (i / (nums.length - 1)) * (W - PAD * 2) + PAD;
+    const y = H - PAD - ((v - min) / range) * (H - PAD * 2);
+    return [x, y];
+  });
+
+  const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  const last = pts[pts.length - 1];
+  const areaD = `${pathD} L ${last[0].toFixed(1)},${H - PAD} L ${PAD},${H - PAD} Z`;
+  const color = STATUS_COLOR[status];
+
+  return `<svg class="sparkline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <path d="${areaD}" fill="${color}" fill-opacity="0.15"/>
+    <path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.5" fill="${color}"/>
+  </svg>`;
+}
+
+// ═══════════════════════════════════════════
+// ★ BIG CHART (for modal)
+// ═══════════════════════════════════════════
+function renderBigChart(rows, vitalKey, ranges, label, unit, color) {
+  if (!rows || rows.length === 0) {
+    return `<div class="big-chart">
+      <div class="big-chart-title"><span>${label}</span></div>
+      <div style="text-align:center; padding:40px 0; color:var(--text-faint); font-size:13px;">ยังไม่มีข้อมูล</div>
+    </div>`;
+  }
+
+  const points = rows.map(r => ({ v: parseFloat(r[vitalKey]), t: new Date(r.created_at) }))
+                    .filter(p => !isNaN(p.v));
+
+  if (points.length === 0) {
+    return `<div class="big-chart">
+      <div class="big-chart-title"><span>${label}</span></div>
+      <div style="text-align:center; padding:40px 0; color:var(--text-faint); font-size:13px;">ยังไม่มีข้อมูล ${label}</div>
+    </div>`;
+  }
+
+  const W = 500, H = 140, PADL = 38, PADR = 12, PADT = 10, PADB = 22;
+
+  // Range includes normal band
+  const candidates = [...points.map(p => p.v)];
+  if (ranges) {
+    candidates.push(ranges.warnLow, ranges.warnHigh);
+  }
+  let yMin = Math.min(...candidates);
+  let yMax = Math.max(...candidates);
+  const pad = (yMax - yMin) * 0.1 || 1;
+  yMin -= pad; yMax += pad;
+  const yRange = yMax - yMin;
+
+  const t0 = points[0].t.getTime();
+  const tN = points[points.length - 1].t.getTime();
+  const tRange = (tN - t0) || 1;
+
+  function xOf(t) { return PADL + ((t.getTime() - t0) / tRange) * (W - PADL - PADR); }
+  function yOf(v) { return H - PADB - ((v - yMin) / yRange) * (H - PADT - PADB); }
+
+  // Build path
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xOf(p.t).toFixed(1)},${yOf(p.v).toFixed(1)}`).join(' ');
+  const lastP = points[points.length - 1];
+  const areaPath = `${linePath} L ${xOf(lastP.t).toFixed(1)},${H - PADB} L ${PADL},${H - PADB} Z`;
+
+  // Normal band
+  let bandSvg = '';
+  if (ranges) {
+    const yWLow  = Math.min(yOf(ranges.warnLow),  H - PADB);
+    const yWHigh = Math.max(yOf(ranges.warnHigh), PADT);
+    bandSvg = `<rect x="${PADL}" y="${yWHigh}" width="${W - PADL - PADR}" height="${yWLow - yWHigh}" fill="${STATUS_COLOR.normal}" fill-opacity="0.08"/>`;
+  }
+
+  // Y-axis ticks (3 ticks)
+  const yTicks = [yMin, (yMin + yMax) / 2, yMax].map(v => {
+    const y = yOf(v).toFixed(1);
+    return `<line x1="${PADL}" y1="${y}" x2="${W-PADR}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/>
+            <text x="${PADL - 4}" y="${y}" text-anchor="end" dominant-baseline="central" fill="var(--text-dim)" font-size="9" font-family="Outfit, monospace">${v.toFixed(0)}</text>`;
+  }).join('');
+
+  // X-axis time labels
+  const formatTime = d => d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const xLabels = [points[0].t, points[Math.floor(points.length/2)].t, lastP.t].map(t => {
+    const x = xOf(t).toFixed(1);
+    return `<text x="${x}" y="${H - 4}" text-anchor="middle" fill="var(--text-faint)" font-size="9" font-family="Outfit, monospace">${formatTime(t)}</text>`;
+  }).join('');
+
+  // Data points
+  const dots = points.map(p => `<circle cx="${xOf(p.t).toFixed(1)}" cy="${yOf(p.v).toFixed(1)}" r="2" fill="${color}"/>`).join('');
+
+  const lastVal = lastP.v;
+  const lastStatus = ranges
+    ? (lastVal <= ranges.critLow || lastVal >= ranges.critHigh ? 'critical'
+      : lastVal <= ranges.warnLow || lastVal >= ranges.warnHigh ? 'warn'
+      : 'normal')
+    : 'normal';
+  const lastColor = STATUS_COLOR[lastStatus];
+
+  return `<div class="big-chart">
+    <div class="big-chart-title">
+      <span>${label} ${unit}</span>
+      <span class="big-chart-current" style="color:${lastColor};">${lastVal}${unit ? `<span style="font-size:14px;color:var(--text-dim);"> ${unit}</span>` : ''}</span>
+    </div>
+    <svg class="big-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      ${bandSvg}
+      ${yTicks}
+      <path d="${areaPath}" fill="${color}" fill-opacity="0.12"/>
+      <path d="${linePath}" stroke="${color}" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      ${dots}
+      <circle cx="${xOf(lastP.t).toFixed(1)}" cy="${yOf(lastVal).toFixed(1)}" r="4" fill="${lastColor}" stroke="#fff" stroke-width="1"/>
+      ${xLabels}
+    </svg>
+    <div style="margin-top:6px; font-size:10px; color:var(--text-faint); font-family:'Outfit',monospace;">
+      ${points.length} จุด · ${formatTime(points[0].t)} – ${formatTime(lastP.t)}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// Modal
+// ═══════════════════════════════════════════
+window.openCardModal = function(animalId) {
+  const q = currentData.find(x => x.vasd_animal && x.vasd_animal.id === animalId);
+  if (!q) return;
+  const a = q.vasd_animal;
+  const ranges = VITAL_RANGES[a.species] || VITAL_RANGES['ส'];
+  const rows = getSortedVitals(a.vasd_vital_signs);
+
+  const speciesText = a.species === 'ส' ? '🐶 สุนัข' : '🐱 แมว';
+  document.getElementById('modalTitle').innerHTML = `
+    <span class="table-mark">โต๊ะ ${escapeHtml(q.operating_table || '—')}</span>
+    &nbsp;·&nbsp; #${a.queue_number || '-'} ${escapeHtml(a.animal_name)}
+  `;
+
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `
+    <div class="modal-meta">
+      <div class="modal-meta-item">${speciesText}</div>
+      <div class="modal-meta-item">เพศ <b>${escapeHtml(a.sex || '-')}</b></div>
+      <div class="modal-meta-item">นน. <b>${a.actual_weight || '-'} kg</b></div>
+      <div class="modal-meta-item">🩺 <b>${escapeHtml(q.surgeon_name || '-')}</b></div>
+      <div class="modal-meta-item">💉 <b>${escapeHtml(q.anesthetist || '-')}</b></div>
+    </div>
+    <div class="big-charts">
+      ${renderBigChart(rows, 'hr',   ranges.hr,   'HR (Heart Rate)',  'bpm',  STATUS_COLOR.normal)}
+      ${renderBigChart(rows, 'rr',   ranges.rr,   'RR (Resp. Rate)',  '/นาที', STATUS_COLOR.normal)}
+      ${renderBigChart(rows, 'spo2', ranges.spo2, 'SpO₂',             '%',    STATUS_COLOR.normal)}
+      ${renderBigChart(rows, 'temp', ranges.temp, 'Temperature',      '°F',   STATUS_COLOR.normal)}
+    </div>
+    <div style="text-align:center; margin-top:14px; font-size:11px; color:var(--text-faint);">
+      💡 พื้นที่สีเขียวจางคือช่วงค่าปกติ
+    </div>
+  `;
+
+  document.getElementById('modalOverlay').classList.add('show');
+};
+
+window.closeModal = function(ev) {
+  if (ev && ev.target.id !== 'modalOverlay' && ev.type === 'click') return;
+  document.getElementById('modalOverlay').classList.remove('show');
+};
+
+// ปิด modal ด้วย Esc
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
 
 // ═══════════════════════════════════════════
 // Render Card
@@ -631,7 +925,15 @@ function renderCard(q) {
   const speciesIcon = species === 'ส' ? '🐶' : '🐱';
   const tableNum = q.operating_table ? escapeHtml(q.operating_table) : '—';
 
-  const vital = getLatestVital(a.vasd_vital_signs);
+  const sortedVitals = getSortedVitals(a.vasd_vital_signs);
+  const vital = getLatestVital(sortedVitals);
+
+  // ★ ดึงประวัติย้อนหลัง (ล่าสุด 20 จุด) สำหรับ sparkline
+  const last20 = sortedVitals.slice(-20);
+  const hrHist   = last20.map(v => v.hr);
+  const rrHist   = last20.map(v => v.rr);
+  const spo2Hist = last20.map(v => v.spo2);
+  const tempHist = last20.map(v => v.temp);
 
   let cardStatus = 'nodata';
   let hr = { status: 'nodata', value: null };
@@ -645,7 +947,7 @@ function renderCard(q) {
     hr   = evalVital(vital.hr,   ranges.hr);
     rr   = evalVital(vital.rr,   ranges.rr);
     spo2 = evalVital(vital.spo2, ranges.spo2);
-    temp = evalVital(vital.temp, ranges.temp);    // ★ ใช้ค่า °F โดยตรง ไม่แปลง
+    temp = evalVital(vital.temp, ranges.temp);
     cardStatus = rankStatus(hr.status, rr.status, spo2.status, temp.status);
     updateTime = formatRelative(vital.created_at);
     noteText = vital.note || '';
@@ -653,12 +955,6 @@ function renderCard(q) {
 
   const hrDur = (hr.value && hr.value > 0) ? Math.max(0.25, 60 / hr.value).toFixed(2) + 's' : '1s';
   const rrDur = (rr.value && rr.value > 0) ? Math.max(0.5,  60 / rr.value).toFixed(2) + 's' : '3s';
-
-  const spo2Pct = spo2.value != null ? Math.min(100, Math.max(0, spo2.value)) : 0;
-  const spo2Color =
-    spo2.status === 'critical' ? 'var(--rose)' :
-    spo2.status === 'warn'     ? 'var(--amber)' :
-    spo2.status === 'normal'   ? 'var(--emerald)' : 'var(--gray)';
 
   let tempClass = '';
   if (temp.status !== 'nodata' && temp.value != null) {
@@ -680,7 +976,7 @@ function renderCard(q) {
     : `<span style="color:var(--text-faint);">ยังไม่ระบุทีม</span>`;
 
   return `
-    <div class="mon-card status-${cardStatus}" data-animal-id="${a.id}">
+    <div class="mon-card status-${cardStatus}" data-animal-id="${a.id}" onclick="openCardModal('${a.id}')">
       <div class="mc-header">
         <div class="mc-table">
           <span class="mc-table-label">โต๊ะ</span>
@@ -708,27 +1004,28 @@ function renderCard(q) {
           <span class="vital-icon heart" style="--hr-dur: ${hrDur};">❤️</span>
           <span class="vital-value">${hr.value != null ? hr.value : '—'}</span>
           <span class="vital-unit">bpm</span>
+          ${renderSparkline(hrHist, hr.status)}
         </div>
         <div class="vital v-${rr.status}">
           <span class="vital-label">RR</span>
           <span class="vital-icon lungs" style="--rr-dur: ${rrDur};">🫁</span>
           <span class="vital-value">${rr.value != null ? rr.value : '—'}</span>
           <span class="vital-unit">/ นาที</span>
+          ${renderSparkline(rrHist, rr.status)}
         </div>
         <div class="vital v-${spo2.status}">
           <span class="vital-label">SpO₂</span>
           <span class="vital-icon spo2">💧</span>
           <span class="vital-value">${spo2.value != null ? spo2.value : '—'}<span class="sub">%</span></span>
           <span class="vital-unit">oxygen</span>
-          <div class="spo2-bar">
-            <div class="spo2-fill" style="width: ${spo2Pct}%; background: ${spo2Color};"></div>
-          </div>
+          ${renderSparkline(spo2Hist, spo2.status)}
         </div>
         <div class="vital v-${temp.status}">
           <span class="vital-label">TEMP</span>
           <span class="vital-icon temp ${tempClass}">🌡️</span>
           <span class="vital-value">${tempDisplay}<span class="sub">°F</span></span>
           <span class="vital-unit">fahrenheit</span>
+          ${renderSparkline(tempHist, temp.status)}
         </div>
       </div>
 
@@ -766,6 +1063,7 @@ async function loadMonitor() {
     if (error) throw error;
 
     const queues = (data || []).filter(q => q.vasd_animal);
+    currentData = queues;  // cache สำหรับ modal
     const grid = document.getElementById('grid');
 
     if (queues.length === 0) {
@@ -787,7 +1085,8 @@ async function loadMonitor() {
       const a = q.vasd_animal;
       if (!a) return;
       const ranges = VITAL_RANGES[a.species] || VITAL_RANGES['ส'];
-      const v = getLatestVital(a.vasd_vital_signs);
+      const sorted = getSortedVitals(a.vasd_vital_signs);
+      const v = getLatestVital(sorted);
       let status = 'nodata';
       if (v) {
         const s = [
