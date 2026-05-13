@@ -1,21 +1,22 @@
-// js/global-alarm.js — v2
+// js/global-alarm.js — v3
 // VASD Emergency Call Alert System
-// แก้ไข: บั๊ก AudioContext.resume ไม่ได้ await + เพิ่ม "Enable Sound" banner
+// แก้บั๊ก v2: AudioContext เป็นของแต่ละ document แยกกัน → ต้องเช็คทุกหน้า
+// ไม่เชื่อ localStorage อย่างเดียว
 
 import { supabase } from './supabase.js';
 
 const STALE_SECONDS = 60;
 const TTS_REPEAT_MS = 5000;
 const VIBRATION_PATTERN = [400, 200, 400, 200, 400, 200, 1000];
-const AUDIO_ENABLED_KEY = 'vasd_audio_enabled';
+const SESSION_DISMISS_KEY = 'vasd_banner_dismissed';
 
 let audioContext = null;
 let activeAlarm = null;
 
-console.log('[VASD Alarm v2] global-alarm.js loaded');
+console.log('[VASD Alarm v3] global-alarm.js loaded on', location.pathname);
 
 // ═══════════════════════════════════════════
-// AudioContext — สร้างครั้งเดียว, await resume ทุกครั้ง
+// AudioContext
 // ═══════════════════════════════════════════
 async function ensureAudioContext() {
   if (!audioContext) {
@@ -30,12 +31,16 @@ async function ensureAudioContext() {
   if (audioContext.state === 'suspended') {
     try {
       await audioContext.resume();
-      console.log('[VASD Alarm] AudioContext after resume, state =', audioContext.state);
+      console.log('[VASD Alarm] After resume(), state =', audioContext.state);
     } catch (e) {
       console.warn('[VASD Alarm] resume() failed', e);
     }
   }
   return audioContext;
+}
+
+function isAudioReady() {
+  return audioContext && audioContext.state === 'running';
 }
 
 async function unlockAudio() {
@@ -44,53 +49,51 @@ async function unlockAudio() {
   try {
     const o = ctx.createOscillator();
     const g = ctx.createGain();
-    g.gain.value = 0; // เงียบสนิท
+    g.gain.value = 0;
     o.connect(g).connect(ctx.destination);
     o.start();
     o.stop(ctx.currentTime + 0.01);
     return true;
-  } catch (e) {
-    return false;
-  }
+  } catch (e) { return false; }
 }
 
 window.unlockAudioForAlarm = unlockAudio;
 
 // ═══════════════════════════════════════════
-// Enable Sound Banner — กดครั้งเดียวต่อเครื่อง
+// Enable Sound Banner
 // ═══════════════════════════════════════════
-function showEnableBanner() {
-  if (document.getElementById('vasd-enable-banner')) return;
-  if (localStorage.getItem(AUDIO_ENABLED_KEY) === 'yes') return;
+function showEnableBanner(urgent = false) {
+  let banner = document.getElementById('vasd-enable-banner');
+  if (banner) {
+    if (urgent) banner.classList.add('vasd-eb-urgent');
+    return;
+  }
 
-  const banner = document.createElement('div');
+  banner = document.createElement('div');
   banner.id = 'vasd-enable-banner';
+  if (urgent) banner.classList.add('vasd-eb-urgent');
   banner.innerHTML = `
-    <span style="font-size: 22px;">🔇</span>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-weight: 700; color: #fff; font-size: 13px;">เสียงแจ้งเตือนยังไม่เปิด</div>
-      <div style="font-size: 11px; color: #fbbf24; margin-top: 2px;">คลิกเพื่อเปิดเสียง Emergency Call</div>
+    <span class="vasd-eb-icon">🔇</span>
+    <div class="vasd-eb-text">
+      <div class="vasd-eb-title">เสียงเตือนยังไม่เปิดในหน้านี้</div>
+      <div class="vasd-eb-sub">กดปุ่มขวาเพื่อเปิดเสียง Emergency</div>
     </div>
-    <button id="vasd-enable-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 13px; white-space: nowrap;">
-      🔊 เปิดเสียง
-    </button>
-    <button id="vasd-dismiss-btn" style="background: transparent; color: #94a3b8; border: none; padding: 4px 8px; cursor: pointer; font-size: 18px; line-height: 1;" title="ปิด">×</button>
+    <button id="vasd-enable-btn" class="vasd-eb-go-btn">🔊 เปิดเสียง</button>
+    <button id="vasd-dismiss-btn" class="vasd-eb-x-btn" title="ปิดสำหรับหน้านี้">×</button>
   `;
   document.body.appendChild(banner);
 
   document.getElementById('vasd-enable-btn').onclick = async () => {
-    console.log('[VASD Alarm] User clicked "Enable Sound"');
+    console.log('[VASD Alarm] User clicked Enable Sound');
     const ok = await unlockAudio();
-    console.log('[VASD Alarm] Audio unlock result:', ok, 'state:', audioContext?.state);
-
+    console.log('[VASD Alarm] Unlock result:', ok, '- state:', audioContext?.state);
     if (ok) {
-      localStorage.setItem(AUDIO_ENABLED_KEY, 'yes');
-      // ขอ Notification permission ทันที (อยู่ใน user gesture)
+      // ขอ Notification permission ใน user gesture
       if ('Notification' in window && Notification.permission === 'default') {
         try { await Notification.requestPermission(); } catch (e) {}
       }
       banner.remove();
-      // ปี้บคอนเฟิร์มสั้นๆ ให้รู้ว่าเปิดเสียงสำเร็จ
+      // ปี้บคอนเฟิร์ม
       try {
         const ctx = audioContext;
         const o = ctx.createOscillator();
@@ -105,28 +108,30 @@ function showEnableBanner() {
     } else {
       alert(
         '⚠️ เบราว์เซอร์บล็อกเสียงอยู่\n\n' +
-        '【Firefox】\n' +
-        '1. คลิกที่ไอคอน 🛡️ หรือ 🔒 ที่ address bar\n' +
-        '2. หา "Autoplay" / "เล่นอัตโนมัติ"\n' +
-        '3. เปลี่ยนเป็น "Allow Audio and Video"\n\n' +
-        '【Chrome】มักไม่มีปัญหานี้ แต่ถ้ามี:\n' +
-        '1. คลิก 🔒 → Site settings → Sound → Allow\n\n' +
-        'รีโหลดหน้าเว็บแล้วกด "เปิดเสียง" อีกครั้ง'
+        '【Firefox】คลิก 🛡️/🔒 ที่ address bar → Autoplay → "Allow Audio and Video"\n\n' +
+        '【iOS Safari】Settings → Safari → ปิด Block Pop-ups + เปิดเสียงเครื่อง\n\n' +
+        '【Android Chrome】มักไม่มีปัญหา ถ้ามีให้เปิดเสียงเครื่อง + กดปุ่มอีกครั้ง\n\n' +
+        'รีโหลดหน้าแล้วลองอีกครั้ง'
       );
     }
   };
 
-  document.getElementById('vasd-dismiss-btn').onclick = () => banner.remove();
+  document.getElementById('vasd-dismiss-btn').onclick = () => {
+    banner.remove();
+    sessionStorage.setItem(SESSION_DISMISS_KEY, 'yes');
+  };
 }
 
 // ═══════════════════════════════════════════
-// เสียงไซเรน (สังเคราะห์)
+// เสียงไซเรน
 // ═══════════════════════════════════════════
 async function playAlarmSound() {
   const ctx = await ensureAudioContext();
   if (!ctx || ctx.state !== 'running') {
-    console.warn('[VASD Alarm] Cannot play sound, AudioContext state:', ctx?.state);
-    showEnableBanner(); // แสดง banner ให้ผู้ใช้เปิดเสียง
+    console.warn('[VASD Alarm] ⚠️ Cannot play sound — state:', ctx?.state);
+    // บังคับ show banner แม้ user เคย dismiss
+    sessionStorage.removeItem(SESSION_DISMISS_KEY);
+    showEnableBanner(true);
     return null;
   }
   try {
@@ -145,7 +150,7 @@ async function playAlarmSound() {
       try { oscillator.frequency.setValueAtTime(freq, ctx.currentTime); } catch (e) {}
     }, 60);
 
-    console.log('[VASD Alarm] 🔊 Alarm sound STARTED');
+    console.log('[VASD Alarm] 🔊 Sound started');
     return { oscillator, freqInterval };
   } catch (e) {
     console.warn('[VASD Alarm] playAlarmSound failed', e);
@@ -302,25 +307,64 @@ function injectStyles() {
   const style = document.createElement('style');
   style.id = 'vasd-alarm-styles';
   style.textContent = `
+    /* Enable Banner */
     #vasd-enable-banner {
       position: fixed; top: 10px; left: 50%;
       transform: translateX(-50%);
-      max-width: 92%; min-width: 280px;
+      max-width: 94%; width: max-content;
       background: linear-gradient(135deg, #1e293b, #334155);
       border: 2px solid #f59e0b;
       border-radius: 12px;
-      padding: 12px 14px;
+      padding: 10px 12px;
       z-index: 99998;
       display: flex; align-items: center; gap: 10px;
       font-family: "Sarabun", -apple-system, sans-serif;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(245,158,11,0.3);
       animation: vasdEbSlide 0.4s ease;
     }
+    #vasd-enable-banner.vasd-eb-urgent {
+      border-color: #ef4444;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 30px rgba(239,68,68,0.6);
+      animation: vasdEbSlide 0.4s ease, vasdEbUrgent 0.8s ease-in-out infinite;
+    }
     @keyframes vasdEbSlide {
       from { transform: translate(-50%, -100px); opacity: 0; }
       to   { transform: translate(-50%, 0); opacity: 1; }
     }
+    @keyframes vasdEbUrgent {
+      0%, 100% { background: linear-gradient(135deg, #1e293b, #334155); }
+      50%      { background: linear-gradient(135deg, #7f1d1d, #991b1b); }
+    }
+    .vasd-eb-icon { font-size: 22px; flex-shrink: 0; }
+    .vasd-eb-text { flex: 1; min-width: 0; }
+    .vasd-eb-title { font-weight: 700; color: #fff; font-size: 13px; }
+    .vasd-eb-sub { font-size: 11px; color: #fbbf24; margin-top: 2px; }
+    .vasd-eb-go-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff; border: none;
+      padding: 10px 16px; border-radius: 8px;
+      font-weight: 700; cursor: pointer;
+      font-family: inherit; font-size: 13px;
+      white-space: nowrap;
+    }
+    .vasd-eb-x-btn {
+      background: transparent; color: #94a3b8;
+      border: none; padding: 4px 8px;
+      cursor: pointer; font-size: 18px; line-height: 1;
+    }
+    @media (max-width: 480px) {
+      #vasd-enable-banner {
+        max-width: 96%;
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .vasd-eb-icon { font-size: 18px; }
+      .vasd-eb-title { font-size: 12px; }
+      .vasd-eb-sub { font-size: 10px; }
+      .vasd-eb-go-btn { padding: 8px 12px; font-size: 12px; }
+    }
 
+    /* Emergency Overlay */
     #vasd-emergency-overlay {
       position: fixed; inset: 0; z-index: 99999;
       background: rgba(220, 38, 38, 0.92);
@@ -393,20 +437,37 @@ function injectStyles() {
 async function init() {
   injectStyles();
 
-  // Auto-unlock บน user interaction แรก
+  // Auto-unlock บน user interaction ใดๆ (ทำซ้ำได้ ไม่ใช่ once)
   const tryUnlock = async () => {
+    const wasReady = isAudioReady();
     await ensureAudioContext();
+    if (!wasReady && isAudioReady()) {
+      console.log('[VASD Alarm] ✅ Auto-unlocked via user interaction');
+      const banner = document.getElementById('vasd-enable-banner');
+      if (banner) banner.remove();
+    }
   };
-  document.addEventListener('click', tryUnlock, { once: true });
-  document.addEventListener('touchstart', tryUnlock, { once: true });
-  document.addEventListener('keydown', tryUnlock, { once: true });
+  document.addEventListener('click', tryUnlock);
+  document.addEventListener('touchstart', tryUnlock, { passive: true });
+  document.addEventListener('keydown', tryUnlock);
 
-  // แสดง banner ถ้ายังไม่เคย enable เสียง
-  if (localStorage.getItem(AUDIO_ENABLED_KEY) !== 'yes') {
-    setTimeout(showEnableBanner, 800);
-  }
+  // เช็คสถานะ audio จริงๆ — ถ้า suspend → show banner
+  // (ไม่ใช้ localStorage เพราะ AudioContext เป็นของแต่ละ document)
+  setTimeout(async () => {
+    if (sessionStorage.getItem(SESSION_DISMISS_KEY) === 'yes') {
+      console.log('[VASD Alarm] Banner dismissed for this session');
+      return;
+    }
+    await ensureAudioContext();
+    if (!isAudioReady()) {
+      console.log('[VASD Alarm] Audio not ready, showing banner. State:', audioContext?.state);
+      showEnableBanner();
+    } else {
+      console.log('[VASD Alarm] Audio ready on load');
+    }
+  }, 800);
 
-  // Subscribe realtime
+  // Realtime subscribe
   try {
     supabase.channel('vasd-emergency-' + Math.random().toString(36).slice(2, 8))
       .on('postgres_changes',
@@ -425,7 +486,7 @@ async function init() {
         (payload) => {
           if (payload.new && payload.new.acknowledged_at &&
               activeAlarm && activeAlarm.id === payload.new.id) {
-            console.log('[VASD Alarm] Remote ACK, stopping');
+            console.log('[VASD Alarm] Remote ACK, stop');
             stopActiveAlarm();
           }
         })
@@ -436,7 +497,7 @@ async function init() {
     console.warn('[VASD Alarm] subscribe failed', e);
   }
 
-  // เช็คเคสค้างตอนเปิดหน้า
+  // เช็คเคสค้าง
   try {
     const cutoff = new Date(Date.now() - STALE_SECONDS * 1000).toISOString();
     const { data, error } = await supabase
