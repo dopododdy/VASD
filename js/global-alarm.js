@@ -7,7 +7,7 @@ import { supabase } from './supabase.js';
 // ═══════════════════════════════════════════
 // ⚙️ CONFIG — แก้บรรทัดนี้ก่อนใช้
 // ═══════════════════════════════════════════
-const VAPID_PUBLIC_KEY = 'PASTE_YOUR_VAPID_PUBLIC_KEY_HERE';
+const VAPID_PUBLIC_KEY = 'BOLeVQQa4pvhArHlGhFHDkrClRpuepRNwF5UgQCpdOr5O5vmWXGk9V2c1e9MXKYPDKNBTIVI8jwE2WA-X_R9n9c';
 // ระวัง! ใส่ Public Key เท่านั้น ห้ามใส่ Private Key
 
 const STALE_SECONDS = 60;
