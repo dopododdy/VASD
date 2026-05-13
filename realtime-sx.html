@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Live Surgery Monitor – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy:        #0b1929;
+  --navy-mid:    #112240;
+  --teal:        #0ea5a0;
+  --teal-light:  #14c4bc;
+  --primary:     #3b82f6;
+  --emerald:     #10b981;
+  --amber:       #f59e0b;
+  --rose:        #ef4444;
+  --rose-bright: #dc2626;
+  --violet:      #8b5cf6;
+  --gray:        #64748b;
+
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --border:     rgba(255,255,255,0.10);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #475569;
+
+  --radius:    16px;
+  --radius-lg: 22px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(59,130,246,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 90%, rgba(239,68,68,0.05) 0%, transparent 60%);
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--rose), var(--rose-bright));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; box-shadow: 0 0 25px rgba(239,68,68,0.4);
+  animation: brandPulse 2s ease-in-out infinite;
+}
+@keyframes brandPulse {
+  0%, 100% { box-shadow: 0 0 25px rgba(239,68,68,0.4); }
+  50%      { box-shadow: 0 0 35px rgba(239,68,68,0.7); }
+}
+.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 800; color: #fff; line-height: 1; }
+.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+.header-stats {
+  display: flex; gap: 8px;
+  font-family: "Outfit", sans-serif; font-size: 12px;
+}
+.stat-pill {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 6px 12px; border-radius: 20px;
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 700;
+}
+.stat-pill.active { color: var(--teal-light); border-color: rgba(14,165,160,0.4); background: rgba(14,165,160,0.1); }
+.stat-pill.crit { color: var(--rose); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
+.stat-pill.crit.has-crit { animation: critFlash 0.6s ease-in-out infinite; }
+@keyframes critFlash {
+  0%, 100% { background: rgba(239,68,68,0.1); }
+  50%      { background: rgba(239,68,68,0.3); }
+}
+
+.btn-sound {
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 14px; border-radius: 10px;
+  font-family: "Sarabun", sans-serif; font-size: 12px;
+  font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-sound.on { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #34d399; }
+.btn-sound.off { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
+
+/* ── MAIN ── */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1600px; margin: 0 auto;
+  padding: 16px 12px 100px; width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.empty-state {
+  text-align: center; padding: 80px 20px;
+  color: var(--text-dim);
+}
+.empty-state-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.4; }
+.empty-state-text { font-size: 16px; }
+
+/* ── CARD ── */
+.mon-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: cardIn 0.5s ease both;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mon-card.status-normal {
+  border-color: rgba(16,185,129,0.3);
+  box-shadow: 0 0 30px rgba(16,185,129,0.08);
+}
+.mon-card.status-warn {
+  border-color: rgba(245,158,11,0.5);
+  box-shadow: 0 0 30px rgba(245,158,11,0.15);
+}
+.mon-card.status-critical {
+  border-color: var(--rose);
+  box-shadow: 0 0 40px rgba(239,68,68,0.4);
+  animation: cardIn 0.5s ease both, critBorder 1s ease-in-out infinite;
+}
+@keyframes critBorder {
+  0%, 100% { box-shadow: 0 0 30px rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.6); }
+  50%      { box-shadow: 0 0 60px rgba(239,68,68,0.7); border-color: var(--rose); }
+}
+.mon-card.status-nodata {
+  border-color: rgba(100,116,139,0.3);
+  opacity: 0.85;
+}
+
+/* Card header */
+.mc-header {
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.mc-table {
+  font-family: "Outfit", sans-serif;
+  font-size: 18px; font-weight: 800;
+  background: linear-gradient(135deg, var(--primary), #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.mc-elapsed {
+  font-family: "Outfit", sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--text-dim);
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Animal info */
+.mc-animal {
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.15);
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.mc-q {
+  font-family: "Outfit", sans-serif;
+  font-size: 13px; font-weight: 800;
+  width: 36px; height: 36px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.4);
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.mc-animal-info { flex: 1; min-width: 0; }
+.mc-animal-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 17px; font-weight: 800; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mc-animal-meta {
+  font-size: 11px; color: var(--text-dim); margin-top: 2px;
+}
+.mc-staff {
+  font-size: 11px; color: var(--text-dim); padding: 8px 16px;
+  background: rgba(0,0,0,0.1); border-bottom: 1px solid var(--border);
+}
+.mc-staff b { color: var(--text); font-weight: 600; }
+
+/* Vitals grid */
+.vitals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+.vital {
+  background: var(--surface);
+  padding: 16px 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  position: relative;
+  transition: background 0.3s;
+}
+.vital.v-normal   { background: rgba(16,185,129,0.06); }
+.vital.v-warn     { background: rgba(245,158,11,0.10); }
+.vital.v-critical { background: rgba(239,68,68,0.15); animation: vitalCrit 1s ease-in-out infinite; }
+.vital.v-nodata   { background: rgba(100,116,139,0.05); }
+@keyframes vitalCrit {
+  0%, 100% { background: rgba(239,68,68,0.15); }
+  50%      { background: rgba(239,68,68,0.35); }
+}
+
+.vital-icon {
+  font-size: 26px; line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* ❤️ Heart pulse: รอบ = 60/HR วินาที */
+.vital-icon.heart {
+  animation: heartbeat var(--hr-dur, 1s) infinite ease-in-out;
+}
+@keyframes heartbeat {
+  0%, 50%, 100% { transform: scale(1); }
+  20% { transform: scale(1.35); }
+  35% { transform: scale(1); }
+}
+
+/* 🫁 Lungs breath: รอบ = 60/RR วินาที */
+.vital-icon.lungs {
+  animation: breathe var(--rr-dur, 3s) infinite ease-in-out;
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50%      { transform: scale(1.2); opacity: 1; }
+}
+
+.vital-icon.spo2 {
+  animation: dropFall 2.5s infinite ease-in-out;
+}
+@keyframes dropFall {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
+}
+
+.vital-icon.temp.v-cold { color: #60a5fa; }
+.vital-icon.temp.v-hot  { color: var(--rose); animation: tempShake 0.5s infinite ease-in-out; }
+@keyframes tempShake {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-8deg); }
+  75%      { transform: rotate(8deg); }
+}
+
+.vital-value {
+  font-family: "Outfit", sans-serif;
+  font-size: 36px; font-weight: 900;
+  color: #fff; line-height: 1;
+  letter-spacing: -1px;
+  transition: color 0.3s;
+}
+.vital.v-normal   .vital-value { color: #6ee7b7; }
+.vital.v-warn     .vital-value { color: #fcd34d; }
+.vital.v-critical .vital-value { color: #fca5a5; text-shadow: 0 0 12px rgba(252,165,165,0.5); }
+.vital.v-nodata   .vital-value { color: var(--text-faint); }
+
+.vital-unit {
+  font-size: 11px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+}
+.vital-label {
+  font-size: 10px; font-weight: 700;
+  color: var(--text-dim); letter-spacing: 1px;
+  text-transform: uppercase;
+  position: absolute; top: 8px; left: 12px;
+}
+
+/* SpO2 bar */
+.spo2-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 4px; background: rgba(0,0,0,0.3);
+}
+.spo2-fill {
+  height: 100%; transition: width 0.6s ease, background 0.3s;
+}
+
+/* Card footer */
+.mc-footer {
+  padding: 12px 16px;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px;
+}
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px;
+  font-family: "Outfit", sans-serif; font-size: 11px; font-weight: 800;
+  letter-spacing: 1px;
+}
+.status-pill.normal   { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.status-pill.warn     { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+.status-pill.critical { background: rgba(239,68,68,0.2);    color: #fca5a5; border: 1px solid var(--rose); animation: pillBlink 0.5s infinite alternate; }
+.status-pill.nodata   { background: rgba(100,116,139,0.15); color: var(--text-dim); border: 1px solid rgba(100,116,139,0.3); }
+@keyframes pillBlink {
+  from { opacity: 1; }
+  to   { opacity: 0.5; }
+}
+
+.last-update { color: var(--text-faint); font-family: "Outfit", sans-serif; }
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+  background: rgba(11,25,41,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); z-index: 200;
+  display: flex; justify-content: space-around; align-items: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: var(--text-dim); text-decoration: none;
+  font-size: 10px; font-weight: 600;
+}
+.nav-item.active { color: var(--rose); }
+.nav-icon { font-size: 20px; }
+
+/* ── Banner alert ── */
+#alertBanner {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--rose-bright), var(--rose));
+  color: #fff; padding: 12px 20px; border-radius: 12px;
+  font-weight: 700; font-size: 14px;
+  box-shadow: 0 10px 30px rgba(239,68,68,0.5);
+  z-index: 500; display: none;
+  animation: alertSlide 0.4s ease;
+}
+#alertBanner.show { display: block; }
+@keyframes alertSlide {
+  from { transform: translate(-50%, -100px); opacity: 0; }
+  to   { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .brand-sub { display: none; }
+  .grid { grid-template-columns: 1fr; }
+  .header-stats { gap: 4px; }
+  .stat-pill { padding: 4px 8px; font-size: 11px; }
+  .btn-sound { padding: 6px 10px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">🩺</div>
+    <div>
+      <div class="brand-name">Live Surgery Monitor</div>
+      <div class="brand-sub">Real-time Vital Signs Dashboard</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill active" id="statActive">🛏️ <span id="cntActive">0</span></div>
+    <div class="stat-pill crit" id="statCrit">⚠️ <span id="cntCrit">0</span></div>
+    <button class="btn-sound off" id="btnSound" onclick="toggleSound()">🔇 เสียง</button>
+  </div>
+</header>
+
+<div id="alertBanner"></div>
+
+<div class="wrap">
+  <div id="grid" class="grid">
+    <div class="empty-state">
+      <div class="empty-state-icon">⏳</div>
+      <div class="empty-state-text">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span>หน้าหลัก</span></a>
+  <a href="animals.html" class="nav-item"><span class="nav-icon">🐾</span><span>สัตว์</span></a>
+  <a href="surgery.html" class="nav-item"><span class="nav-icon">🛏️</span><span>ผ่าตัด</span></a>
+  <a href="#" class="nav-item active"><span class="nav-icon">🩺</span><span>Monitor</span></a>
+  <a href="recovery.html" class="nav-item"><span class="nav-icon">❤️‍🩹</span><span>พักฟื้น</span></a>
+</nav>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+// ═══════════════════════════════════════════
+// VITAL RANGES (สำหรับสุนัข ส และแมว ม)
+// ═══════════════════════════════════════════
+const VITAL_RANGES = {
+  'ส': { // สุนัข (dog)
+    hr:   { critLow: 50,  warnLow: 60,   warnHigh: 180,  critHigh: 220 },
+    rr:   { critLow: 5,   warnLow: 8,    warnHigh: 30,   critHigh: 50  },
+    spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,  critHigh: 102 },
+    temp: { critLow: 35,  warnLow: 36.5, warnHigh: 39.5, critHigh: 41  }
+  },
+  'ม': { // แมว (cat)
+    hr:   { critLow: 80,  warnLow: 100,  warnHigh: 200,  critHigh: 230 },
+    rr:   { critLow: 5,   warnLow: 10,   warnHigh: 30,   critHigh: 50  },
+    spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,  critHigh: 102 },
+    temp: { critLow: 35,  warnLow: 36.5, warnHigh: 39.5, critHigh: 41  }
+  }
+};
+
+// ═══════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════
+let lastStatus = {};          // animalId -> 'normal'/'warn'/'critical'/'nodata'
+let lastReloadAt = 0;
+let audioContext = null;
+let soundEnabled = false;
+
+// ═══════════════════════════════════════════
+// Audio Alarm
+// ═══════════════════════════════════════════
+async function ensureAudio() {
+  if (!audioContext) {
+    try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { return null; }
+  }
+  if (audioContext.state === 'suspended') {
+    try { await audioContext.resume(); } catch (e) {}
+  }
+  return audioContext;
+}
+
+window.toggleSound = async function() {
+  const btn = document.getElementById('btnSound');
+  if (!soundEnabled) {
+    const ctx = await ensureAudio();
+    if (!ctx || ctx.state !== 'running') {
+      alert('⚠️ ไม่สามารถเปิดเสียงได้ — เบราว์เซอร์บล็อก autoplay');
+      return;
+    }
+    // Test beep
+    playBeep(880, 0.15, 0.2);
+    soundEnabled = true;
+    btn.className = 'btn-sound on';
+    btn.innerHTML = '🔊 เสียงเปิด';
+  } else {
+    soundEnabled = false;
+    btn.className = 'btn-sound off';
+    btn.innerHTML = '🔇 เสียง';
+  }
+};
+
+function playBeep(freq, duration, volume = 0.3) {
+  if (!audioContext || audioContext.state !== 'running') return;
+  try {
+    const t = audioContext.currentTime;
+    const o = audioContext.createOscillator();
+    const g = audioContext.createGain();
+    o.connect(g).connect(audioContext.destination);
+    o.frequency.value = freq;
+    o.type = 'sine';
+    g.gain.setValueAtTime(volume, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + duration);
+    o.start(t);
+    o.stop(t + duration);
+  } catch (e) {}
+}
+
+function playAlarmSiren() {
+  if (!soundEnabled || !audioContext || audioContext.state !== 'running') return;
+  // 3 beeps urgent
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => playBeep(1000, 0.2, 0.4), i * 250);
+  }
+}
+
+// ═══════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function evalVital(value, range) {
+  const v = parseFloat(value);
+  if (isNaN(v) || value === '' || value == null) return { status: 'nodata', value: null };
+  if (v <= range.critLow || v >= range.critHigh) return { status: 'critical', value: v };
+  if (v <= range.warnLow || v >= range.warnHigh) return { status: 'warn', value: v };
+  return { status: 'normal', value: v };
+}
+
+function rankStatus(...statuses) {
+  // critical > warn > normal > nodata
+  if (statuses.includes('critical')) return 'critical';
+  if (statuses.includes('warn'))     return 'warn';
+  if (statuses.includes('normal'))   return 'normal';
+  return 'nodata';
+}
+
+function getLatestVital(vitals) {
+  if (!vitals || vitals.length === 0) return null;
+  return [...vitals].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+}
+
+function formatElapsed(startStr) {
+  if (!startStr) return '--:--';
+  const ms = Date.now() - new Date(startStr).getTime();
+  if (ms < 0) return '--:--';
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function formatRelative(dateStr) {
+  if (!dateStr) return '-';
+  const ms = Date.now() - new Date(dateStr).getTime();
+  const sec = Math.floor(ms / 1000);
+  if (sec < 60)   return `${sec} วินาทีที่แล้ว`;
+  if (sec < 3600) return `${Math.floor(sec/60)} นาทีที่แล้ว`;
+  return `${Math.floor(sec/3600)} ชม.ที่แล้ว`;
+}
+
+// ═══════════════════════════════════════════
+// Render Card
+// ═══════════════════════════════════════════
+function renderCard(q) {
+  const a = q.vasd_animal;
+  if (!a) return '';
+
+  const species = a.species; // 'ส' or 'ม'
+  const ranges = VITAL_RANGES[species] || VITAL_RANGES['ส'];
+  const speciesText = species === 'ส' ? '🐶 สุนัข' : '🐱 แมว';
+
+  const vital = getLatestVital(a.vasd_vital_signs);
+  const tableLabel = q.operating_table ? `โต๊ะ ${escapeHtml(q.operating_table)}` : 'โต๊ะ —';
+
+  let cardStatus = 'nodata';
+  let hr = { status: 'nodata', value: null };
+  let rr = { status: 'nodata', value: null };
+  let spo2 = { status: 'nodata', value: null };
+  let temp = { status: 'nodata', value: null };
+  let updateTime = '';
+  let noteText = '';
+
+  if (vital) {
+    hr   = evalVital(vital.hr,   ranges.hr);
+    rr   = evalVital(vital.rr,   ranges.rr);
+    spo2 = evalVital(vital.spo2, ranges.spo2);
+    temp = evalVital(vital.temp, ranges.temp);
+    cardStatus = rankStatus(hr.status, rr.status, spo2.status, temp.status);
+    updateTime = formatRelative(vital.created_at);
+    noteText = vital.note || '';
+  }
+
+  // HR animation duration
+  const hrDur = (hr.value && hr.value > 0) ? Math.max(0.25, 60 / hr.value).toFixed(2) + 's' : '1s';
+  const rrDur = (rr.value && rr.value > 0) ? Math.max(0.5,  60 / rr.value).toFixed(2) + 's' : '3s';
+
+  // SpO2 bar
+  const spo2Pct = spo2.value != null ? Math.min(100, Math.max(0, spo2.value)) : 0;
+  const spo2Color =
+    spo2.status === 'critical' ? 'var(--rose)' :
+    spo2.status === 'warn'     ? 'var(--amber)' :
+    spo2.status === 'normal'   ? 'var(--emerald)' : 'var(--gray)';
+
+  // Temp icon class
+  let tempClass = '';
+  if (temp.status !== 'nodata' && temp.value != null) {
+    if (temp.value < (ranges.temp.warnLow))  tempClass = 'v-cold';
+    if (temp.value > (ranges.temp.warnHigh)) tempClass = 'v-hot';
+  }
+
+  const statusLabel = {
+    normal:   '🟢 NORMAL',
+    warn:     '🟡 WARNING',
+    critical: '🔴 CRITICAL',
+    nodata:   '⚪ WAITING'
+  }[cardStatus];
+
+  const staffLine = (q.surgeon_name || q.anesthetist)
+    ? `🩺 <b>${escapeHtml(q.surgeon_name || '-')}</b> &nbsp;·&nbsp; 💉 <b>${escapeHtml(q.anesthetist || '-')}</b>`
+    : `<span style="color:var(--text-faint);">ยังไม่ระบุทีม</span>`;
+
+  return `
+    <div class="mon-card status-${cardStatus}" data-animal-id="${a.id}" data-start="${q.updated_at || ''}">
+      <div class="mc-header">
+        <div class="mc-table">🛏️ ${tableLabel}</div>
+        <div class="mc-elapsed">⏱️ <span class="elapsed-val" data-start="${q.updated_at || ''}">--:--</span></div>
+      </div>
+
+      <div class="mc-animal">
+        <div class="mc-q">#${a.queue_number || '-'}</div>
+        <div class="mc-animal-info">
+          <div class="mc-animal-name">${escapeHtml(a.animal_name)}</div>
+          <div class="mc-animal-meta">${speciesText} · ${escapeHtml(a.sex || '-')} · ${a.actual_weight || '-'} kg</div>
+        </div>
+      </div>
+
+      <div class="mc-staff">${staffLine}</div>
+
+      <div class="vitals">
+        <!-- HR -->
+        <div class="vital v-${hr.status}">
+          <span class="vital-label">HR</span>
+          <span class="vital-icon heart" style="--hr-dur: ${hrDur};">❤️</span>
+          <span class="vital-value">${hr.value != null ? hr.value : '—'}</span>
+          <span class="vital-unit">bpm</span>
+        </div>
+        <!-- RR -->
+        <div class="vital v-${rr.status}">
+          <span class="vital-label">RR</span>
+          <span class="vital-icon lungs" style="--rr-dur: ${rrDur};">🫁</span>
+          <span class="vital-value">${rr.value != null ? rr.value : '—'}</span>
+          <span class="vital-unit">/ นาที</span>
+        </div>
+        <!-- SpO2 -->
+        <div class="vital v-${spo2.status}">
+          <span class="vital-label">SpO₂</span>
+          <span class="vital-icon spo2">💧</span>
+          <span class="vital-value">${spo2.value != null ? spo2.value : '—'}<span style="font-size:18px;">%</span></span>
+          <span class="vital-unit">oxygen</span>
+          <div class="spo2-bar">
+            <div class="spo2-fill" style="width: ${spo2Pct}%; background: ${spo2Color};"></div>
+          </div>
+        </div>
+        <!-- Temp -->
+        <div class="vital v-${temp.status}">
+          <span class="vital-label">TEMP</span>
+          <span class="vital-icon temp ${tempClass}">🌡️</span>
+          <span class="vital-value">${temp.value != null ? temp.value : '—'}<span style="font-size:18px;">°</span></span>
+          <span class="vital-unit">เซลเซียส</span>
+        </div>
+      </div>
+
+      ${noteText ? `<div style="padding:10px 16px; background:rgba(245,158,11,0.08); border-top:1px solid var(--border); font-size:12px; color:var(--amber);">📝 ${escapeHtml(noteText)}</div>` : ''}
+
+      <div class="mc-footer">
+        <span class="status-pill ${cardStatus}">${statusLabel}</span>
+        <span class="last-update">${updateTime || 'รอข้อมูล...'}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// Load & Render
+// ═══════════════════════════════════════════
+async function loadMonitor() {
+  // Throttle: max once per 500ms
+  const now = Date.now();
+  if (now - lastReloadAt < 500) return;
+  lastReloadAt = now;
+
+  try {
+    const { data, error } = await supabase
+      .from('vasd_queue')
+      .select(`
+        id, animal_id, status, operating_table, surgeon_name, anesthetist, updated_at,
+        vasd_animal(id, queue_number, animal_name, species, sex, actual_weight,
+          vasd_vital_signs(id, hr, rr, spo2, temp, zoletil_top, note, created_at)
+        )
+      `)
+      .eq('status', 'surgery')
+      .order('updated_at', { ascending: true });
+
+    if (error) throw error;
+
+    const queues = (data || []).filter(q => q.vasd_animal);
+    const grid = document.getElementById('grid');
+
+    if (queues.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">✅</div>
+          <div class="empty-state-text">ไม่มีเคสกำลังผ่าตัดในขณะนี้</div>
+        </div>`;
+      document.getElementById('cntActive').textContent = '0';
+      document.getElementById('cntCrit').textContent = '0';
+      document.getElementById('statCrit').classList.remove('has-crit');
+      return;
+    }
+
+    // Render all cards
+    grid.innerHTML = queues.map(renderCard).join('');
+
+    // Check for new critical transitions → alarm
+    let critCount = 0;
+    queues.forEach(q => {
+      const a = q.vasd_animal;
+      if (!a) return;
+      const ranges = VITAL_RANGES[a.species] || VITAL_RANGES['ส'];
+      const v = getLatestVital(a.vasd_vital_signs);
+      let status = 'nodata';
+      if (v) {
+        const s = [
+          evalVital(v.hr,   ranges.hr).status,
+          evalVital(v.rr,   ranges.rr).status,
+          evalVital(v.spo2, ranges.spo2).status,
+          evalVital(v.temp, ranges.temp).status
+        ];
+        status = rankStatus(...s);
+      }
+
+      const prev = lastStatus[a.id];
+      if (status === 'critical') {
+        critCount++;
+        if (prev !== 'critical') {
+          // Transitioned to critical → alarm!
+          triggerAlarm(a, q);
+        }
+      }
+      lastStatus[a.id] = status;
+    });
+
+    document.getElementById('cntActive').textContent = queues.length;
+    document.getElementById('cntCrit').textContent = critCount;
+    document.getElementById('statCrit').classList.toggle('has-crit', critCount > 0);
+
+  } catch (e) {
+    console.error('[Monitor] load failed', e);
+    const grid = document.getElementById('grid');
+    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">โหลดข้อมูลไม่สำเร็จ: ${e.message}</div></div>`;
+  }
+}
+
+function triggerAlarm(animal, queue) {
+  console.warn('[ALARM]', animal.animal_name, 'is CRITICAL');
+  playAlarmSiren();
+  showBanner(`🚨 CRITICAL: ${animal.animal_name} (โต๊ะ ${queue.operating_table || '-'})`);
+}
+
+function showBanner(text) {
+  const b = document.getElementById('alertBanner');
+  b.textContent = text;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 8000);
+}
+
+// ═══════════════════════════════════════════
+// Elapsed Time Tick (ทุกวินาที)
+// ═══════════════════════════════════════════
+setInterval(() => {
+  document.querySelectorAll('.elapsed-val').forEach(el => {
+    const start = el.dataset.start;
+    if (start) el.textContent = formatElapsed(start);
+  });
+}, 1000);
+
+// ═══════════════════════════════════════════
+// Realtime Subscriptions
+// ═══════════════════════════════════════════
+supabase.channel('monitor-live')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, () => {
+    console.log('[Monitor] vital_signs changed');
+    loadMonitor();
+  })
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, () => {
+    console.log('[Monitor] queue changed');
+    loadMonitor();
+  })
+  .subscribe();
+
+// ═══════════════════════════════════════════
+// Initial load + polling fallback (ทุก 10 วินาที)
+// ═══════════════════════════════════════════
+loadMonitor();
+setInterval(loadMonitor, 10000);
+</script>
+
+<script type="module" src="./js/global-alarm.js"></script>
+</body>
+</html>
