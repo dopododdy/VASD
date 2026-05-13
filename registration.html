@@ -13,7 +13,9 @@
   --teal:       #0ea5a0;
   --teal-light: #14c4bc;
   --teal-glow:  rgba(14,165,160,0.25);
+  --emerald:    #10b981;
   --amber:      #f59e0b;
+  --violet:     #8b5cf6;
   --rose:       #ef4444;
   --rose-soft:  rgba(239,68,68,0.15);
   --surface:    rgba(255,255,255,0.04);
@@ -60,9 +62,10 @@ header {
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface-2); }
 .card-header-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.card-header-icon.violet { background: var(--violet); }
 .card-header h4 { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
-
 .card-body { padding: 18px; }
+
 .field-group { display: flex; flex-direction: column; gap: 5px; }
 .field-label { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -80,6 +83,70 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
   .owner-row, .owner-row-2, .animal-fields { grid-template-columns: 1fr; }
 }
 
+/* ── Search Card ── */
+.search-wrap { position: relative; }
+.search-input-row {
+  display: flex; gap: 10px; align-items: center;
+}
+#ownerSearch {
+  font-size: 14px; padding: 12px 14px;
+}
+#searchResults {
+  margin-top: 10px;
+  max-height: 320px; overflow-y: auto;
+  display: none;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,0.2);
+}
+#searchResults.show { display: block; }
+.sr-item {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: 0.15s;
+}
+.sr-item:last-child { border-bottom: none; }
+.sr-item:hover { background: rgba(14,165,160,0.08); }
+.sr-name { font-size: 14px; font-weight: 700; color: #fff; }
+.sr-meta { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.sr-today { color: var(--teal-light); font-weight: 700; }
+.sr-old { color: var(--text-dim); }
+.sr-animals { font-size: 12px; color: var(--amber); margin-top: 4px; }
+.sr-empty {
+  padding: 20px; text-align: center;
+  color: var(--text-dim); font-size: 13px;
+}
+
+#selectedOwnerBadge {
+  display: none;
+  margin-top: 12px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+#selectedOwnerBadge.show { display: flex; }
+#selectedOwnerBadge.cross-day {
+  background: rgba(245, 158, 11, 0.10);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--amber);
+}
+.badge-clear-btn {
+  background: transparent; color: inherit;
+  border: 1px solid currentColor;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; cursor: pointer;
+  font-family: inherit; white-space: nowrap;
+}
+.badge-clear-btn:hover { background: rgba(255,255,255,0.08); }
+
+/* ── Buttons ── */
 .btn { padding: 10px 16px; font-size: 13px; font-weight: 600; border: none; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; white-space: nowrap; }
 .btn:active { transform: scale(0.96); }
 
@@ -143,6 +210,21 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 <div class="wrap">
   <h2 class="page-title">ลงทะเบียนสัตว์</h2>
 
+  <!-- ★ NEW: Owner Search Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon violet">🔍</div>
+      <h4>ค้นหาเจ้าของเดิม (เลือกเพื่อใช้ข้อมูลเดิม)</h4>
+    </div>
+    <div class="card-body">
+      <div class="search-wrap">
+        <input id="ownerSearch" placeholder="พิมพ์ ชื่อ / เบอร์โทร / เลขบัตร (อย่างน้อย 2 ตัวอักษร)" autocomplete="off">
+        <div id="searchResults"></div>
+        <div id="selectedOwnerBadge"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-header"><div class="card-header-icon">👤</div><h4>ข้อมูลเจ้าของสัตว์</h4></div>
     <div class="card-body">
@@ -178,16 +260,175 @@ import { supabase } from "./js/supabase.js";
 
 let animalCount = 0;
 let isWaitingForConsent = false;
-let pendingSaveData = null;  // ★ เก็บข้อมูลรอบันทึกหลัง iPad ตอบรับ
+let pendingSaveData = null;
+let selectedOwner = null;     // ★ เจ้าของที่เลือกจากการค้นหา
+let todayEventId = null;      // event_id ของวันนี้
 
 const consentChannel = supabase.channel('vasd-consent-room');
 
-// Listen for iPad Approval
 consentChannel.on('broadcast', { event: 'consent-granted' }, () => {
     if (isWaitingForConsent) executeSave();
 }).subscribe();
 
-/* ── อ่านบัตรประชาชน ── */
+// ดึง event_id วันนี้ตอนเปิดหน้า
+(async () => {
+  try {
+    const { data, error } = await supabase.rpc('get_today_event');
+    if (!error) todayEventId = data;
+  } catch (e) {}
+})();
+
+/* ─────────────────────────────────────────────
+   ★ OWNER SEARCH
+───────────────────────────────────────────── */
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+let searchTimer = null;
+document.getElementById('ownerSearch').addEventListener('input', (e) => {
+  clearTimeout(searchTimer);
+  const q = e.target.value.trim();
+  if (q.length < 2) {
+    hideResults();
+    return;
+  }
+  searchTimer = setTimeout(() => searchOwners(q), 300);
+});
+
+function hideResults() {
+  const r = document.getElementById('searchResults');
+  r.classList.remove('show');
+  r.innerHTML = '';
+}
+
+async function searchOwners(query) {
+  const safe = query.replace(/[,()]/g, '');
+  if (safe.length < 2) return;
+
+  try {
+    const { data, error } = await supabase
+      .from('vasd_owner')
+      .select('id, event_id, owner_name, phone, id_card, address, created_at, vasd_animal(id, animal_name, species, queue_number)')
+      .or(`owner_name.ilike.%${safe}%,phone.ilike.%${safe}%,id_card.ilike.%${safe}%`)
+      .order('created_at', { ascending: false })
+      .limit(15);
+
+    if (error) throw error;
+    renderResults(data || []);
+  } catch (e) {
+    console.error('[Search] error:', e);
+    const r = document.getElementById('searchResults');
+    r.innerHTML = `<div class="sr-empty">⚠️ ค้นหาผิดพลาด: ${escapeHtml(e.message)}</div>`;
+    r.classList.add('show');
+  }
+}
+
+function renderResults(results) {
+  const r = document.getElementById('searchResults');
+  if (results.length === 0) {
+    r.innerHTML = '<div class="sr-empty">ไม่พบเจ้าของในระบบ — กรอกข้อมูลใหม่ด้านล่างได้เลย</div>';
+    r.classList.add('show');
+    return;
+  }
+
+  r.innerHTML = results.map((o, idx) => {
+    const isToday = o.event_id === todayEventId;
+    const d = new Date(o.created_at);
+    const dateStr = isToday
+      ? `<span class="sr-today">⭐ วันนี้</span>`
+      : `<span class="sr-old">📅 ${d.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit' })}</span>`;
+
+    const animals = (o.vasd_animal || []).map(a =>
+      `${a.species === 'ม' ? '🐱' : '🐶'} ${escapeHtml(a.animal_name)} #${a.queue_number}`
+    ).join('  ·  ');
+
+    return `
+      <div class="sr-item" data-idx="${idx}">
+        <div class="sr-name">${escapeHtml(o.owner_name)}</div>
+        <div class="sr-meta">
+          ☎ ${escapeHtml(o.phone || '-')} &nbsp;|&nbsp;
+          🪪 ${escapeHtml(o.id_card || '-')} &nbsp;|&nbsp; ${dateStr}
+        </div>
+        ${animals ? `<div class="sr-animals">🐾 ${animals}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  r.classList.add('show');
+
+  r.querySelectorAll('.sr-item').forEach(el => {
+    el.onclick = () => selectOwnerFromSearch(results[parseInt(el.dataset.idx)]);
+  });
+}
+
+function selectOwnerFromSearch(owner) {
+  selectedOwner = owner;
+  document.getElementById('ownerName').value = owner.owner_name || '';
+  document.getElementById('phone').value    = owner.phone || '';
+  document.getElementById('idCard').value   = owner.id_card || '';
+  document.getElementById('address').value  = owner.address || '';
+
+  const isToday = owner.event_id === todayEventId;
+  const badge = document.getElementById('selectedOwnerBadge');
+  badge.className = isToday ? 'show' : 'show cross-day';
+  badge.innerHTML = `
+    <span>
+      ${isToday
+        ? `✓ เพิ่มสัตว์เข้าเจ้าของเดิม <b>${escapeHtml(owner.owner_name)}</b> (วันนี้)`
+        : `↻ ใช้ข้อมูล <b>${escapeHtml(owner.owner_name)}</b> (จาก ${new Date(owner.created_at).toLocaleDateString('th-TH')}) — จะสร้างเรกคอร์ดใหม่`
+      }
+    </span>
+    <button class="badge-clear-btn" onclick="window.clearSelectedOwner()">✖ เริ่มใหม่</button>
+  `;
+
+  document.getElementById('ownerSearch').value = '';
+  hideResults();
+}
+
+window.clearSelectedOwner = function() {
+  selectedOwner = null;
+  document.getElementById('selectedOwnerBadge').classList.remove('show', 'cross-day');
+  document.getElementById('selectedOwnerBadge').innerHTML = '';
+  document.getElementById('ownerName').value = '';
+  document.getElementById('phone').value = '';
+  document.getElementById('idCard').value = '';
+  document.getElementById('address').value = '';
+};
+
+// ถ้าผู้ใช้แก้ไขฟิลด์เจ้าของหลังเลือก → ยกเลิกการ "ใช้ข้อมูลเดิม"
+['ownerName', 'phone', 'idCard', 'address'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    if (!selectedOwner) return;
+    const cur = {
+      name:    document.getElementById('ownerName').value,
+      phone:   document.getElementById('phone').value,
+      idCard:  document.getElementById('idCard').value,
+      address: document.getElementById('address').value
+    };
+    const differs =
+      cur.name    !== (selectedOwner.owner_name || '') ||
+      cur.phone   !== (selectedOwner.phone || '')      ||
+      cur.idCard  !== (selectedOwner.id_card || '')    ||
+      cur.address !== (selectedOwner.address || '');
+    if (differs) {
+      selectedOwner = null;
+      document.getElementById('selectedOwnerBadge').classList.remove('show', 'cross-day');
+    }
+  });
+});
+
+// คลิกข้างนอก → ปิดผลค้นหา
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#ownerSearch') && !e.target.closest('#searchResults')) {
+    hideResults();
+  }
+});
+
+/* ─────────────────────────────────────────────
+   อ่านบัตรประชาชน / วางชื่อจาก clipboard
+───────────────────────────────────────────── */
 window.readSmartCard = async function(ev) {
     const btn = ev.currentTarget;
     const originalText = btn.innerHTML;
@@ -202,12 +443,16 @@ window.readSmartCard = async function(ev) {
             document.getElementById("idCard").value = p.cid;
             document.getElementById("address").value = p.address;
             document.getElementById("phone").focus();
+            // ★ smart card = ข้อมูลใหม่ ไม่ใช่ selected owner
+            if (selectedOwner) {
+              selectedOwner = null;
+              document.getElementById('selectedOwnerBadge').classList.remove('show', 'cross-day');
+            }
         } else alert("❌ " + result.message);
     } catch (e) { alert("❌ โปรดเปิดโปรแกรม Python Agent ก่อนใช้งาน"); }
     finally { btn.disabled = false; btn.innerHTML = originalText; }
 };
 
-/* ── วางชื่อจากคลิปบอร์ด ── */
 window.pasteOwnerName = async function() {
     try {
         const text = await navigator.clipboard.readText();
@@ -215,7 +460,9 @@ window.pasteOwnerName = async function() {
     } catch (e) { alert("ไม่สามารถเข้าถึงคลิปบอร์ดได้"); }
 };
 
-/* ── เพิ่มการ์ดสัตว์ ── */
+/* ─────────────────────────────────────────────
+   เพิ่มสัตว์
+───────────────────────────────────────────── */
 window.addAnimal = function () {
     animalCount++;
     const card = document.createElement("div");
@@ -274,7 +521,9 @@ window.refreshCount = () => {
     cards.forEach((c, i) => c.querySelector(".animal-card-num").textContent = i + 1);
 };
 
-/* ── ส่ง Consent ไป iPad ── */
+/* ─────────────────────────────────────────────
+   ส่ง Consent
+───────────────────────────────────────────── */
 window.requestConsent = function() {
     const ownerName = document.getElementById("ownerName").value.trim();
     if (!ownerName) return alert("กรุณาระบุชื่อเจ้าของ");
@@ -292,7 +541,7 @@ window.requestConsent = function() {
         c.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
         animals.push({
             name: animalName,
-            species: c.querySelector(".species").value,   // เก็บเป็น ม/ส
+            species: c.querySelector(".species").value,
             sex: c.querySelector(".sex").value,
             estWeight: parseFloat(c.querySelector(".estWeight").value) || null,
             services: svcs
@@ -302,9 +551,9 @@ window.requestConsent = function() {
     if (invalidName) return alert("กรุณาระบุชื่อสัตว์ทุกรายการ");
     if (animals.length === 0) return alert("กรุณาเพิ่มสัตว์อย่างน้อย 1 รายการ");
 
-    // ★ เก็บข้อมูลไว้ใช้ตอน save (หลัง iPad ตอบรับ)
     pendingSaveData = {
         owner: { name: ownerName, phone, idCard, address },
+        selectedOwner,  // ★ เก็บไว้ใช้ตอน save
         animals
     };
 
@@ -314,7 +563,6 @@ window.requestConsent = function() {
     document.getElementById("btnCancelWait").classList.add("show");
     isWaitingForConsent = true;
 
-    // ★ ส่งข้อมูลครบให้ iPad (รวม phone/idCard/address + แปลง ม/ส → แมว/สุนัข)
     consentChannel.send({
         type: 'broadcast', event: 'request-consent',
         payload: {
@@ -329,7 +577,6 @@ window.requestConsent = function() {
     });
 };
 
-/* ── ยกเลิกการรอ ── */
 window.cancelWait = function() {
     if (!confirm("ยกเลิกการรอและเริ่มใหม่?")) return;
     isWaitingForConsent = false;
@@ -341,7 +588,9 @@ window.cancelWait = function() {
     document.getElementById("btnCancelWait").classList.remove("show");
 };
 
-/* ── ★ บันทึกลง Supabase (เรียกหลัง iPad ตอบรับ) ── */
+/* ─────────────────────────────────────────────
+   บันทึกลง Supabase (มี logic เลือกระหว่าง reuse owner_id หรือสร้างใหม่)
+───────────────────────────────────────────── */
 async function executeSave() {
     if (!pendingSaveData) {
         alert("❌ ไม่พบข้อมูลที่จะบันทึก กรุณาเริ่มใหม่");
@@ -357,25 +606,39 @@ async function executeSave() {
     isWaitingForConsent = false;
 
     try {
-        // 1. ดึง event_id ของวันนี้ (ใช้ฟังก์ชัน get_today_event() ที่เรามีอยู่)
+        // 1. ดึง event_id วันนี้ (สดๆ ป้องกันข้ามวัน)
         const { data: eventId, error: evtErr } = await supabase.rpc('get_today_event');
         if (evtErr) throw new Error('Event: ' + evtErr.message);
 
-        // 2. บันทึกเจ้าของ
-        const { data: ownerData, error: ownerErr } = await supabase
-            .from('vasd_owner')
-            .insert({
-                event_id: eventId,
-                owner_name: pendingSaveData.owner.name,
-                phone:   pendingSaveData.owner.phone   || null,
-                id_card: pendingSaveData.owner.idCard  || null,
-                address: pendingSaveData.owner.address || null
-            })
-            .select()
-            .single();
-        if (ownerErr) throw new Error('Owner: ' + ownerErr.message);
+        // 2. ★ ตัดสินใจ: reuse owner_id เดิม หรือสร้างใหม่
+        let ownerIdToUse;
+        let reused = false;
+        const sel = pendingSaveData.selectedOwner;
 
-        // 3. หา queue_number ถัดไป (นับสัตว์ทั้งหมดของวันนี้)
+        if (sel && sel.id && sel.event_id === eventId) {
+            // เจ้าของเดิมของวันนี้ → reuse
+            ownerIdToUse = sel.id;
+            reused = true;
+            console.log('[Save] Reusing existing owner from today:', sel.owner_name, sel.id);
+        } else {
+            // สร้างใหม่ (กรณีเจ้าของใหม่ หรือเจ้าของจากวันก่อน)
+            const { data: ownerData, error: ownerErr } = await supabase
+                .from('vasd_owner')
+                .insert({
+                    event_id: eventId,
+                    owner_name: pendingSaveData.owner.name,
+                    phone:   pendingSaveData.owner.phone   || null,
+                    id_card: pendingSaveData.owner.idCard  || null,
+                    address: pendingSaveData.owner.address || null
+                })
+                .select()
+                .single();
+            if (ownerErr) throw new Error('Owner: ' + ownerErr.message);
+            ownerIdToUse = ownerData.id;
+            console.log('[Save] Created new owner:', pendingSaveData.owner.name, ownerData.id);
+        }
+
+        // 3. หา queue_number ถัดไป
         const { count: existingCount } = await supabase
             .from('vasd_animal')
             .select('*', { count: 'exact', head: true })
@@ -389,9 +652,9 @@ async function executeSave() {
                 .from('vasd_animal')
                 .insert({
                     event_id: eventId,
-                    owner_id: ownerData.id,
+                    owner_id: ownerIdToUse,
                     queue_number: nextQueue,
-                    species: anim.species,         // เก็บเป็น ม/ส ตาม schema
+                    species: anim.species,
                     animal_name: anim.name,
                     sex: anim.sex,
                     est_weight: anim.estWeight
@@ -403,7 +666,6 @@ async function executeSave() {
             saved.push({ ...animalData, services: anim.services });
             nextQueue++;
 
-            // บริการ
             if (anim.services && anim.services.length > 0) {
                 const svcRows = anim.services.map(s => ({
                     animal_id: animalData.id,
@@ -414,7 +676,6 @@ async function executeSave() {
                 if (svcErr) throw new Error('Service: ' + svcErr.message);
             }
 
-            // คิว
             const { error: qErr } = await supabase.from('vasd_queue').insert({
                 animal_id: animalData.id,
                 status: 'waiting'
@@ -425,14 +686,14 @@ async function executeSave() {
         const queueList = saved.map(a => `#${a.queue_number} ${a.animal_name}`).join('\n');
         alert(
             `✅ บันทึกข้อมูลเรียบร้อยแล้ว!\n\n` +
-            `เจ้าของ: ${pendingSaveData.owner.name}\n` +
-            `สัตว์ ${pendingSaveData.animals.length} ตัว:\n${queueList}`
+            `เจ้าของ: ${pendingSaveData.owner.name} ${reused ? '(ใช้ข้อมูลเดิม)' : '(เจ้าของใหม่)'}\n` +
+            `เพิ่มสัตว์ ${pendingSaveData.animals.length} ตัว:\n${queueList}`
         );
         pendingSaveData = null;
         location.reload();
 
     } catch (e) {
-        console.error('Save failed:', e);
+        console.error('[Save] failed:', e);
         alert("❌ บันทึกไม่สำเร็จ: " + e.message + "\n\nลองใหม่อีกครั้ง");
         btn.disabled = false;
         btn.classList.remove("saving");
