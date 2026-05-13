@@ -10,6 +10,7 @@
 :root {
   --navy:        #0b1929;
   --primary:     #3b82f6;
+  --primary-light:#60a5fa;
   --teal:        #0ea5a0;
   --teal-light:  #14c4bc;
   --emerald:     #10b981;
@@ -45,7 +46,7 @@ body::before {
     radial-gradient(ellipse 40% 30% at 80% 90%, rgba(239,68,68,0.04) 0%, transparent 60%);
 }
 
-/* ── HEADER ── */
+/* ── HEADER (top of page) ── */
 header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(11,25,41,0.92);
@@ -79,8 +80,7 @@ header {
   border: 1px solid var(--border);
   padding: 5px 10px; border-radius: 16px;
   display: flex; align-items: center; gap: 4px;
-  font-weight: 700;
-  white-space: nowrap;
+  font-weight: 700; white-space: nowrap;
 }
 .stat-pill.active { color: var(--teal-light); border-color: rgba(14,165,160,0.4); background: rgba(14,165,160,0.1); }
 .stat-pill.crit { color: var(--rose); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
@@ -108,13 +108,11 @@ header {
   padding: 10px; width: 100%;
   padding-bottom: 74px;
 }
-
 .grid {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
-
 .empty-state {
   grid-column: 1 / -1;
   text-align: center; padding: 80px 20px;
@@ -123,7 +121,7 @@ header {
 .empty-state-icon { font-size: 56px; margin-bottom: 12px; opacity: 0.4; }
 .empty-state-text { font-size: 15px; }
 
-/* ── CARD (compact) ── */
+/* ── CARD ── */
 .mon-card {
   background: var(--surface);
   border: 2px solid var(--border);
@@ -150,28 +148,55 @@ header {
 }
 .mon-card.status-nodata { border-color: rgba(100,116,139,0.25); opacity: 0.85; }
 
-/* Card header (compact) */
+/* ★ Table-number hero header */
 .mc-header {
-  padding: 8px 12px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.10), rgba(59,130,246,0.03));
+  border-bottom: 2px solid rgba(59,130,246,0.25);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; min-height: 72px;
 }
+.mon-card.status-warn     .mc-header { background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.03)); border-bottom-color: rgba(245,158,11,0.35); }
+.mon-card.status-critical .mc-header { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05)); border-bottom-color: rgba(239,68,68,0.4); }
+
 .mc-table {
+  display: flex; align-items: baseline;
+  gap: 8px; flex: 1; min-width: 0;
   font-family: "Outfit", sans-serif;
-  font-size: 15px; font-weight: 800;
-  background: linear-gradient(135deg, var(--primary), #60a5fa);
+}
+.mc-table-label {
+  font-size: 16px; font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.mc-table-num {
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  filter: drop-shadow(0 2px 8px rgba(96,165,250,0.5));
 }
+.mon-card.status-warn     .mc-table-num { background: linear-gradient(135deg, #fcd34d, var(--amber)); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 2px 8px rgba(245,158,11,0.5)); }
+.mon-card.status-critical .mc-table-num { background: linear-gradient(135deg, #fca5a5, var(--rose)); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 2px 10px rgba(239,68,68,0.6)); }
+.mon-card.status-nodata   .mc-table-num { background: linear-gradient(135deg, #94a3b8, var(--gray)); -webkit-background-clip: text; background-clip: text; filter: none; }
+
 .mc-elapsed {
   font-family: "Outfit", sans-serif;
-  font-size: 12px; font-weight: 700;
+  font-size: 16px; font-weight: 700;
   color: var(--text-dim);
-  display: flex; align-items: center; gap: 3px;
-  white-space: nowrap;
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 2px; flex-shrink: 0;
 }
+.mc-elapsed-icon { font-size: 14px; opacity: 0.7; }
+.mc-elapsed-val { font-size: 18px; letter-spacing: -0.5px; }
 
 /* Animal info row */
 .mc-animal {
@@ -212,7 +237,7 @@ header {
 }
 .mc-staff b { color: var(--text); font-weight: 600; }
 
-/* Vitals 2×2 grid (compact) */
+/* Vitals */
 .vitals {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -241,24 +266,18 @@ header {
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
   margin-top: 2px;
 }
-.vital-icon.heart {
-  animation: heartbeat var(--hr-dur, 1s) infinite ease-in-out;
-}
+.vital-icon.heart { animation: heartbeat var(--hr-dur, 1s) infinite ease-in-out; }
 @keyframes heartbeat {
   0%, 50%, 100% { transform: scale(1); }
   20% { transform: scale(1.35); }
   35% { transform: scale(1); }
 }
-.vital-icon.lungs {
-  animation: breathe var(--rr-dur, 3s) infinite ease-in-out;
-}
+.vital-icon.lungs { animation: breathe var(--rr-dur, 3s) infinite ease-in-out; }
 @keyframes breathe {
   0%, 100% { transform: scale(1); opacity: 0.7; }
   50%      { transform: scale(1.2); opacity: 1; }
 }
-.vital-icon.spo2 {
-  animation: dropFall 2.5s infinite ease-in-out;
-}
+.vital-icon.spo2 { animation: dropFall 2.5s infinite ease-in-out; }
 @keyframes dropFall {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(2px); }
@@ -303,7 +322,6 @@ header {
 }
 .spo2-fill { height: 100%; transition: width 0.6s ease, background 0.3s; }
 
-/* Footer */
 .mc-footer {
   padding: 6px 10px;
   background: var(--surface-2);
@@ -325,7 +343,6 @@ header {
   from { opacity: 1; }
   to   { opacity: 0.55; }
 }
-
 .last-update { color: var(--text-faint); font-family: "Outfit", sans-serif; font-size: 10px; }
 
 .mc-note {
@@ -336,7 +353,7 @@ header {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* ── Bottom nav ── */
+/* Bottom nav */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
   background: rgba(11,25,41,0.95);
@@ -353,7 +370,7 @@ header {
 .nav-item.active { color: var(--rose); }
 .nav-icon { font-size: 18px; }
 
-/* ── Alert banner ── */
+/* Alert banner */
 #alertBanner {
   position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
   background: linear-gradient(135deg, var(--rose-bright), var(--rose));
@@ -374,15 +391,16 @@ header {
    RESPONSIVE
 ═══════════════════════════════════════════ */
 
-/* Tablet & PC: bigger vitals if there's room */
+/* Tablet & smaller PC */
 @media (min-width: 600px) and (max-width: 1279px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
   .vital-value { font-size: 30px; }
   .vital-icon { font-size: 22px; }
   .vital { min-height: 96px; }
+  .mc-table-num { font-size: 60px; }
 }
 
-/* PC: target ≥10 cards per page on standard screens */
+/* PC standard */
 @media (min-width: 1280px) {
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -390,15 +408,25 @@ header {
   }
 }
 
-/* Big PC monitors: enforce 5 columns to fit 10 cards in 2 rows */
+/* PC big - 5 columns for 10 cards in 2 rows */
 @media (min-width: 1600px) {
-  .grid { grid-template-columns: repeat(5, 1fr); }
-}
-@media (min-width: 2000px) {
-  .grid { grid-template-columns: repeat(6, 1fr); }
+  .grid { grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .mc-header { min-height: 84px; padding: 12px 16px; }
+  .mc-table-num { font-size: 68px; letter-spacing: -4px; }
+  .mc-table-label { font-size: 17px; }
+  .mc-elapsed-val { font-size: 20px; }
 }
 
-/* Mobile: single column with bigger touch-friendly vitals */
+/* 4K TV display */
+@media (min-width: 2000px) {
+  .grid { grid-template-columns: repeat(6, 1fr); }
+  .mc-table-num { font-size: 76px; }
+  .vital-value { font-size: 34px; }
+  .vital { min-height: 110px; }
+  .vital-icon { font-size: 26px; }
+}
+
+/* Mobile - 1 column, bigger fonts for close viewing */
 @media (max-width: 599px) {
   .grid { gap: 10px; grid-template-columns: 1fr; }
   .vital { min-height: 100px; padding: 12px 10px 10px; }
@@ -406,7 +434,10 @@ header {
   .vital-value { font-size: 32px; }
   .vital-value .sub { font-size: 17px; }
   .mc-animal-name { font-size: 16px; }
-  .mc-table { font-size: 16px; }
+  .mc-table-num { font-size: 72px; letter-spacing: -4px; }
+  .mc-table-label { font-size: 18px; }
+  .mc-header { min-height: 90px; padding: 12px 16px; }
+  .mc-elapsed-val { font-size: 20px; }
   .header-stats { font-size: 11px; }
   .brand-sub { display: none; }
 }
@@ -414,6 +445,7 @@ header {
 @media (max-width: 380px) {
   .stat-pill { padding: 4px 7px; font-size: 10px; }
   .btn-sound { padding: 5px 8px; font-size: 10px; }
+  .mc-table-num { font-size: 64px; }
 }
 </style>
 </head>
@@ -457,9 +489,7 @@ header {
 import { supabase } from "./js/supabase.js";
 
 // ═══════════════════════════════════════════
-// VITAL RANGES
-// HR, RR, SpO2 = ตามค่าจริง
-// Temp = หน่วย °F (data ถูกบันทึกเป็น °C → แปลงตอนแสดงผล)
+// VITAL RANGES (Temp = °F โดยตรงจาก surgery.html)
 //   95°F = 35°C    | 97.7°F = 36.5°C
 //   103.1°F = 39.5°C | 105.8°F = 41°C
 // ═══════════════════════════════════════════
@@ -468,23 +498,16 @@ const VITAL_RANGES = {
     hr:   { critLow: 50,  warnLow: 60,   warnHigh: 180,   critHigh: 220 },
     rr:   { critLow: 5,   warnLow: 8,    warnHigh: 30,    critHigh: 50 },
     spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,   critHigh: 102 },
-    temp: { critLow: 95.0, warnLow: 97.7, warnHigh: 103.1, critHigh: 105.8 } // °F
+    temp: { critLow: 95.0, warnLow: 97.7, warnHigh: 103.1, critHigh: 105.8 }
   },
   'ม': { // แมว
     hr:   { critLow: 80,  warnLow: 100,  warnHigh: 200,   critHigh: 230 },
     rr:   { critLow: 5,   warnLow: 10,   warnHigh: 30,    critHigh: 50 },
     spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,   critHigh: 102 },
-    temp: { critLow: 95.0, warnLow: 97.7, warnHigh: 103.1, critHigh: 105.8 } // °F
+    temp: { critLow: 95.0, warnLow: 97.7, warnHigh: 103.1, critHigh: 105.8 }
   }
 };
 
-// แปลง Celsius → Fahrenheit
-function cToF(c) {
-  if (c == null || isNaN(c)) return null;
-  return c * 9/5 + 32;
-}
-
-// ═══════════════════════════════════════════
 let lastStatus = {};
 let lastReloadAt = 0;
 let audioContext = null;
@@ -606,16 +629,15 @@ function renderCard(q) {
   const species = a.species;
   const ranges = VITAL_RANGES[species] || VITAL_RANGES['ส'];
   const speciesIcon = species === 'ส' ? '🐶' : '🐱';
+  const tableNum = q.operating_table ? escapeHtml(q.operating_table) : '—';
 
   const vital = getLatestVital(a.vasd_vital_signs);
-  const tableLabel = q.operating_table ? `โต๊ะ ${escapeHtml(q.operating_table)}` : 'โต๊ะ —';
 
   let cardStatus = 'nodata';
   let hr = { status: 'nodata', value: null };
   let rr = { status: 'nodata', value: null };
   let spo2 = { status: 'nodata', value: null };
   let temp = { status: 'nodata', value: null };
-  let tempF = null;
   let updateTime = '';
   let noteText = '';
 
@@ -623,14 +645,7 @@ function renderCard(q) {
     hr   = evalVital(vital.hr,   ranges.hr);
     rr   = evalVital(vital.rr,   ranges.rr);
     spo2 = evalVital(vital.spo2, ranges.spo2);
-
-    // Temp: data เป็น °C → แปลงเป็น °F แล้ว evaluate ด้วย range ของ °F
-    const tempC = parseFloat(vital.temp);
-    if (!isNaN(tempC)) {
-      tempF = cToF(tempC);
-      temp = evalVital(tempF, ranges.temp);
-    }
-
+    temp = evalVital(vital.temp, ranges.temp);    // ★ ใช้ค่า °F โดยตรง ไม่แปลง
     cardStatus = rankStatus(hr.status, rr.status, spo2.status, temp.status);
     updateTime = formatRelative(vital.created_at);
     noteText = vital.note || '';
@@ -646,9 +661,9 @@ function renderCard(q) {
     spo2.status === 'normal'   ? 'var(--emerald)' : 'var(--gray)';
 
   let tempClass = '';
-  if (temp.status !== 'nodata' && tempF != null) {
-    if (tempF < ranges.temp.warnLow)  tempClass = 'v-cold';
-    if (tempF > ranges.temp.warnHigh) tempClass = 'v-hot';
+  if (temp.status !== 'nodata' && temp.value != null) {
+    if (temp.value < ranges.temp.warnLow)  tempClass = 'v-cold';
+    if (temp.value > ranges.temp.warnHigh) tempClass = 'v-hot';
   }
 
   const statusLabel = {
@@ -658,7 +673,7 @@ function renderCard(q) {
     nodata:   '⚪ WAITING'
   }[cardStatus];
 
-  const tempDisplay = tempF != null ? tempF.toFixed(1) : '—';
+  const tempDisplay = temp.value != null ? temp.value.toFixed(1) : '—';
 
   const staffLine = (q.surgeon_name || q.anesthetist)
     ? `🩺 <b>${escapeHtml(q.surgeon_name || '-')}</b> · 💉 <b>${escapeHtml(q.anesthetist || '-')}</b>`
@@ -667,8 +682,14 @@ function renderCard(q) {
   return `
     <div class="mon-card status-${cardStatus}" data-animal-id="${a.id}">
       <div class="mc-header">
-        <div class="mc-table">🛏️ ${tableLabel}</div>
-        <div class="mc-elapsed">⏱️ <span class="elapsed-val" data-start="${q.updated_at || ''}">--:--</span></div>
+        <div class="mc-table">
+          <span class="mc-table-label">โต๊ะ</span>
+          <span class="mc-table-num">${tableNum}</span>
+        </div>
+        <div class="mc-elapsed">
+          <span class="mc-elapsed-icon">⏱️ เวลาที่ใช้</span>
+          <span class="mc-elapsed-val elapsed-val" data-start="${q.updated_at || ''}">--:--</span>
+        </div>
       </div>
 
       <div class="mc-animal">
@@ -761,7 +782,6 @@ async function loadMonitor() {
 
     grid.innerHTML = queues.map(renderCard).join('');
 
-    // Detect new critical transitions
     let critCount = 0;
     queues.forEach(q => {
       const a = q.vasd_animal;
@@ -770,13 +790,11 @@ async function loadMonitor() {
       const v = getLatestVital(a.vasd_vital_signs);
       let status = 'nodata';
       if (v) {
-        const tempC = parseFloat(v.temp);
-        const tempF = isNaN(tempC) ? null : cToF(tempC);
         const s = [
           evalVital(v.hr,   ranges.hr).status,
           evalVital(v.rr,   ranges.rr).status,
           evalVital(v.spo2, ranges.spo2).status,
-          evalVital(tempF,  ranges.temp).status
+          evalVital(v.temp, ranges.temp).status
         ];
         status = rankStatus(...s);
       }
@@ -812,9 +830,6 @@ function showBanner(text) {
   setTimeout(() => b.classList.remove('show'), 8000);
 }
 
-// ═══════════════════════════════════════════
-// Elapsed timer tick
-// ═══════════════════════════════════════════
 setInterval(() => {
   document.querySelectorAll('.elapsed-val').forEach(el => {
     const start = el.dataset.start;
@@ -822,9 +837,6 @@ setInterval(() => {
   });
 }, 1000);
 
-// ═══════════════════════════════════════════
-// Realtime
-// ═══════════════════════════════════════════
 supabase.channel('monitor-live')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, loadMonitor)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadMonitor)
