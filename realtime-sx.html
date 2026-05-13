@@ -9,15 +9,13 @@
 <style>
 :root {
   --navy:        #0b1929;
-  --navy-mid:    #112240;
+  --primary:     #3b82f6;
   --teal:        #0ea5a0;
   --teal-light:  #14c4bc;
-  --primary:     #3b82f6;
   --emerald:     #10b981;
   --amber:       #f59e0b;
   --rose:        #ef4444;
   --rose-bright: #dc2626;
-  --violet:      #8b5cf6;
   --gray:        #64748b;
 
   --surface:    rgba(255,255,255,0.04);
@@ -27,8 +25,8 @@
   --text-dim:   #94a3b8;
   --text-faint: #475569;
 
-  --radius:    16px;
-  --radius-lg: 22px;
+  --radius:    12px;
+  --radius-lg: 16px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,8 +41,8 @@ body {
 body::before {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(59,130,246,0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 30% at 80% 90%, rgba(239,68,68,0.05) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(59,130,246,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 90%, rgba(239,68,68,0.04) 0%, transparent 60%);
 }
 
 /* ── HEADER ── */
@@ -53,143 +51,139 @@ header {
   background: rgba(11,25,41,0.92);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 0 16px; height: 64px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 0 14px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
-.brand { display: flex; align-items: center; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 8px; }
 .brand-logo {
-  width: 40px; height: 40px;
+  width: 36px; height: 36px;
   background: linear-gradient(135deg, var(--rose), var(--rose-bright));
-  border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  font-size: 20px; box-shadow: 0 0 25px rgba(239,68,68,0.4);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 0 20px rgba(239,68,68,0.4);
   animation: brandPulse 2s ease-in-out infinite;
 }
 @keyframes brandPulse {
-  0%, 100% { box-shadow: 0 0 25px rgba(239,68,68,0.4); }
-  50%      { box-shadow: 0 0 35px rgba(239,68,68,0.7); }
+  0%, 100% { box-shadow: 0 0 20px rgba(239,68,68,0.4); }
+  50%      { box-shadow: 0 0 30px rgba(239,68,68,0.7); }
 }
-.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 800; color: #fff; line-height: 1; }
-.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+.brand-name { font-family: "Outfit", sans-serif; font-size: 14px; font-weight: 800; color: #fff; line-height: 1; }
+.brand-sub { font-size: 9px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.5px; }
 
 .header-stats {
-  display: flex; gap: 8px;
+  display: flex; gap: 6px; align-items: center;
   font-family: "Outfit", sans-serif; font-size: 12px;
 }
 .stat-pill {
   background: var(--surface-2);
   border: 1px solid var(--border);
-  padding: 6px 12px; border-radius: 20px;
-  display: flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 16px;
+  display: flex; align-items: center; gap: 4px;
   font-weight: 700;
+  white-space: nowrap;
 }
 .stat-pill.active { color: var(--teal-light); border-color: rgba(14,165,160,0.4); background: rgba(14,165,160,0.1); }
 .stat-pill.crit { color: var(--rose); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
 .stat-pill.crit.has-crit { animation: critFlash 0.6s ease-in-out infinite; }
 @keyframes critFlash {
   0%, 100% { background: rgba(239,68,68,0.1); }
-  50%      { background: rgba(239,68,68,0.3); }
+  50%      { background: rgba(239,68,68,0.4); }
 }
 
 .btn-sound {
   background: var(--surface-2); color: var(--text);
   border: 1px solid var(--border);
-  padding: 8px 14px; border-radius: 10px;
-  font-family: "Sarabun", sans-serif; font-size: 12px;
+  padding: 6px 10px; border-radius: 9px;
+  font-family: "Sarabun", sans-serif; font-size: 11px;
   font-weight: 700; cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; gap: 4px;
+  white-space: nowrap;
 }
 .btn-sound.on { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #34d399; }
-.btn-sound.off { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
 
-/* ── MAIN ── */
+/* ── MAIN GRID ── */
 .wrap {
   position: relative; z-index: 1;
-  max-width: 1600px; margin: 0 auto;
-  padding: 16px 12px 100px; width: 100%;
+  max-width: 2400px; margin: 0 auto;
+  padding: 10px; width: 100%;
+  padding-bottom: 74px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 16px;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 .empty-state {
+  grid-column: 1 / -1;
   text-align: center; padding: 80px 20px;
   color: var(--text-dim);
 }
-.empty-state-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.4; }
-.empty-state-text { font-size: 16px; }
+.empty-state-icon { font-size: 56px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state-text { font-size: 15px; }
 
-/* ── CARD ── */
+/* ── CARD (compact) ── */
 .mon-card {
   background: var(--surface);
   border: 2px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  animation: cardIn 0.5s ease both;
+  animation: cardIn 0.4s ease both;
   transition: border-color 0.3s, box-shadow 0.3s;
+  display: flex; flex-direction: column;
 }
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(15px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.mon-card.status-normal {
-  border-color: rgba(16,185,129,0.3);
-  box-shadow: 0 0 30px rgba(16,185,129,0.08);
-}
-.mon-card.status-warn {
-  border-color: rgba(245,158,11,0.5);
-  box-shadow: 0 0 30px rgba(245,158,11,0.15);
-}
+.mon-card.status-normal   { border-color: rgba(16,185,129,0.3); }
+.mon-card.status-warn     { border-color: rgba(245,158,11,0.5); box-shadow: 0 0 20px rgba(245,158,11,0.1); }
 .mon-card.status-critical {
   border-color: var(--rose);
-  box-shadow: 0 0 40px rgba(239,68,68,0.4);
-  animation: cardIn 0.5s ease both, critBorder 1s ease-in-out infinite;
+  animation: cardIn 0.4s ease both, critBorder 1s ease-in-out infinite;
 }
 @keyframes critBorder {
-  0%, 100% { box-shadow: 0 0 30px rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.6); }
-  50%      { box-shadow: 0 0 60px rgba(239,68,68,0.7); border-color: var(--rose); }
+  0%, 100% { box-shadow: 0 0 20px rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); }
+  50%      { box-shadow: 0 0 40px rgba(239,68,68,0.6); border-color: var(--rose); }
 }
-.mon-card.status-nodata {
-  border-color: rgba(100,116,139,0.3);
-  opacity: 0.85;
-}
+.mon-card.status-nodata { border-color: rgba(100,116,139,0.25); opacity: 0.85; }
 
-/* Card header */
+/* Card header (compact) */
 .mc-header {
-  padding: 14px 16px;
+  padding: 8px 12px;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
 }
 .mc-table {
   font-family: "Outfit", sans-serif;
-  font-size: 18px; font-weight: 800;
+  font-size: 15px; font-weight: 800;
   background: linear-gradient(135deg, var(--primary), #60a5fa);
-  -webkit-background-clip: text;
-  background-clip: text;
+  -webkit-background-clip: text; background-clip: text;
   color: transparent;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .mc-elapsed {
   font-family: "Outfit", sans-serif;
-  font-size: 14px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   color: var(--text-dim);
-  display: flex; align-items: center; gap: 4px;
+  display: flex; align-items: center; gap: 3px;
+  white-space: nowrap;
 }
 
-/* Animal info */
+/* Animal info row */
 .mc-animal {
-  padding: 12px 16px;
+  padding: 8px 12px;
   background: rgba(0,0,0,0.15);
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 8px;
   border-bottom: 1px solid var(--border);
 }
 .mc-q {
   font-family: "Outfit", sans-serif;
-  font-size: 13px; font-weight: 800;
-  width: 36px; height: 36px;
+  font-size: 11px; font-weight: 800;
+  width: 30px; height: 30px;
   background: rgba(59,130,246,0.15);
   border: 1px solid rgba(59,130,246,0.4);
   color: var(--primary);
@@ -200,19 +194,25 @@ header {
 .mc-animal-info { flex: 1; min-width: 0; }
 .mc-animal-name {
   font-family: "Outfit", sans-serif;
-  font-size: 17px; font-weight: 800; color: #fff;
+  font-size: 15px; font-weight: 800; color: #fff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.1;
 }
 .mc-animal-meta {
-  font-size: 11px; color: var(--text-dim); margin-top: 2px;
+  font-size: 10px; color: var(--text-dim); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
 .mc-staff {
-  font-size: 11px; color: var(--text-dim); padding: 8px 16px;
-  background: rgba(0,0,0,0.1); border-bottom: 1px solid var(--border);
+  font-size: 10px; color: var(--text-dim);
+  padding: 5px 12px;
+  background: rgba(0,0,0,0.1);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .mc-staff b { color: var(--text); font-weight: 600; }
 
-/* Vitals grid */
+/* Vitals 2×2 grid (compact) */
 .vitals {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -221,10 +221,11 @@ header {
 }
 .vital {
   background: var(--surface);
-  padding: 16px 14px;
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 10px 8px 8px;
+  display: flex; flex-direction: column; align-items: center;
   position: relative;
   transition: background 0.3s;
+  min-height: 92px;
 }
 .vital.v-normal   { background: rgba(16,185,129,0.06); }
 .vital.v-warn     { background: rgba(245,158,11,0.10); }
@@ -236,11 +237,10 @@ header {
 }
 
 .vital-icon {
-  font-size: 26px; line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  font-size: 20px; line-height: 1;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+  margin-top: 2px;
 }
-
-/* ❤️ Heart pulse: รอบ = 60/HR วินาที */
 .vital-icon.heart {
   animation: heartbeat var(--hr-dur, 1s) infinite ease-in-out;
 }
@@ -249,8 +249,6 @@ header {
   20% { transform: scale(1.35); }
   35% { transform: scale(1); }
 }
-
-/* 🫁 Lungs breath: รอบ = 60/RR วินาที */
 .vital-icon.lungs {
   animation: breathe var(--rr-dur, 3s) infinite ease-in-out;
 }
@@ -258,17 +256,15 @@ header {
   0%, 100% { transform: scale(1); opacity: 0.7; }
   50%      { transform: scale(1.2); opacity: 1; }
 }
-
 .vital-icon.spo2 {
   animation: dropFall 2.5s infinite ease-in-out;
 }
 @keyframes dropFall {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(3px); }
+  50%      { transform: translateY(2px); }
 }
-
 .vital-icon.temp.v-cold { color: #60a5fa; }
-.vital-icon.temp.v-hot  { color: var(--rose); animation: tempShake 0.5s infinite ease-in-out; }
+.vital-icon.temp.v-hot  { animation: tempShake 0.5s infinite ease-in-out; }
 @keyframes tempShake {
   0%, 100% { transform: rotate(0deg); }
   25%      { transform: rotate(-8deg); }
@@ -277,49 +273,49 @@ header {
 
 .vital-value {
   font-family: "Outfit", sans-serif;
-  font-size: 36px; font-weight: 900;
+  font-size: 26px; font-weight: 900;
   color: #fff; line-height: 1;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
+  margin-top: 4px;
   transition: color 0.3s;
 }
+.vital-value .sub { font-size: 14px; }
 .vital.v-normal   .vital-value { color: #6ee7b7; }
 .vital.v-warn     .vital-value { color: #fcd34d; }
-.vital.v-critical .vital-value { color: #fca5a5; text-shadow: 0 0 12px rgba(252,165,165,0.5); }
+.vital.v-critical .vital-value { color: #fca5a5; text-shadow: 0 0 10px rgba(252,165,165,0.5); }
 .vital.v-nodata   .vital-value { color: var(--text-faint); }
 
 .vital-unit {
-  font-size: 11px; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+  font-size: 9px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  margin-top: 2px;
 }
 .vital-label {
-  font-size: 10px; font-weight: 700;
+  font-size: 9px; font-weight: 700;
   color: var(--text-dim); letter-spacing: 1px;
   text-transform: uppercase;
-  position: absolute; top: 8px; left: 12px;
+  position: absolute; top: 5px; left: 8px;
 }
 
-/* SpO2 bar */
 .spo2-bar {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 4px; background: rgba(0,0,0,0.3);
+  height: 3px; background: rgba(0,0,0,0.3);
 }
-.spo2-fill {
-  height: 100%; transition: width 0.6s ease, background 0.3s;
-}
+.spo2-fill { height: 100%; transition: width 0.6s ease, background 0.3s; }
 
-/* Card footer */
+/* Footer */
 .mc-footer {
-  padding: 12px 16px;
+  padding: 6px 10px;
   background: var(--surface-2);
   border-top: 1px solid var(--border);
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 11px;
+  font-size: 10px;
 }
 .status-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px; border-radius: 20px;
-  font-family: "Outfit", sans-serif; font-size: 11px; font-weight: 800;
-  letter-spacing: 1px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 14px;
+  font-family: "Outfit", sans-serif; font-size: 10px; font-weight: 800;
+  letter-spacing: 0.5px;
 }
 .status-pill.normal   { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
 .status-pill.warn     { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
@@ -327,14 +323,22 @@ header {
 .status-pill.nodata   { background: rgba(100,116,139,0.15); color: var(--text-dim); border: 1px solid rgba(100,116,139,0.3); }
 @keyframes pillBlink {
   from { opacity: 1; }
-  to   { opacity: 0.5; }
+  to   { opacity: 0.55; }
 }
 
-.last-update { color: var(--text-faint); font-family: "Outfit", sans-serif; }
+.last-update { color: var(--text-faint); font-family: "Outfit", sans-serif; font-size: 10px; }
+
+.mc-note {
+  padding: 6px 12px;
+  background: rgba(245,158,11,0.08);
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--amber);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* ── Bottom nav ── */
 .bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+  position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
   background: rgba(11,25,41,0.95);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border); z-index: 200;
@@ -342,21 +346,22 @@ header {
   padding-bottom: env(safe-area-inset-bottom);
 }
 .nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
   color: var(--text-dim); text-decoration: none;
-  font-size: 10px; font-weight: 600;
+  font-size: 9px; font-weight: 600;
 }
 .nav-item.active { color: var(--rose); }
-.nav-icon { font-size: 20px; }
+.nav-icon { font-size: 18px; }
 
-/* ── Banner alert ── */
+/* ── Alert banner ── */
 #alertBanner {
-  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
   background: linear-gradient(135deg, var(--rose-bright), var(--rose));
-  color: #fff; padding: 12px 20px; border-radius: 12px;
-  font-weight: 700; font-size: 14px;
+  color: #fff; padding: 10px 18px; border-radius: 10px;
+  font-weight: 700; font-size: 13px;
   box-shadow: 0 10px 30px rgba(239,68,68,0.5);
   z-index: 500; display: none;
+  max-width: 90%;
   animation: alertSlide 0.4s ease;
 }
 #alertBanner.show { display: block; }
@@ -365,12 +370,50 @@ header {
   to   { transform: translate(-50%, 0); opacity: 1; }
 }
 
-@media (max-width: 480px) {
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+
+/* Tablet & PC: bigger vitals if there's room */
+@media (min-width: 600px) and (max-width: 1279px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .vital-value { font-size: 30px; }
+  .vital-icon { font-size: 22px; }
+  .vital { min-height: 96px; }
+}
+
+/* PC: target ≥10 cards per page on standard screens */
+@media (min-width: 1280px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+}
+
+/* Big PC monitors: enforce 5 columns to fit 10 cards in 2 rows */
+@media (min-width: 1600px) {
+  .grid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (min-width: 2000px) {
+  .grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* Mobile: single column with bigger touch-friendly vitals */
+@media (max-width: 599px) {
+  .grid { gap: 10px; grid-template-columns: 1fr; }
+  .vital { min-height: 100px; padding: 12px 10px 10px; }
+  .vital-icon { font-size: 24px; }
+  .vital-value { font-size: 32px; }
+  .vital-value .sub { font-size: 17px; }
+  .mc-animal-name { font-size: 16px; }
+  .mc-table { font-size: 16px; }
+  .header-stats { font-size: 11px; }
   .brand-sub { display: none; }
-  .grid { grid-template-columns: 1fr; }
-  .header-stats { gap: 4px; }
-  .stat-pill { padding: 4px 8px; font-size: 11px; }
-  .btn-sound { padding: 6px 10px; font-size: 11px; }
+}
+
+@media (max-width: 380px) {
+  .stat-pill { padding: 4px 7px; font-size: 10px; }
+  .btn-sound { padding: 5px 8px; font-size: 10px; }
 }
 </style>
 </head>
@@ -387,7 +430,7 @@ header {
   <div class="header-stats">
     <div class="stat-pill active" id="statActive">🛏️ <span id="cntActive">0</span></div>
     <div class="stat-pill crit" id="statCrit">⚠️ <span id="cntCrit">0</span></div>
-    <button class="btn-sound off" id="btnSound" onclick="toggleSound()">🔇 เสียง</button>
+    <button class="btn-sound" id="btnSound" onclick="toggleSound()">🔇 เสียง</button>
   </div>
 </header>
 
@@ -414,33 +457,41 @@ header {
 import { supabase } from "./js/supabase.js";
 
 // ═══════════════════════════════════════════
-// VITAL RANGES (สำหรับสุนัข ส และแมว ม)
+// VITAL RANGES
+// HR, RR, SpO2 = ตามค่าจริง
+// Temp = หน่วย °F (data ถูกบันทึกเป็น °C → แปลงตอนแสดงผล)
+//   95°F = 35°C    | 97.7°F = 36.5°C
+//   103.1°F = 39.5°C | 105.8°F = 41°C
 // ═══════════════════════════════════════════
 const VITAL_RANGES = {
-  'ส': { // สุนัข (dog)
-    hr:   { critLow: 50,  warnLow: 60,   warnHigh: 180,  critHigh: 220 },
-    rr:   { critLow: 5,   warnLow: 8,    warnHigh: 30,   critHigh: 50  },
-    spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,  critHigh: 102 },
-    temp: { critLow: 35,  warnLow: 36.5, warnHigh: 39.5, critHigh: 41  }
+  'ส': { // สุนัข
+    hr:   { critLow: 50,  warnLow: 60,   warnHigh: 180,   critHigh: 220 },
+    rr:   { critLow: 5,   warnLow: 8,    warnHigh: 30,    critHigh: 50 },
+    spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,   critHigh: 102 },
+    temp: { critLow: 95.0, warnLow: 97.7, warnHigh: 103.1, critHigh: 105.8 } // °F
   },
-  'ม': { // แมว (cat)
-    hr:   { critLow: 80,  warnLow: 100,  warnHigh: 200,  critHigh: 230 },
-    rr:   { critLow: 5,   warnLow: 10,   warnHigh: 30,   critHigh: 50  },
-    spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,  critHigh: 102 },
-    temp: { critLow: 35,  warnLow: 36.5, warnHigh: 39.5, critHigh: 41  }
+  'ม': { // แมว
+    hr:   { critLow: 80,  warnLow: 100,  warnHigh: 200,   critHigh: 230 },
+    rr:   { critLow: 5,   warnLow: 10,   warnHigh: 30,    critHigh: 50 },
+    spo2: { critLow: 90,  warnLow: 95,   warnHigh: 101,   critHigh: 102 },
+    temp: { critLow: 95.0, warnLow: 97.7, warnHigh: 103.1, critHigh: 105.8 } // °F
   }
 };
 
+// แปลง Celsius → Fahrenheit
+function cToF(c) {
+  if (c == null || isNaN(c)) return null;
+  return c * 9/5 + 32;
+}
+
 // ═══════════════════════════════════════════
-// State
-// ═══════════════════════════════════════════
-let lastStatus = {};          // animalId -> 'normal'/'warn'/'critical'/'nodata'
+let lastStatus = {};
 let lastReloadAt = 0;
 let audioContext = null;
 let soundEnabled = false;
 
 // ═══════════════════════════════════════════
-// Audio Alarm
+// Audio
 // ═══════════════════════════════════════════
 async function ensureAudio() {
   if (!audioContext) {
@@ -461,14 +512,13 @@ window.toggleSound = async function() {
       alert('⚠️ ไม่สามารถเปิดเสียงได้ — เบราว์เซอร์บล็อก autoplay');
       return;
     }
-    // Test beep
     playBeep(880, 0.15, 0.2);
     soundEnabled = true;
     btn.className = 'btn-sound on';
     btn.innerHTML = '🔊 เสียงเปิด';
   } else {
     soundEnabled = false;
-    btn.className = 'btn-sound off';
+    btn.className = 'btn-sound';
     btn.innerHTML = '🔇 เสียง';
   }
 };
@@ -491,7 +541,6 @@ function playBeep(freq, duration, volume = 0.3) {
 
 function playAlarmSiren() {
   if (!soundEnabled || !audioContext || audioContext.state !== 'running') return;
-  // 3 beeps urgent
   for (let i = 0; i < 3; i++) {
     setTimeout(() => playBeep(1000, 0.2, 0.4), i * 250);
   }
@@ -515,7 +564,6 @@ function evalVital(value, range) {
 }
 
 function rankStatus(...statuses) {
-  // critical > warn > normal > nodata
   if (statuses.includes('critical')) return 'critical';
   if (statuses.includes('warn'))     return 'warn';
   if (statuses.includes('normal'))   return 'normal';
@@ -543,9 +591,9 @@ function formatRelative(dateStr) {
   if (!dateStr) return '-';
   const ms = Date.now() - new Date(dateStr).getTime();
   const sec = Math.floor(ms / 1000);
-  if (sec < 60)   return `${sec} วินาทีที่แล้ว`;
-  if (sec < 3600) return `${Math.floor(sec/60)} นาทีที่แล้ว`;
-  return `${Math.floor(sec/3600)} ชม.ที่แล้ว`;
+  if (sec < 60)   return `${sec}s`;
+  if (sec < 3600) return `${Math.floor(sec/60)}m`;
+  return `${Math.floor(sec/3600)}h`;
 }
 
 // ═══════════════════════════════════════════
@@ -555,9 +603,9 @@ function renderCard(q) {
   const a = q.vasd_animal;
   if (!a) return '';
 
-  const species = a.species; // 'ส' or 'ม'
+  const species = a.species;
   const ranges = VITAL_RANGES[species] || VITAL_RANGES['ส'];
-  const speciesText = species === 'ส' ? '🐶 สุนัข' : '🐱 แมว';
+  const speciesIcon = species === 'ส' ? '🐶' : '🐱';
 
   const vital = getLatestVital(a.vasd_vital_signs);
   const tableLabel = q.operating_table ? `โต๊ะ ${escapeHtml(q.operating_table)}` : 'โต๊ะ —';
@@ -567,6 +615,7 @@ function renderCard(q) {
   let rr = { status: 'nodata', value: null };
   let spo2 = { status: 'nodata', value: null };
   let temp = { status: 'nodata', value: null };
+  let tempF = null;
   let updateTime = '';
   let noteText = '';
 
@@ -574,43 +623,49 @@ function renderCard(q) {
     hr   = evalVital(vital.hr,   ranges.hr);
     rr   = evalVital(vital.rr,   ranges.rr);
     spo2 = evalVital(vital.spo2, ranges.spo2);
-    temp = evalVital(vital.temp, ranges.temp);
+
+    // Temp: data เป็น °C → แปลงเป็น °F แล้ว evaluate ด้วย range ของ °F
+    const tempC = parseFloat(vital.temp);
+    if (!isNaN(tempC)) {
+      tempF = cToF(tempC);
+      temp = evalVital(tempF, ranges.temp);
+    }
+
     cardStatus = rankStatus(hr.status, rr.status, spo2.status, temp.status);
     updateTime = formatRelative(vital.created_at);
     noteText = vital.note || '';
   }
 
-  // HR animation duration
   const hrDur = (hr.value && hr.value > 0) ? Math.max(0.25, 60 / hr.value).toFixed(2) + 's' : '1s';
   const rrDur = (rr.value && rr.value > 0) ? Math.max(0.5,  60 / rr.value).toFixed(2) + 's' : '3s';
 
-  // SpO2 bar
   const spo2Pct = spo2.value != null ? Math.min(100, Math.max(0, spo2.value)) : 0;
   const spo2Color =
     spo2.status === 'critical' ? 'var(--rose)' :
     spo2.status === 'warn'     ? 'var(--amber)' :
     spo2.status === 'normal'   ? 'var(--emerald)' : 'var(--gray)';
 
-  // Temp icon class
   let tempClass = '';
-  if (temp.status !== 'nodata' && temp.value != null) {
-    if (temp.value < (ranges.temp.warnLow))  tempClass = 'v-cold';
-    if (temp.value > (ranges.temp.warnHigh)) tempClass = 'v-hot';
+  if (temp.status !== 'nodata' && tempF != null) {
+    if (tempF < ranges.temp.warnLow)  tempClass = 'v-cold';
+    if (tempF > ranges.temp.warnHigh) tempClass = 'v-hot';
   }
 
   const statusLabel = {
     normal:   '🟢 NORMAL',
-    warn:     '🟡 WARNING',
+    warn:     '🟡 WARN',
     critical: '🔴 CRITICAL',
     nodata:   '⚪ WAITING'
   }[cardStatus];
 
+  const tempDisplay = tempF != null ? tempF.toFixed(1) : '—';
+
   const staffLine = (q.surgeon_name || q.anesthetist)
-    ? `🩺 <b>${escapeHtml(q.surgeon_name || '-')}</b> &nbsp;·&nbsp; 💉 <b>${escapeHtml(q.anesthetist || '-')}</b>`
+    ? `🩺 <b>${escapeHtml(q.surgeon_name || '-')}</b> · 💉 <b>${escapeHtml(q.anesthetist || '-')}</b>`
     : `<span style="color:var(--text-faint);">ยังไม่ระบุทีม</span>`;
 
   return `
-    <div class="mon-card status-${cardStatus}" data-animal-id="${a.id}" data-start="${q.updated_at || ''}">
+    <div class="mon-card status-${cardStatus}" data-animal-id="${a.id}">
       <div class="mc-header">
         <div class="mc-table">🛏️ ${tableLabel}</div>
         <div class="mc-elapsed">⏱️ <span class="elapsed-val" data-start="${q.updated_at || ''}">--:--</span></div>
@@ -619,62 +674,57 @@ function renderCard(q) {
       <div class="mc-animal">
         <div class="mc-q">#${a.queue_number || '-'}</div>
         <div class="mc-animal-info">
-          <div class="mc-animal-name">${escapeHtml(a.animal_name)}</div>
-          <div class="mc-animal-meta">${speciesText} · ${escapeHtml(a.sex || '-')} · ${a.actual_weight || '-'} kg</div>
+          <div class="mc-animal-name">${speciesIcon} ${escapeHtml(a.animal_name)}</div>
+          <div class="mc-animal-meta">${escapeHtml(a.sex || '-')} · ${a.actual_weight || '-'} kg</div>
         </div>
       </div>
 
       <div class="mc-staff">${staffLine}</div>
 
       <div class="vitals">
-        <!-- HR -->
         <div class="vital v-${hr.status}">
           <span class="vital-label">HR</span>
           <span class="vital-icon heart" style="--hr-dur: ${hrDur};">❤️</span>
           <span class="vital-value">${hr.value != null ? hr.value : '—'}</span>
           <span class="vital-unit">bpm</span>
         </div>
-        <!-- RR -->
         <div class="vital v-${rr.status}">
           <span class="vital-label">RR</span>
           <span class="vital-icon lungs" style="--rr-dur: ${rrDur};">🫁</span>
           <span class="vital-value">${rr.value != null ? rr.value : '—'}</span>
           <span class="vital-unit">/ นาที</span>
         </div>
-        <!-- SpO2 -->
         <div class="vital v-${spo2.status}">
           <span class="vital-label">SpO₂</span>
           <span class="vital-icon spo2">💧</span>
-          <span class="vital-value">${spo2.value != null ? spo2.value : '—'}<span style="font-size:18px;">%</span></span>
+          <span class="vital-value">${spo2.value != null ? spo2.value : '—'}<span class="sub">%</span></span>
           <span class="vital-unit">oxygen</span>
           <div class="spo2-bar">
             <div class="spo2-fill" style="width: ${spo2Pct}%; background: ${spo2Color};"></div>
           </div>
         </div>
-        <!-- Temp -->
         <div class="vital v-${temp.status}">
           <span class="vital-label">TEMP</span>
           <span class="vital-icon temp ${tempClass}">🌡️</span>
-          <span class="vital-value">${temp.value != null ? temp.value : '—'}<span style="font-size:18px;">°</span></span>
-          <span class="vital-unit">เซลเซียส</span>
+          <span class="vital-value">${tempDisplay}<span class="sub">°F</span></span>
+          <span class="vital-unit">fahrenheit</span>
         </div>
       </div>
 
-      ${noteText ? `<div style="padding:10px 16px; background:rgba(245,158,11,0.08); border-top:1px solid var(--border); font-size:12px; color:var(--amber);">📝 ${escapeHtml(noteText)}</div>` : ''}
+      ${noteText ? `<div class="mc-note">📝 ${escapeHtml(noteText)}</div>` : ''}
 
       <div class="mc-footer">
         <span class="status-pill ${cardStatus}">${statusLabel}</span>
-        <span class="last-update">${updateTime || 'รอข้อมูล...'}</span>
+        <span class="last-update">${updateTime || 'รอข้อมูล'}</span>
       </div>
     </div>
   `;
 }
 
 // ═══════════════════════════════════════════
-// Load & Render
+// Load
 // ═══════════════════════════════════════════
 async function loadMonitor() {
-  // Throttle: max once per 500ms
   const now = Date.now();
   if (now - lastReloadAt < 500) return;
   lastReloadAt = now;
@@ -689,6 +739,7 @@ async function loadMonitor() {
         )
       `)
       .eq('status', 'surgery')
+      .order('operating_table', { ascending: true, nullsFirst: false })
       .order('updated_at', { ascending: true });
 
     if (error) throw error;
@@ -708,10 +759,9 @@ async function loadMonitor() {
       return;
     }
 
-    // Render all cards
     grid.innerHTML = queues.map(renderCard).join('');
 
-    // Check for new critical transitions → alarm
+    // Detect new critical transitions
     let critCount = 0;
     queues.forEach(q => {
       const a = q.vasd_animal;
@@ -720,22 +770,20 @@ async function loadMonitor() {
       const v = getLatestVital(a.vasd_vital_signs);
       let status = 'nodata';
       if (v) {
+        const tempC = parseFloat(v.temp);
+        const tempF = isNaN(tempC) ? null : cToF(tempC);
         const s = [
           evalVital(v.hr,   ranges.hr).status,
           evalVital(v.rr,   ranges.rr).status,
           evalVital(v.spo2, ranges.spo2).status,
-          evalVital(v.temp, ranges.temp).status
+          evalVital(tempF,  ranges.temp).status
         ];
         status = rankStatus(...s);
       }
-
       const prev = lastStatus[a.id];
       if (status === 'critical') {
         critCount++;
-        if (prev !== 'critical') {
-          // Transitioned to critical → alarm!
-          triggerAlarm(a, q);
-        }
+        if (prev !== 'critical') triggerAlarm(a, q);
       }
       lastStatus[a.id] = status;
     });
@@ -746,15 +794,15 @@ async function loadMonitor() {
 
   } catch (e) {
     console.error('[Monitor] load failed', e);
-    const grid = document.getElementById('grid');
-    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">โหลดข้อมูลไม่สำเร็จ: ${e.message}</div></div>`;
+    document.getElementById('grid').innerHTML =
+      `<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">โหลดข้อมูลไม่สำเร็จ: ${e.message}</div></div>`;
   }
 }
 
 function triggerAlarm(animal, queue) {
   console.warn('[ALARM]', animal.animal_name, 'is CRITICAL');
   playAlarmSiren();
-  showBanner(`🚨 CRITICAL: ${animal.animal_name} (โต๊ะ ${queue.operating_table || '-'})`);
+  showBanner(`🚨 CRITICAL: ${animal.animal_name} (${queue.operating_table ? 'โต๊ะ ' + queue.operating_table : 'ไม่ระบุโต๊ะ'})`);
 }
 
 function showBanner(text) {
@@ -765,7 +813,7 @@ function showBanner(text) {
 }
 
 // ═══════════════════════════════════════════
-// Elapsed Time Tick (ทุกวินาที)
+// Elapsed timer tick
 // ═══════════════════════════════════════════
 setInterval(() => {
   document.querySelectorAll('.elapsed-val').forEach(el => {
@@ -775,22 +823,13 @@ setInterval(() => {
 }, 1000);
 
 // ═══════════════════════════════════════════
-// Realtime Subscriptions
+// Realtime
 // ═══════════════════════════════════════════
 supabase.channel('monitor-live')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, () => {
-    console.log('[Monitor] vital_signs changed');
-    loadMonitor();
-  })
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, () => {
-    console.log('[Monitor] queue changed');
-    loadMonitor();
-  })
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, loadMonitor)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadMonitor)
   .subscribe();
 
-// ═══════════════════════════════════════════
-// Initial load + polling fallback (ทุก 10 วินาที)
-// ═══════════════════════════════════════════
 loadMonitor();
 setInterval(loadMonitor, 10000);
 </script>
