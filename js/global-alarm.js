@@ -1,7 +1,6 @@
-// js/global-alarm.js — v3
+// js/global-alarm.js — v3.1
 // VASD Emergency Call Alert System
-// แก้บั๊ก v2: AudioContext เป็นของแต่ละ document แยกกัน → ต้องเช็คทุกหน้า
-// ไม่เชื่อ localStorage อย่างเดียว
+// แก้: เตือนเฉพาะบทบาท "ผู้ดูแลระบบ" "อาจารย์" "สัตวแพทย์" เท่านั้น
 
 import { supabase } from './supabase.js';
 
@@ -10,10 +9,26 @@ const TTS_REPEAT_MS = 5000;
 const VIBRATION_PATTERN = [400, 200, 400, 200, 400, 200, 1000];
 const SESSION_DISMISS_KEY = 'vasd_banner_dismissed';
 
+// ★ บทบาทที่จะได้รับเสียงเตือน (อื่นๆ จะไม่ดัง)
+const ALERT_RECEIVER_ROLES = ['ผู้ดูแลระบบ', 'อาจารย์', 'สัตวแพทย์'];
+
 let audioContext = null;
 let activeAlarm = null;
 
-console.log('[VASD Alarm v3] global-alarm.js loaded on', location.pathname);
+console.log(
+  '[VASD Alarm v3.1] loaded on',
+  location.pathname,
+  '| role:',
+  localStorage.getItem('vasd_role') || '(not logged in)'
+);
+
+// ═══════════════════════════════════════════
+// Role check — เรียกใหม่ทุกครั้ง (อ่านจาก localStorage สดๆ)
+// ═══════════════════════════════════════════
+function isAlertReceiver() {
+  const role = (localStorage.getItem('vasd_role') || '').trim();
+  return ALERT_RECEIVER_ROLES.includes(role);
+}
 
 // ═══════════════════════════════════════════
 // AudioContext
@@ -88,12 +103,10 @@ function showEnableBanner(urgent = false) {
     const ok = await unlockAudio();
     console.log('[VASD Alarm] Unlock result:', ok, '- state:', audioContext?.state);
     if (ok) {
-      // ขอ Notification permission ใน user gesture
       if ('Notification' in window && Notification.permission === 'default') {
         try { await Notification.requestPermission(); } catch (e) {}
       }
       banner.remove();
-      // ปี้บคอนเฟิร์ม
       try {
         const ctx = audioContext;
         const o = ctx.createOscillator();
@@ -129,7 +142,6 @@ async function playAlarmSound() {
   const ctx = await ensureAudioContext();
   if (!ctx || ctx.state !== 'running') {
     console.warn('[VASD Alarm] ⚠️ Cannot play sound — state:', ctx?.state);
-    // บังคับ show banner แม้ user เคย dismiss
     sessionStorage.removeItem(SESSION_DISMISS_KEY);
     showEnableBanner(true);
     return null;
@@ -258,6 +270,13 @@ function removeOverlay() {
 // Trigger / Stop
 // ═══════════════════════════════════════════
 async function triggerAlarm(call) {
+  // ★ เช็คบทบาทก่อนเตือน — เฉพาะผู้ดูแลระบบ/อาจารย์/สัตวแพทย์
+  if (!isAlertReceiver()) {
+    const role = localStorage.getItem('vasd_role') || '(ไม่ได้ login)';
+    console.log('[VASD Alarm] 🔕 ข้ามการเตือน — role "' + role + '" ไม่อยู่ในรายชื่อผู้รับ');
+    return;
+  }
+
   if (activeAlarm && activeAlarm.id === call.id) return;
   stopActiveAlarm();
   console.log('[VASD Alarm] 🚨 TRIGGER for', call.sender, call.role);
@@ -307,7 +326,6 @@ function injectStyles() {
   const style = document.createElement('style');
   style.id = 'vasd-alarm-styles';
   style.textContent = `
-    /* Enable Banner */
     #vasd-enable-banner {
       position: fixed; top: 10px; left: 50%;
       transform: translateX(-50%);
@@ -364,7 +382,6 @@ function injectStyles() {
       .vasd-eb-go-btn { padding: 8px 12px; font-size: 12px; }
     }
 
-    /* Emergency Overlay */
     #vasd-emergency-overlay {
       position: fixed; inset: 0; z-index: 99999;
       background: rgba(220, 38, 38, 0.92);
@@ -437,7 +454,7 @@ function injectStyles() {
 async function init() {
   injectStyles();
 
-  // Auto-unlock บน user interaction ใดๆ (ทำซ้ำได้ ไม่ใช่ once)
+  // Auto-unlock บน user interaction ใดๆ
   const tryUnlock = async () => {
     const wasReady = isAudioReady();
     await ensureAudioContext();
@@ -451,13 +468,13 @@ async function init() {
   document.addEventListener('touchstart', tryUnlock, { passive: true });
   document.addEventListener('keydown', tryUnlock);
 
-  // เช็คสถานะ audio จริงๆ — ถ้า suspend → show banner
-  // (ไม่ใช้ localStorage เพราะ AudioContext เป็นของแต่ละ document)
+  // ★ Banner: เด้งเฉพาะถ้าเป็นบทบาทที่จะรับสัญญาณ
   setTimeout(async () => {
-    if (sessionStorage.getItem(SESSION_DISMISS_KEY) === 'yes') {
-      console.log('[VASD Alarm] Banner dismissed for this session');
+    if (!isAlertReceiver()) {
+      console.log('[VASD Alarm] User ไม่ใช่ผู้รับสัญญาณ — ข้าม banner');
       return;
     }
+    if (sessionStorage.getItem(SESSION_DISMISS_KEY) === 'yes') return;
     await ensureAudioContext();
     if (!isAudioReady()) {
       console.log('[VASD Alarm] Audio not ready, showing banner. State:', audioContext?.state);
@@ -467,7 +484,7 @@ async function init() {
     }
   }, 800);
 
-  // Realtime subscribe
+  // Realtime subscribe (always — เผื่อ user login ภายหลัง)
   try {
     supabase.channel('vasd-emergency-' + Math.random().toString(36).slice(2, 8))
       .on('postgres_changes',
@@ -479,7 +496,7 @@ async function init() {
           const ageSec = (Date.now() - new Date(call.created_at).getTime()) / 1000;
           if (ageSec > STALE_SECONDS) { console.log('[VASD Alarm] Stale, skip'); return; }
           if (call.acknowledged_at) { console.log('[VASD Alarm] Already acked, skip'); return; }
-          triggerAlarm(call);
+          triggerAlarm(call); // role check อยู่ใน triggerAlarm
         })
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'vasd_emergency_call' },
@@ -509,7 +526,7 @@ async function init() {
       .limit(1);
     if (!error && data && data.length > 0) {
       console.log('[VASD Alarm] Pending emergency on load:', data[0]);
-      triggerAlarm(data[0]);
+      triggerAlarm(data[0]); // role check อยู่ใน triggerAlarm
     }
   } catch (e) {
     console.warn('[VASD Alarm] Initial check failed', e);
