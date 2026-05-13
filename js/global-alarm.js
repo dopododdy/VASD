@@ -1,29 +1,31 @@
-// js/global-alarm.js — v3.1
-// VASD Emergency Call Alert System
-// แก้: เตือนเฉพาะบทบาท "ผู้ดูแลระบบ" "อาจารย์" "สัตวแพทย์" เท่านั้น
+// js/global-alarm.js — v4
+// VASD Emergency Call Alert System + Web Push subscription
+// ★ ใส่ VAPID_PUBLIC_KEY ของคุณที่บรรทัด const VAPID_PUBLIC_KEY ด้านล่าง
 
 import { supabase } from './supabase.js';
+
+// ═══════════════════════════════════════════
+// ⚙️ CONFIG — แก้บรรทัดนี้ก่อนใช้
+// ═══════════════════════════════════════════
+const VAPID_PUBLIC_KEY = 'PASTE_YOUR_VAPID_PUBLIC_KEY_HERE';
+// ระวัง! ใส่ Public Key เท่านั้น ห้ามใส่ Private Key
 
 const STALE_SECONDS = 60;
 const TTS_REPEAT_MS = 5000;
 const VIBRATION_PATTERN = [400, 200, 400, 200, 400, 200, 1000];
 const SESSION_DISMISS_KEY = 'vasd_banner_dismissed';
-
-// ★ บทบาทที่จะได้รับเสียงเตือน (อื่นๆ จะไม่ดัง)
 const ALERT_RECEIVER_ROLES = ['ผู้ดูแลระบบ', 'อาจารย์', 'สัตวแพทย์'];
 
 let audioContext = null;
 let activeAlarm = null;
 
 console.log(
-  '[VASD Alarm v3.1] loaded on',
-  location.pathname,
-  '| role:',
-  localStorage.getItem('vasd_role') || '(not logged in)'
+  '[VASD Alarm v4] loaded on', location.pathname,
+  '| role:', localStorage.getItem('vasd_role') || '(not logged in)'
 );
 
 // ═══════════════════════════════════════════
-// Role check — เรียกใหม่ทุกครั้ง (อ่านจาก localStorage สดๆ)
+// Role check
 // ═══════════════════════════════════════════
 function isAlertReceiver() {
   const role = (localStorage.getItem('vasd_role') || '').trim();
@@ -37,19 +39,10 @@ async function ensureAudioContext() {
   if (!audioContext) {
     try {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      console.log('[VASD Alarm] AudioContext created, state =', audioContext.state);
-    } catch (e) {
-      console.warn('[VASD Alarm] AudioContext unsupported', e);
-      return null;
-    }
+    } catch (e) { return null; }
   }
   if (audioContext.state === 'suspended') {
-    try {
-      await audioContext.resume();
-      console.log('[VASD Alarm] After resume(), state =', audioContext.state);
-    } catch (e) {
-      console.warn('[VASD Alarm] resume() failed', e);
-    }
+    try { await audioContext.resume(); } catch (e) {}
   }
   return audioContext;
 }
@@ -75,6 +68,72 @@ async function unlockAudio() {
 window.unlockAudioForAlarm = unlockAudio;
 
 // ═══════════════════════════════════════════
+// Web Push — Register Service Worker + Subscribe
+// ═══════════════════════════════════════════
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+async function registerWebPush() {
+  if (!isAlertReceiver()) {
+    console.log('[VASD Push] Not a receiver, skip subscribe');
+    return;
+  }
+  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.startsWith('PASTE_')) {
+    console.warn('[VASD Push] VAPID_PUBLIC_KEY not configured');
+    return;
+  }
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.log('[VASD Push] Not supported in this browser');
+    return;
+  }
+  if (Notification.permission !== 'granted') {
+    console.log('[VASD Push] Notification permission not granted yet');
+    return;
+  }
+
+  try {
+    // หา path ของ sw.js — ใช้ absolute path ที่ตรงกับ GitHub Pages
+    const swPath = location.pathname.includes('/VASD/') ? '/VASD/sw.js' : './sw.js';
+    const reg = await navigator.serviceWorker.register(swPath);
+    console.log('[VASD Push] SW registered');
+
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+      console.log('[VASD Push] New subscription created');
+    }
+
+    const subData = sub.toJSON();
+    const userName = localStorage.getItem('vasd_user') || 'unknown';
+    const userRole = localStorage.getItem('vasd_role') || 'unknown';
+
+    const { error } = await supabase.from('vasd_push_subscription').upsert({
+      endpoint: subData.endpoint,
+      p256dh: subData.keys.p256dh,
+      auth: subData.keys.auth,
+      user_name: userName,
+      user_role: userRole,
+      device_info: navigator.userAgent.substring(0, 200),
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'endpoint' });
+
+    if (error) throw error;
+    console.log('[VASD Push] ✅ Subscription saved to DB');
+  } catch (e) {
+    console.warn('[VASD Push] Failed:', e);
+  }
+}
+
+// ═══════════════════════════════════════════
 // Enable Sound Banner
 // ═══════════════════════════════════════════
 function showEnableBanner(urgent = false) {
@@ -91,7 +150,7 @@ function showEnableBanner(urgent = false) {
     <span class="vasd-eb-icon">🔇</span>
     <div class="vasd-eb-text">
       <div class="vasd-eb-title">เสียงเตือนยังไม่เปิดในหน้านี้</div>
-      <div class="vasd-eb-sub">กดปุ่มขวาเพื่อเปิดเสียง Emergency</div>
+      <div class="vasd-eb-sub">กดเพื่อเปิดเสียง + ตั้งค่า Push Notification</div>
     </div>
     <button id="vasd-enable-btn" class="vasd-eb-go-btn">🔊 เปิดเสียง</button>
     <button id="vasd-dismiss-btn" class="vasd-eb-x-btn" title="ปิดสำหรับหน้านี้">×</button>
@@ -99,9 +158,7 @@ function showEnableBanner(urgent = false) {
   document.body.appendChild(banner);
 
   document.getElementById('vasd-enable-btn').onclick = async () => {
-    console.log('[VASD Alarm] User clicked Enable Sound');
     const ok = await unlockAudio();
-    console.log('[VASD Alarm] Unlock result:', ok, '- state:', audioContext?.state);
     if (ok) {
       if ('Notification' in window && Notification.permission === 'default') {
         try { await Notification.requestPermission(); } catch (e) {}
@@ -118,12 +175,15 @@ function showEnableBanner(urgent = false) {
         o.start();
         o.stop(ctx.currentTime + 0.15);
       } catch (e) {}
+      // หลังได้ permission แล้ว → ลงทะเบียน Web Push
+      registerWebPush();
     } else {
       alert(
         '⚠️ เบราว์เซอร์บล็อกเสียงอยู่\n\n' +
         '【Firefox】คลิก 🛡️/🔒 ที่ address bar → Autoplay → "Allow Audio and Video"\n\n' +
-        '【iOS Safari】Settings → Safari → ปิด Block Pop-ups + เปิดเสียงเครื่อง\n\n' +
-        '【Android Chrome】มักไม่มีปัญหา ถ้ามีให้เปิดเสียงเครื่อง + กดปุ่มอีกครั้ง\n\n' +
+        '【iOS Safari】Settings → Safari → ปิด Block Pop-ups\n' +
+        '★ สำหรับ Push บน iOS ต้อง Add to Home Screen ก่อน (PWA)\n\n' +
+        '【Android Chrome】มักไม่มีปัญหา ถ้ามีให้เปิดเสียงเครื่อง\n\n' +
         'รีโหลดหน้าแล้วลองอีกครั้ง'
       );
     }
@@ -141,7 +201,6 @@ function showEnableBanner(urgent = false) {
 async function playAlarmSound() {
   const ctx = await ensureAudioContext();
   if (!ctx || ctx.state !== 'running') {
-    console.warn('[VASD Alarm] ⚠️ Cannot play sound — state:', ctx?.state);
     sessionStorage.removeItem(SESSION_DISMISS_KEY);
     showEnableBanner(true);
     return null;
@@ -154,20 +213,14 @@ async function playAlarmSound() {
     gain.gain.value = 0.3;
     oscillator.frequency.value = 600;
     oscillator.start();
-
     let freq = 600, up = true;
     const freqInterval = setInterval(() => {
       if (up) { freq += 80; if (freq >= 1200) up = false; }
       else    { freq -= 80; if (freq <= 600)  up = true;  }
       try { oscillator.frequency.setValueAtTime(freq, ctx.currentTime); } catch (e) {}
     }, 60);
-
-    console.log('[VASD Alarm] 🔊 Sound started');
     return { oscillator, freqInterval };
-  } catch (e) {
-    console.warn('[VASD Alarm] playAlarmSound failed', e);
-    return null;
-  }
+  } catch (e) { return null; }
 }
 
 function stopAlarmSound(audio) {
@@ -257,7 +310,6 @@ function showOverlay(call) {
     </div>
   `;
   document.body.appendChild(overlay);
-
   document.getElementById('vasd-ack-btn').onclick = () => acknowledgeAlarm(call.id);
 }
 
@@ -270,13 +322,10 @@ function removeOverlay() {
 // Trigger / Stop
 // ═══════════════════════════════════════════
 async function triggerAlarm(call) {
-  // ★ เช็คบทบาทก่อนเตือน — เฉพาะผู้ดูแลระบบ/อาจารย์/สัตวแพทย์
   if (!isAlertReceiver()) {
-    const role = localStorage.getItem('vasd_role') || '(ไม่ได้ login)';
-    console.log('[VASD Alarm] 🔕 ข้ามการเตือน — role "' + role + '" ไม่อยู่ในรายชื่อผู้รับ');
+    console.log('[VASD Alarm] 🔕 ข้าม — role ไม่อยู่ในรายชื่อผู้รับ');
     return;
   }
-
   if (activeAlarm && activeAlarm.id === call.id) return;
   stopActiveAlarm();
   console.log('[VASD Alarm] 🚨 TRIGGER for', call.sender, call.role);
@@ -305,16 +354,13 @@ function stopActiveAlarm() {
 
 async function acknowledgeAlarm(callId) {
   const ackName = localStorage.getItem('vasd_user') || 'ไม่ทราบชื่อ';
-  console.log('[VASD Alarm] ACK by', ackName);
   try {
     await supabase
       .from('vasd_emergency_call')
       .update({ acknowledged_by: ackName, acknowledged_at: new Date().toISOString() })
       .eq('id', callId)
       .is('acknowledged_at', null);
-  } catch (e) {
-    console.warn('[VASD Alarm] ACK failed', e);
-  }
+  } catch (e) {}
   stopActiveAlarm();
 }
 
@@ -345,10 +391,7 @@ function injectStyles() {
       box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 30px rgba(239,68,68,0.6);
       animation: vasdEbSlide 0.4s ease, vasdEbUrgent 0.8s ease-in-out infinite;
     }
-    @keyframes vasdEbSlide {
-      from { transform: translate(-50%, -100px); opacity: 0; }
-      to   { transform: translate(-50%, 0); opacity: 1; }
-    }
+    @keyframes vasdEbSlide { from { transform: translate(-50%, -100px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     @keyframes vasdEbUrgent {
       0%, 100% { background: linear-gradient(135deg, #1e293b, #334155); }
       50%      { background: linear-gradient(135deg, #7f1d1d, #991b1b); }
@@ -371,11 +414,7 @@ function injectStyles() {
       cursor: pointer; font-size: 18px; line-height: 1;
     }
     @media (max-width: 480px) {
-      #vasd-enable-banner {
-        max-width: 96%;
-        padding: 8px 10px;
-        gap: 8px;
-      }
+      #vasd-enable-banner { max-width: 96%; padding: 8px 10px; gap: 8px; }
       .vasd-eb-icon { font-size: 18px; }
       .vasd-eb-title { font-size: 12px; }
       .vasd-eb-sub { font-size: 10px; }
@@ -414,33 +453,19 @@ function injectStyles() {
       font-size: 80px; line-height: 1; margin-bottom: 8px;
       animation: vasdEmergBounce 1s ease infinite;
     }
-    @keyframes vasdEmergBounce {
-      0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.15); }
-    }
-    .vasd-emerg-title {
-      font-family: "Outfit", sans-serif;
-      font-size: 32px; font-weight: 800; color: #dc2626;
-      letter-spacing: 1px; line-height: 1.1;
-    }
+    @keyframes vasdEmergBounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    .vasd-emerg-title { font-family: "Outfit", sans-serif; font-size: 32px; font-weight: 800; color: #dc2626; letter-spacing: 1px; line-height: 1.1; }
     .vasd-emerg-subtitle { font-size: 14px; color: #6b7280; margin-top: 4px; margin-bottom: 24px; }
-    .vasd-emerg-sender {
-      background: #fef2f2; border: 2px solid #fecaca;
-      border-radius: 16px; padding: 16px; margin-bottom: 16px;
-    }
+    .vasd-emerg-sender { background: #fef2f2; border: 2px solid #fecaca; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
     .vasd-emerg-label { font-size: 11px; color: #991b1b; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
     .vasd-emerg-name { font-size: 26px; font-weight: 800; color: #111827; margin-top: 4px; word-break: break-word; }
     .vasd-emerg-role { font-size: 14px; color: #4b5563; margin-top: 2px; }
     .vasd-emerg-time { font-size: 12px; color: #9ca3af; margin-bottom: 20px; font-family: "Outfit", sans-serif; }
     .vasd-emerg-ack-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff; border: none;
-      padding: 18px; border-radius: 14px;
-      font-family: "Sarabun", sans-serif;
-      font-size: 18px; font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      width: 100%; background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff; border: none; padding: 18px; border-radius: 14px;
+      font-family: "Sarabun", sans-serif; font-size: 18px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
       transition: transform 0.15s;
     }
     .vasd-emerg-ack-btn:active { transform: scale(0.96); }
@@ -454,12 +479,10 @@ function injectStyles() {
 async function init() {
   injectStyles();
 
-  // Auto-unlock บน user interaction ใดๆ
   const tryUnlock = async () => {
     const wasReady = isAudioReady();
     await ensureAudioContext();
     if (!wasReady && isAudioReady()) {
-      console.log('[VASD Alarm] ✅ Auto-unlocked via user interaction');
       const banner = document.getElementById('vasd-enable-banner');
       if (banner) banner.remove();
     }
@@ -468,69 +491,57 @@ async function init() {
   document.addEventListener('touchstart', tryUnlock, { passive: true });
   document.addEventListener('keydown', tryUnlock);
 
-  // ★ Banner: เด้งเฉพาะถ้าเป็นบทบาทที่จะรับสัญญาณ
+  // Banner check
   setTimeout(async () => {
-    if (!isAlertReceiver()) {
-      console.log('[VASD Alarm] User ไม่ใช่ผู้รับสัญญาณ — ข้าม banner');
-      return;
-    }
+    if (!isAlertReceiver()) return;
     if (sessionStorage.getItem(SESSION_DISMISS_KEY) === 'yes') return;
     await ensureAudioContext();
     if (!isAudioReady()) {
-      console.log('[VASD Alarm] Audio not ready, showing banner. State:', audioContext?.state);
       showEnableBanner();
-    } else {
-      console.log('[VASD Alarm] Audio ready on load');
+    } else if (Notification.permission === 'granted') {
+      // เผื่อมี subscription หายไป — ลงทะเบียนซ้ำ
+      registerWebPush();
     }
   }, 800);
 
-  // Realtime subscribe (always — เผื่อ user login ภายหลัง)
+  // Realtime subscribe
   try {
     supabase.channel('vasd-emergency-' + Math.random().toString(36).slice(2, 8))
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'vasd_emergency_call' },
         (payload) => {
           const call = payload.new;
-          console.log('[VASD Alarm] 📥 INSERT received', call);
           if (!call || !call.created_at) return;
           const ageSec = (Date.now() - new Date(call.created_at).getTime()) / 1000;
-          if (ageSec > STALE_SECONDS) { console.log('[VASD Alarm] Stale, skip'); return; }
-          if (call.acknowledged_at) { console.log('[VASD Alarm] Already acked, skip'); return; }
-          triggerAlarm(call); // role check อยู่ใน triggerAlarm
+          if (ageSec > STALE_SECONDS) return;
+          if (call.acknowledged_at) return;
+          triggerAlarm(call);
         })
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'vasd_emergency_call' },
         (payload) => {
           if (payload.new && payload.new.acknowledged_at &&
               activeAlarm && activeAlarm.id === payload.new.id) {
-            console.log('[VASD Alarm] Remote ACK, stop');
             stopActiveAlarm();
           }
         })
       .subscribe((status) => {
         console.log('[VASD Alarm] Realtime status:', status);
       });
-  } catch (e) {
-    console.warn('[VASD Alarm] subscribe failed', e);
-  }
+  } catch (e) {}
 
-  // เช็คเคสค้าง
+  // Pending check
   try {
     const cutoff = new Date(Date.now() - STALE_SECONDS * 1000).toISOString();
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('vasd_emergency_call')
       .select('*')
       .gte('created_at', cutoff)
       .is('acknowledged_at', null)
       .order('created_at', { ascending: false })
       .limit(1);
-    if (!error && data && data.length > 0) {
-      console.log('[VASD Alarm] Pending emergency on load:', data[0]);
-      triggerAlarm(data[0]); // role check อยู่ใน triggerAlarm
-    }
-  } catch (e) {
-    console.warn('[VASD Alarm] Initial check failed', e);
-  }
+    if (data && data.length > 0) triggerAlarm(data[0]);
+  } catch (e) {}
 }
 
 init();
