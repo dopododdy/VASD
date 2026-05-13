@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>🔬 Emergency Debug - VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0b1929; color: #e2e8f0;
+  padding: 20px; min-height: 100vh;
+  line-height: 1.5;
+}
+h1 { font-size: 22px; margin-bottom: 16px; color: #fff; }
+h3 { font-size: 14px; margin-bottom: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+.box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 16px; margin-bottom: 14px;
+}
+.status-line {
+  font-family: monospace;
+  font-size: 14px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 6px;
+  margin: 6px 0;
+}
+.ok   { color: #10b981; }
+.fail { color: #ef4444; }
+.warn { color: #f59e0b; }
+.info { color: #60a5fa; }
+
+button {
+  padding: 12px 18px; background: #0ea5a0; color: #fff;
+  border: none; border-radius: 8px;
+  cursor: pointer; font-size: 14px; font-weight: 600;
+  margin: 4px; min-width: 200px;
+}
+button:hover { opacity: 0.9; }
+button:active { transform: scale(0.97); }
+.btn-red { background: #ef4444; }
+.btn-amber { background: #f59e0b; }
+.btn-gray { background: #475569; }
+
+#log {
+  background: #000; color: #0f0;
+  padding: 12px; height: 320px; overflow-y: auto;
+  font-family: monospace; font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+.log-line { margin: 2px 0; word-break: break-all; }
+
+.row-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+.row-table th, .row-table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #333; }
+.row-table th { background: rgba(255,255,255,0.05); color: #94a3b8; }
+
+.summary { font-size: 13px; line-height: 1.7; }
+.summary code { background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px; color: #fbbf24; }
+</style>
+</head>
+<body>
+
+<h1>🔬 VASD Emergency Call — Diagnostic Tool</h1>
+
+<div class="box summary">
+  <h3>วิธีใช้</h3>
+  ใช้ debug 1 ทีละเครื่อง — เปิดหน้านี้ที่ <b>เครื่องอาจารย์</b> ก่อน (เครื่องที่เสียงไม่ดัง)
+  รอให้ section 1-3 ทำงานครบ จากนั้นค่อยมาดู section 4-5
+</div>
+
+<div class="box">
+  <h3>1. การเชื่อมต่อ Supabase</h3>
+  <div class="status-line" id="conn-status">⏳ กำลังเชื่อมต่อ...</div>
+</div>
+
+<div class="box">
+  <h3>2. ตาราง vasd_emergency_call</h3>
+  <div class="status-line" id="table-status">⏳ ตรวจสอบ...</div>
+  <button class="btn-gray" onclick="checkTable()">🔄 ตรวจอีกครั้ง</button>
+</div>
+
+<div class="box">
+  <h3>3. Realtime Subscription (สำคัญ — ถ้าตรงนี้ไม่ผ่าน เสียงจะไม่ดัง)</h3>
+  <div class="status-line" id="rt-status">⏳ subscribe...</div>
+</div>
+
+<div class="box">
+  <h3>4. ทดสอบ — กดทีละปุ่ม ดูผลใน Event Log ด้านล่าง</h3>
+  <button onclick="testAudio()">🔊 ทดสอบเสียง (ลำโพง)</button>
+  <button onclick="insertTest()">📤 INSERT ทดสอบจากหน้านี้</button>
+  <button class="btn-amber" onclick="testFullAlarm()">🚨 ทดสอบ ALARM เต็มรูปแบบ</button>
+  <button class="btn-gray" onclick="cleanupTests()">🧹 ล้าง test rows</button>
+</div>
+
+<div class="box">
+  <h3>5. Event Log — บรรทัดบนสุดคือเหตุการณ์ล่าสุด</h3>
+  <div id="log"></div>
+</div>
+
+<div class="box summary">
+  <h3>📋 การแปลผล</h3>
+  <ul style="padding-left: 20px;">
+    <li>ถ้า <code>section 1-3</code> ✅ ทั้งหมด แสดงว่าระบบฝั่งรับ <b>พร้อมรับเสียง</b></li>
+    <li>ลองให้เครื่องอื่นกด EMERGENCY → ต้องเห็น <code>🎯 INSERT received</code> ใน Event Log</li>
+    <li>ถ้าไม่เห็น INSERT แม้เครื่องอื่นกด → ปัญหาที่ realtime publication</li>
+    <li>ถ้าเห็น INSERT แต่ไม่ดัง → ปัญหา audio/browser block</li>
+  </ul>
+</div>
+
+<script type="module">
+import { supabase } from './js/supabase.js';
+
+const logEl = document.getElementById('log');
+function log(msg, cls='info') {
+  const line = document.createElement('div');
+  line.className = 'log-line ' + cls;
+  const t = new Date().toLocaleTimeString('th-TH', { hour12: false });
+  line.innerHTML = `<span style="color:#666">[${t}]</span> ${msg}`;
+  logEl.insertBefore(line, logEl.firstChild);
+}
+
+// ───── 1. Connection ─────
+const connEl = document.getElementById('conn-status');
+try {
+  const supabaseUrl = supabase?.supabaseUrl || 'unknown';
+  connEl.innerHTML = `<span class="ok">✅ Supabase client โหลดสำเร็จ</span><br><small style="color:#666">URL: ${supabaseUrl}</small>`;
+  log('Supabase client loaded: ' + supabaseUrl, 'ok');
+} catch(e) {
+  connEl.innerHTML = '<span class="fail">❌ Supabase client error: ' + e.message + '</span>';
+  log('Connection FAILED: ' + e.message, 'fail');
+}
+
+// ───── 2. Check table ─────
+window.checkTable = async function() {
+  const el = document.getElementById('table-status');
+  el.innerHTML = '⏳ ตรวจสอบ...';
+  try {
+    const { data, count, error } = await supabase
+      .from('vasd_emergency_call')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .limit(5);
+    if (error) throw error;
+    el.innerHTML = `<span class="ok">✅ ตารางมีอยู่ (${count || 0} แถวทั้งหมด)</span>`;
+    log('Table exists. Total rows: ' + (count || 0), 'ok');
+    if (data && data.length > 0) {
+      log('Recent rows: ' + data.map(r => `${r.sender}/${r.role}@${new Date(r.created_at).toLocaleTimeString('th-TH')}`).join(', '), 'info');
+    }
+  } catch(e) {
+    el.innerHTML = '<span class="fail">❌ ' + e.message + '</span>';
+    log('Table check FAILED: ' + e.message + '. ตรวจว่ารัน SQL v2.6 แล้วหรือยัง', 'fail');
+  }
+};
+await checkTable();
+
+// ───── 3. Realtime ─────
+let eventsReceived = 0;
+const rtEl = document.getElementById('rt-status');
+
+const ch = supabase.channel('debug-emerg-' + Date.now())
+  .on('postgres_changes', {
+    event: 'INSERT', schema: 'public', table: 'vasd_emergency_call'
+  }, (payload) => {
+    eventsReceived++;
+    log('🎯 INSERT received! sender=' + payload.new.sender + ' role=' + payload.new.role, 'ok');
+  })
+  .on('postgres_changes', {
+    event: 'UPDATE', schema: 'public', table: 'vasd_emergency_call'
+  }, (payload) => {
+    log('🔄 UPDATE received: ack_by=' + (payload.new.acknowledged_by || 'null'), 'warn');
+  })
+  .subscribe((status, err) => {
+    if (status === 'SUBSCRIBED') {
+      rtEl.innerHTML = '<span class="ok">✅ Realtime SUBSCRIBED — รอ event...</span>';
+      log('Realtime subscribed successfully', 'ok');
+    } else if (status === 'CHANNEL_ERROR') {
+      rtEl.innerHTML = '<span class="fail">❌ CHANNEL_ERROR — ' + (err?.message || 'check publication') + '</span>';
+      log('Realtime CHANNEL_ERROR: ' + (err?.message || 'unknown'), 'fail');
+    } else if (status === 'TIMED_OUT') {
+      rtEl.innerHTML = '<span class="fail">❌ TIMED_OUT — network issue?</span>';
+      log('Realtime TIMED_OUT', 'fail');
+    } else if (status === 'CLOSED') {
+      rtEl.innerHTML = '<span class="warn">⚠️ CLOSED</span>';
+      log('Realtime channel closed', 'warn');
+    } else {
+      rtEl.innerHTML = '<span class="warn">⏳ ' + status + '</span>';
+      log('Realtime status: ' + status, 'warn');
+    }
+  });
+
+// ───── 4. Tests ─────
+window.testAudio = function() {
+  log('▶️ Testing Web Audio API...', 'warn');
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    log('AudioContext state: ' + ctx.state, 'info');
+    if (ctx.state === 'suspended') {
+      log('⚠️ AudioContext SUSPENDED — browser ยังไม่ unlock audio', 'warn');
+      ctx.resume();
+    }
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain).connect(ctx.destination);
+    gain.gain.value = 0.3;
+    osc.type = 'sawtooth';
+    osc.frequency.value = 800;
+    osc.start();
+    log('✅ เสียงควรดังตอนนี้ (3 วินาที)', 'ok');
+    setTimeout(() => {
+      try { osc.stop(); ctx.close(); log('Audio stopped', 'info'); } catch(e){}
+    }, 3000);
+  } catch(e) {
+    log('❌ Audio FAILED: ' + e.message, 'fail');
+  }
+};
+
+window.insertTest = async function() {
+  log('📤 Inserting test row...', 'warn');
+  try {
+    const { data, error } = await supabase
+      .from('vasd_emergency_call')
+      .insert({ sender: 'DEBUG-TEST', role: 'debug-' + Date.now() })
+      .select();
+    if (error) throw error;
+    log('✅ INSERT OK. id=' + data[0].id, 'ok');
+    log('💡 ถ้า realtime ทำงาน จะเห็น "🎯 INSERT received" ภายใน 1-2 วินาที', 'info');
+  } catch(e) {
+    log('❌ INSERT FAILED: ' + e.message, 'fail');
+    log('   → ตรวจ RLS policy หรือว่ารัน SQL v2.6 ครบหรือยัง', 'fail');
+  }
+};
+
+window.testFullAlarm = function() {
+  log('🚨 Triggering full alarm UI...', 'warn');
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed; inset:0;
+    background:rgba(220,38,38,0.9);
+    z-index:99999;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    color:#fff; text-align:center; padding:20px;
+    animation: pulse 0.8s infinite;
+  `;
+  overlay.innerHTML = `
+    <div style="font-size:80px;">🚨</div>
+    <div style="font-size:32px; font-weight:800;">TEST ALARM</div>
+    <div style="font-size:16px; margin:20px 0;">ถ้าเห็น overlay นี้แสดงว่า UI ทำงาน</div>
+    <button onclick="this.parentElement.remove()" style="font-size:18px; padding:15px 30px; background:#10b981; color:#fff; border:none; border-radius:10px; cursor:pointer;">✅ ปิด</button>
+  `;
+  document.body.appendChild(overlay);
+  testAudio();
+  log('✅ Visual + Audio test triggered', 'ok');
+};
+
+window.cleanupTests = async function() {
+  try {
+    const { error } = await supabase.from('vasd_emergency_call').delete().in('sender', ['DEBUG-TEST', 'ทดสอบ', 'TEST']);
+    if (error) throw error;
+    log('✅ Cleanup OK', 'ok');
+    checkTable();
+  } catch(e) {
+    log('❌ Cleanup failed: ' + e.message, 'fail');
+  }
+};
+
+// Status check at 5s mark
+setTimeout(() => {
+  if (eventsReceived === 0) {
+    log('💡 5 วินาทีผ่านไป ยังไม่มี realtime event — ถ้า subscribe ผ่านแล้ว ลองกด INSERT ทดสอบ', 'info');
+  }
+}, 5000);
+</script>
+</body>
+</html>
