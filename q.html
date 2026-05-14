@@ -539,7 +539,7 @@ loadVoices();
 if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
 
 // ═══════════════════════════════════════════
-// ★ Speak Call — แยก 3 ประโยค + slow rate ตรงเลข + เว้น 1 วินาที
+// ★ Speak Call — ประโยคเดียวต่อเนื่อง ฟังเป็นธรรมชาติ
 // ═══════════════════════════════════════════
 function speakCall(queueNumber, animalName, ownerName, roomName, times = 2) {
   speechSynthesis.cancel();
@@ -547,47 +547,28 @@ function speakCall(queueNumber, animalName, ownerName, roomName, times = 2) {
   const voice = s.voiceName ? allVoices.find(v => v.name === s.voiceName) : null;
   const thaiNum = numberToThai(queueNumber);
 
-  function makeUtter(text, rateMul = 1) {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'th-TH';
-    u.rate = s.rate * rateMul;
-    u.pitch = s.pitch;
-    if (voice) u.voice = voice;
-    return u;
-  }
+  // ★ ประโยคเดียว ให้ TTS จัดการ prosody/intonation เองตามธรรมชาติ
+  const text = `ขอเชิญคิวหมายเลข ${thaiNum} คุณ${ownerName || ''} เจ้าของน้อง${animalName || ''} เข้า${roomName || ''}`;
 
-  // หนึ่งรอบ = 3 ประโยค + 1 sec pause
-  function speakRound() {
+  function speakOnce() {
     return new Promise(resolve => {
-      // ส่วนที่ 1: "ขอเชิญ คิวหมายเลข"
-      const u1 = makeUtter('ขอเชิญ คิวหมายเลข', 1.0);
-
-      // ★ ส่วนที่ 2: เลขคิว (slow rate = เสียงยาวขึ้น)
-      const u2 = makeUtter(thaiNum, 0.6);
-
-      // ส่วนที่ 3: "คุณ X เจ้าของน้อง Y เข้า Z"
-      const u3 = makeUtter(`คุณ ${ownerName || ''} เจ้าของน้อง ${animalName || ''} เข้า ${roomName || ''}`, 1.0);
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'th-TH';
+      u.rate = s.rate;
+      u.pitch = s.pitch;
+      if (voice) u.voice = voice;
 
       const safety = setTimeout(resolve, 30000);
+      u.onend  = () => { clearTimeout(safety); resolve(); };
+      u.onerror = u.onend;
 
-      u1.onend  = () => speechSynthesis.speak(u2);
-      u1.onerror = u1.onend;
-
-      // ★ หลังพูดเลขจบ → รอ 1 วินาที → พูดต่อ
-      u2.onend  = () => setTimeout(() => speechSynthesis.speak(u3), 1000);
-      u2.onerror = u2.onend;
-
-      u3.onend  = () => { clearTimeout(safety); resolve(); };
-      u3.onerror = u3.onend;
-
-      speechSynthesis.speak(u1);
+      speechSynthesis.speak(u);
     });
   }
 
-  // พูดตามจำนวนครั้งที่ตั้งไว้ (default 2)
   (async () => {
     for (let i = 0; i < times; i++) {
-      await speakRound();
+      await speakOnce();
       if (i < times - 1) await new Promise(r => setTimeout(r, 700));
     }
   })();

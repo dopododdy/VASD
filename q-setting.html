@@ -649,20 +649,14 @@ window.testVoice = function() {
   const voiceName = document.getElementById('voiceSelect').value;
   const voice = allVoices.find(v => v.name === voiceName);
 
-  function utter(text, rateMul) {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'th-TH'; u.rate = rate * rateMul; u.pitch = pitch;
-    if (voice) u.voice = voice;
-    return u;
-  }
-
-  const u1 = utter('ขอเชิญ คิวหมายเลข', 1.0);
-  const u2 = utter(numberToThai(5), 0.6);
-  const u3 = utter('คุณสมชาย เจ้าของน้องมะลิ เข้าห้องตรวจ ที่ หนึ่ง', 1.0);
-
-  u1.onend = () => speechSynthesis.speak(u2);
-  u2.onend = () => setTimeout(() => speechSynthesis.speak(u3), 1000);
-  speechSynthesis.speak(u1);
+  // ★ ประโยคเดียวต่อเนื่อง ฟังเป็นธรรมชาติ
+  const text = `ขอเชิญคิวหมายเลข ${numberToThai(5)} คุณสมชาย เจ้าของน้องมะลิ เข้าห้องตรวจ ที่ หนึ่ง`;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'th-TH';
+  u.rate = rate;
+  u.pitch = pitch;
+  if (voice) u.voice = voice;
+  speechSynthesis.speak(u);
 };
 
 // ─────────────────────────────────────────────
