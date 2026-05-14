@@ -299,7 +299,9 @@
     text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 13px;
   }
 
-  /* ── Bottom nav (single-icon toggle to admin page) ── */
+  /* ═══════════════════════════════════════════════════════
+     BOTTOM NAV - 3 buttons (Queue left, Admin center, Queue Settings right)
+     ═══════════════════════════════════════════════════════ */
   .bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
     background: rgba(11,25,41,0.95);
@@ -308,9 +310,11 @@
     border-top: 1px solid var(--border-2);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
     padding: 12px 10px calc(12px + env(safe-area-inset-bottom));
   }
+
+  /* ── Center: primary action (admin page) ── */
   .nav-toggle {
     position: relative;
     display: flex; align-items: center; justify-content: center;
@@ -336,8 +340,32 @@
   }
   .nav-toggle:active { transform: scale(0.94); }
   .nav-toggle-icon { font-size: 26px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25)); }
-  /* Tooltip on hover (desktop only) */
-  .nav-toggle .nav-toggle-tip {
+
+  /* ── Side buttons: queue calling system ── */
+  .nav-side {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: rgba(14,165,160,0.10);
+    color: var(--teal-light);
+    text-decoration: none;
+    border: 1px solid rgba(14,165,160,0.30);
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-side:hover {
+    background: rgba(14,165,160,0.20);
+    border-color: var(--teal);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(14,165,160,0.30);
+  }
+  .nav-side:active { transform: scale(0.94); }
+  .nav-side-icon { font-size: 22px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+
+  /* ── Shared tooltip ── */
+  .nav-toggle .nav-toggle-tip,
+  .nav-side .nav-toggle-tip {
     position: absolute;
     bottom: calc(100% + 10px);
     left: 50%;
@@ -356,13 +384,14 @@
     transition: opacity 0.2s, transform 0.2s;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   }
-  .nav-toggle:hover .nav-toggle-tip {
+  .nav-toggle:hover .nav-toggle-tip,
+  .nav-side:hover .nav-toggle-tip {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
   @media (hover: none) {
-    /* hide tooltip on touch devices */
-    .nav-toggle .nav-toggle-tip { display: none; }
+    .nav-toggle .nav-toggle-tip,
+    .nav-side .nav-toggle-tip { display: none; }
   }
 
   /* ── Responsive ── */
@@ -419,11 +448,26 @@
 
 </div>
 
+<!-- ═══════════════════════════════════════════
+     BOTTOM NAV: queue (left) · admin page (center) · queue settings (right)
+     ═══════════════════════════════════════════ -->
 <nav class="bottom-nav">
+  <a href="q.html" class="nav-side"
+     title="ระบบเรียกคิว" aria-label="ระบบเรียกคิว">
+    <span class="nav-side-icon">📣</span>
+    <span class="nav-toggle-tip">ระบบเรียกคิว</span>
+  </a>
+
   <a href="Setting-SurgerySchedule.html" class="nav-toggle"
      title="จัดการตารางผ่าตัด" aria-label="จัดการตารางผ่าตัด">
     <span class="nav-toggle-icon">✏️</span>
     <span class="nav-toggle-tip">จัดการตารางผ่าตัด</span>
+  </a>
+
+  <a href="q-setting.html" class="nav-side"
+     title="ตั้งค่าระบบเรียกคิว" aria-label="ตั้งค่าระบบเรียกคิว">
+    <span class="nav-side-icon">🎫</span>
+    <span class="nav-toggle-tip">ตั้งค่าคิว</span>
   </a>
 </nav>
 
