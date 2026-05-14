@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>Settings – RMUTTO VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   /* ═══════════════════════════════════════════
      DESIGN TOKENS (ORIGINAL DARK)
@@ -52,7 +52,7 @@
     position: sticky; top: 0; z-index: 10;
   }
   .brand-title {
-    font-family: "Outfit", sans-serif;
+    font-family: "Sarabun", sans-serif;
     font-size: 22px;
     font-weight: 700;
     color: #fff;
@@ -107,8 +107,9 @@
   }
 
   .menu-info h3 {
-    font-family: "Outfit", sans-serif;
+    font-family: "Sarabun", sans-serif;
     font-size: 17px;
+    font-weight: 700;
     margin-bottom: 4px;
     color: #fff;
   }
@@ -133,6 +134,23 @@
     color: #fff;
     border-color: rgba(255,255,255,0.2);
     box-shadow: 0 2px 12px rgba(239,68,68,0.4);
+  }
+
+  /* ── Highlighted card for queue calling (teal accent) ── */
+  .menu-card.menu-card-queue {
+    background: linear-gradient(135deg, rgba(14,165,160,0.16), rgba(20,196,188,0.08));
+    border-color: rgba(14,165,160,0.45);
+  }
+  .menu-card.menu-card-queue:hover {
+    background: linear-gradient(135deg, rgba(14,165,160,0.25), rgba(20,196,188,0.15));
+    border-color: var(--teal-light);
+    box-shadow: 0 8px 24px rgba(14,165,160,0.25);
+  }
+  .menu-card.menu-card-queue .menu-icon {
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    color: #fff;
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 2px 12px rgba(14,165,160,0.4);
   }
 
   /* ═══════════════════════════════════════════
@@ -177,7 +195,7 @@
 
 <div class="menu-list">
 
-  <!-- ★ จัดการตารางผ่าตัด รพส. (ใหม่) -->
+  <!-- ★ จัดการตารางผ่าตัด รพส. -->
   <a href="Setting-SurgerySchedule.html" class="menu-card menu-card-vh-schedule">
     <div class="menu-icon">📅</div>
     <div class="menu-info">
@@ -207,6 +225,24 @@
     <div class="menu-info">
       <h3>จัดการฐานข้อมูล</h3>
       <p>สรุปสถิติและล้างข้อมูลเพื่อเริ่มค่ายใหม่</p>
+    </div>
+  </a>
+
+  <!-- ★ ระบบเรียกคิว (NEW) -->
+  <a href="q.html" class="menu-card menu-card-queue">
+    <div class="menu-icon">📣</div>
+    <div class="menu-info">
+      <h3>ระบบเรียกคิว</h3>
+      <p>หน้าจอเรียกคิวสำหรับ TV / Tablet พร้อมเสียงเรียกภาษาไทย</p>
+    </div>
+  </a>
+
+  <!-- ★ ตั้งค่าระบบเรียกคิว (NEW) -->
+  <a href="q-setting.html" class="menu-card">
+    <div class="menu-icon">🎫</div>
+    <div class="menu-info">
+      <h3>ตั้งค่าระบบเรียกคิว</h3>
+      <p>จัดการคิว เพิ่ม/แก้ไข/ลบ · ห้องตรวจ · เสียง ความเร็ว เสียงผู้หญิง/ผู้ชาย</p>
     </div>
   </a>
 
