@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ระบบเรียกคิว – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy:       #0b1929;
+  --navy-mid:   #112240;
+  --teal:       #0ea5a0;
+  --teal-light: #14c4bc;
+  --teal-glow:  rgba(14,165,160,0.4);
+  --primary:    #3b82f6;
+  --primary-light: #60a5fa;
+  --violet:     #8b5cf6;
+  --emerald:    #10b981;
+  --amber:      #f59e0b;
+  --rose:       #ef4444;
+
+  --surface:    rgba(255,255,255,0.04);
+  --surface-2:  rgba(255,255,255,0.07);
+  --surface-3:  rgba(255,255,255,0.11);
+  --border:     rgba(255,255,255,0.10);
+  --text:       #e2e8f0;
+  --text-dim:   #94a3b8;
+  --text-faint: #475569;
+
+  --radius:    12px;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy); color: var(--text);
+  min-height: 100vh; width: 100%;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 90%, rgba(59,130,246,0.06) 0%, transparent 60%);
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-light));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; box-shadow: 0 0 25px var(--teal-glow);
+}
+.brand-name { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 800; color: #fff; line-height: 1; }
+.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+.header-right {
+  display: flex; align-items: center; gap: 10px;
+}
+.clock {
+  font-family: "Outfit", sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--teal-light);
+  letter-spacing: -0.5px;
+}
+.btn-settings {
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 12px; border-radius: 10px;
+  font-family: "Sarabun", sans-serif; font-size: 12px;
+  font-weight: 700; cursor: pointer;
+  text-decoration: none; display: flex; align-items: center; gap: 4px;
+}
+
+/* ── ROOM CONTROL BAR ── */
+.room-bar {
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex; gap: 8px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.room-bar::-webkit-scrollbar { display: none; }
+.room-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; border: none;
+  padding: 10px 16px; border-radius: 10px;
+  font-family: "Sarabun", sans-serif; font-size: 13px;
+  font-weight: 700; cursor: pointer;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  flex-shrink: 0;
+  transition: 0.2s;
+}
+.room-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59,130,246,0.4); }
+.room-btn:active { transform: scale(0.97); }
+.room-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── MAIN ── */
+.wrap {
+  position: relative; z-index: 1;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* ── CURRENT CALL (HERO) ── */
+.call-hero {
+  display: none;
+  background: linear-gradient(135deg, rgba(14,165,160,0.20), rgba(20,196,188,0.10));
+  border: 3px solid var(--teal-light);
+  border-radius: var(--radius-lg);
+  padding: 30px 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 60px var(--teal-glow);
+  animation: heroAppear 0.6s ease both, heroGlow 2s ease-in-out infinite alternate;
+}
+.call-hero.show { display: block; }
+@keyframes heroAppear {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes heroGlow {
+  from { box-shadow: 0 0 40px rgba(14,165,160,0.4); border-color: var(--teal); }
+  to   { box-shadow: 0 0 100px rgba(20,196,188,0.7); border-color: var(--teal-light); }
+}
+
+.call-hero::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at center, transparent 30%, rgba(14,165,160,0.1) 70%);
+  pointer-events: none;
+}
+
+.call-hero-label {
+  font-family: "Outfit", sans-serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--teal-light);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+  animation: labelBlink 1s ease-in-out infinite;
+}
+@keyframes labelBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+.call-hero-main {
+  display: flex; align-items: center; gap: 24px; justify-content: center;
+  flex-wrap: wrap;
+}
+.call-hero-num {
+  font-family: "Outfit", sans-serif;
+  font-size: clamp(120px, 22vw, 280px);
+  font-weight: 900; line-height: 0.9;
+  letter-spacing: -8px;
+  background: linear-gradient(135deg, #fff, var(--teal-light));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 20px rgba(20,196,188,0.6));
+  animation: numPulse 1.5s ease-in-out infinite;
+}
+@keyframes numPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+.call-hero-info { text-align: left; min-width: 0; }
+.call-hero-animal {
+  font-family: "Outfit", sans-serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800; color: #fff;
+  line-height: 1.1;
+  word-break: break-word;
+}
+.call-hero-owner {
+  font-size: clamp(16px, 2.5vw, 26px);
+  color: var(--text-dim);
+  margin-top: 8px;
+  font-weight: 500;
+}
+.call-hero-room {
+  margin-top: 16px;
+  background: linear-gradient(135deg, var(--amber), #fbbf24);
+  color: var(--navy);
+  padding: 12px 24px;
+  border-radius: 100px;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: "Outfit", sans-serif;
+  font-size: clamp(22px, 3vw, 40px);
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(245,158,11,0.4);
+  animation: roomArrow 1s ease-in-out infinite alternate;
+}
+@keyframes roomArrow {
+  from { transform: translateX(0); }
+  to   { transform: translateX(8px); }
+}
+
+/* ── WAITING GRID ── */
+.section-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title .count {
+  background: var(--surface-3);
+  padding: 2px 10px; border-radius: 12px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+  transition: all 0.3s;
+}
+.grid[data-size="lg"] { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.grid[data-size="md"] { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.grid[data-size="sm"] { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.grid[data-size="xs"] { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+
+.q-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s;
+  animation: cardIn 0.4s ease both;
+  position: relative;
+  overflow: hidden;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.8) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.q-card:hover {
+  border-color: var(--teal);
+  background: rgba(14,165,160,0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(14,165,160,0.2);
+}
+.q-card:active { transform: translateY(-1px); }
+.q-card.calling {
+  background: linear-gradient(135deg, rgba(14,165,160,0.3), rgba(20,196,188,0.2));
+  border-color: var(--teal-light);
+  animation: cardCall 1.2s ease-in-out infinite;
+}
+@keyframes cardCall {
+  0%, 100% { box-shadow: 0 0 20px var(--teal-glow); }
+  50%      { box-shadow: 0 0 50px rgba(20,196,188,0.8); }
+}
+
+.q-num {
+  font-family: "Outfit", sans-serif;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, var(--teal-light), var(--teal));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(20,196,188,0.4));
+  margin-bottom: 4px;
+}
+.grid[data-size="lg"] .q-num { font-size: 90px; }
+.grid[data-size="md"] .q-num { font-size: 70px; }
+.grid[data-size="sm"] .q-num { font-size: 52px; }
+.grid[data-size="xs"] .q-num { font-size: 38px; }
+
+.q-name {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800; color: #fff;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.grid[data-size="lg"] .q-name { font-size: 22px; }
+.grid[data-size="md"] .q-name { font-size: 18px; }
+.grid[data-size="sm"] .q-name { font-size: 14px; }
+.grid[data-size="xs"] .q-name { font-size: 12px; }
+
+.q-owner {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.grid[data-size="sm"] .q-owner,
+.grid[data-size="xs"] .q-owner { display: none; }
+
+/* ── Empty state ── */
+.empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-dim);
+}
+.empty-icon { font-size: 64px; opacity: 0.5; margin-bottom: 12px; }
+.empty-text { font-size: 16px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-box {
+  background: var(--navy);
+  border: 2px solid var(--teal);
+  border-radius: 24px;
+  max-width: 480px; width: 100%;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.modal-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 20px; font-weight: 800;
+  color: #fff; margin-bottom: 6px;
+}
+.modal-subtitle {
+  font-size: 14px; color: var(--text-dim);
+  margin-bottom: 20px;
+}
+.modal-q-num {
+  font-family: "Outfit", sans-serif;
+  font-size: 72px; font-weight: 900;
+  background: linear-gradient(135deg, var(--teal-light), var(--teal));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  line-height: 1; margin-bottom: 8px;
+}
+.modal-rooms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 14px;
+}
+@media (max-width: 380px) { .modal-rooms { grid-template-columns: 1fr; } }
+.modal-room-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; border: none;
+  padding: 16px; border-radius: 12px;
+  font-family: "Sarabun", sans-serif; font-size: 16px;
+  font-weight: 700; cursor: pointer;
+  transition: 0.2s;
+}
+.modal-room-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
+.modal-room-btn:active { transform: scale(0.97); }
+.modal-cancel {
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 10px 20px; border-radius: 10px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Audio unlock prompt ── */
+#audioPrompt {
+  display: none;
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--amber), #fbbf24);
+  color: var(--navy);
+  padding: 12px 20px; border-radius: 12px;
+  font-weight: 800; font-size: 14px;
+  cursor: pointer; z-index: 600;
+  box-shadow: 0 10px 30px rgba(245,158,11,0.5);
+  animation: alertSlide 0.4s ease;
+}
+#audioPrompt.show { display: block; }
+@keyframes alertSlide {
+  from { transform: translate(-50%, -100px); opacity: 0; }
+  to   { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* ── TV MODE (?tv=1) ── */
+body.tv-mode .room-bar { display: none; }
+body.tv-mode .btn-settings { display: none; }
+body.tv-mode header { height: 80px; }
+body.tv-mode .brand-name { font-size: 22px; }
+body.tv-mode .brand-sub { font-size: 13px; }
+body.tv-mode .brand-logo { width: 50px; height: 50px; font-size: 24px; }
+body.tv-mode .clock { font-size: 32px; }
+body.tv-mode .section-title { font-size: 20px; }
+body.tv-mode .section-title .count { font-size: 18px; padding: 4px 14px; }
+body.tv-mode .call-hero { padding: 40px 30px; }
+body.tv-mode .call-hero-label { font-size: 24px; }
+body.tv-mode .grid[data-size="lg"] .q-num { font-size: 110px; }
+body.tv-mode .grid[data-size="md"] .q-num { font-size: 84px; }
+body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
+
+@media (max-width: 600px) {
+  .header-right .clock { display: none; }
+  .grid[data-size="lg"] .q-num { font-size: 70px; }
+  .room-btn { font-size: 12px; padding: 8px 12px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">📣</div>
+    <div>
+      <div class="brand-name">ระบบเรียกคิว</div>
+      <div class="brand-sub">Queue Calling System</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="clock" id="clock">--:--</div>
+    <a href="q-setting.html" class="btn-settings">⚙️ ตั้งค่า</a>
+  </div>
+</header>
+
+<div class="room-bar" id="roomBar"></div>
+
+<div id="audioPrompt" onclick="unlockAudio()">🔊 คลิกที่นี่เพื่อเปิดเสียงเรียก</div>
+
+<div class="wrap">
+
+  <!-- Currently called -->
+  <div class="call-hero" id="callHero">
+    <div class="call-hero-label"><span>📢</span> ขอเชิญคิว</div>
+    <div class="call-hero-main">
+      <div class="call-hero-num" id="callNum">—</div>
+      <div class="call-hero-info">
+        <div class="call-hero-animal" id="callAnimal">—</div>
+        <div class="call-hero-owner" id="callOwner">—</div>
+        <div class="call-hero-room" id="callRoom"><span>→</span> <span id="callRoomName">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Waiting grid -->
+  <div>
+    <div class="section-title">
+      ⏳ คิวรอตรวจ <span class="count" id="waitingCount">0</span>
+    </div>
+    <div class="grid" id="grid" data-size="lg">
+      <div class="empty">
+        <div class="empty-icon">⏳</div>
+        <div class="empty-text">กำลังโหลด...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: pick room to call -->
+<div class="modal-overlay" id="callModal" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-q-num" id="modalQNum">—</div>
+    <div class="modal-title" id="modalTitle">เรียกเข้าห้องตรวจ</div>
+    <div class="modal-subtitle" id="modalSubtitle">เลือกห้อง</div>
+    <div class="modal-rooms" id="modalRooms"></div>
+    <button class="modal-cancel" onclick="closeModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+// ═══════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════
+const isTvMode = new URLSearchParams(location.search).get('tv') === '1';
+if (isTvMode) document.body.classList.add('tv-mode');
+
+let allVoices = [];
+let audioCtx = null;
+let audioUnlocked = false;
+let waitingQueues = [];
+let currentCallTimer = null;
+let selectedQueue = null;
+
+// ═══════════════════════════════════════════
+// Settings (จาก localStorage)
+// ═══════════════════════════════════════════
+function getSettings() {
+  return {
+    rooms: JSON.parse(localStorage.getItem('q_rooms') || '["ห้องตรวจ 1","ห้องตรวจ 2"]'),
+    voiceName: localStorage.getItem('q_voice_name') || '',
+    rate: parseFloat(localStorage.getItem('q_speech_rate') || '1.0'),
+    pitch: parseFloat(localStorage.getItem('q_speech_pitch') || '1.0'),
+    repeat: parseInt(localStorage.getItem('q_repeat') || '2')
+  };
+}
+
+// ═══════════════════════════════════════════
+// Clock
+// ═══════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
+  document.getElementById('clock').textContent = t;
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ═══════════════════════════════════════════
+// Audio Unlock
+// ═══════════════════════════════════════════
+async function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { return null; }
+  }
+  if (audioCtx.state === 'suspended') {
+    try { await audioCtx.resume(); } catch (e) {}
+  }
+  return audioCtx;
+}
+
+window.unlockAudio = async function() {
+  const ctx = await ensureAudio();
+  if (ctx && ctx.state === 'running') {
+    audioUnlocked = true;
+    document.getElementById('audioPrompt').classList.remove('show');
+    // เล่นเสียงเงียบเพื่อ confirm
+    try {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      g.gain.value = 0.01;
+      o.connect(g).connect(ctx.destination);
+      o.frequency.value = 440;
+      o.start(); o.stop(ctx.currentTime + 0.05);
+    } catch (e) {}
+    // ปลดล็อก speechSynthesis ด้วย (Safari ต้องมี user gesture)
+    try {
+      const test = new SpeechSynthesisUtterance(' ');
+      test.volume = 0;
+      speechSynthesis.speak(test);
+    } catch (e) {}
+  }
+};
+
+document.addEventListener('click', async () => {
+  if (!audioUnlocked) {
+    await ensureAudio();
+    if (audioCtx && audioCtx.state === 'running') {
+      audioUnlocked = true;
+      document.getElementById('audioPrompt').classList.remove('show');
+    }
+  }
+}, { once: false });
+
+// แสดง prompt ถ้ายังไม่ unlock หลังโหลด
+setTimeout(() => {
+  if (!audioUnlocked) document.getElementById('audioPrompt').classList.add('show');
+}, 1500);
+
+// ═══════════════════════════════════════════
+// Chime (เสียงเตือนก่อนพูด)
+// ═══════════════════════════════════════════
+function playChime() {
+  if (!audioCtx || audioCtx.state !== 'running') return;
+  const t = audioCtx.currentTime;
+  // ding-dong: 880Hz then 660Hz
+  [{ f: 880, d: 0 }, { f: 660, d: 0.35 }].forEach(({ f, d }) => {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g).connect(audioCtx.destination);
+    o.frequency.value = f;
+    o.type = 'sine';
+    g.gain.setValueAtTime(0, t + d);
+    g.gain.linearRampToValueAtTime(0.35, t + d + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + d + 0.5);
+    o.start(t + d);
+    o.stop(t + d + 0.5);
+  });
+}
+
+// ═══════════════════════════════════════════
+// Voices
+// ═══════════════════════════════════════════
+function loadVoices() {
+  allVoices = speechSynthesis.getVoices();
+}
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function speakCall(queueNumber, animalName, ownerName, roomName, times = 2) {
+  speechSynthesis.cancel();
+  const s = getSettings();
+
+  // แปลงตัวเลขเป็นภาษาไทยอ่านง่ายขึ้น (option)
+  const text = `ขอเชิญ คิวหมายเลข ${queueNumber} คุณ ${ownerName} เจ้าของน้อง ${animalName} เข้า ${roomName}`;
+
+  const speakOnce = () => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'th-TH';
+    u.rate = s.rate;
+    u.pitch = s.pitch;
+    if (s.voiceName) {
+      const v = allVoices.find(v => v.name === s.voiceName);
+      if (v) u.voice = v;
+    }
+    speechSynthesis.speak(u);
+  };
+
+  speakOnce();
+  for (let i = 1; i < times; i++) {
+    // ใส่หยุดเงียบสั้นๆ ระหว่างซ้ำ
+    const pause = new SpeechSynthesisUtterance(' ');
+    pause.volume = 0; pause.rate = 0.1;
+    speechSynthesis.speak(pause);
+    setTimeout(speakOnce, 0); // queue ต่อกัน
+  }
+}
+
+// ═══════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function firstName(fullName) {
+  if (!fullName) return '';
+  return fullName.split(/\s+/)[0].replace(/^(นาย|นาง|นางสาว|น\.ส\.|ด\.ช\.|ด\.ญ\.)/, '');
+}
+
+function speciesIcon(s) {
+  if (s === 'ส') return '🐶';
+  if (s === 'ม') return '🐱';
+  return '🐾';
+}
+
+function adaptiveSize(count) {
+  if (count <= 6) return 'lg';
+  if (count <= 16) return 'md';
+  if (count <= 32) return 'sm';
+  return 'xs';
+}
+
+// ═══════════════════════════════════════════
+// Render: Room Bar
+// ═══════════════════════════════════════════
+function renderRoomBar() {
+  const s = getSettings();
+  const bar = document.getElementById('roomBar');
+  if (isTvMode) { bar.style.display = 'none'; return; }
+  bar.innerHTML = s.rooms.map((r, i) => `
+    <button class="room-btn" data-room="${escapeHtml(r)}" onclick="callNext('${escapeHtml(r)}')">
+      📢 เรียกถัดไป → ${escapeHtml(r)}
+    </button>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// Render: Waiting Grid
+// ═══════════════════════════════════════════
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  document.getElementById('waitingCount').textContent = waitingQueues.length;
+
+  if (waitingQueues.length === 0) {
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">ไม่มีคิวรอตรวจ</div></div>`;
+    return;
+  }
+
+  grid.dataset.size = adaptiveSize(waitingQueues.length);
+
+  grid.innerHTML = waitingQueues.map(q => {
+    const a = q.vasd_animal;
+    const owner = a?.vasd_owner?.owner_name || '';
+    return `
+      <div class="q-card" data-animal-id="${a.id}" onclick="openCallModal('${a.id}')">
+        <div class="q-num">${a.queue_number || '-'}</div>
+        <div class="q-name">${speciesIcon(a.species)} ${escapeHtml(a.animal_name)}</div>
+        <div class="q-owner">${escapeHtml(firstName(owner))}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// Load data
+// ═══════════════════════════════════════════
+async function loadWaiting() {
+  try {
+    const { data, error } = await supabase
+      .from('vasd_queue')
+      .select(`
+        id, animal_id, status,
+        vasd_animal(id, queue_number, animal_name, species, sex,
+          vasd_owner(owner_name))
+      `)
+      .eq('status', 'waiting');
+
+    if (error) throw error;
+
+    // sort by queue_number
+    waitingQueues = (data || [])
+      .filter(q => q.vasd_animal)
+      .sort((a, b) => (a.vasd_animal.queue_number || 999) - (b.vasd_animal.queue_number || 999));
+
+    renderGrid();
+  } catch (e) {
+    console.error('[Q] load failed', e);
+    document.getElementById('grid').innerHTML = `<div class="empty"><div class="empty-icon">❌</div><div class="empty-text">โหลดข้อมูลไม่สำเร็จ</div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// Call System
+// ═══════════════════════════════════════════
+const callChannel = supabase.channel('vasd-queue-call', {
+  config: { broadcast: { self: true } }
+});
+
+callChannel.on('broadcast', { event: 'call' }, (payload) => {
+  console.log('[Q] received call', payload);
+  showCallHero(payload.payload);
+}).subscribe();
+
+window.callNext = async function(roomName) {
+  if (waitingQueues.length === 0) {
+    alert('ไม่มีคิวรอตรวจ');
+    return;
+  }
+  // เรียกคิวลำดับน้อยสุด
+  const q = waitingQueues[0];
+  await broadcastCall(q, roomName);
+};
+
+window.openCallModal = function(animalId) {
+  const q = waitingQueues.find(w => w.vasd_animal && w.vasd_animal.id === animalId);
+  if (!q) return;
+  selectedQueue = q;
+  const a = q.vasd_animal;
+  const owner = a?.vasd_owner?.owner_name || '';
+
+  document.getElementById('modalQNum').textContent = a.queue_number || '-';
+  document.getElementById('modalTitle').textContent = `${speciesIcon(a.species)} ${a.animal_name}`;
+  document.getElementById('modalSubtitle').textContent = `${firstName(owner)} — เลือกห้องที่จะเรียก`;
+
+  const s = getSettings();
+  document.getElementById('modalRooms').innerHTML = s.rooms.map(r => `
+    <button class="modal-room-btn" onclick="confirmCall('${escapeHtml(r)}')">${escapeHtml(r)}</button>
+  `).join('');
+
+  document.getElementById('callModal').classList.add('show');
+};
+
+window.confirmCall = async function(roomName) {
+  if (!selectedQueue) return;
+  await broadcastCall(selectedQueue, roomName);
+  closeModal();
+};
+
+window.closeModal = function(ev) {
+  if (ev && ev.target.id !== 'callModal' && ev.type === 'click') return;
+  document.getElementById('callModal').classList.remove('show');
+  selectedQueue = null;
+};
+
+async function broadcastCall(queue, roomName) {
+  const a = queue.vasd_animal;
+  const owner = a?.vasd_owner?.owner_name || '';
+
+  const payload = {
+    callId: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    queueNumber: a.queue_number,
+    animalName: a.animal_name,
+    ownerName: firstName(owner),
+    species: a.species,
+    roomName,
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    await callChannel.send({ type: 'broadcast', event: 'call', payload });
+    console.log('[Q] sent call', payload);
+    // highlight card
+    const card = document.querySelector(`.q-card[data-animal-id="${a.id}"]`);
+    if (card) {
+      card.classList.add('calling');
+      setTimeout(() => card.classList.remove('calling'), 30000);
+    }
+  } catch (e) {
+    console.error('[Q] broadcast failed', e);
+    alert('ส่งสัญญาณไม่สำเร็จ: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════
+// Show "Currently Called" Hero
+// ═══════════════════════════════════════════
+function showCallHero(call) {
+  const hero = document.getElementById('callHero');
+
+  document.getElementById('callNum').textContent = call.queueNumber || '—';
+  document.getElementById('callAnimal').textContent =
+    speciesIcon(call.species) + ' ' + (call.animalName || '—');
+  document.getElementById('callOwner').textContent = call.ownerName ? `คุณ ${call.ownerName}` : '';
+  document.getElementById('callRoomName').textContent = call.roomName || '—';
+
+  hero.classList.add('show');
+  // scroll to top so visible
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // chime + speak
+  playChime();
+  const s = getSettings();
+  setTimeout(() => {
+    speakCall(call.queueNumber, call.animalName, call.ownerName, call.roomName, s.repeat);
+  }, 800);  // delay so chime plays first
+
+  // auto-hide after 30s
+  if (currentCallTimer) clearTimeout(currentCallTimer);
+  currentCallTimer = setTimeout(() => {
+    hero.classList.remove('show');
+  }, 30000);
+}
+
+// ═══════════════════════════════════════════
+// Realtime: listen for queue changes (status updates)
+// ═══════════════════════════════════════════
+supabase.channel('q-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadWaiting)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadWaiting)
+  .subscribe();
+
+// ═══════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════
+renderRoomBar();
+loadWaiting();
+setInterval(loadWaiting, 15000);  // refresh ทุก 15 วินาที (polling fallback)
+</script>
+
+</body>
+</html>
