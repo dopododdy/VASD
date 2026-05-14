@@ -9,7 +9,6 @@
 <style>
 :root {
   --navy:       #0b1929;
-  --navy-mid:   #112240;
   --teal:       #0ea5a0;
   --teal-light: #14c4bc;
   --teal-glow:  rgba(14,165,160,0.4);
@@ -47,7 +46,6 @@ body::before {
     radial-gradient(ellipse 40% 30% at 80% 90%, rgba(59,130,246,0.06) 0%, transparent 60%);
 }
 
-/* ── HEADER ── */
 header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(11,25,41,0.92);
@@ -66,14 +64,11 @@ header {
 .brand-name { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 800; color: #fff; line-height: 1; }
 .brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
 
-.header-right {
-  display: flex; align-items: center; gap: 10px;
-}
+.header-right { display: flex; align-items: center; gap: 10px; }
 .clock {
   font-family: "Outfit", sans-serif;
   font-size: 22px; font-weight: 700;
-  color: var(--teal-light);
-  letter-spacing: -0.5px;
+  color: var(--teal-light); letter-spacing: -0.5px;
 }
 .btn-settings {
   background: var(--surface-2); color: var(--text);
@@ -84,7 +79,6 @@ header {
   text-decoration: none; display: flex; align-items: center; gap: 4px;
 }
 
-/* ── ROOM CONTROL BAR ── */
 .room-bar {
   background: rgba(0,0,0,0.2);
   border-bottom: 1px solid var(--border);
@@ -102,21 +96,17 @@ header {
   white-space: nowrap;
   display: flex; align-items: center; gap: 6px;
   box-shadow: 0 4px 12px rgba(59,130,246,0.3);
-  flex-shrink: 0;
-  transition: 0.2s;
+  flex-shrink: 0; transition: 0.2s;
 }
 .room-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59,130,246,0.4); }
 .room-btn:active { transform: scale(0.97); }
-.room-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* ── MAIN ── */
 .wrap {
   position: relative; z-index: 1;
   padding: 16px;
   display: flex; flex-direction: column; gap: 16px;
 }
 
-/* ── CURRENT CALL (HERO) ── */
 .call-hero {
   display: none;
   background: linear-gradient(135deg, rgba(14,165,160,0.20), rgba(20,196,188,0.10));
@@ -129,36 +119,25 @@ header {
   animation: heroAppear 0.6s ease both, heroGlow 2s ease-in-out infinite alternate;
 }
 .call-hero.show { display: block; }
-@keyframes heroAppear {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
-}
+@keyframes heroAppear { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 @keyframes heroGlow {
   from { box-shadow: 0 0 40px rgba(14,165,160,0.4); border-color: var(--teal); }
   to   { box-shadow: 0 0 100px rgba(20,196,188,0.7); border-color: var(--teal-light); }
 }
-
 .call-hero::before {
   content: ""; position: absolute; inset: 0;
   background: radial-gradient(circle at center, transparent 30%, rgba(14,165,160,0.1) 70%);
   pointer-events: none;
 }
-
 .call-hero-label {
   font-family: "Outfit", sans-serif;
   font-size: 18px; font-weight: 700;
-  color: var(--teal-light);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-bottom: 14px;
+  color: var(--teal-light); letter-spacing: 4px;
+  text-transform: uppercase; margin-bottom: 14px;
   display: flex; align-items: center; gap: 10px;
   animation: labelBlink 1s ease-in-out infinite;
 }
-@keyframes labelBlink {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.5; }
-}
-
+@keyframes labelBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .call-hero-main {
   display: flex; align-items: center; gap: 24px; justify-content: center;
   flex-wrap: wrap;
@@ -174,44 +153,28 @@ header {
   filter: drop-shadow(0 4px 20px rgba(20,196,188,0.6));
   animation: numPulse 1.5s ease-in-out infinite;
 }
-@keyframes numPulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.05); }
-}
-
+@keyframes numPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 .call-hero-info { text-align: left; min-width: 0; }
 .call-hero-animal {
   font-family: "Outfit", sans-serif;
   font-size: clamp(32px, 5vw, 56px);
-  font-weight: 800; color: #fff;
-  line-height: 1.1;
+  font-weight: 800; color: #fff; line-height: 1.1;
   word-break: break-word;
 }
-.call-hero-owner {
-  font-size: clamp(16px, 2.5vw, 26px);
-  color: var(--text-dim);
-  margin-top: 8px;
-  font-weight: 500;
-}
+.call-hero-owner { font-size: clamp(16px, 2.5vw, 26px); color: var(--text-dim); margin-top: 8px; font-weight: 500; }
 .call-hero-room {
   margin-top: 16px;
   background: linear-gradient(135deg, var(--amber), #fbbf24);
   color: var(--navy);
-  padding: 12px 24px;
-  border-radius: 100px;
+  padding: 12px 24px; border-radius: 100px;
   display: inline-flex; align-items: center; gap: 8px;
   font-family: "Outfit", sans-serif;
-  font-size: clamp(22px, 3vw, 40px);
-  font-weight: 800;
+  font-size: clamp(22px, 3vw, 40px); font-weight: 800;
   box-shadow: 0 8px 20px rgba(245,158,11,0.4);
   animation: roomArrow 1s ease-in-out infinite alternate;
 }
-@keyframes roomArrow {
-  from { transform: translateX(0); }
-  to   { transform: translateX(8px); }
-}
+@keyframes roomArrow { from { transform: translateX(0); } to { transform: translateX(8px); } }
 
-/* ── WAITING GRID ── */
 .section-title {
   font-family: "Outfit", sans-serif;
   font-size: 16px; font-weight: 700;
@@ -224,13 +187,11 @@ header {
 .section-title .count {
   background: var(--surface-3);
   padding: 2px 10px; border-radius: 12px;
-  font-size: 14px;
-  color: var(--text);
+  font-size: 14px; color: var(--text);
 }
 
 .grid {
-  display: grid;
-  gap: 10px;
+  display: grid; gap: 10px;
   transition: all 0.3s;
 }
 .grid[data-size="lg"] { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
@@ -274,8 +235,7 @@ header {
 .q-num {
   font-family: "Outfit", sans-serif;
   font-weight: 900;
-  line-height: 1;
-  letter-spacing: -2px;
+  line-height: 1; letter-spacing: -2px;
   background: linear-gradient(135deg, var(--teal-light), var(--teal));
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
@@ -300,24 +260,14 @@ header {
 .grid[data-size="sm"] .q-name { font-size: 14px; }
 .grid[data-size="xs"] .q-name { font-size: 12px; }
 
-.q-owner {
-  font-size: 12px;
-  color: var(--text-dim);
-  white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
-}
+.q-owner { font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .grid[data-size="sm"] .q-owner,
 .grid[data-size="xs"] .q-owner { display: none; }
 
-/* ── Empty state ── */
-.empty {
-  text-align: center; padding: 60px 20px;
-  color: var(--text-dim);
-}
+.empty { text-align: center; padding: 60px 20px; color: var(--text-dim); }
 .empty-icon { font-size: 64px; opacity: 0.5; margin-bottom: 12px; }
 .empty-text { font-size: 16px; }
 
-/* ── Modal ── */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 800;
   background: rgba(0,0,0,0.75);
@@ -340,19 +290,9 @@ header {
   box-shadow: 0 30px 80px rgba(0,0,0,0.6);
   animation: modalIn 0.3s ease;
 }
-@keyframes modalIn {
-  from { transform: scale(0.85); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-.modal-title {
-  font-family: "Outfit", sans-serif;
-  font-size: 20px; font-weight: 800;
-  color: #fff; margin-bottom: 6px;
-}
-.modal-subtitle {
-  font-size: 14px; color: var(--text-dim);
-  margin-bottom: 20px;
-}
+@keyframes modalIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-title { font-family: "Outfit", sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.modal-subtitle { font-size: 14px; color: var(--text-dim); margin-bottom: 20px; }
 .modal-q-num {
   font-family: "Outfit", sans-serif;
   font-size: 72px; font-weight: 900;
@@ -361,22 +301,16 @@ header {
   color: transparent;
   line-height: 1; margin-bottom: 8px;
 }
-.modal-rooms {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 14px;
-}
+.modal-rooms { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 @media (max-width: 380px) { .modal-rooms { grid-template-columns: 1fr; } }
 .modal-room-btn {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
   color: #fff; border: none;
   padding: 16px; border-radius: 12px;
   font-family: "Sarabun", sans-serif; font-size: 16px;
-  font-weight: 700; cursor: pointer;
-  transition: 0.2s;
+  font-weight: 700; cursor: pointer; transition: 0.2s;
 }
 .modal-room-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
-.modal-room-btn:active { transform: scale(0.97); }
 .modal-cancel {
   background: transparent; color: var(--text-dim);
   border: 1px solid var(--border);
@@ -385,7 +319,6 @@ header {
   cursor: pointer;
 }
 
-/* ── Audio unlock prompt ── */
 #audioPrompt {
   display: none;
   position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
@@ -403,7 +336,6 @@ header {
   to   { transform: translate(-50%, 0); opacity: 1; }
 }
 
-/* ── TV MODE (?tv=1) ── */
 body.tv-mode .room-bar { display: none; }
 body.tv-mode .btn-settings { display: none; }
 body.tv-mode header { height: 80px; }
@@ -447,8 +379,6 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
 <div id="audioPrompt" onclick="unlockAudio()">🔊 คลิกที่นี่เพื่อเปิดเสียงเรียก</div>
 
 <div class="wrap">
-
-  <!-- Currently called -->
   <div class="call-hero" id="callHero">
     <div class="call-hero-label"><span>📢</span> ขอเชิญคิว</div>
     <div class="call-hero-main">
@@ -461,22 +391,16 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     </div>
   </div>
 
-  <!-- Waiting grid -->
   <div>
     <div class="section-title">
       ⏳ คิวรอตรวจ <span class="count" id="waitingCount">0</span>
     </div>
     <div class="grid" id="grid" data-size="lg">
-      <div class="empty">
-        <div class="empty-icon">⏳</div>
-        <div class="empty-text">กำลังโหลด...</div>
-      </div>
+      <div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">กำลังโหลด...</div></div>
     </div>
   </div>
-
 </div>
 
-<!-- Modal: pick room to call -->
 <div class="modal-overlay" id="callModal" onclick="closeModal(event)">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-q-num" id="modalQNum">—</div>
@@ -503,9 +427,6 @@ let waitingQueues = [];
 let currentCallTimer = null;
 let selectedQueue = null;
 
-// ═══════════════════════════════════════════
-// Settings (จาก localStorage)
-// ═══════════════════════════════════════════
 function getSettings() {
   return {
     rooms: JSON.parse(localStorage.getItem('q_rooms') || '["ห้องตรวจ 1","ห้องตรวจ 2"]'),
@@ -516,18 +437,15 @@ function getSettings() {
   };
 }
 
-// ═══════════════════════════════════════════
-// Clock
-// ═══════════════════════════════════════════
 function updateClock() {
   const now = new Date();
-  const t = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
-  document.getElementById('clock').textContent = t;
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 setInterval(updateClock, 1000); updateClock();
 
 // ═══════════════════════════════════════════
-// Audio Unlock
+// Audio
 // ═══════════════════════════════════════════
 async function ensureAudio() {
   if (!audioCtx) {
@@ -545,20 +463,14 @@ window.unlockAudio = async function() {
   if (ctx && ctx.state === 'running') {
     audioUnlocked = true;
     document.getElementById('audioPrompt').classList.remove('show');
-    // เล่นเสียงเงียบเพื่อ confirm
     try {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      g.gain.value = 0.01;
-      o.connect(g).connect(ctx.destination);
-      o.frequency.value = 440;
-      o.start(); o.stop(ctx.currentTime + 0.05);
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      g.gain.value = 0.01; o.connect(g).connect(ctx.destination);
+      o.frequency.value = 440; o.start(); o.stop(ctx.currentTime + 0.05);
     } catch (e) {}
-    // ปลดล็อก speechSynthesis ด้วย (Safari ต้องมี user gesture)
     try {
       const test = new SpeechSynthesisUtterance(' ');
-      test.volume = 0;
-      speechSynthesis.speak(test);
+      test.volume = 0; speechSynthesis.speak(test);
     } catch (e) {}
   }
 };
@@ -571,72 +483,114 @@ document.addEventListener('click', async () => {
       document.getElementById('audioPrompt').classList.remove('show');
     }
   }
-}, { once: false });
+});
 
-// แสดง prompt ถ้ายังไม่ unlock หลังโหลด
 setTimeout(() => {
   if (!audioUnlocked) document.getElementById('audioPrompt').classList.add('show');
 }, 1500);
 
-// ═══════════════════════════════════════════
-// Chime (เสียงเตือนก่อนพูด)
-// ═══════════════════════════════════════════
 function playChime() {
   if (!audioCtx || audioCtx.state !== 'running') return;
   const t = audioCtx.currentTime;
-  // ding-dong: 880Hz then 660Hz
   [{ f: 880, d: 0 }, { f: 660, d: 0.35 }].forEach(({ f, d }) => {
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
+    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
     o.connect(g).connect(audioCtx.destination);
-    o.frequency.value = f;
-    o.type = 'sine';
+    o.frequency.value = f; o.type = 'sine';
     g.gain.setValueAtTime(0, t + d);
     g.gain.linearRampToValueAtTime(0.35, t + d + 0.05);
     g.gain.exponentialRampToValueAtTime(0.001, t + d + 0.5);
-    o.start(t + d);
-    o.stop(t + d + 0.5);
+    o.start(t + d); o.stop(t + d + 0.5);
   });
+}
+
+// ═══════════════════════════════════════════
+// ★ Number → Thai
+// ═══════════════════════════════════════════
+function numberToThai(n) {
+  if (n == null) return '';
+  n = parseInt(n);
+  if (isNaN(n)) return '';
+  const d = ['ศูนย์','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'];
+  if (n === 0) return d[0];
+  if (n < 0) return 'ลบ ' + numberToThai(-n);
+  if (n < 10) return d[n];
+  if (n === 10) return 'สิบ';
+  if (n < 20) return n === 11 ? 'สิบเอ็ด' : 'สิบ' + d[n - 10];
+  if (n < 100) {
+    const t = Math.floor(n / 10), o = n % 10;
+    const tens = t === 2 ? 'ยี่สิบ' : d[t] + 'สิบ';
+    if (o === 0) return tens;
+    if (o === 1) return tens + 'เอ็ด';
+    return tens + d[o];
+  }
+  if (n < 1000) {
+    const h = Math.floor(n / 100), r = n % 100;
+    return d[h] + 'ร้อย' + (r === 0 ? '' : numberToThai(r));
+  }
+  // > 999: อ่านทีละหลัก
+  return String(n).split('').map(c => d[+c]).join(' ');
 }
 
 // ═══════════════════════════════════════════
 // Voices
 // ═══════════════════════════════════════════
-function loadVoices() {
-  allVoices = speechSynthesis.getVoices();
-}
+function loadVoices() { allVoices = speechSynthesis.getVoices(); }
 loadVoices();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = loadVoices;
-}
+if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
 
+// ═══════════════════════════════════════════
+// ★ Speak Call — แยก 3 ประโยค + slow rate ตรงเลข + เว้น 1 วินาที
+// ═══════════════════════════════════════════
 function speakCall(queueNumber, animalName, ownerName, roomName, times = 2) {
   speechSynthesis.cancel();
   const s = getSettings();
+  const voice = s.voiceName ? allVoices.find(v => v.name === s.voiceName) : null;
+  const thaiNum = numberToThai(queueNumber);
 
-  // แปลงตัวเลขเป็นภาษาไทยอ่านง่ายขึ้น (option)
-  const text = `ขอเชิญ คิวหมายเลข ${queueNumber} คุณ ${ownerName} เจ้าของน้อง ${animalName} เข้า ${roomName}`;
-
-  const speakOnce = () => {
+  function makeUtter(text, rateMul = 1) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'th-TH';
-    u.rate = s.rate;
+    u.rate = s.rate * rateMul;
     u.pitch = s.pitch;
-    if (s.voiceName) {
-      const v = allVoices.find(v => v.name === s.voiceName);
-      if (v) u.voice = v;
-    }
-    speechSynthesis.speak(u);
-  };
-
-  speakOnce();
-  for (let i = 1; i < times; i++) {
-    // ใส่หยุดเงียบสั้นๆ ระหว่างซ้ำ
-    const pause = new SpeechSynthesisUtterance(' ');
-    pause.volume = 0; pause.rate = 0.1;
-    speechSynthesis.speak(pause);
-    setTimeout(speakOnce, 0); // queue ต่อกัน
+    if (voice) u.voice = voice;
+    return u;
   }
+
+  // หนึ่งรอบ = 3 ประโยค + 1 sec pause
+  function speakRound() {
+    return new Promise(resolve => {
+      // ส่วนที่ 1: "ขอเชิญ คิวหมายเลข"
+      const u1 = makeUtter('ขอเชิญ คิวหมายเลข', 1.0);
+
+      // ★ ส่วนที่ 2: เลขคิว (slow rate = เสียงยาวขึ้น)
+      const u2 = makeUtter(thaiNum, 0.6);
+
+      // ส่วนที่ 3: "คุณ X เจ้าของน้อง Y เข้า Z"
+      const u3 = makeUtter(`คุณ ${ownerName || ''} เจ้าของน้อง ${animalName || ''} เข้า ${roomName || ''}`, 1.0);
+
+      const safety = setTimeout(resolve, 30000);
+
+      u1.onend  = () => speechSynthesis.speak(u2);
+      u1.onerror = u1.onend;
+
+      // ★ หลังพูดเลขจบ → รอ 1 วินาที → พูดต่อ
+      u2.onend  = () => setTimeout(() => speechSynthesis.speak(u3), 1000);
+      u2.onerror = u2.onend;
+
+      u3.onend  = () => { clearTimeout(safety); resolve(); };
+      u3.onerror = u3.onend;
+
+      speechSynthesis.speak(u1);
+    });
+  }
+
+  // พูดตามจำนวนครั้งที่ตั้งไว้ (default 2)
+  (async () => {
+    for (let i = 0; i < times; i++) {
+      await speakRound();
+      if (i < times - 1) await new Promise(r => setTimeout(r, 700));
+    }
+  })();
 }
 
 // ═══════════════════════════════════════════
@@ -647,18 +601,15 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
 function firstName(fullName) {
   if (!fullName) return '';
   return fullName.split(/\s+/)[0].replace(/^(นาย|นาง|นางสาว|น\.ส\.|ด\.ช\.|ด\.ญ\.)/, '');
 }
-
 function speciesIcon(s) {
   if (s === 'ส') return '🐶';
   if (s === 'ม') return '🐱';
   return '🐾';
 }
-
 function adaptiveSize(count) {
   if (count <= 6) return 'lg';
   if (count <= 16) return 'md';
@@ -667,33 +618,27 @@ function adaptiveSize(count) {
 }
 
 // ═══════════════════════════════════════════
-// Render: Room Bar
+// Render
 // ═══════════════════════════════════════════
 function renderRoomBar() {
   const s = getSettings();
   const bar = document.getElementById('roomBar');
   if (isTvMode) { bar.style.display = 'none'; return; }
-  bar.innerHTML = s.rooms.map((r, i) => `
-    <button class="room-btn" data-room="${escapeHtml(r)}" onclick="callNext('${escapeHtml(r)}')">
+  bar.innerHTML = s.rooms.map(r => `
+    <button class="room-btn" onclick="callNext('${escapeHtml(r)}')">
       📢 เรียกถัดไป → ${escapeHtml(r)}
     </button>
   `).join('');
 }
 
-// ═══════════════════════════════════════════
-// Render: Waiting Grid
-// ═══════════════════════════════════════════
 function renderGrid() {
   const grid = document.getElementById('grid');
   document.getElementById('waitingCount').textContent = waitingQueues.length;
-
   if (waitingQueues.length === 0) {
     grid.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">ไม่มีคิวรอตรวจ</div></div>`;
     return;
   }
-
   grid.dataset.size = adaptiveSize(waitingQueues.length);
-
   grid.innerHTML = waitingQueues.map(q => {
     const a = q.vasd_animal;
     const owner = a?.vasd_owner?.owner_name || '';
@@ -707,9 +652,6 @@ function renderGrid() {
   }).join('');
 }
 
-// ═══════════════════════════════════════════
-// Load data
-// ═══════════════════════════════════════════
 async function loadWaiting() {
   try {
     const { data, error } = await supabase
@@ -720,14 +662,10 @@ async function loadWaiting() {
           vasd_owner(owner_name))
       `)
       .eq('status', 'waiting');
-
     if (error) throw error;
-
-    // sort by queue_number
     waitingQueues = (data || [])
       .filter(q => q.vasd_animal)
       .sort((a, b) => (a.vasd_animal.queue_number || 999) - (b.vasd_animal.queue_number || 999));
-
     renderGrid();
   } catch (e) {
     console.error('[Q] load failed', e);
@@ -748,13 +686,8 @@ callChannel.on('broadcast', { event: 'call' }, (payload) => {
 }).subscribe();
 
 window.callNext = async function(roomName) {
-  if (waitingQueues.length === 0) {
-    alert('ไม่มีคิวรอตรวจ');
-    return;
-  }
-  // เรียกคิวลำดับน้อยสุด
-  const q = waitingQueues[0];
-  await broadcastCall(q, roomName);
+  if (waitingQueues.length === 0) { alert('ไม่มีคิวรอตรวจ'); return; }
+  await broadcastCall(waitingQueues[0], roomName);
 };
 
 window.openCallModal = function(animalId) {
@@ -763,16 +696,13 @@ window.openCallModal = function(animalId) {
   selectedQueue = q;
   const a = q.vasd_animal;
   const owner = a?.vasd_owner?.owner_name || '';
-
   document.getElementById('modalQNum').textContent = a.queue_number || '-';
   document.getElementById('modalTitle').textContent = `${speciesIcon(a.species)} ${a.animal_name}`;
   document.getElementById('modalSubtitle').textContent = `${firstName(owner)} — เลือกห้องที่จะเรียก`;
-
   const s = getSettings();
   document.getElementById('modalRooms').innerHTML = s.rooms.map(r => `
     <button class="modal-room-btn" onclick="confirmCall('${escapeHtml(r)}')">${escapeHtml(r)}</button>
   `).join('');
-
   document.getElementById('callModal').classList.add('show');
 };
 
@@ -791,7 +721,6 @@ window.closeModal = function(ev) {
 async function broadcastCall(queue, roomName) {
   const a = queue.vasd_animal;
   const owner = a?.vasd_owner?.owner_name || '';
-
   const payload = {
     callId: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
     queueNumber: a.queue_number,
@@ -801,66 +730,45 @@ async function broadcastCall(queue, roomName) {
     roomName,
     timestamp: new Date().toISOString()
   };
-
   try {
     await callChannel.send({ type: 'broadcast', event: 'call', payload });
-    console.log('[Q] sent call', payload);
-    // highlight card
     const card = document.querySelector(`.q-card[data-animal-id="${a.id}"]`);
     if (card) {
       card.classList.add('calling');
       setTimeout(() => card.classList.remove('calling'), 30000);
     }
   } catch (e) {
-    console.error('[Q] broadcast failed', e);
     alert('ส่งสัญญาณไม่สำเร็จ: ' + e.message);
   }
 }
 
-// ═══════════════════════════════════════════
-// Show "Currently Called" Hero
-// ═══════════════════════════════════════════
 function showCallHero(call) {
   const hero = document.getElementById('callHero');
-
   document.getElementById('callNum').textContent = call.queueNumber || '—';
-  document.getElementById('callAnimal').textContent =
-    speciesIcon(call.species) + ' ' + (call.animalName || '—');
+  document.getElementById('callAnimal').textContent = speciesIcon(call.species) + ' ' + (call.animalName || '—');
   document.getElementById('callOwner').textContent = call.ownerName ? `คุณ ${call.ownerName}` : '';
   document.getElementById('callRoomName').textContent = call.roomName || '—';
-
   hero.classList.add('show');
-  // scroll to top so visible
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // chime + speak
   playChime();
   const s = getSettings();
   setTimeout(() => {
     speakCall(call.queueNumber, call.animalName, call.ownerName, call.roomName, s.repeat);
-  }, 800);  // delay so chime plays first
+  }, 800);
 
-  // auto-hide after 30s
   if (currentCallTimer) clearTimeout(currentCallTimer);
-  currentCallTimer = setTimeout(() => {
-    hero.classList.remove('show');
-  }, 30000);
+  currentCallTimer = setTimeout(() => hero.classList.remove('show'), 30000);
 }
 
-// ═══════════════════════════════════════════
-// Realtime: listen for queue changes (status updates)
-// ═══════════════════════════════════════════
 supabase.channel('q-changes')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadWaiting)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_animal' }, loadWaiting)
   .subscribe();
 
-// ═══════════════════════════════════════════
-// Init
-// ═══════════════════════════════════════════
 renderRoomBar();
 loadWaiting();
-setInterval(loadWaiting, 15000);  // refresh ทุก 15 วินาที (polling fallback)
+setInterval(loadWaiting, 15000);
 </script>
 
 </body>
