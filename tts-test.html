@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>TTS Diagnostic – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Sarabun", sans-serif;
+    background: #0b1929;
+    color: #e2e8f0;
+    padding: 24px;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  h1 {
+    color: #14c4bc;
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: #94a3b8;
+    margin-bottom: 24px;
+    font-size: 16px;
+  }
+  .verdict {
+    background: linear-gradient(135deg, rgba(14,165,160,0.15), rgba(20,196,188,0.05));
+    border: 2px solid #14c4bc;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .verdict.ok    { border-color: #10b981; background: rgba(16,185,129,0.1); }
+  .verdict.warn  { border-color: #f59e0b; background: rgba(245,158,11,0.1); }
+  .verdict.fail  { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+
+  section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  section h2 {
+    color: #fff;
+    font-size: 22px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .badge.ok   { background: #10b981; color: #fff; }
+  .badge.fail { background: #ef4444; color: #fff; }
+  .badge.warn { background: #f59e0b; color: #000; }
+  .badge.idle { background: rgba(255,255,255,0.1); color: #94a3b8; }
+
+  pre {
+    background: rgba(0,0,0,0.4);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    color: #cbd5e1;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 8px 0;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  button {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    color: #fff;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 6px 4px;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  }
+  button:focus {
+    outline: 4px solid #14c4bc;
+    outline-offset: 2px;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    font-size: 15px;
+    min-height: 24px;
+  }
+  .result.ok   { border-left: 4px solid #10b981; color: #6ee7b7; }
+  .result.fail { border-left: 4px solid #ef4444; color: #fca5a5; }
+  .result.info { border-left: 4px solid #3b82f6; color: #93c5fd; }
+
+  .big-btn {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #0b1929;
+    font-size: 22px;
+    padding: 20px 32px;
+    width: 100%;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🔧 TTS Diagnostic</h1>
+<p class="subtitle">หน้าทดสอบเสียงภาษาไทยสำหรับ Smart TV / มือถือ / PC</p>
+
+<div class="verdict" id="verdict">⏳ กำลังตรวจสอบ...</div>
+
+<button class="big-btn" id="runAll">▶ รันทดสอบทั้งหมดอัตโนมัติ</button>
+
+<!-- ════════════ 1. Browser ════════════ -->
+<section>
+  <h2>1️⃣ ข้อมูลเครื่อง <span class="badge idle" id="b1">รอ</span></h2>
+  <pre id="browserInfo"></pre>
+</section>
+
+<!-- ════════════ 2. Web Speech ════════════ -->
+<section>
+  <h2>2️⃣ Web Speech API <span class="badge idle" id="b2">รอ</span></h2>
+  <pre id="voicesInfo"></pre>
+  <div class="button-row">
+    <button id="btnTestWebSpeech">▶ ทดสอบพูด (Web Speech)</button>
+  </div>
+  <div class="result" id="r2">กดปุ่มเพื่อทดสอบ</div>
+</section>
+
+<!-- ════════════ 3. Audio URL — Google Translate ════════════ -->
+<section>
+  <h2>3️⃣ Audio URL: Google Translate <span class="badge idle" id="b3">รอ</span></h2>
+  <p style="color:#94a3b8; font-size:14px; margin-bottom:8px;">
+    ทดสอบดึง MP3 จาก translate.google.com แล้วเล่นผ่าน &lt;audio&gt;
+  </p>
+  <div class="button-row">
+    <button id="btnTestGoogle1">▶ ทดสอบ client=tw-ob</button>
+    <button id="btnTestGoogle2">▶ ทดสอบ client=gtx</button>
+  </div>
+  <audio id="audio3" controls style="width:100%; margin-top:10px;"></audio>
+  <div class="result" id="r3">กดปุ่มเพื่อทดสอบ</div>
+</section>
+
+<!-- ════════════ 4. Network ════════════ -->
+<section>
+  <h2>4️⃣ Network access <span class="badge idle" id="b4">รอ</span></h2>
+  <div class="button-row">
+    <button id="btnTestFetch">▶ ทดสอบ fetch translate.google.com</button>
+  </div>
+  <pre id="r4">กดปุ่มเพื่อทดสอบ</pre>
+</section>
+
+<!-- ════════════ 5. Audio playback ════════════ -->
+<section>
+  <h2>5️⃣ การเล่น MP3 (ทดสอบ codec) <span class="badge idle" id="b5">รอ</span></h2>
+  <p style="color:#94a3b8; font-size:14px; margin-bottom:8px;">
+    ทดสอบเล่นไฟล์ MP3 ขนาดเล็ก เพื่อดูว่า browser ของ TV เล่น MP3 ได้ไหม
+  </p>
+  <div class="button-row">
+    <button id="btnTestMp3">▶ ทดสอบเล่น MP3 ทดสอบ</button>
+  </div>
+  <audio id="audio5" controls style="width:100%; margin-top:10px;"></audio>
+  <div class="result" id="r5">กดปุ่มเพื่อทดสอบ</div>
+</section>
+
+<section>
+  <h2>📋 สรุปการตรวจ</h2>
+  <pre id="summary">ยังไม่ได้รัน</pre>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var results = {
+    browser: '?',
+    webSpeech: '?',
+    googleTTS: '?',
+    network: '?',
+    mp3: '?'
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  function setBadge(id, status, text) {
+    var el = $(id);
+    el.className = 'badge ' + status;
+    el.textContent = text;
+  }
+
+  function setResult(id, status, text) {
+    var el = $(id);
+    el.className = 'result ' + status;
+    el.textContent = text;
+  }
+
+  function updateVerdict() {
+    var v = $('verdict');
+    if (results.webSpeech === 'ok-thai') {
+      v.className = 'verdict ok';
+      v.textContent = '✅ Web Speech API มีเสียงไทย → ใช้ TTS ในตัวเครื่องได้';
+    } else if (results.googleTTS === 'ok') {
+      v.className = 'verdict ok';
+      v.textContent = '✅ Audio URL (Google Translate) ใช้ได้ → fallback จะทำงาน';
+    } else if (results.network === 'fail') {
+      v.className = 'verdict fail';
+      v.textContent = '❌ Network ไม่สามารถเข้าถึง translate.google.com — Firewall คลินิกอาจปิดกั้น';
+    } else if (results.mp3 === 'fail') {
+      v.className = 'verdict fail';
+      v.textContent = '❌ TV นี้เล่น MP3 ไม่ได้ — ต้องใช้ format อื่น';
+    } else {
+      v.className = 'verdict warn';
+      v.textContent = '⏳ ยังตรวจไม่ครบ — กดทดสอบให้ครบ';
+    }
+
+    $('summary').textContent =
+      'Browser:    ' + results.browser + '\n' +
+      'Web Speech: ' + results.webSpeech + '\n' +
+      'Google TTS: ' + results.googleTTS + '\n' +
+      'Network:    ' + results.network + '\n' +
+      'MP3 codec:  ' + results.mp3;
+  }
+
+  // ─── 1. Browser Info ───
+  function runBrowserInfo() {
+    var info =
+      'UserAgent: ' + navigator.userAgent + '\n' +
+      'Platform:  ' + (navigator.platform || '?') + '\n' +
+      'Language:  ' + (navigator.language || '?') + '\n' +
+      'Online:    ' + navigator.onLine + '\n' +
+      'Cookies:   ' + navigator.cookieEnabled + '\n' +
+      'Vendor:    ' + (navigator.vendor || '?');
+    $('browserInfo').textContent = info;
+    results.browser = 'ok';
+    setBadge('b1', 'ok', 'OK');
+    updateVerdict();
+  }
+
+  // ─── 2. Web Speech ───
+  function listVoices() {
+    if (!window.speechSynthesis) {
+      $('voicesInfo').textContent = '❌ window.speechSynthesis ไม่มีในเครื่องนี้';
+      results.webSpeech = 'no-api';
+      setBadge('b2', 'fail', 'ไม่มี API');
+      updateVerdict();
+      return;
+    }
+    var voices = window.speechSynthesis.getVoices() || [];
+    var thaiVoices = [];
+    var lines = ['จำนวน voices ทั้งหมด: ' + voices.length, ''];
+    for (var i = 0; i < voices.length; i++) {
+      var lang = (voices[i].lang || '').toLowerCase();
+      var isThai = lang.indexOf('th') === 0;
+      if (isThai) thaiVoices.push(voices[i]);
+      lines.push((isThai ? '🇹🇭 ' : '   ') + voices[i].name + '  [' + voices[i].lang + ']' +
+                 (voices[i].localService ? ' (local)' : ' (remote)'));
+    }
+    lines.push('');
+    lines.push('เสียงไทยที่พบ: ' + thaiVoices.length + ' เสียง');
+    $('voicesInfo').textContent = lines.join('\n');
+
+    if (thaiVoices.length > 0) {
+      results.webSpeech = 'ok-thai';
+      setBadge('b2', 'ok', 'มีเสียงไทย ' + thaiVoices.length);
+    } else if (voices.length > 0) {
+      results.webSpeech = 'no-thai';
+      setBadge('b2', 'warn', 'มี API แต่ไม่มีเสียงไทย');
+    } else {
+      results.webSpeech = 'no-voices';
+      setBadge('b2', 'warn', 'API มีแต่ getVoices() ว่าง');
+    }
+    updateVerdict();
+  }
+
+  // voices มักโหลดแบบ async
+  listVoices();
+  if (window.speechSynthesis && typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
+    window.speechSynthesis.onvoiceschanged = listVoices;
+  }
+  setTimeout(listVoices, 1500);
+
+  $('btnTestWebSpeech').onclick = function () {
+    if (!window.speechSynthesis) {
+      setResult('r2', 'fail', 'ไม่มี speechSynthesis API');
+      return;
+    }
+    setResult('r2', 'info', '⏳ กำลังพูด: "สวัสดีครับ ทดสอบเสียงภาษาไทย หนึ่ง สอง สาม"');
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance('สวัสดีครับ ทดสอบเสียงภาษาไทย หนึ่ง สอง สาม');
+    u.lang = 'th-TH';
+    var startedAt = Date.now();
+    var startFired = false;
+    u.onstart = function () {
+      startFired = true;
+      setResult('r2', 'info', '🔊 เริ่มพูดแล้ว — คุณได้ยินเสียงไทยที่ถูกต้องไหม?');
+    };
+    u.onend = function () {
+      var elapsed = Date.now() - startedAt;
+      if (!startFired) {
+        setResult('r2', 'fail', '❌ ไม่มี onstart event — TV นี้ไม่ได้พูดจริง (' + elapsed + 'ms)');
+      } else {
+        setResult('r2', 'ok', '✅ พูดเสร็จ (' + elapsed + 'ms) — ถ้าเงียบหรือพูดมั่ว แสดงว่าไม่มีเสียงไทยจริง');
+      }
+    };
+    u.onerror = function (e) {
+      setResult('r2', 'fail', '❌ Error: ' + (e.error || 'unknown'));
+    };
+    window.speechSynthesis.speak(u);
+  };
+
+  // ─── 3. Google Translate TTS ───
+  function testGoogleTTS(clientType) {
+    var text = 'สวัสดีครับ ทดสอบเสียงภาษาไทย หนึ่ง สอง สาม';
+    var url = 'https://translate.google.com/translate_tts'
+            + '?ie=UTF-8&tl=th&client=' + clientType
+            + '&q=' + encodeURIComponent(text);
+    setResult('r3', 'info', '⏳ กำลังโหลด: ' + url.substring(0, 80) + '...');
+
+    var audio = $('audio3');
+    audio.src = url;
+    audio.onerror = function () {
+      var code = audio.error ? audio.error.code : '?';
+      var msg = audio.error ? audio.error.message : '';
+      setResult('r3', 'fail', '❌ audio.error code=' + code + ' (1=ABORT 2=NETWORK 3=DECODE 4=SRC_NOT_SUPPORTED) ' + msg);
+      results.googleTTS = 'fail';
+      setBadge('b3', 'fail', 'ล้มเหลว');
+      updateVerdict();
+    };
+    audio.oncanplay = function () {
+      setResult('r3', 'info', '✅ โหลดเสียงสำเร็จ (oncanplay) — กำลังเล่น...');
+    };
+    audio.onended = function () {
+      setResult('r3', 'ok', '✅ เล่นจบ — ได้ยินเสียงไทยที่ถูกต้องไหม? ถ้าได้ยิน TTS ใช้ได้!');
+      results.googleTTS = 'ok';
+      setBadge('b3', 'ok', 'ใช้ได้');
+      updateVerdict();
+    };
+
+    var pp = audio.play();
+    if (pp && typeof pp.then === 'function') {
+      pp.then(
+        function () {
+          setResult('r3', 'info', '✅ play() ผ่าน — กำลังเล่น (รอจนจบ)');
+        },
+        function (e) {
+          setResult('r3', 'fail', '❌ play() rejected: ' + (e.message || e.name));
+          results.googleTTS = 'play-blocked';
+          setBadge('b3', 'fail', 'play() ถูกบล็อก');
+          updateVerdict();
+        }
+      );
+    }
+  }
+  $('btnTestGoogle1').onclick = function () { testGoogleTTS('tw-ob'); };
+  $('btnTestGoogle2').onclick = function () { testGoogleTTS('gtx'); };
+
+  // ─── 4. Network ───
+  $('btnTestFetch').onclick = function () {
+    $('r4').textContent = '⏳ กำลัง fetch...';
+    var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=th&client=tw-ob&q=test';
+    try {
+      fetch(url, { method: 'GET', mode: 'no-cors' }).then(
+        function (res) {
+          $('r4').textContent = '✅ fetch กลับมาแล้ว\n'
+            + 'status: ' + res.status + '\n'
+            + 'type: ' + res.type + '\n'
+            + '(no-cors mode ดังนั้น header อ่านไม่ได้ — แต่ถ้ามาถึงนี่ network OK)';
+          results.network = 'ok';
+          setBadge('b4', 'ok', 'OK');
+          updateVerdict();
+        },
+        function (e) {
+          $('r4').textContent = '❌ fetch ล้มเหลว: ' + e.message
+            + '\n(อาจเป็น network ถูกบล็อก หรือ TV ไม่รองรับ fetch API)';
+          results.network = 'fail';
+          setBadge('b4', 'fail', 'ล้มเหลว');
+          updateVerdict();
+        }
+      );
+    } catch (e) {
+      $('r4').textContent = '❌ fetch ทำงานไม่ได้: ' + e.message;
+      results.network = 'fail';
+      setBadge('b4', 'fail', 'ล้มเหลว');
+      updateVerdict();
+    }
+  };
+
+  // ─── 5. MP3 codec test (data URL — ไม่ต้องโหลดจากเน็ต) ───
+  // ตัวอย่าง MP3 เงียบสั้น ๆ (CC0)
+  var SILENT_MP3 = 'data:audio/mpeg;base64,/+MYxAAAAANIAUAAAASEEB/jwOFM/0MM/90b/+RhST//w4NFwOjf///PZu////9lns5GFDv//l9GlUIEEIAAAgIg8Ir/JGq3/+MYxDsLIj5QMYcoAPwUO80OdmFFKMQ4Y4yPbtKNeHkjUTKamSnSILiMBkR4qhd1bCBPjwOFM/0MM/90b/+RhST//w4NFwOjf///PZu////9lns5GFDv//l9GlUIEEIAAAgIg8Ir/JGq3/+MYxDsLIj5QMYcoAPwUO80OdmFFKMQ4Y4yPbtKNeHkjUTKamSnSILiMBkR4qhd1bCBPj';
+  // หมายเหตุ: data URL นี้อาจไม่ใช่ MP3 valid 100% — ถ้าเล่นไม่ได้แสดงว่า codec มีปัญหา
+  $('btnTestMp3').onclick = function () {
+    setResult('r5', 'info', '⏳ ทดสอบเล่น MP3 ทดสอบ (เสียงเงียบ)');
+    var audio = $('audio5');
+    audio.src = 'https://www.kozco.com/tech/piano2.wav';
+    // ใช้ WAV ตัวอย่างจากเว็บสาธารณะ — ทดสอบทั้ง codec และ network
+    audio.onerror = function () {
+      var code = audio.error ? audio.error.code : '?';
+      setResult('r5', 'fail', '❌ audio.error code=' + code + ' — TV อาจเล่นไฟล์เสียงจากเน็ตไม่ได้');
+      results.mp3 = 'fail';
+      setBadge('b5', 'fail', 'ล้มเหลว');
+      updateVerdict();
+    };
+    audio.oncanplay = function () {
+      setResult('r5', 'ok', '✅ โหลดได้! กดเล่นบน controls ดู');
+      results.mp3 = 'ok';
+      setBadge('b5', 'ok', 'OK');
+      updateVerdict();
+    };
+    audio.load();
+  };
+
+  // ─── Run all ───
+  $('runAll').onclick = function () {
+    $('btnTestWebSpeech').click();
+    setTimeout(function () { $('btnTestGoogle1').click(); }, 4000);
+    setTimeout(function () { $('btnTestFetch').click(); }, 10000);
+    setTimeout(function () { $('btnTestMp3').click(); }, 12000);
+  };
+
+  // ─── Init ───
+  runBrowserInfo();
+  setTimeout(updateVerdict, 2500);
+})();
+</script>
+
+</body>
+</html>

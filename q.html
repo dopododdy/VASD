@@ -505,6 +505,28 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
   var currentCallTimer = null;
   var selectedQueue = null;
 
+  // ─── On-screen log สำหรับ debug บน TV (เปิดด้วย ?debug=1) ───
+  var debugEnabled = false;
+  try { debugEnabled = (location.search || '').indexOf('debug=1') !== -1; } catch (e) {}
+  var logEl = null;
+  function uiLog(msg) {
+    if (!debugEnabled) return;
+    if (!logEl) {
+      logEl = document.createElement('div');
+      logEl.style.cssText = 'position:fixed; bottom:10px; left:10px; right:10px; max-height:30vh; ' +
+        'overflow-y:auto; background:rgba(0,0,0,0.85); color:#0f0; ' +
+        'font-family:monospace; font-size:12px; padding:8px; ' +
+        'border-radius:8px; z-index:9999; white-space:pre-wrap; word-break:break-all;';
+      document.body.appendChild(logEl);
+    }
+    var t = new Date();
+    var ts = ('0'+t.getMinutes()).slice(-2) + ':' + ('0'+t.getSeconds()).slice(-2);
+    logEl.textContent = '[' + ts + '] ' + msg + '\n' + logEl.textContent;
+    // เก็บแค่ 50 บรรทัด
+    var lines = logEl.textContent.split('\n');
+    if (lines.length > 50) logEl.textContent = lines.slice(0, 50).join('\n');
+  }
+
   // ─── safe get: แทน optional chaining ที่ TV เก่าไม่รองรับ ───
   function safe(obj, path) {
     if (!obj) return null;
@@ -760,10 +782,18 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     return chunks;
   }
 
-  function buildTTSUrl(text) {
-    return 'https://translate.google.com/translate_tts'
-      + '?ie=UTF-8&tl=th&client=tw-ob&q=' + encodeURIComponent(text);
+  function buildTTSUrl(text, clientType) {
+    // Google Translate TTS — มีหลาย endpoint, บางตัวอาจถูก rate-limit หรือ block
+    var host = clientType === 'googleapis' ? 'translate.googleapis.com' : 'translate.google.com';
+    var c = clientType === 'tw-ob' ? 'tw-ob' : 'gtx';
+    return 'https://' + host + '/translate_tts'
+      + '?ie=UTF-8&tl=th&client=' + c
+      + '&q=' + encodeURIComponent(text);
   }
+
+  // ลำดับ endpoint ที่จะลอง (ถ้าตัวแรกเล่นไม่ได้ ลองตัวต่อไป)
+  var TTS_ENDPOINTS = ['tw-ob', 'gtx', 'googleapis'];
+  var ttsEndpointIndex = 0; // จำตัวที่ใช้สำเร็จล่าสุด
 
   // ใช้ Audio element เดียวซ้ำๆ — บาง TV จะ "อนุญาต" element ที่ถูก unlock แล้ว
   var ttsAudio = null;
@@ -778,34 +808,62 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
   function playOneAudioChunk(text) {
     return new Promise(function (resolve) {
       var audio = getTTSAudio();
+      var attempt = 0;
       var done = false;
+
       function finish(ok) {
         if (done) return;
         done = true;
-        audio.onended = null; audio.onerror = null; audio.oncanplaythrough = null;
+        audio.onended = null; audio.onerror = null; audio.oncanplay = null;
         resolve(ok);
       }
-      audio.onended = function () { finish(true); };
-      audio.onerror = function () {
-        console.warn('[TTS-audio] error loading:', text.substring(0, 30));
-        finish(false);
-      };
+
+      function tryEndpoint() {
+        // เริ่มจาก endpoint ที่ใช้สำเร็จล่าสุด, แล้ววนต่อ
+        var idx = (ttsEndpointIndex + attempt) % TTS_ENDPOINTS.length;
+        var endpoint = TTS_ENDPOINTS[idx];
+        var url = buildTTSUrl(text, endpoint);
+        console.log('[TTS-audio] try endpoint:', endpoint);
+        uiLog('TTS try: ' + endpoint);
+
+        audio.onerror = function () {
+          attempt++;
+          if (attempt < TTS_ENDPOINTS.length) {
+            tryEndpoint();
+          } else {
+            console.warn('[TTS-audio] ทุก endpoint ล้มเหลว');
+            uiLog('❌ TTS endpoint ทั้งหมดล้มเหลว');
+            finish(false);
+          }
+        };
+        audio.onended = function () {
+          ttsEndpointIndex = idx; // จำว่าตัวนี้ใช้ได้
+          finish(true);
+        };
+
+        try {
+          audio.src = url;
+          var p = audio.play();
+          if (p && typeof p.then === 'function') {
+            p.then(null, function (e) {
+              console.warn('[TTS-audio] play() rejected:', e && e.message);
+              uiLog('play() rejected: ' + (e && e.message));
+              // play() ถูก browser block — ลอง endpoint ถัดไปไม่ช่วยอะไร
+              finish(false);
+            });
+          }
+        } catch (e) {
+          attempt++;
+          if (attempt < TTS_ENDPOINTS.length) tryEndpoint();
+          else finish(false);
+        }
+      }
+
       var safety = setTimeout(function () { finish(false); }, 15000);
       var origFinish = finish;
       finish = function (ok) { clearTimeout(safety); origFinish(ok); };
 
-      try {
-        audio.src = buildTTSUrl(text);
-        var p = audio.play();
-        if (p && typeof p.then === 'function') {
-          p.then(null, function (e) {
-            console.warn('[TTS-audio] play() rejected:', e && e.message);
-            finish(false);
-          });
-        }
-      } catch (e) {
-        finish(false);
-      }
+      tryEndpoint();
     });
   }
 
@@ -853,11 +911,14 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     // auto: ถ้ามีเสียงไทยให้ใช้ Web Speech, ไม่งั้นใช้ Audio URL
     var s = getSettings();
     var hasThai = !!(findVoice(s.voiceName) || findAnyThaiVoice());
+    uiLog('voices=' + allVoices.length + ' hasThai=' + hasThai);
     if (window.speechSynthesis && hasThai) {
       console.log('[TTS] using Web Speech API');
+      uiLog('TTS: Web Speech API');
       speakViaWebSpeech(text, times);
     } else {
       console.log('[TTS] no Thai voice → using Audio URL fallback (Google Translate)');
+      uiLog('TTS: Audio URL fallback (no Thai voice)');
       speakViaAudioURL(text, times);
     }
   }
