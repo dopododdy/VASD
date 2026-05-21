@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>ตั้งค่าระบบคิว – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;500;600;700&family=Kanit:wght@400;500;600;700&family=Mitr:wght@400;500;600;700&family=Mali:wght@400;500;600;700&family=Bai+Jamjuree:wght@400;500;600;700&family=Charm:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
@@ -179,17 +179,25 @@ header {
   margin-left: 6px;
 }
 
-input[type="text"], input[type="number"], select {
+input[type="text"], input[type="number"], select, textarea {
   width: 100%; padding: 10px 12px;
   font-size: 14px; font-family: "Sarabun", sans-serif;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   color: var(--text); outline: none; transition: 0.2s;
+  resize: vertical;
 }
-input:focus, select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
+input:focus, select:focus, textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
 
 input[type="range"] { width: 100%; accent-color: var(--violet); cursor: pointer; }
+
+input[type="color"] {
+  width: 100%; height: 42px;
+  padding: 4px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--surface-2);
+  cursor: pointer;
+}
 
 .room-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .room-row {
@@ -263,6 +271,73 @@ input[type="range"] { width: 100%; accent-color: var(--violet); cursor: pointer;
 
 .hint { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
 .no-voice { color: var(--amber); font-size: 12px; padding: 8px; background: rgba(245,158,11,0.1); border-radius: 8px; }
+
+/* ── Marquee Preview ─────────────────────────────────────────── */
+.mq-preview {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 0;
+  margin-top: 4px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+.mq-content {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  line-height: 1.2;
+  font-weight: 700;
+}
+.mq-content.scroll {
+  padding-left: 100%;
+  animation: q-mq-scroll var(--mq-speed, 20s) linear infinite;
+}
+.mq-content.scroll.reverse { animation-direction: reverse; }
+@keyframes q-mq-scroll {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+.mq-content.fixed {
+  display: block; width: 100%; text-align: center; padding-left: 0;
+}
+.mq-content.slide-up   { animation: q-mq-slide-up var(--mq-speed, 8s) ease-in-out infinite; }
+.mq-content.fade-cycle { animation: q-mq-fade     var(--mq-speed, 5s) ease-in-out infinite; }
+.mq-content.pulse      { animation: q-mq-pulse    var(--mq-speed, 2s) ease-in-out infinite; }
+.mq-content.blink      { animation: q-mq-blink    var(--mq-speed, 1.5s) steps(1) infinite; }
+
+@keyframes q-mq-slide-up {
+  0%             { transform: translateY(120%); opacity: 0; }
+  15%, 85%       { transform: translateY(0);    opacity: 1; }
+  100%           { transform: translateY(-120%); opacity: 0; }
+}
+@keyframes q-mq-fade {
+  0%, 100%       { opacity: 0; }
+  20%, 80%       { opacity: 1; }
+}
+@keyframes q-mq-pulse {
+  0%, 100%       { opacity: 1; transform: scale(1); }
+  50%            { opacity: 0.5; transform: scale(0.97); }
+}
+@keyframes q-mq-blink {
+  0%, 49%        { opacity: 1; }
+  50%, 100%      { opacity: 0; }
+}
+
+.color-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.color-pair label { font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 4px; }
+
+.preset-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.preset-chip {
+  background: var(--surface-3); border: 1px solid var(--border);
+  color: var(--text); font-family: inherit; font-size: 12px;
+  padding: 4px 10px; border-radius: 16px; cursor: pointer;
+}
+.preset-chip:hover { background: rgba(139,92,246,0.2); border-color: var(--violet); }
 
 /* ── Modal: Queue Form ── */
 .modal-overlay {
@@ -399,6 +474,92 @@ input[type="range"] { width: 100%; accent-color: var(--violet); cursor: pointer;
     </div>
   </div>
 
+  <!-- Marquee (แถบอักษรวิ่งด้านล่าง) -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background: var(--amber);">📣</div>
+      <div class="section-title">แถบอักษรวิ่ง <span style="color:var(--text-dim); font-weight:500;">(แสดงด้านล่างของหน้าเรียกคิว)</span></div>
+    </div>
+    <div class="section-body">
+
+      <div class="field-group">
+        <label class="field-label">เปิดใช้งาน</label>
+        <select id="mqEnabled">
+          <option value="true">เปิด</option>
+          <option value="false">ปิด</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">ข้อความ</label>
+        <textarea id="mqText" rows="2" placeholder="ข้อความที่จะแสดง..."></textarea>
+        <div class="hint">ใช้ <code>•</code> หรือ <code>—</code> คั่นถ้ามีหลายข้อความ</div>
+        <div class="preset-chips">
+          <button type="button" class="preset-chip" data-preset="welcome">ยินดีต้อนรับ</button>
+          <button type="button" class="preset-chip" data-preset="hours">เวลาทำการ</button>
+          <button type="button" class="preset-chip" data-preset="emergency">ฉุกเฉิน</button>
+          <button type="button" class="preset-chip" data-preset="announce">ประกาศ</button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">ฟอนต์</label>
+        <select id="mqFont">
+          <option value="Sarabun"      style="font-family:Sarabun">Sarabun (สากล อ่านง่าย)</option>
+          <option value="Prompt"       style="font-family:Prompt">Prompt (เรียบทันสมัย)</option>
+          <option value="Kanit"        style="font-family:Kanit">Kanit (หนา เห็นชัด)</option>
+          <option value="Mitr"         style="font-family:Mitr">Mitr (โค้งมน เป็นมิตร)</option>
+          <option value="Mali"         style="font-family:Mali">Mali (ลายมือ น่ารัก)</option>
+          <option value="Bai Jamjuree" style="font-family:'Bai Jamjuree'">Bai Jamjuree (คลาสสิก)</option>
+          <option value="Charm"        style="font-family:Charm">Charm (ทางการ มีหาง)</option>
+        </select>
+      </div>
+
+      <div class="color-row">
+        <div class="color-pair">
+          <label>สีตัวอักษร</label>
+          <input type="color" id="mqColor" value="#14c4bc">
+        </div>
+        <div class="color-pair">
+          <label>สีพื้นหลัง</label>
+          <input type="color" id="mqBgColor" value="#0b1929">
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top: 10px;">
+        <label class="field-label">ขนาดตัวอักษร <span class="field-value-pill" id="mqSizeVal">28px</span></label>
+        <input type="range" id="mqSize" min="14" max="80" step="1" value="28">
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">ความเร็ว / รอบ <span class="field-value-pill" id="mqSpeedVal">20s</span></label>
+        <input type="range" id="mqSpeed" min="3" max="60" step="1" value="20">
+        <div class="hint">scroll: เลขน้อย = วิ่งเร็ว · pulse/fade/blink: คือเวลาต่อรอบ</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">รูปแบบ animation</label>
+        <select id="mqAnim">
+          <option value="scroll">วิ่งจากขวา → ซ้าย (มาตรฐาน)</option>
+          <option value="scroll-reverse">วิ่งจากซ้าย → ขวา</option>
+          <option value="slide-up">เลื่อนขึ้นจากด้านล่าง</option>
+          <option value="fade-cycle">ค่อยๆ จาง เข้า-ออก</option>
+          <option value="pulse">เต้นช้าๆ (pulse)</option>
+          <option value="blink">กระพริบ</option>
+          <option value="none">นิ่ง ไม่เคลื่อนไหว</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">ตัวอย่าง (preview)</label>
+        <div class="mq-preview" id="mqPreview">
+          <div class="mq-content" id="mqPreviewContent"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="btn-row">
     <button class="btn btn-reset" onclick="resetDefaults()">↺ คืนค่าเริ่มต้น</button>
     <button class="btn btn-save" onclick="saveSettings()">💾 บันทึก</button>
@@ -490,6 +651,24 @@ const DEFAULT_RATE = 1.0;
 const DEFAULT_PITCH = 1.0;
 const DEFAULT_REPEAT = 2;
 
+const MARQUEE_DEFAULTS = {
+  enabled:   true,
+  text:      'ยินดีต้อนรับสู่คลินิก • วันนี้เปิดทำการ 9:00 – 18:00 น. • กรุณานั่งรอเรียกคิว',
+  font:      'Sarabun',
+  color:     '#14c4bc',
+  bgColor:   '#0b1929',
+  size:      28,
+  speed:     20,
+  animation: 'scroll'
+};
+
+const MQ_PRESETS = {
+  welcome:   'ยินดีต้อนรับสู่คลินิก กรุณานั่งรอเรียกคิว',
+  hours:     'เปิดทำการ จันทร์ - เสาร์ 9:00 - 18:00 น. • หยุดวันอาทิตย์',
+  emergency: '⚠️ กรณีฉุกเฉิน โทร 02-xxx-xxxx ตลอด 24 ชั่วโมง',
+  announce:  '📢 ประกาศ: วันนี้คุณหมอ A ตรวจห้อง 1, คุณหมอ B ตรวจห้อง 2'
+};
+
 let allVoices = [];
 let currentQueues = [];   // cache สำหรับ edit
 let editingQueueId = null;   // null = add mode, else = edit mode
@@ -532,7 +711,100 @@ function loadSettings() {
 
   const repeat = localStorage.getItem('q_repeat') || DEFAULT_REPEAT;
   document.getElementById('repeatSelect').value = repeat;
+
+  // ── Marquee
+  loadMarqueeSettings();
 }
+
+// ─────────────────────────────────────────────
+// Marquee
+// ─────────────────────────────────────────────
+function loadMarqueeSettings() {
+  document.getElementById('mqEnabled').value =
+    (localStorage.getItem('q_marquee_enabled') ?? String(MARQUEE_DEFAULTS.enabled)) === 'false' ? 'false' : 'true';
+  document.getElementById('mqText').value     = localStorage.getItem('q_marquee_text') ?? MARQUEE_DEFAULTS.text;
+  document.getElementById('mqFont').value     = localStorage.getItem('q_marquee_font') ?? MARQUEE_DEFAULTS.font;
+  document.getElementById('mqColor').value    = localStorage.getItem('q_marquee_color') ?? MARQUEE_DEFAULTS.color;
+  document.getElementById('mqBgColor').value  = localStorage.getItem('q_marquee_bg_color') ?? MARQUEE_DEFAULTS.bgColor;
+  document.getElementById('mqSize').value     = localStorage.getItem('q_marquee_size') ?? MARQUEE_DEFAULTS.size;
+  document.getElementById('mqSpeed').value    = localStorage.getItem('q_marquee_speed') ?? MARQUEE_DEFAULTS.speed;
+  document.getElementById('mqAnim').value     = localStorage.getItem('q_marquee_animation') ?? MARQUEE_DEFAULTS.animation;
+  updateMarqueePreview();
+}
+
+function saveMarqueeSettings() {
+  localStorage.setItem('q_marquee_enabled',  document.getElementById('mqEnabled').value);
+  localStorage.setItem('q_marquee_text',     document.getElementById('mqText').value);
+  localStorage.setItem('q_marquee_font',     document.getElementById('mqFont').value);
+  localStorage.setItem('q_marquee_color',    document.getElementById('mqColor').value);
+  localStorage.setItem('q_marquee_bg_color', document.getElementById('mqBgColor').value);
+  localStorage.setItem('q_marquee_size',     document.getElementById('mqSize').value);
+  localStorage.setItem('q_marquee_speed',    document.getElementById('mqSpeed').value);
+  localStorage.setItem('q_marquee_animation', document.getElementById('mqAnim').value);
+}
+
+function updateMarqueePreview() {
+  const enabled = document.getElementById('mqEnabled').value === 'true';
+  const text    = document.getElementById('mqText').value;
+  const font    = document.getElementById('mqFont').value;
+  const color   = document.getElementById('mqColor').value;
+  const bgColor = document.getElementById('mqBgColor').value;
+  const size    = document.getElementById('mqSize').value;
+  const speed   = document.getElementById('mqSpeed').value;
+  const anim    = document.getElementById('mqAnim').value;
+
+  document.getElementById('mqSizeVal').textContent  = size + 'px';
+  document.getElementById('mqSpeedVal').textContent = speed + 's';
+
+  const preview = document.getElementById('mqPreview');
+  const content = document.getElementById('mqPreviewContent');
+
+  if (!enabled || !text.trim()) {
+    preview.style.opacity = '0.3';
+    content.textContent = '— ปิดอยู่ —';
+    content.className = 'mq-content fixed';
+    content.style.fontFamily = 'Sarabun';
+    content.style.color = 'var(--text-faint)';
+    content.style.fontSize = '14px';
+    return;
+  }
+
+  preview.style.opacity = '1';
+  preview.style.background = bgColor;
+  preview.style.setProperty('--mq-speed', speed + 's');
+
+  content.textContent = text;
+  content.style.fontFamily = `"${font}", "Sarabun", sans-serif`;
+  content.style.color = color;
+  content.style.fontSize = size + 'px';
+
+  let cls = 'mq-content';
+  if (anim === 'scroll')               cls += ' scroll';
+  else if (anim === 'scroll-reverse')  cls += ' scroll reverse';
+  else if (anim === 'none')            cls += ' fixed';
+  else                                 cls += ' fixed ' + anim;
+  content.className = cls;
+}
+
+// hook field changes → preview update
+['mqEnabled','mqText','mqFont','mqColor','mqBgColor','mqSize','mqSpeed','mqAnim'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input',  updateMarqueePreview);
+    el.addEventListener('change', updateMarqueePreview);
+  }
+});
+
+// preset chips
+document.querySelectorAll('.preset-chip').forEach(chip => {
+  chip.onclick = () => {
+    const key = chip.dataset.preset;
+    if (MQ_PRESETS[key]) {
+      document.getElementById('mqText').value = MQ_PRESETS[key];
+      updateMarqueePreview();
+    }
+  };
+});
 
 document.getElementById('rateSlider').oninput = e => {
   document.getElementById('rateVal').textContent = parseFloat(e.target.value).toFixed(2) + '×';
@@ -670,11 +942,14 @@ window.saveSettings = function() {
   localStorage.setItem('q_speech_pitch', document.getElementById('pitchSlider').value);
   localStorage.setItem('q_voice_name', document.getElementById('voiceSelect').value);
   localStorage.setItem('q_repeat', document.getElementById('repeatSelect').value);
+  saveMarqueeSettings();
   showToast('✅ บันทึกการตั้งค่าเรียบร้อย');
 };
 window.resetDefaults = function() {
   if (!confirm('คืนค่าทั้งหมดเป็นค่าเริ่มต้น?')) return;
-  ['q_rooms','q_speech_rate','q_speech_pitch','q_voice_name','q_repeat']
+  ['q_rooms','q_speech_rate','q_speech_pitch','q_voice_name','q_repeat',
+   'q_marquee_enabled','q_marquee_text','q_marquee_font','q_marquee_color',
+   'q_marquee_bg_color','q_marquee_size','q_marquee_speed','q_marquee_animation']
     .forEach(k => localStorage.removeItem(k));
   loadSettings();
   showToast('↺ คืนค่าเริ่มต้นแล้ว');
