@@ -14,8 +14,8 @@
   'use strict';
 
   // ─── ★ ใส่ค่าจากไฟล์ ./js/supabase.js เดิมของคุณตรงนี้ ───
-  var SUPABASE_URL      = 'https://YOUR-PROJECT.supabase.co';
-  var SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+  var SUPABASE_URL      = 'https://cagjnlxmbeuyenawowmm.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhZ2pubHhtYmV1eWVuYXdvd21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDY4MjksImV4cCI6MjA4NjgyMjgyOX0.Lwy2vZd8ifZ7tSohmKivAJJqYd3wcBO7hHQtFZ6efYc';
   // ────────────────────────────────────────────────────────────
 
   if (!global.supabase || typeof global.supabase.createClient !== 'function') {
