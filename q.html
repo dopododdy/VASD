@@ -567,15 +567,29 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
         audioUnlocked = true;
         var el = document.getElementById('audioPrompt');
         if (el) el.className = el.className.replace(' show', '');
+        // beep test (WebAudio chime)
         try {
           var o = ctx.createOscillator(); var g = ctx.createGain();
           g.gain.value = 0.01; o.connect(g).connect(ctx.destination);
           o.frequency.value = 440; o.start(); o.stop(ctx.currentTime + 0.05);
         } catch (e) {}
+        // warm up Web Speech
         try {
           if (window.speechSynthesis) {
             var test = new SpeechSynthesisUtterance(' ');
             test.volume = 0; window.speechSynthesis.speak(test);
+          }
+        } catch (e) {}
+        // warm up <audio> element (จำเป็นสำหรับ Audio URL fallback บน TV)
+        try {
+          var a = getTTSAudio();
+          a.muted = true;
+          a.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+          var pp = a.play();
+          if (pp && typeof pp.then === 'function') {
+            pp.then(function () { a.muted = false; }, function () { a.muted = false; });
+          } else {
+            a.muted = false;
           }
         } catch (e) {}
       }
@@ -649,7 +663,19 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     return out.join(' ');
   }
 
-  // ─── Voices ───
+  // ═══════════════════════════════════════════════════════════
+  //  Text-to-Speech with auto-fallback for Smart TV
+  //  ───────────────────────────────────────────────────────────
+  //  - PC / Mobile: ใช้ Web Speech API ตามปกติ (เสียง Thai ในเครื่อง)
+  //  - Smart TV: เครื่องส่วนใหญ่ไม่มีเสียงไทยใน speechSynthesis
+  //    → fallback ไปใช้ Google Translate TTS ผ่าน <audio> element
+  //    ซึ่งทุก browser รวม TV เก่ารองรับ
+  //
+  //  เปลี่ยน mode ผ่าน URL ได้:
+  //    ?tts=audio  → บังคับใช้ Audio URL (สำหรับทดสอบบน PC)
+  //    ?tts=web    → บังคับใช้ Web Speech (ไม่ fallback)
+  // ═══════════════════════════════════════════════════════════
+
   function loadVoices() {
     if (window.speechSynthesis) allVoices = window.speechSynthesis.getVoices() || [];
   }
@@ -666,17 +692,34 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     return null;
   }
 
-  function speakCall(queueNumber, animalName, ownerName, roomName, times) {
-    if (!window.speechSynthesis) return;
-    times = times || 2;
+  function findAnyThaiVoice() {
+    if (!allVoices) return null;
+    for (var i = 0; i < allVoices.length; i++) {
+      var lang = (allVoices[i].lang || '').toLowerCase();
+      if (lang.indexOf('th') === 0) return allVoices[i];
+    }
+    return null;
+  }
+
+  function getQueryParam(name) {
+    try {
+      var search = (location.search || '').substring(1);
+      if (!search) return '';
+      var pairs = search.split('&');
+      for (var i = 0; i < pairs.length; i++) {
+        var kv = pairs[i].split('=');
+        if (decodeURIComponent(kv[0]) === name) return decodeURIComponent(kv[1] || '');
+      }
+    } catch (e) {}
+    return '';
+  }
+
+  // ─── Mode 1: Web Speech API (PC / Mobile) ───
+  function speakViaWebSpeech(text, times) {
+    if (!window.speechSynthesis) return Promise.resolve();
     window.speechSynthesis.cancel();
     var s = getSettings();
-    var voice = findVoice(s.voiceName);
-    var thaiNum = numberToThai(queueNumber);
-    var text = 'ขอเชิญคิวหมายเลข ' + thaiNum +
-               ' คุณ' + (ownerName || '') +
-               ' เจ้าของน้อง' + (animalName || '') +
-               ' เข้า' + (roomName || '');
+    var voice = findVoice(s.voiceName) || findAnyThaiVoice();
 
     function speakOnce() {
       return new Promise(function (resolve) {
@@ -692,12 +735,131 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
       });
     }
 
-    (function loop(i) {
-      if (i >= times) return;
-      speakOnce().then(function () {
-        if (i < times - 1) setTimeout(function () { loop(i + 1); }, 700);
-      });
-    })(0);
+    return new Promise(function (done) {
+      (function loop(i) {
+        if (i >= times) { done(); return; }
+        speakOnce().then(function () {
+          if (i < times - 1) setTimeout(function () { loop(i + 1); }, 700);
+          else loop(i + 1);
+        });
+      })(0);
+    });
+  }
+
+  // ─── Mode 2: Google Translate TTS via <audio> (Smart TV fallback) ───
+  function splitForTTS(text, maxLen) {
+    var chunks = [];
+    var remaining = String(text || '');
+    while (remaining.length > maxLen) {
+      var cut = remaining.lastIndexOf(' ', maxLen);
+      if (cut < 30) cut = maxLen;
+      chunks.push(remaining.substring(0, cut));
+      remaining = remaining.substring(cut).replace(/^\s+/, '');
+    }
+    if (remaining) chunks.push(remaining);
+    return chunks;
+  }
+
+  function buildTTSUrl(text) {
+    return 'https://translate.google.com/translate_tts'
+      + '?ie=UTF-8&tl=th&client=tw-ob&q=' + encodeURIComponent(text);
+  }
+
+  // ใช้ Audio element เดียวซ้ำๆ — บาง TV จะ "อนุญาต" element ที่ถูก unlock แล้ว
+  var ttsAudio = null;
+  function getTTSAudio() {
+    if (!ttsAudio) {
+      ttsAudio = new Audio();
+      ttsAudio.preload = 'auto';
+    }
+    return ttsAudio;
+  }
+
+  function playOneAudioChunk(text) {
+    return new Promise(function (resolve) {
+      var audio = getTTSAudio();
+      var done = false;
+      function finish(ok) {
+        if (done) return;
+        done = true;
+        audio.onended = null; audio.onerror = null; audio.oncanplaythrough = null;
+        resolve(ok);
+      }
+      audio.onended = function () { finish(true); };
+      audio.onerror = function () {
+        console.warn('[TTS-audio] error loading:', text.substring(0, 30));
+        finish(false);
+      };
+      var safety = setTimeout(function () { finish(false); }, 15000);
+      var origFinish = finish;
+      finish = function (ok) { clearTimeout(safety); origFinish(ok); };
+
+      try {
+        audio.src = buildTTSUrl(text);
+        var p = audio.play();
+        if (p && typeof p.then === 'function') {
+          p.then(null, function (e) {
+            console.warn('[TTS-audio] play() rejected:', e && e.message);
+            finish(false);
+          });
+        }
+      } catch (e) {
+        finish(false);
+      }
+    });
+  }
+
+  function speakViaAudioURL(text, times) {
+    var chunks = splitForTTS(text, 150);
+
+    function playAllOnce() {
+      var p = Promise.resolve(true);
+      for (var i = 0; i < chunks.length; i++) {
+        (function (c) {
+          p = p.then(function () { return playOneAudioChunk(c); });
+        })(chunks[i]);
+      }
+      return p;
+    }
+
+    return new Promise(function (done) {
+      (function loop(i) {
+        if (i >= times) { done(); return; }
+        playAllOnce().then(function () {
+          if (i < times - 1) setTimeout(function () { loop(i + 1); }, 700);
+          else loop(i + 1);
+        });
+      })(0);
+    });
+  }
+
+  // ─── Dispatcher ───
+  function speakCall(queueNumber, animalName, ownerName, roomName, times) {
+    times = times || 2;
+    var thaiNum = numberToThai(queueNumber);
+    var text = 'ขอเชิญคิวหมายเลข ' + thaiNum +
+               ' คุณ' + (ownerName || '') +
+               ' เจ้าของน้อง' + (animalName || '') +
+               ' เข้า' + (roomName || '');
+
+    var force = getQueryParam('tts');
+    if (force === 'audio') { speakViaAudioURL(text, times); return; }
+    if (force === 'web') {
+      if (window.speechSynthesis) speakViaWebSpeech(text, times);
+      else speakViaAudioURL(text, times);
+      return;
+    }
+
+    // auto: ถ้ามีเสียงไทยให้ใช้ Web Speech, ไม่งั้นใช้ Audio URL
+    var s = getSettings();
+    var hasThai = !!(findVoice(s.voiceName) || findAnyThaiVoice());
+    if (window.speechSynthesis && hasThai) {
+      console.log('[TTS] using Web Speech API');
+      speakViaWebSpeech(text, times);
+    } else {
+      console.log('[TTS] no Thai voice → using Audio URL fallback (Google Translate)');
+      speakViaAudioURL(text, times);
+    }
   }
 
   // ─── Helpers ───
@@ -965,12 +1127,39 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
   loadWaiting();
   setInterval(loadWaiting, 15000);
 
-  // expose สำหรับ debug บน Smart TV (เปิด URL ด้วย ?debug=1 จะ log เพิ่ม)
+  // expose สำหรับ debug บน Smart TV
+  //   เปิด URL `q.html?tts=audio` เพื่อบังคับใช้ Audio URL (ทดสอบบน PC ได้)
+  //   เปิด URL `q.html?tts=web`   เพื่อบังคับใช้ Web Speech
+  //   ใน console: __q.testTTS()  → ทดสอบเรียกคิวจำลอง
+  //                __q.voices()   → ดูรายชื่อ voice ที่มีในเครื่อง
   window.__q = {
     reload: loadWaiting,
     waitingQueues: function () { return waitingQueues; },
-    callNext: callNext
+    callNext: callNext,
+    testTTS: function (mode) {
+      var text = 'ขอเชิญคิวหมายเลข ห้า คุณสมชาย เจ้าของน้องโกโก้ เข้าห้องตรวจ 1';
+      if (mode === 'web')   return speakViaWebSpeech(text, 1);
+      if (mode === 'audio') return speakViaAudioURL(text, 1);
+      return speakCall(5, 'โกโก้', 'สมชาย', 'ห้องตรวจ 1', 1);
+    },
+    voices: function () {
+      if (!allVoices) return [];
+      var out = [];
+      for (var i = 0; i < allVoices.length; i++) {
+        out.push({ name: allVoices[i].name, lang: allVoices[i].lang });
+      }
+      return out;
+    }
   };
+
+  // log สถานะ TTS ตอนเปิดหน้า (ดูได้ใน console บน TV ถ้ามี remote debugger)
+  setTimeout(function () {
+    var thai = findAnyThaiVoice();
+    console.log('[TTS] speechSynthesis:', !!window.speechSynthesis,
+                '| voices:', allVoices.length,
+                '| thaiVoice:', thai ? thai.name : '(none)',
+                '| fallback to Audio URL:', !thai);
+  }, 2000);
 })();
 </script>
 
