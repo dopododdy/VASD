@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>ระบบเรียกคิว – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;500;600;700&family=Kanit:wght@400;500;600;700&family=Mitr:wght@400;500;600;700&family=Mali:wght@400;500;600;700&family=Bai+Jamjuree:wght@400;500;600;700&family=Charm:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
@@ -155,7 +155,7 @@ header {
 }
 .call-hero-num {
   font-family: "Sarabun", sans-serif;
-  font-size: 220px;
+  font-size: clamp(120px, 22vw, 280px);
   font-weight: 900; line-height: 0.9;
   letter-spacing: -8px;
   background: linear-gradient(135deg, #fff, var(--teal-light));
@@ -172,11 +172,11 @@ header {
 .call-hero-info { text-align: left; min-width: 0; }
 .call-hero-animal {
   font-family: "Sarabun", sans-serif;
-  font-size: 42px;
+  font-size: clamp(32px, 5vw, 56px);
   font-weight: 800; color: #fff; line-height: 1.1;
   word-break: break-word;
 }
-.call-hero-owner { font-size: 22px; color: var(--text-dim); margin-top: 8px; font-weight: 500; }
+.call-hero-owner { font-size: clamp(16px, 2.5vw, 26px); color: var(--text-dim); margin-top: 8px; font-weight: 500; }
 .call-hero-room {
   margin-top: 16px;
   background: linear-gradient(135deg, var(--amber), #fbbf24);
@@ -184,7 +184,7 @@ header {
   padding: 12px 24px; border-radius: 100px;
   display: inline-flex; align-items: center; gap: 8px;
   font-family: "Sarabun", sans-serif;
-  font-size: 30px; font-weight: 800;
+  font-size: clamp(22px, 3vw, 40px); font-weight: 800;
   box-shadow: 0 8px 20px rgba(245,158,11,0.4);
   -webkit-animation: roomArrow 1s ease-in-out infinite alternate;
   animation: roomArrow 1s ease-in-out infinite alternate;
@@ -391,6 +391,76 @@ body.tv-mode .grid[data-size="lg"] .q-num { font-size: 110px; }
 body.tv-mode .grid[data-size="md"] .q-num { font-size: 84px; }
 body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
 
+/* ── Marquee Bar (แถบอักษรวิ่งด้านล่าง) ─────────────────────── */
+.mq-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  overflow: hidden;
+  z-index: 100;
+  border-top: 2px solid rgba(255,255,255,0.12);
+  padding: 12px 0;
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 -8px 30px rgba(0,0,0,0.4);
+}
+.mq-bar.show { display: block; }
+
+/* ภายในใช้ .mq-content ที่จัด animation/text */
+.mq-content {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  line-height: 1.2;
+}
+
+/* scroll (default): right → left */
+.mq-content.scroll {
+  padding-left: 100%;
+  animation-name: q-mq-scroll;
+  animation-duration: var(--mq-speed, 20s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.mq-content.scroll.reverse {
+  animation-direction: reverse;
+}
+@keyframes q-mq-scroll {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* fixed mode: ข้อความคงที่ตรงกลาง — animation ที่ไม่ใช่ scroll */
+.mq-content.fixed {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding-left: 0;
+}
+.mq-content.slide-up   { animation: q-mq-slide-up var(--mq-speed, 8s) ease-in-out infinite; }
+.mq-content.fade-cycle { animation: q-mq-fade     var(--mq-speed, 5s) ease-in-out infinite; }
+.mq-content.pulse      { animation: q-mq-pulse    var(--mq-speed, 2s) ease-in-out infinite; }
+.mq-content.blink      { animation: q-mq-blink    var(--mq-speed, 1.5s) steps(1) infinite; }
+
+@keyframes q-mq-slide-up {
+  0%             { transform: translateY(120%); opacity: 0; }
+  15%, 85%       { transform: translateY(0);    opacity: 1; }
+  100%           { transform: translateY(-120%); opacity: 0; }
+}
+@keyframes q-mq-fade {
+  0%, 100%       { opacity: 0; }
+  20%, 80%       { opacity: 1; }
+}
+@keyframes q-mq-pulse {
+  0%, 100%       { opacity: 1; transform: scale(1); }
+  50%            { opacity: 0.5; transform: scale(0.97); }
+}
+@keyframes q-mq-blink {
+  0%, 49%        { opacity: 1; }
+  50%, 100%      { opacity: 0; }
+}
+
+body.tv-mode .mq-bar { padding: 18px 0; border-top-width: 3px; }
+
 @media (max-width: 600px) {
   .header-right .clock { display: none; }
   .grid[data-size="lg"] .q-num { font-size: 70px; }
@@ -451,27 +521,19 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
-     โหลด Supabase แบบ UMD (รองรับทุก browser รวม Smart TV เก่า)
-     ════════════════════════════════════════════════════════════ -->
+<!-- แถบอักษรวิ่งด้านล่าง (ตั้งค่าได้ใน q-setting.html) -->
+<div class="mq-bar" id="marqueeBar">
+  <div class="mq-content" id="marqueeContent"></div>
+</div>
+
+<!-- Supabase UMD + non-module init -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./js/supabase-compat.js"></script>
 
-<!-- ════════════════════════════════════════════════════════════
-     โหลด Voice Pack ภาษาไทย (optional)
-     ถ้าไม่มีไฟล์ thai_voice_pack.js จะข้ามไปใช้ TTS อื่น
-     สร้างไฟล์นี้ด้วย:  python generate_voice_pack.py
-     ════════════════════════════════════════════════════════════ -->
-<script src="./thai_voice_pack.js" onerror="console.log('[Q] no voice pack — using fallback TTS')"></script>
-
-<!-- ════════════════════════════════════════════════════════════
-     สคริปต์หลัก — ไม่ใช้ ES Module, ไม่ใช้ optional chaining
-     ════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
   'use strict';
 
-  // ─── ตรวจสอบว่า supabase client พร้อมใช้งานไหม ───
   function showFatalError(msg, detail) {
     var grid = document.getElementById('grid');
     if (!grid) return;
@@ -483,8 +545,7 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
       '</div>';
   }
 
-  // จับ JavaScript error ทุกชนิด แสดงบนหน้าจอแทน (สำคัญสำหรับ Smart TV ที่ไม่มี devtools)
-  window.onerror = function (msg, src, line, col, err) {
+  window.onerror = function (msg, src, line) {
     showFatalError('เกิดข้อผิดพลาด', msg + ' (บรรทัด ' + line + ')');
   };
 
@@ -499,10 +560,7 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
 
   // ─── State ───
   var isTvMode = false;
-  try {
-    var qs = location.search || '';
-    isTvMode = qs.indexOf('tv=1') !== -1;
-  } catch (e) {}
+  try { isTvMode = (location.search || '').indexOf('tv=1') !== -1; } catch (e) {}
   if (isTvMode) document.body.className += ' tv-mode';
 
   var allVoices = [];
@@ -512,29 +570,6 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
   var currentCallTimer = null;
   var selectedQueue = null;
 
-  // ─── On-screen log สำหรับ debug บน TV (เปิดด้วย ?debug=1) ───
-  var debugEnabled = false;
-  try { debugEnabled = (location.search || '').indexOf('debug=1') !== -1; } catch (e) {}
-  var logEl = null;
-  function uiLog(msg) {
-    if (!debugEnabled) return;
-    if (!logEl) {
-      logEl = document.createElement('div');
-      logEl.style.cssText = 'position:fixed; bottom:10px; left:10px; right:10px; max-height:30vh; ' +
-        'overflow-y:auto; background:rgba(0,0,0,0.85); color:#0f0; ' +
-        'font-family:monospace; font-size:12px; padding:8px; ' +
-        'border-radius:8px; z-index:9999; white-space:pre-wrap; word-break:break-all;';
-      document.body.appendChild(logEl);
-    }
-    var t = new Date();
-    var ts = ('0'+t.getMinutes()).slice(-2) + ':' + ('0'+t.getSeconds()).slice(-2);
-    logEl.textContent = '[' + ts + '] ' + msg + '\n' + logEl.textContent;
-    // เก็บแค่ 50 บรรทัด
-    var lines = logEl.textContent.split('\n');
-    if (lines.length > 50) logEl.textContent = lines.slice(0, 50).join('\n');
-  }
-
-  // ─── safe get: แทน optional chaining ที่ TV เก่าไม่รองรับ ───
   function safe(obj, path) {
     if (!obj) return null;
     var parts = path.split('.');
@@ -571,7 +606,7 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
   }
   setInterval(updateClock, 1000); updateClock();
 
-  // ─── Audio ───
+  // ─── Audio unlock (สำหรับ chime + Web Speech) ───
   function ensureAudio() {
     return new Promise(function (resolve) {
       if (!audioCtx) {
@@ -596,22 +631,17 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
         audioUnlocked = true;
         var el = document.getElementById('audioPrompt');
         if (el) el.className = el.className.replace(' show', '');
-        // beep test (WebAudio chime)
         try {
           var o = ctx.createOscillator(); var g = ctx.createGain();
           g.gain.value = 0.01; o.connect(g).connect(ctx.destination);
           o.frequency.value = 440; o.start(); o.stop(ctx.currentTime + 0.05);
         } catch (e) {}
-        // warm up Web Speech
         try {
           if (window.speechSynthesis) {
             var test = new SpeechSynthesisUtterance(' ');
             test.volume = 0; window.speechSynthesis.speak(test);
           }
         } catch (e) {}
-        // หมายเหตุ: ไม่ warm-up <audio> element แล้ว เพราะ
-        // muted=true อาจค้างถ้า play() promise ไม่ resolve
-        // user gesture ที่กดปุ่มเรียกคิวจะ unlock Audio ให้เองอยู่แล้ว
       }
     });
   }
@@ -683,20 +713,7 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     return out.join(' ');
   }
 
-  // ═══════════════════════════════════════════════════════════
-  //  Text-to-Speech with auto-fallback (3 ลำดับ)
-  //  ───────────────────────────────────────────────────────────
-  //  1) Voice Pack (thai_voice_pack.js) — base64 ฝังในไฟล์ JS
-  //     ทำงานออฟไลน์ 100% ใช้ได้บน Smart TV ที่ปิด network ภายนอก
-  //  2) Web Speech API — PC/มือถือ ที่มีเสียงไทยในเครื่อง
-  //  3) Google Translate TTS via Audio URL — fallback สุดท้าย
-  //
-  //  เปลี่ยน mode ผ่าน URL:
-  //    ?tts=pack   บังคับใช้ Voice Pack
-  //    ?tts=web    บังคับใช้ Web Speech
-  //    ?tts=audio  บังคับใช้ Google TTS
-  // ═══════════════════════════════════════════════════════════
-
+  // ─── Voices ───
   function loadVoices() {
     if (window.speechSynthesis) allVoices = window.speechSynthesis.getVoices() || [];
   }
@@ -713,34 +730,18 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     return null;
   }
 
-  function findAnyThaiVoice() {
-    if (!allVoices) return null;
-    for (var i = 0; i < allVoices.length; i++) {
-      var lang = (allVoices[i].lang || '').toLowerCase();
-      if (lang.indexOf('th') === 0) return allVoices[i];
-    }
-    return null;
-  }
-
-  function getQueryParam(name) {
-    try {
-      var search = (location.search || '').substring(1);
-      if (!search) return '';
-      var pairs = search.split('&');
-      for (var i = 0; i < pairs.length; i++) {
-        var kv = pairs[i].split('=');
-        if (decodeURIComponent(kv[0]) === name) return decodeURIComponent(kv[1] || '');
-      }
-    } catch (e) {}
-    return '';
-  }
-
-  // ─── Mode 1: Web Speech API (PC / Mobile) ───
-  function speakViaWebSpeech(text, times) {
-    if (!window.speechSynthesis) return Promise.resolve();
+  // ─── Speak (Web Speech API only) ───
+  function speakCall(queueNumber, animalName, ownerName, roomName, times) {
+    if (!window.speechSynthesis) return;
+    times = times || 2;
     window.speechSynthesis.cancel();
     var s = getSettings();
-    var voice = findVoice(s.voiceName) || findAnyThaiVoice();
+    var voice = findVoice(s.voiceName);
+    var thaiNum = numberToThai(queueNumber);
+    var text = 'ขอเชิญคิวหมายเลข ' + thaiNum +
+               ' คุณ' + (ownerName || '') +
+               ' เจ้าของน้อง' + (animalName || '') +
+               ' เข้า' + (roomName || '');
 
     function speakOnce() {
       return new Promise(function (resolve) {
@@ -756,288 +757,12 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
       });
     }
 
-    return new Promise(function (done) {
-      (function loop(i) {
-        if (i >= times) { done(); return; }
-        speakOnce().then(function () {
-          if (i < times - 1) setTimeout(function () { loop(i + 1); }, 700);
-          else loop(i + 1);
-        });
-      })(0);
-    });
-  }
-
-  // ─── Mode 2: Google Translate TTS via <audio> (Smart TV fallback) ───
-  function splitForTTS(text, maxLen) {
-    var chunks = [];
-    var remaining = String(text || '');
-    while (remaining.length > maxLen) {
-      var cut = remaining.lastIndexOf(' ', maxLen);
-      if (cut < 30) cut = maxLen;
-      chunks.push(remaining.substring(0, cut));
-      remaining = remaining.substring(cut).replace(/^\s+/, '');
-    }
-    if (remaining) chunks.push(remaining);
-    return chunks;
-  }
-
-  function buildTTSUrl(text, clientType) {
-    // Google Translate TTS — มีหลาย endpoint, บางตัวอาจถูก rate-limit หรือ block
-    var host = clientType === 'googleapis' ? 'translate.googleapis.com' : 'translate.google.com';
-    var c = clientType === 'tw-ob' ? 'tw-ob' : 'gtx';
-    return 'https://' + host + '/translate_tts'
-      + '?ie=UTF-8&tl=th&client=' + c
-      + '&q=' + encodeURIComponent(text);
-  }
-
-  // ลำดับ endpoint ที่จะลอง (ถ้าตัวแรกเล่นไม่ได้ ลองตัวต่อไป)
-  var TTS_ENDPOINTS = ['tw-ob', 'gtx', 'googleapis'];
-  var ttsEndpointIndex = 0; // จำตัวที่ใช้สำเร็จล่าสุด
-
-  // ใช้ Audio element เดียวซ้ำๆ — บาง TV จะ "อนุญาต" element ที่ถูก unlock แล้ว
-  var ttsAudio = null;
-  function getTTSAudio() {
-    if (!ttsAudio) {
-      ttsAudio = new Audio();
-      ttsAudio.preload = 'auto';
-    }
-    return ttsAudio;
-  }
-
-  function playOneAudioChunk(text) {
-    return new Promise(function (resolve) {
-      var audio = getTTSAudio();
-      var attempt = 0;
-      var done = false;
-
-      function finish(ok) {
-        if (done) return;
-        done = true;
-        audio.onended = null; audio.onerror = null; audio.oncanplay = null;
-        resolve(ok);
-      }
-
-      function tryEndpoint() {
-        // เริ่มจาก endpoint ที่ใช้สำเร็จล่าสุด, แล้ววนต่อ
-        var idx = (ttsEndpointIndex + attempt) % TTS_ENDPOINTS.length;
-        var endpoint = TTS_ENDPOINTS[idx];
-        var url = buildTTSUrl(text, endpoint);
-        console.log('[TTS-audio] try endpoint:', endpoint);
-        uiLog('TTS try: ' + endpoint);
-
-        audio.onerror = function () {
-          attempt++;
-          if (attempt < TTS_ENDPOINTS.length) {
-            tryEndpoint();
-          } else {
-            console.warn('[TTS-audio] ทุก endpoint ล้มเหลว');
-            uiLog('❌ TTS endpoint ทั้งหมดล้มเหลว');
-            finish(false);
-          }
-        };
-        audio.onended = function () {
-          ttsEndpointIndex = idx; // จำว่าตัวนี้ใช้ได้
-          finish(true);
-        };
-
-        try {
-          audio.muted = false;
-          audio.volume = 1.0;
-          audio.src = url;
-          var p = audio.play();
-          if (p && typeof p.then === 'function') {
-            p.then(null, function (e) {
-              console.warn('[TTS-audio] play() rejected:', e && e.message);
-              uiLog('play() rejected: ' + (e && e.message));
-              // play() ถูก browser block — ลอง endpoint ถัดไปไม่ช่วยอะไร
-              finish(false);
-            });
-          }
-        } catch (e) {
-          attempt++;
-          if (attempt < TTS_ENDPOINTS.length) tryEndpoint();
-          else finish(false);
-        }
-      }
-
-      var safety = setTimeout(function () { finish(false); }, 15000);
-      var origFinish = finish;
-      finish = function (ok) { clearTimeout(safety); origFinish(ok); };
-
-      tryEndpoint();
-    });
-  }
-
-  function speakViaAudioURL(text, times) {
-    var chunks = splitForTTS(text, 150);
-
-    function playAllOnce() {
-      var p = Promise.resolve(true);
-      for (var i = 0; i < chunks.length; i++) {
-        (function (c) {
-          p = p.then(function () { return playOneAudioChunk(c); });
-        })(chunks[i]);
-      }
-      return p;
-    }
-
-    return new Promise(function (done) {
-      (function loop(i) {
-        if (i >= times) { done(); return; }
-        playAllOnce().then(function () {
-          if (i < times - 1) setTimeout(function () { loop(i + 1); }, 700);
-          else loop(i + 1);
-        });
-      })(0);
-    });
-  }
-
-  // ─── Mode 0 (PRIMARY): Voice Pack — เสียงไทย base64 ฝังในไฟล์ JS ───
-  // ทำงานออฟไลน์ 100% ไม่ต้องใช้ network ภายนอกเลย
-  // ต้องโหลด script tag thai_voice_pack.js ก่อน q.html ใช้งาน
-
-  function hasVoicePack() {
-    return !!(window.THAI_VOICE_PACK && window.THAI_VOICE_PACK.segments);
-  }
-
-  // สร้างลำดับ segment สำหรับ "ขอเชิญคิวหมายเลข [N] เข้า [ห้อง]"
-  function buildVoicePackSegments(queueNumber, roomName) {
-    var vp = window.THAI_VOICE_PACK;
-    if (!vp || !vp.segments) return null;
-    var seg = vp.segments;
-    var rooms = vp.rooms || {};
-    var out = [];
-
-    // intro
-    if (seg.intro) out.push(seg.intro);
-
-    // queue number
-    var qn = parseInt(queueNumber, 10);
-    if (!isNaN(qn) && seg['n' + qn]) {
-      out.push(seg['n' + qn]);
-    } else if (!isNaN(qn)) {
-      // ตัวเลขเกิน max → อ่านทีละหลัก
-      var digits = String(qn).split('');
-      for (var i = 0; i < digits.length; i++) {
-        var key = 'n' + digits[i];
-        if (seg[key]) out.push(seg[key]);
-      }
-    }
-
-    // room
-    if (roomName) {
-      if (rooms[roomName]) {
-        // มี audio ของชื่อห้องนี้แล้ว → ใช้ "เข้า" + ชื่อห้อง
-        if (seg.enter) out.push(seg.enter);
-        out.push(rooms[roomName]);
-      } else {
-        // ลองดูว่า roomName เป็น "ห้องตรวจ N" pattern หรือเปล่า
-        var m = roomName.match(/(\d+)/);
-        if (m && seg.to_room && seg['n' + m[1]]) {
-          out.push(seg.to_room);
-          out.push(seg['n' + m[1]]);
-        } else if (seg.enter) {
-          // ไม่มีข้อมูลห้อง → อย่างน้อยพูด "เข้า"
-          out.push(seg.enter);
-        }
-      }
-    }
-
-    return out;
-  }
-
-  // เล่น segment ทีละตัวต่อกัน (ใช้ <audio> element เดียวซ้ำ)
-  function playVoiceSegments(segments) {
-    return new Promise(function (resolve) {
-      var audio = getTTSAudio();
-      var idx = 0;
-      function next() {
-        if (idx >= segments.length) { resolve(); return; }
-        var seg = segments[idx++];
-        audio.onended = next;
-        audio.onerror = function () {
-          var code = audio.error ? audio.error.code : '?';
-          uiLog('VP segment err idx=' + (idx-1) + ' code=' + code);
-          next(); // ข้ามไปตัวถัดไป
-        };
-        try {
-          // ★ บังคับเสมอ — กัน state ค้างจาก unlockAudio หรือ Google TTS fallback
-          audio.muted = false;
-          audio.volume = 1.0;
-          audio.src = seg;
-          var p = audio.play();
-          if (p && typeof p.then === 'function') {
-            p.then(null, function (e) {
-              uiLog('VP play() rejected: ' + (e && e.message));
-              resolve();
-            });
-          }
-        } catch (e) {
-          uiLog('VP exception: ' + e.message);
-          resolve();
-        }
-      }
-      next();
-    });
-  }
-
-  function speakViaVoicePack(queueNumber, roomName, times) {
-    var segments = buildVoicePackSegments(queueNumber, roomName);
-    if (!segments || segments.length === 0) return false;
-    uiLog('Voice Pack: ' + segments.length + ' segments × ' + times);
-
-    return new Promise(function (done) {
-      (function loop(i) {
-        if (i >= times) { done(); return; }
-        playVoiceSegments(segments).then(function () {
-          if (i < times - 1) setTimeout(function () { loop(i + 1); }, 700);
-          else loop(i + 1);
-        });
-      })(0);
-    });
-  }
-
-  // ─── Dispatcher ───
-  function speakCall(queueNumber, animalName, ownerName, roomName, times) {
-    times = times || 2;
-    var thaiNum = numberToThai(queueNumber);
-    var text = 'ขอเชิญคิวหมายเลข ' + thaiNum +
-               ' คุณ' + (ownerName || '') +
-               ' เจ้าของน้อง' + (animalName || '') +
-               ' เข้า' + (roomName || '');
-
-    var force = getQueryParam('tts');
-    if (force === 'pack')  { speakViaVoicePack(queueNumber, roomName, times); return; }
-    if (force === 'audio') { speakViaAudioURL(text, times); return; }
-    if (force === 'web') {
-      if (window.speechSynthesis) speakViaWebSpeech(text, times);
-      else speakViaAudioURL(text, times);
-      return;
-    }
-
-    // Priority 1: Voice Pack (ออฟไลน์ 100% — เหมาะกับ Smart TV)
-    if (hasVoicePack()) {
-      console.log('[TTS] using Voice Pack (offline)');
-      uiLog('TTS: Voice Pack ✓');
-      speakViaVoicePack(queueNumber, roomName, times);
-      return;
-    }
-
-    // Priority 2: Web Speech API (PC/มือถือ ที่มีเสียงไทย)
-    var s = getSettings();
-    var hasThai = !!(findVoice(s.voiceName) || findAnyThaiVoice());
-    uiLog('voices=' + allVoices.length + ' hasThai=' + hasThai + ' voicePack=no');
-    if (window.speechSynthesis && hasThai) {
-      console.log('[TTS] using Web Speech API');
-      uiLog('TTS: Web Speech API');
-      speakViaWebSpeech(text, times);
-      return;
-    }
-
-    // Priority 3: Google Translate TTS (fallback สุดท้าย — ต้องมีเน็ต)
-    console.log('[TTS] using Audio URL fallback');
-    uiLog('TTS: Audio URL fallback');
-    speakViaAudioURL(text, times);
+    (function loop(i) {
+      if (i >= times) return;
+      speakOnce().then(function () {
+        if (i < times - 1) setTimeout(function () { loop(i + 1); }, 700);
+      });
+    })(0);
   }
 
   // ─── Helpers ───
@@ -1120,7 +845,7 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
     }
   }
 
-  // ─── Load Waiting (มี timeout ป้องกัน hang) ───
+  // ─── Load Waiting ───
   function loadWaiting() {
     var timeoutFired = false;
     var timer = setTimeout(function () {
@@ -1305,55 +1030,74 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
   loadWaiting();
   setInterval(loadWaiting, 15000);
 
-  // expose สำหรับ debug บน Smart TV
-  //   เปิด URL `q.html?tts=audio` เพื่อบังคับใช้ Audio URL (ทดสอบบน PC ได้)
-  //   เปิด URL `q.html?tts=web`   เพื่อบังคับใช้ Web Speech
-  //   ใน console: __q.testTTS()  → ทดสอบเรียกคิวจำลอง
-  //                __q.voices()   → ดูรายชื่อ voice ที่มีในเครื่อง
+  // ─── Marquee Bar (อ่านค่าจาก localStorage ที่ตั้งจาก q-setting.html) ───
+  function loadMarqueeSettings() {
+    return {
+      enabled:   localStorage.getItem('q_marquee_enabled') !== 'false',
+      text:      localStorage.getItem('q_marquee_text') || '',
+      font:      localStorage.getItem('q_marquee_font') || 'Sarabun',
+      color:     localStorage.getItem('q_marquee_color') || '#14c4bc',
+      bgColor:   localStorage.getItem('q_marquee_bg_color') || '#0b1929',
+      size:      parseInt(localStorage.getItem('q_marquee_size') || '28', 10),
+      speed:     parseFloat(localStorage.getItem('q_marquee_speed') || '20'),
+      animation: localStorage.getItem('q_marquee_animation') || 'scroll'
+    };
+  }
+
+  function applyMarquee() {
+    var bar = document.getElementById('marqueeBar');
+    var content = document.getElementById('marqueeContent');
+    if (!bar || !content) return;
+    var s = loadMarqueeSettings();
+
+    if (!s.enabled || !s.text || !s.text.trim()) {
+      bar.className = 'mq-bar';
+      document.body.style.paddingBottom = '';
+      return;
+    }
+
+    bar.className = 'mq-bar show';
+    bar.style.background = s.bgColor;
+    bar.style.setProperty('--mq-speed', s.speed + 's');
+
+    content.textContent = s.text;
+    content.style.fontFamily = '"' + s.font + '", "Sarabun", sans-serif';
+    content.style.color = s.color;
+    content.style.fontSize = s.size + 'px';
+    content.style.fontWeight = '700';
+
+    // class สำหรับ animation
+    var cls = 'mq-content';
+    if (s.animation === 'scroll')          cls += ' scroll';
+    else if (s.animation === 'scroll-reverse') cls += ' scroll reverse';
+    else if (s.animation === 'none')       cls += ' fixed';
+    else                                   cls += ' fixed ' + s.animation;
+    content.className = cls;
+
+    // ปรับ padding-bottom ของ body เพื่อไม่ให้ marquee ทับเนื้อหา
+    setTimeout(function () {
+      document.body.style.paddingBottom = bar.offsetHeight + 'px';
+    }, 50);
+  }
+
+  // listen change ข้าม tab (ถ้าตั้งใน q-setting.html อีกแท็บ จะ refresh ทันที)
+  window.addEventListener('storage', function (e) {
+    if (e.key && e.key.indexOf('q_marquee_') === 0) applyMarquee();
+  });
+
+  applyMarquee();
+  // re-apply เมื่อ window resize เผื่อ padding คำนวณใหม่
+  window.addEventListener('resize', function () {
+    setTimeout(applyMarquee, 100);
+  });
+
+  // debug helper
   window.__q = {
     reload: loadWaiting,
     waitingQueues: function () { return waitingQueues; },
     callNext: callNext,
-    testTTS: function (mode) {
-      var text = 'ขอเชิญคิวหมายเลข ห้า คุณสมชาย เจ้าของน้องโกโก้ เข้าห้องตรวจ 1';
-      if (mode === 'web')   return speakViaWebSpeech(text, 1);
-      if (mode === 'audio') return speakViaAudioURL(text, 1);
-      if (mode === 'pack')  return speakViaVoicePack(5, 'ห้องตรวจ 1', 1);
-      return speakCall(5, 'โกโก้', 'สมชาย', 'ห้องตรวจ 1', 1);
-    },
-    voices: function () {
-      if (!allVoices) return [];
-      var out = [];
-      for (var i = 0; i < allVoices.length; i++) {
-        out.push({ name: allVoices[i].name, lang: allVoices[i].lang });
-      }
-      return out;
-    },
-    voicePack: function () {
-      if (!window.THAI_VOICE_PACK) return null;
-      var vp = window.THAI_VOICE_PACK;
-      return {
-        voice: vp.voice,
-        max: vp.max,
-        segmentCount: Object.keys(vp.segments || {}).length,
-        roomCount: Object.keys(vp.rooms || {}).length,
-        rooms: Object.keys(vp.rooms || {})
-      };
-    }
+    refreshMarquee: applyMarquee
   };
-
-  // log สถานะ TTS ตอนเปิดหน้า
-  setTimeout(function () {
-    var thai = findAnyThaiVoice();
-    var vp = window.THAI_VOICE_PACK;
-    console.log('[TTS] voicePack:', vp ? (Object.keys(vp.segments||{}).length + ' segments') : '(none)',
-                '| speechSynthesis:', !!window.speechSynthesis,
-                '| voices:', allVoices.length,
-                '| thaiVoice:', thai ? thai.name : '(none)');
-    uiLog('voicePack=' + (vp ? Object.keys(vp.segments||{}).length+'seg' : 'no') +
-          ' webSpeech=' + !!window.speechSynthesis +
-          ' thaiVoice=' + (thai ? 'yes' : 'no'));
-  }, 2000);
 })();
 </script>
 
