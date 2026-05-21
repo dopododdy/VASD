@@ -609,18 +609,9 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
             test.volume = 0; window.speechSynthesis.speak(test);
           }
         } catch (e) {}
-        // warm up <audio> element (จำเป็นสำหรับ Audio URL fallback บน TV)
-        try {
-          var a = getTTSAudio();
-          a.muted = true;
-          a.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-          var pp = a.play();
-          if (pp && typeof pp.then === 'function') {
-            pp.then(function () { a.muted = false; }, function () { a.muted = false; });
-          } else {
-            a.muted = false;
-          }
-        } catch (e) {}
+        // หมายเหตุ: ไม่ warm-up <audio> element แล้ว เพราะ
+        // muted=true อาจค้างถ้า play() promise ไม่ resolve
+        // user gesture ที่กดปุ่มเรียกคิวจะ unlock Audio ให้เองอยู่แล้ว
       }
     });
   }
@@ -850,6 +841,8 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
         };
 
         try {
+          audio.muted = false;
+          audio.volume = 1.0;
           audio.src = url;
           var p = audio.play();
           if (p && typeof p.then === 'function') {
@@ -963,20 +956,24 @@ body.tv-mode .grid[data-size="sm"] .q-num { font-size: 64px; }
         var seg = segments[idx++];
         audio.onended = next;
         audio.onerror = function () {
-          uiLog('Voice Pack segment error idx=' + (idx-1));
+          var code = audio.error ? audio.error.code : '?';
+          uiLog('VP segment err idx=' + (idx-1) + ' code=' + code);
           next(); // ข้ามไปตัวถัดไป
         };
         try {
+          // ★ บังคับเสมอ — กัน state ค้างจาก unlockAudio หรือ Google TTS fallback
+          audio.muted = false;
+          audio.volume = 1.0;
           audio.src = seg;
           var p = audio.play();
           if (p && typeof p.then === 'function') {
             p.then(null, function (e) {
-              uiLog('Voice Pack play() rejected: ' + (e && e.message));
+              uiLog('VP play() rejected: ' + (e && e.message));
               resolve();
             });
           }
         } catch (e) {
-          uiLog('Voice Pack exception: ' + e.message);
+          uiLog('VP exception: ' + e.message);
           resolve();
         }
       }
