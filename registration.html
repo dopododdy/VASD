@@ -494,8 +494,8 @@ window.addAnimal = function () {
     const sex = card.querySelector(".sex");
 
     const refreshChips = () => {
-        const neuter = sex.value === "ผู้" ? "ทำหมันเพศผู้" : "ทำหมันเพศเมีย";
-        const list = [neuter, "ฉีดวัคซีนพิษสุนัขบ้า", "ตรวจเลือด", "ฝังไมโครชิฟ"];
+        const neuter = sex.value === "ผู้" ? "ทำหมันผู้" : "ทำหมันเมีย";
+        const list = [neuter, "ฉีดวัคซีน", "ฉีดเห็บ", "ตรวจเลือด", "ฝังไมโครชิฟ"];
         svcGrid.innerHTML = list.map((s, i) => `
             <label class="svc-chip ${i===0?'checked':''}">
                 <input type="checkbox" class="svc" value="${s}" ${i===0?'checked':''}>${s}
