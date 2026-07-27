@@ -781,18 +781,24 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
 
         let printContents = "";
         tmplData.config.forEach(l => {
-            let text = l.text
-              .replace(/{{queue_number}}/g, a.queue_number)
-              .replace(/{{animal_name}}/g, a.animal_name)
-              .replace(/{{species}}/g, spcText)
-              .replace(/{{species_icon}}/g, spcImg)
-              .replace(/{{sex}}/g, a.sex)
-              .replace(/{{sex_icon}}/g, sexImg)
-              .replace(/{{owner_name}}/g, ownerName)
-              .replace(/{{phone}}/g, phone)
-              .replace(/{{services}}/g, services);
-            
-            printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
+            const type = l.type || 'text';
+
+            if (type === 'image') {
+                printContents += `<div class="line" style="left:${l.x||0}px;top:${l.y||0}px;"><img src="${l.src}" style="width: ${l.width}px; height: ${l.height}px; object-fit: contain;"></div>`;
+            } else {
+                let text = (l.text || "")
+                  .replace(/{{queue_number}}/g, a.queue_number)
+                  .replace(/{{animal_name}}/g, a.animal_name)
+                  .replace(/{{species}}/g, spcText)
+                  .replace(/{{species_icon}}/g, spcImg)
+                  .replace(/{{sex}}/g, a.sex)
+                  .replace(/{{sex_icon}}/g, sexImg)
+                  .replace(/{{owner_name}}/g, ownerName)
+                  .replace(/{{phone}}/g, phone)
+                  .replace(/{{services}}/g, services);
+                
+                printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
+            }
         });
         allPagesHTML += `<div class="sticker-page">${printContents}</div>`;
     }
