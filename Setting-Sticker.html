@@ -108,7 +108,12 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; 
 
   <div id="lineEditor"></div>
   
-  <button class="btn-add" onclick="addLine()">+ เพิ่มบรรทัดใหม่</button>
+  <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+    <button class="btn-add" style="margin-bottom: 0;" onclick="addLine()">+ เพิ่มข้อความ</button>
+    <button class="btn-add" style="margin-bottom: 0;" onclick="document.getElementById('imageUpload').click()">🖼️ แทรกรูปภาพ</button>
+    <input type="file" id="imageUpload" accept="image/png, image/jpeg" style="display: none;" onchange="handleImageUpload(event)">
+  </div>
+  
   <button class="btn-save" onclick="saveTemplate()">💾 บันทึกรูปแบบนี้</button>
 </div>
 
@@ -146,36 +151,45 @@ function renderPreview() {
     div.className = "line";
     div.style.left = l.x + "px"; 
     div.style.top = l.y + "px";
-    div.style.fontSize = l.size + "px"; 
-    div.style.textAlign = l.align || "left";
-    div.style.fontFamily = l.font || "Sarabun";
-    div.style.fontWeight = l.bold ? "600" : "400";
-    div.style.width = l.align === 'center' ? "100%" : `calc(100% - ${l.x}px)`;
-    if(l.align === 'center') div.style.left = "0px";
 
-    let iconDog = `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
-    let iconMale = `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+    const type = l.type || 'text';
 
-    let txt = l.text
-      .replace(/{{queue_number}}/g, "A001")
-      .replace(/{{animal_name}}/g, "น้องนำโชค")
-      .replace(/{{species}}/g, "สุนัข (Beagle)")
-      .replace(/{{species_icon}}/g, iconDog)
-      .replace(/{{sex}}/g, "ผู้")
-      .replace(/{{sex_icon}}/g, iconMale)
-      .replace(/{{owner_name}}/g, "คุณสมชาย ใจดี")
-      .replace(/{{owner_id}}/g, "1234567890123")
-      .replace(/{{address}}/g, "123 ม.4 ต.บางพระ อ.ศรีราชา จ.ชลบุรี")
-      .replace(/{{phone}}/g, "081-234-5678")
-      .replace(/{{services}}/g, "ตรวจสุขภาพ, ทำหมันเพศผู้")
-      .replace(/{{drug_name}}/g, "Amoxicillin (500mg)")
-      .replace(/{{dose}}/g, "1 เม็ด")
-      .replace(/{{freq}}/g, "เช้า - เย็น หลังอาหาร")
-      .replace(/{{total_amount}}/g, "14 เม็ด")
-      .replace(/{{todayDate}}/g, dates.today)
-      .replace(/{{next7days}}/g, dates.next);
-    
-    div.innerHTML = txt;
+    if (type === 'image') {
+      // โหมดแสดงรูปภาพ
+      div.innerHTML = `<img src="${l.src}" style="width: ${l.width}px; height: ${l.height}px; object-fit: contain;">`;
+    } else {
+      // โหมดแสดงข้อความ (แบบเดิม)
+      div.style.fontSize = l.size + "px"; 
+      div.style.textAlign = l.align || "left";
+      div.style.fontFamily = l.font || "Sarabun";
+      div.style.fontWeight = l.bold ? "600" : "400";
+      div.style.width = l.align === 'center' ? "100%" : `calc(100% - ${l.x}px)`;
+      if(l.align === 'center') div.style.left = "0px";
+
+      let iconDog = `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+      let iconMale = `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
+      let txt = l.text
+        .replace(/{{queue_number}}/g, "A001")
+        .replace(/{{animal_name}}/g, "น้องนำโชค")
+        .replace(/{{species}}/g, "สุนัข (Beagle)")
+        .replace(/{{species_icon}}/g, iconDog)
+        .replace(/{{sex}}/g, "ผู้")
+        .replace(/{{sex_icon}}/g, iconMale)
+        .replace(/{{owner_name}}/g, "คุณสมชาย ใจดี")
+        .replace(/{{owner_id}}/g, "1234567890123")
+        .replace(/{{address}}/g, "123 ม.4 ต.บางพระ อ.ศรีราชา จ.ชลบุรี")
+        .replace(/{{phone}}/g, "081-234-5678")
+        .replace(/{{services}}/g, "ตรวจสุขภาพ, ทำหมันเพศผู้")
+        .replace(/{{drug_name}}/g, "Amoxicillin (500mg)")
+        .replace(/{{dose}}/g, "1 เม็ด")
+        .replace(/{{freq}}/g, "เช้า - เย็น หลังอาหาร")
+        .replace(/{{total_amount}}/g, "14 เม็ด")
+        .replace(/{{todayDate}}/g, dates.today)
+        .replace(/{{next7days}}/g, dates.next);
+      
+      div.innerHTML = txt;
+    }
     box.appendChild(div);
   });
 }
@@ -186,61 +200,109 @@ function renderEditor() {
   currentConfig.forEach((l, i) => {
     const block = document.createElement("div");
     block.className = "card";
-    block.innerHTML = `
-      <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
-        <span style="font-size:12px; font-weight:700; color:var(--teal-light)">LINE ${i+1}</span>
-        <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
-      </div>
-      
-      <label class="label">ข้อความ / ตัวแปร</label>
-      <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="เช่น ชื่อสัตว์: {{animal_name}}">
-      
-      <div class="prop-grid">
-        <div>
-          <label class="label">Font</label>
-          <select onchange="updateLine(${i},'font',this.value)">
-            <option value="Sarabun" ${l.font==='Sarabun'?'selected':''}>Sarabun (มาตรฐาน)</option>
-            <option value="Prompt" ${l.font==='Prompt'?'selected':''}>Prompt</option>
-            <option value="Kanit" ${l.font==='Kanit'?'selected':''}>Kanit</option>
-            <option value="Outfit" ${l.font==='Outfit'?'selected':''}>Outfit (EN)</option>
-          </select>
-        </div>
-        <div>
-          <label class="label">การจัดวาง</label>
-          <select onchange="updateLine(${i},'align',this.value)">
-            <option value="left" ${l.align==='left'?'selected':''}>ชิดซ้าย</option>
-            <option value="center" ${l.align==='center'?'selected':''}>กึ่งกลาง</option>
-            <option value="right" ${l.align==='right'?'selected':''}>ชิดขวา</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="prop-3-row">
-        <div><label class="label">Size (px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
-        <div><label class="label">แกน X</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
-        <div><label class="label">แกน Y</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
-      </div>
-      
-      <div style="margin-top:5px; display:flex; align-items:center; gap:8px;">
-        <input type="checkbox" style="width:16px; margin:0;" ${l.bold?'checked':''} onchange="updateLine(${i},'bold',this.checked)">
-        <span style="font-size:12px; color:var(--text-dim)">ตัวหนา (Bold)</span>
-      </div>
-    `;
+    const type = l.type || 'text';
+
+    if (type === 'image') {
+      // UI สำหรับปรับแต่งรูปภาพ
+      block.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+          <span style="font-size:12px; font-weight:700; color:var(--teal-light)">IMAGE ${i+1}</span>
+          <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 10px; background: #fff; border-radius: 4px; padding: 5px;">
+          <img src="${l.src}" style="max-height: 60px; object-fit: contain;">
+        </div>
+        
+        <div class="prop-grid">
+          <div><label class="label">ความกว้าง (px)</label><input type="number" value="${l.width}" oninput="updateLine(${i},'width',this.value)"></div>
+          <div><label class="label">ความสูง (px)</label><input type="number" value="${l.height}" oninput="updateLine(${i},'height',this.value)"></div>
+          <div><label class="label">แกน X</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
+          <div><label class="label">แกน Y</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
+        </div>
+      `;
+    } else {
+      // UI สำหรับปรับแต่งข้อความ (แบบเดิม)
+      block.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+          <span style="font-size:12px; font-weight:700; color:var(--teal-light)">LINE ${i+1}</span>
+          <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
+        </div>
+        
+        <label class="label">ข้อความ / ตัวแปร</label>
+        <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="เช่น ชื่อสัตว์: {{animal_name}}">
+        
+        <div class="prop-grid">
+          <div>
+            <label class="label">Font</label>
+            <select onchange="updateLine(${i},'font',this.value)">
+              <option value="Sarabun" ${l.font==='Sarabun'?'selected':''}>Sarabun (มาตรฐาน)</option>
+              <option value="Prompt" ${l.font==='Prompt'?'selected':''}>Prompt</option>
+              <option value="Kanit" ${l.font==='Kanit'?'selected':''}>Kanit</option>
+              <option value="Outfit" ${l.font==='Outfit'?'selected':''}>Outfit (EN)</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">การจัดวาง</label>
+            <select onchange="updateLine(${i},'align',this.value)">
+              <option value="left" ${l.align==='left'?'selected':''}>ชิดซ้าย</option>
+              <option value="center" ${l.align==='center'?'selected':''}>กึ่งกลาง</option>
+              <option value="right" ${l.align==='right'?'selected':''}>ชิดขวา</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="prop-3-row">
+          <div><label class="label">Size (px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
+          <div><label class="label">แกน X</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
+          <div><label class="label">แกน Y</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
+        </div>
+        
+        <div style="margin-top:5px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" style="width:16px; margin:0;" ${l.bold?'checked':''} onchange="updateLine(${i},'bold',this.checked)">
+          <span style="font-size:12px; color:var(--text-dim)">ตัวหนา (Bold)</span>
+        </div>
+      `;
+    }
+    
     area.appendChild(block);
   });
 }
 
 window.updateLine = (i, k, v) => { 
-  if(['size','x','y'].includes(k)) v=parseInt(v)||0; 
-  currentConfig[i][k]=v; 
+  if(['size','x','y','width','height'].includes(k)) v = parseInt(v) || 0; 
+  currentConfig[i][k] = v; 
   renderPreview(); 
 };
 
 window.removeLine = (i) => { currentConfig.splice(i,1); renderEditor(); renderPreview(); };
 
 window.addLine = () => { 
-  currentConfig.push({text:"ข้อความใหม่", size:16, x:10, y:10, align:"left", font:"Sarabun", bold:false}); 
+  currentConfig.push({type: "text", text:"ข้อความใหม่", size:16, x:10, y:10, align:"left", font:"Sarabun", bold:false}); 
   renderEditor(); renderPreview(); 
+};
+
+// ฟังก์ชันจัดการเมื่ออัปโหลดรูปภาพ
+window.handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentConfig.push({
+      type: 'image',
+      src: e.target.result, // บันทึกเป็น Base64
+      x: 10,
+      y: 10,
+      width: 50,
+      height: 50
+    });
+    renderEditor();
+    renderPreview();
+    event.target.value = ''; // เคลียร์ค่า input
+  };
+  reader.readAsDataURL(file);
 };
 
 window.loadTemplate = async () => {
@@ -272,6 +334,7 @@ window.printTest = () => {
   </style></head><body><div class="sticker">${contents}</div>
   <script>
     window.onload = function() {
+      // เผื่อเวลาให้เบราว์เซอร์โหลดรูปภาพ Base64 ลงในหน้าต่างใหม่
       setTimeout(function() {
         window.print();
         window.close();
