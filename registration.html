@@ -185,6 +185,29 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 .svc-chip.checked { background: rgba(14,165,160,0.15); border-color: var(--teal); color: var(--teal-light); }
 .svc-chip input { display: none; }
 
+/* ── Custom Modal Popup ── */
+.modal-overlay {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11,25,41,0.85);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+.modal-box {
+  background: var(--navy-mid);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 30px; max-width: 500px; width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+.modal-box h3 { color: var(--emerald); font-size: 26px; margin-bottom: 12px; }
+.modal-box p { font-size: 16px; color: var(--text); line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap; }
+.modal-actions { display: flex; gap: 12px; justify-content: center; }
+
 #printArea { display: none; }
 @media print {
   body > :not(#printArea) { display: none !important; }
@@ -195,6 +218,7 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { from { opacity: 0.7; } to { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -253,6 +277,18 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
   <button type="button" id="btnCancelWait" class="btn btn-cancel-wait" onclick="window.cancelWait()">✖ ยกเลิกและเริ่มใหม่</button>
 </div>
 
+<!-- ★ Modal ถามพิมพ์คิว (ลดปัญหาเบราว์เซอร์บล็อกการพิมพ์อัตโนมัติ) -->
+<div id="printModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>✅ บันทึกข้อมูลสำเร็จ!</h3>
+    <p id="printModalText"></p>
+    <div class="modal-actions">
+      <button class="btn btn-paste" onclick="window.skipPrint()">✖ เริ่มคิวใหม่ (ไม่พิมพ์)</button>
+      <button id="btnConfirmPrint" class="btn btn-submit" style="margin-top: 0;" onclick="window.confirmPrint()">🖨 พิมพ์บัตรคิวทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
 <div id="printArea"></div>
 
 <script type="module">
@@ -261,8 +297,8 @@ import { supabase } from "./js/supabase.js";
 let animalCount = 0;
 let isWaitingForConsent = false;
 let pendingSaveData = null;
-let selectedOwner = null;     // ★ เจ้าของที่เลือกจากการค้นหา
-let todayEventId = null;      // event_id ของวันนี้
+let selectedOwner = null;
+let todayEventId = null;
 
 const consentChannel = supabase.channel('vasd-consent-room');
 
@@ -443,7 +479,7 @@ window.readSmartCard = async function(ev) {
             document.getElementById("idCard").value = p.cid;
             document.getElementById("address").value = p.address;
             document.getElementById("phone").focus();
-            // ★ smart card = ข้อมูลใหม่ ไม่ใช่ selected owner
+            
             if (selectedOwner) {
               selectedOwner = null;
               document.getElementById('selectedOwnerBadge').classList.remove('show', 'cross-day');
@@ -553,7 +589,7 @@ window.requestConsent = function() {
 
     pendingSaveData = {
         owner: { name: ownerName, phone, idCard, address },
-        selectedOwner,  // ★ เก็บไว้ใช้ตอน save
+        selectedOwner,
         animals
     };
 
@@ -589,7 +625,7 @@ window.cancelWait = function() {
 };
 
 /* ─────────────────────────────────────────────
-   บันทึกลง Supabase (มี logic เลือกระหว่าง reuse owner_id หรือสร้างใหม่)
+   บันทึกลง Supabase
 ───────────────────────────────────────────── */
 async function executeSave() {
     if (!pendingSaveData) {
@@ -606,22 +642,17 @@ async function executeSave() {
     isWaitingForConsent = false;
 
     try {
-        // 1. ดึง event_id วันนี้ (สดๆ ป้องกันข้ามวัน)
         const { data: eventId, error: evtErr } = await supabase.rpc('get_today_event');
         if (evtErr) throw new Error('Event: ' + evtErr.message);
 
-        // 2. ★ ตัดสินใจ: reuse owner_id เดิม หรือสร้างใหม่
         let ownerIdToUse;
         let reused = false;
         const sel = pendingSaveData.selectedOwner;
 
         if (sel && sel.id && sel.event_id === eventId) {
-            // เจ้าของเดิมของวันนี้ → reuse
             ownerIdToUse = sel.id;
             reused = true;
-            console.log('[Save] Reusing existing owner from today:', sel.owner_name, sel.id);
         } else {
-            // สร้างใหม่ (กรณีเจ้าของใหม่ หรือเจ้าของจากวันก่อน)
             const { data: ownerData, error: ownerErr } = await supabase
                 .from('vasd_owner')
                 .insert({
@@ -635,17 +666,14 @@ async function executeSave() {
                 .single();
             if (ownerErr) throw new Error('Owner: ' + ownerErr.message);
             ownerIdToUse = ownerData.id;
-            console.log('[Save] Created new owner:', pendingSaveData.owner.name, ownerData.id);
         }
 
-        // 3. หา queue_number ถัดไป
         const { count: existingCount } = await supabase
             .from('vasd_animal')
             .select('*', { count: 'exact', head: true })
             .eq('event_id', eventId);
         let nextQueue = (existingCount || 0) + 1;
 
-        // 4. บันทึกสัตว์ + บริการ + คิว
         const saved = [];
         for (const anim of pendingSaveData.animals) {
             const { data: animalData, error: animErr } = await supabase
@@ -683,22 +711,19 @@ async function executeSave() {
             if (qErr) throw new Error('Queue: ' + qErr.message);
         }
 
-        // ★ เพิ่ม Logic การแจ้งเตือนและถามเรื่องพิมพ์คิว
-        const queueList = saved.map(a => `#${a.queue_number} ${a.animal_name}`).join('\n');
+        // ★ แสดง Popup (Modal) เพื่อให้สตาฟฟ์คลิก (ปลดล็อก Browser Print Block)
+        const queueList = saved.map(a => `• #${a.queue_number} ${a.animal_name}`).join('\n');
+        document.getElementById('printModalText').textContent = 
+            `เจ้าของ: ${pendingSaveData.owner.name} ${reused ? '(ใช้ประวัติเดิม)' : '(ลงทะเบียนใหม่)'}\n` +
+            `เพิ่มสัตว์ใหม่ทั้งหมด ${pendingSaveData.animals.length} รายการ:\n${queueList}`;
         
-        const wantToPrint = confirm(
-            `✅ บันทึกข้อมูลเรียบร้อยแล้ว!\n\n` +
-            `เจ้าของ: ${pendingSaveData.owner.name} ${reused ? '(ใช้ข้อมูลเดิม)' : '(เจ้าของใหม่)'}\n` +
-            `เพิ่มสัตว์ ${pendingSaveData.animals.length} ตัว:\n${queueList}\n\n` +
-            `👉 ต้องการ "พิมพ์บัตรคิว" ทั้งหมดหรือไม่?\n(กด OK เพื่อพิมพ์ / กด Cancel เพื่อข้าม)`
-        );
+        // เก็บค่าไว้ใช้ตอนคลิกปุ่มใน Popup
+        window._savedAnimalsToPrint = saved;
+        window._ownerInfoToPrint = pendingSaveData.owner;
+        pendingSaveData = null; 
 
-        if (wantToPrint) {
-            await printMultipleQueues(saved, pendingSaveData.owner);
-        }
-
-        pendingSaveData = null;
-        location.reload();
+        // แสดง Modal
+        document.getElementById('printModal').classList.add('show');
 
     } catch (e) {
         console.error('[Save] failed:', e);
@@ -707,6 +732,25 @@ async function executeSave() {
         btn.classList.remove("saving");
         btn.textContent = "📲 ส่งคำขอ Consent ไปยัง iPad";
     }
+}
+
+/* ─────────────────────────────────────────────
+   ★ ฟังก์ชันจัดการหน้าต่าง Modal (ข้าม/พิมพ์)
+───────────────────────────────────────────── */
+window.skipPrint = function() {
+    document.getElementById('printModal').classList.remove('show');
+    location.reload();
+}
+
+window.confirmPrint = async function() {
+    const btn = document.getElementById('btnConfirmPrint');
+    btn.innerHTML = "⏳ กำลังพิมพ์...";
+    btn.disabled = true;
+
+    await printMultipleQueues(window._savedAnimalsToPrint, window._ownerInfoToPrint);
+    
+    document.getElementById('printModal').classList.remove('show');
+    location.reload();
 }
 
 /* ─────────────────────────────────────────────
@@ -721,7 +765,6 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
 
     let allPagesHTML = "";
     
-    // วนลูปสร้างหน้าสติ๊กเกอร์ตามจำนวนสัตว์ที่ถูกบันทึก
     for (const a of savedAnimals) {
         const spcText  = a.species === "ส" ? "สุนัข" : "แมว";
         const services = a.services?.join(", ") || "-";
@@ -751,19 +794,14 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
             
             printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
         });
-        // ใส่ใน .sticker-page เพื่อให้ตัดหน้า (Page Break) ระหว่างดวงอัตโนมัติ
         allPagesHTML += `<div class="sticker-page">${printContents}</div>`;
     }
 
-    // วาง HTML ลงใน Print Area ในหน้าจอปัจจุบัน
     const printArea = document.getElementById("printArea");
     printArea.innerHTML = allPagesHTML;
 
-    // หน่วงเวลาให้เบราว์เซอร์โหลดรูปภาพ (cat.png / dog.png) เสร็จก่อนสั่ง Print
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
     window.print();
-    
-    // เคลียร์เนื้อหาหลัง Print เสร็จ
     printArea.innerHTML = "";
 }
 
