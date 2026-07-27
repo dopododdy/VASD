@@ -683,12 +683,20 @@ async function executeSave() {
             if (qErr) throw new Error('Queue: ' + qErr.message);
         }
 
+        // ★ เพิ่ม Logic การแจ้งเตือนและถามเรื่องพิมพ์คิว
         const queueList = saved.map(a => `#${a.queue_number} ${a.animal_name}`).join('\n');
-        alert(
+        
+        const wantToPrint = confirm(
             `✅ บันทึกข้อมูลเรียบร้อยแล้ว!\n\n` +
             `เจ้าของ: ${pendingSaveData.owner.name} ${reused ? '(ใช้ข้อมูลเดิม)' : '(เจ้าของใหม่)'}\n` +
-            `เพิ่มสัตว์ ${pendingSaveData.animals.length} ตัว:\n${queueList}`
+            `เพิ่มสัตว์ ${pendingSaveData.animals.length} ตัว:\n${queueList}\n\n` +
+            `👉 ต้องการ "พิมพ์บัตรคิว" ทั้งหมดหรือไม่?\n(กด OK เพื่อพิมพ์ / กด Cancel เพื่อข้าม)`
         );
+
+        if (wantToPrint) {
+            await printMultipleQueues(saved, pendingSaveData.owner);
+        }
+
         pendingSaveData = null;
         location.reload();
 
@@ -699,6 +707,64 @@ async function executeSave() {
         btn.classList.remove("saving");
         btn.textContent = "📲 ส่งคำขอ Consent ไปยัง iPad";
     }
+}
+
+/* ─────────────────────────────────────────────
+   ★ ฟังก์ชันพิมพ์คิวแบบ Batch (พิมพ์ทั้งหมดในทีเดียว)
+───────────────────────────────────────────── */
+async function printMultipleQueues(savedAnimals, ownerInfo) {
+    const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
+    if (!tmplData?.config) {
+        alert("⚠️ ยังไม่ได้บันทึก Template สติ๊กเกอร์คิว กรุณาตั้งค่าเครื่องพิมพ์ก่อน");
+        return;
+    }
+
+    let allPagesHTML = "";
+    
+    // วนลูปสร้างหน้าสติ๊กเกอร์ตามจำนวนสัตว์ที่ถูกบันทึก
+    for (const a of savedAnimals) {
+        const spcText  = a.species === "ส" ? "สุนัข" : "แมว";
+        const services = a.services?.join(", ") || "-";
+        const phone    = ownerInfo.phone || "ไม่ระบุ";
+        const ownerName= ownerInfo.name || "";
+
+        const spcImg = (a.species === "ม" || a.species === "แมว") 
+          ? `<img src="./cat.png" style="height: 1em; width: auto; vertical-align: middle;">`
+          : `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
+        const sexImg = (a.sex === "ผู้" || a.sex === "Male")
+          ? `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`
+          : `<img src="./female.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
+        let printContents = "";
+        tmplData.config.forEach(l => {
+            let text = l.text
+              .replace(/{{queue_number}}/g, a.queue_number)
+              .replace(/{{animal_name}}/g, a.animal_name)
+              .replace(/{{species}}/g, spcText)
+              .replace(/{{species_icon}}/g, spcImg)
+              .replace(/{{sex}}/g, a.sex)
+              .replace(/{{sex_icon}}/g, sexImg)
+              .replace(/{{owner_name}}/g, ownerName)
+              .replace(/{{phone}}/g, phone)
+              .replace(/{{services}}/g, services);
+            
+            printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
+        });
+        // ใส่ใน .sticker-page เพื่อให้ตัดหน้า (Page Break) ระหว่างดวงอัตโนมัติ
+        allPagesHTML += `<div class="sticker-page">${printContents}</div>`;
+    }
+
+    // วาง HTML ลงใน Print Area ในหน้าจอปัจจุบัน
+    const printArea = document.getElementById("printArea");
+    printArea.innerHTML = allPagesHTML;
+
+    // หน่วงเวลาให้เบราว์เซอร์โหลดรูปภาพ (cat.png / dog.png) เสร็จก่อนสั่ง Print
+    await new Promise(r => setTimeout(r, 600));
+    window.print();
+    
+    // เคลียร์เนื้อหาหลัง Print เสร็จ
+    printArea.innerHTML = "";
 }
 
 window.addAnimal();
