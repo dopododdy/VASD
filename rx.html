@@ -331,7 +331,7 @@ async function loadRxQueue() {
 }
 
 // ==========================================
-// ระบบพิมพ์ Sticker จาก Template
+// ระบบพิมพ์ Sticker จาก Template (รองรับรูปภาพ)
 // ==========================================
 async function renderStickers(templateType, dataArray) {
   const { data } = await supabase.from("vasd_print_template").select("config").eq("template_type", templateType).maybeSingle();
@@ -347,25 +347,44 @@ async function renderStickers(templateType, dataArray) {
 
   dataArray.forEach(item => {
     htmlStr += `<div class="sticker">`;
-    config.forEach(l => {
-      // แทนค่าตัวแปรทั้งหมดตามโครงสร้าง v2.3
-      let txt = l.text
-        .replace(/{{queue_number}}/g, item.queue_number || "")
-        .replace(/{{animal_name}}/g, item.animal_name || "")
-        .replace(/{{species}}/g, item.species || "")
-        .replace(/{{sex}}/g, item.sex || "")
-        .replace(/{{owner_name}}/g, item.owner_name || "")
-        .replace(/{{id_card}}/g, item.id_card || "")
-        .replace(/{{address}}/g, item.address || "")
-        .replace(/{{phone}}/g, item.phone || "")
-        .replace(/{{drug_name}}/g, item.drug_name || "")
-        .replace(/{{dose}}/g, item.dose || "")
-        .replace(/{{freq}}/g, item.freq || "")
-        .replace(/{{total_amount}}/g, item.total_amount || "")
-        .replace(/{{todayDate}}/g, dates.today)
-        .replace(/{{next7days}}/g, dates.next);
+    
+    // เตรียมไอคอนหมาแมว
+    const spcImg = (item.species === "ม" || item.species === "แมว") 
+      ? `<img src="./cat.png" style="height: 1em; width: auto; vertical-align: middle;">`
+      : `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+    const sexImg = (item.sex === "ผู้" || item.sex === "Male")
+      ? `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`
+      : `<img src="./female.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+    const spcText = item.species === "ส" ? "สุนัข" : "แมว";
 
-      htmlStr += `<div class="line" style="left:${l.x}px; top:${l.y}px; font-size:${l.size}px; text-align:${l.align}; font-family:'${l.font}', sans-serif; font-weight:${l.bold?'600':'400'}; width:${l.align==='center'?'100%':`calc(100% - ${l.x}px)`}; ${l.align==='center'?'left:0px;':''}">${txt}</div>`;
+    config.forEach(l => {
+      const type = l.type || 'text';
+
+      if (type === 'image') {
+        // วาดรูปแบบ Image Base64
+        htmlStr += `<div class="line" style="left:${l.x||0}px; top:${l.y||0}px;"><img src="${l.src}" style="width: ${l.width}px; height: ${l.height}px; object-fit: contain;"></div>`;
+      } else {
+        // แทนค่าตัวแปรทั้งหมด (โหมด Text)
+        let txt = (l.text || "")
+          .replace(/{{queue_number}}/g, item.queue_number || "")
+          .replace(/{{animal_name}}/g, item.animal_name || "")
+          .replace(/{{species}}/g, spcText)
+          .replace(/{{species_icon}}/g, spcImg)
+          .replace(/{{sex}}/g, item.sex || "")
+          .replace(/{{sex_icon}}/g, sexImg)
+          .replace(/{{owner_name}}/g, item.owner_name || "")
+          .replace(/{{id_card}}/g, item.id_card || "")
+          .replace(/{{address}}/g, item.address || "")
+          .replace(/{{phone}}/g, item.phone || "")
+          .replace(/{{drug_name}}/g, item.drug_name || "")
+          .replace(/{{dose}}/g, item.dose || "")
+          .replace(/{{freq}}/g, item.freq || "")
+          .replace(/{{total_amount}}/g, item.total_amount || "")
+          .replace(/{{todayDate}}/g, dates.today)
+          .replace(/{{next7days}}/g, dates.next);
+
+        htmlStr += `<div class="line" style="left:${l.x||0}px; top:${l.y||0}px; font-size:${l.size||12}px; text-align:${l.align||'left'}; font-family:'${l.font||'Sarabun'}', sans-serif; font-weight:${l.bold?'600':'400'}; width:${l.align==='center'?'100%':`calc(100% - ${l.x||0}px)`}; ${l.align==='center'?'left:0px;':''}">${txt}</div>`;
+      }
     });
     htmlStr += `</div>`;
   });
@@ -379,7 +398,14 @@ async function renderStickers(templateType, dataArray) {
     @page{size:80mm 50mm; margin:0;}
     @media print { body{background:#fff; padding:0;} .sticker{margin:0; box-shadow:none;} }
   </style></head><body>${htmlStr}
-  <script>window.onload=function(){window.print();window.close();};<\/script></body></html>`);
+  <script>
+    window.onload=function(){
+      setTimeout(function(){
+        window.print();
+        window.close();
+      }, 500);
+    };
+  <\/script></body></html>`);
   pw.document.close();
 }
 
