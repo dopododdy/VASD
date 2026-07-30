@@ -16,6 +16,8 @@
     --teal-light: #14c4bc;
     --rose: #ef4444;
     --rose-dark: #b91c1c;
+    --amber: #f59e0b;
+    --amber-light: #fbbf24;
     --surface: rgba(255,255,255,0.05);
     --border: rgba(255,255,255,0.1);
     --text: #e2e8f0;
@@ -153,6 +155,23 @@
     box-shadow: 0 2px 12px rgba(14,165,160,0.4);
   }
 
+  /* ── Highlighted card for Feedback Summary (amber accent) ── */
+  .menu-card.menu-card-feedback {
+    background: linear-gradient(135deg, rgba(245,158,11,0.16), rgba(217,119,6,0.08));
+    border-color: rgba(245,158,11,0.45);
+  }
+  .menu-card.menu-card-feedback:hover {
+    background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(217,119,6,0.15));
+    border-color: var(--amber-light);
+    box-shadow: 0 8px 24px rgba(245,158,11,0.25);
+  }
+  .menu-card.menu-card-feedback .menu-icon {
+    background: linear-gradient(135deg, var(--amber), #d97706);
+    color: #fff;
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 2px 12px rgba(245,158,11,0.4);
+  }
+
   /* ═══════════════════════════════════════════
      BOTTOM NAVIGATION
      ═══════════════════════════════════════════ */
@@ -201,6 +220,15 @@
     <div class="menu-info">
       <h3>จัดการตารางผ่าตัด รพส.</h3>
       <p>เพิ่ม / แก้ไข / ลบ รายการตารางผ่าตัดของโรงพยาบาลสัตว์</p>
+    </div>
+  </a>
+
+  <!-- ★ สรุป Feedback (NEW) -->
+  <a href="feedback_sum.html" class="menu-card menu-card-feedback">
+    <div class="menu-icon">⭐</div>
+    <div class="menu-info">
+      <h3>สรุปแบบประเมิน (Feedback)</h3>
+      <p>ดูคะแนนความพึงพอใจและข้อเสนอแนะจากผู้รับบริการ</p>
     </div>
   </a>
 
