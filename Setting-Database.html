@@ -65,7 +65,7 @@ header {
     <span class="danger-icon">⚠️</span>
     <h3 class="danger-title">Danger Zone</h3>
     <p class="danger-desc">
-      การดำเนินการนี้จะล้างข้อมูลสัตว์ คิว และประวัติการรักษาทั้งหมดในระบบถาวร 
+      การดำเนินการนี้จะล้างข้อมูลสัตว์ คิว ประวัติการรักษา และ<b>ข้อมูลแบบประเมินทั้งหมด</b>ในระบบถาวร 
       เพื่อเตรียมความพร้อมสำหรับการเริ่มโครงการใหม่
     </p>
     <button class="btn-clear" onclick="clearDB()">🔥 รีเซ็ตฐานข้อมูลใหม่</button>
@@ -93,16 +93,22 @@ window.clearDB = async () => {
     return;
   }
 
-  if (!confirm("🚨 ยืนยันการรีเซ็ตฐานข้อมูล?\nข้อมูลทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้")) return;
+  if (!confirm("🚨 ยืนยันการรีเซ็ตฐานข้อมูล?\nข้อมูลสัตว์, คิว และแบบประเมินทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้")) return;
   
   try {
-    // ลบข้อมูลโดยอ้างอิงจาก ID ที่ไม่ใช่ค่าว่าง (ลบทั้งหมด)
-    const { error } = await supabase
+    // 1. ลบข้อมูลสัตว์ (จะ cascade ลบคิว, บริการ, ยา ฯลฯ อัตโนมัติด้วย Foreign Key)
+    const { error: animalError } = await supabase
       .from('vasd_animal')
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000');
-    
-    if (error) throw error;
+    if (animalError) throw animalError;
+
+    // 2. ลบข้อมูลแบบประเมิน (Feedback)
+    const { error: feedbackError } = await supabase
+      .from('vasd_feedback')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    if (feedbackError) throw feedbackError;
 
     alert("✅ รีเซ็ตฐานข้อมูลเรียบร้อยแล้ว");
     window.location.href = "index.html"; // ส่งกลับหน้าหลักหลังรีเซ็ต
