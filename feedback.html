@@ -9,9 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- นำเข้า Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         body { 
             font-family: 'Sarabun', sans-serif; 
@@ -165,7 +162,7 @@
             <p class="subtitle">หน่วยบริการวิชาการ VET RMUTTO<br>(การออกหน่วยบริการเคลื่อนที่ภายนอก)</p>
         </div>
 
-        <form id="feedbackForm" onsubmit="submitFeedback(event)">
+        <form id="feedbackForm">
             <div class="form-group">
                 <label for="location">สถานที่ออกหน่วย (หมู่บ้าน/ชุมชน/วัด)</label>
                 <input type="text" id="location" name="location" placeholder="ระบุสถานที่รับบริการ" required>
@@ -231,23 +228,23 @@
         <div class="thank-you-msg" id="thankYouMsg">
             <h3>✅ ขอบคุณสำหรับคำติชม</h3>
             <p>ข้อมูลของท่านจะเป็นประโยชน์อย่างยิ่ง<br>ในการพัฒนาการเรียนการสอนและการให้บริการของ VET RMUTTO ครับ/ค่ะ</p>
-            <button onclick="location.reload()" class="btn-submit" style="margin-top: 15px; background-color: #64748b;">ทำแบบประเมินอีกครั้ง</button>
+            <button id="resetBtn" type="button" class="btn-submit" style="margin-top: 15px; background-color: #64748b;">ทำแบบประเมินอีกครั้ง</button>
         </div>
     </div>
 
-    <script>
-        // กำหนดค่าการเชื่อมต่อ Supabase
-        // *** กรุณาแก้ไข URL และ KEY ให้ตรงกับ Project ของคุณ ***
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <!-- ใช้ type="module" เพื่อรองรับการ import ตัวแปร -->
+    <script type="module">
+        // Import การเชื่อมต่อฐานข้อมูลจากไฟล์ส่วนกลาง
+        import { supabase } from "./js/supabase.js";
 
-        async function submitFeedback(event) {
+        const feedbackForm = document.getElementById('feedbackForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        feedbackForm.addEventListener('submit', async (event) => {
             event.preventDefault(); 
             
             // ป้องกันการกดปุ่มซ้ำ
-            const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerText = 'กำลังส่งข้อมูล...';
 
@@ -259,8 +256,8 @@
             const q3Val = document.querySelector('input[name="q3"]:checked').value;
             const commentsVal = document.getElementById('comments').value;
 
-            // ส่งข้อมูลไปยังตาราง vasd_feedback
-            const { data, error } = await supabase
+            // ส่งข้อมูลไปยังตาราง vasd_feedback ผ่าน Module ที่ Import มา
+            const { error } = await supabase
                 .from('vasd_feedback')
                 .insert([
                     { 
@@ -280,11 +277,16 @@
                 submitBtn.innerText = 'ส่งแบบประเมิน';
             } else {
                 // บันทึกสำเร็จ ซ่อนฟอร์ม และแสดงข้อความขอบคุณ
-                document.getElementById('feedbackForm').style.display = 'none';
+                feedbackForm.style.display = 'none';
                 document.getElementById('thankYouMsg').style.display = 'block';
                 window.scrollTo(0, 0);
             }
-        }
+        });
+
+        // ปุ่มสำหรับรีเฟรชหน้าเพื่อทำประเมินใหม่
+        resetBtn.addEventListener('click', () => {
+            location.reload();
+        });
     </script>
 </body>
 </html>
