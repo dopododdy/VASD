@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback Summary - RMUTTO VASD</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --navy: #0b1929;
+        --navy-mid: #112240;
+        --surface: rgba(255,255,255,0.05);
+        --border: rgba(255,255,255,0.1);
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
+        --amber: #f59e0b;
+        --teal: #0ea5a0;
+        --rose: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Sarabun', sans-serif;
+        background: var(--navy);
+        color: var(--text);
+        padding: 20px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .header h1 { font-size: 22px; color: #fff; margin: 0; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .btn {
+        padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+        font-family: 'Sarabun', sans-serif; font-weight: 600; text-decoration: none; 
+        display: inline-flex; align-items: center; gap: 8px; font-size: 14px;
+        transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn-back { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-print { background: var(--amber); color: #fff; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
+    
+    .summary-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 30px;
+    }
+    .stat-card {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;
+    }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--amber); margin-bottom: 4px; line-height: 1; }
+    .stat-label { font-size: 13px; color: var(--text-dim); }
+    
+    .table-container {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    th, td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    th { background: rgba(0,0,0,0.2); font-weight: 600; color: #fff; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+    .comment-text { max-width: 300px; word-wrap: break-word; color: var(--teal-light); }
+    
+    /* ═══════════════════════════════════════════
+       PRINT STYLES (สำหรับพิมพ์ A4)
+       ═══════════════════════════════════════════ */
+    @media print {
+        @page { margin: 15mm; size: A4 portrait; }
+        body { background: #fff; color: #000; padding: 0; }
+        .no-print { display: none !important; }
+        .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { color: #000; font-size: 20px; }
+        
+        .summary-grid { gap: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .stat-card { 
+            background: #fff; border: 1px solid #ccc; border-radius: 8px; 
+            padding: 15px; flex: 1; margin: 0 5px; 
+        }
+        .stat-card:first-child { margin-left: 0; }
+        .stat-card:last-child { margin-right: 0; }
+        .stat-value { color: #000; font-size: 24px; }
+        .stat-label { color: #333; font-size: 12px; }
+        
+        .table-container { background: transparent; border: none; overflow: visible; }
+        table { border: 1px solid #000; width: 100%; font-size: 12px; }
+        th, td { border: 1px solid #ccc; color: #000; padding: 8px; }
+        th { background: #f0f0f0; color: #000 !important; font-weight: bold; }
+        .comment-text { color: #000; }
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <a href="settings.html" class="btn btn-back no-print">⬅ กลับ</a>
+                <h1>รายงานสรุปผลการประเมิน VET RMUTTO</h1>
+            </div>
+            <button onclick="window.print()" class="btn btn-print no-print">🖨️ พิมพ์รายงาน</button>
+        </div>
+
+        <div class="summary-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">-</div>
+                <div class="stat-label">ผู้ตอบแบบประเมินทั้งหมด (คน)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgQ1">-</div>
+                <div class="stat-label">ความสุภาพและคำแนะนำ (เต็ม 5)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgQ2">-</div>
+                <div class="stat-label">ความสะอาดและปลอดภัย (เต็ม 5)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgQ3">-</div>
+                <div class="stat-label">ความพึงพอใจภาพรวม (เต็ม 5)</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="feedbackTable">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">วันที่-เวลา</th>
+                        <th>สถานที่ออกหน่วย</th>
+                        <th>บริการที่ได้รับ</th>
+                        <th style="text-align:center;">Q1</th>
+                        <th style="text-align:center;">Q2</th>
+                        <th style="text-align:center;">Q3</th>
+                        <th>ข้อเสนอแนะ</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackBody">
+                    <tr><td colspan="7" style="text-align: center; padding: 30px;">กำลังดึงข้อมูล...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ใช้ type="module" เพื่อรองรับการ import ตัวแปร -->
+    <script type="module">
+        import { supabase } from "./js/supabase.js";
+
+        // แปลงค่าบริการภาษาอังกฤษเป็นภาษาไทย
+        const serviceMap = {
+            'vaccine': 'ฉีดวัคซีน',
+            'neuter': 'ทำหมัน',
+            'checkup': 'ตรวจสุขภาพ',
+            'consult': 'ให้คำปรึกษา',
+            'other': 'อื่นๆ'
+        };
+
+        async function loadFeedback() {
+            try {
+                // ดึงข้อมูลทั้งหมดจากตาราง vasd_feedback เรียงตามวันที่ล่าสุด
+                const { data, error } = await supabase
+                    .from('vasd_feedback')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('feedbackBody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 30px;">ยังไม่มีข้อมูลแบบประเมินในระบบ</td></tr>';
+                    document.getElementById('totalCount').innerText = '0';
+                    document.getElementById('avgQ1').innerText = '0.0';
+                    document.getElementById('avgQ2').innerText = '0.0';
+                    document.getElementById('avgQ3').innerText = '0.0';
+                    return;
+                }
+
+                // คำนวณค่าเฉลี่ย
+                let sumQ1 = 0, sumQ2 = 0, sumQ3 = 0;
+                let htmlRows = '';
+
+                data.forEach(item => {
+                    sumQ1 += item.score_q1;
+                    sumQ2 += item.score_q2;
+                    sumQ3 += item.score_q3;
+
+                    // แปลงรูปแบบวันที่และเวลา
+                    const dateObj = new Date(item.created_at);
+                    const dateStr = dateObj.toLocaleDateString('th-TH', { 
+                        year: '2-digit', month: 'short', day: 'numeric' 
+                    }) + ' ' + dateObj.toLocaleTimeString('th-TH', { 
+                        hour: '2-digit', minute:'2-digit' 
+                    });
+                    
+                    const srv = serviceMap[item.service_type] || item.service_type;
+                    const comment = item.comments ? item.comments : '<span style="color:var(--text-faint);">-</span>';
+
+                    htmlRows += `
+                        <tr>
+                            <td>${dateStr}</td>
+                            <td>${item.location || '-'}</td>
+                            <td>${srv}</td>
+                            <td style="text-align:center;">${item.score_q1}</td>
+                            <td style="text-align:center;">${item.score_q2}</td>
+                            <td style="text-align:center;">${item.score_q3}</td>
+                            <td class="comment-text">${comment}</td>
+                        </tr>
+                    `;
+                });
+
+                // อัปเดตหน้าจอ Dashboard
+                document.getElementById('totalCount').innerText = data.length;
+                document.getElementById('avgQ1').innerText = (sumQ1 / data.length).toFixed(2);
+                document.getElementById('avgQ2').innerText = (sumQ2 / data.length).toFixed(2);
+                document.getElementById('avgQ3').innerText = (sumQ3 / data.length).toFixed(2);
+                
+                tbody.innerHTML = htmlRows;
+
+            } catch (err) {
+                console.error("Error loading feedback:", err);
+                document.getElementById('feedbackBody').innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--rose); padding: 30px;">❌ เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>`;
+            }
+        }
+
+        // เริ่มต้นโหลดข้อมูลทันทีที่เปิดหน้า
+        loadFeedback();
+    </script>
+</body>
+</html>
