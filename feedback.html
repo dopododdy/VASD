@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- นำเข้า Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         body { 
             font-family: 'Sarabun', sans-serif; 
@@ -138,6 +142,11 @@
         .btn-submit:hover { 
             background-color: #0284c7; 
         }
+        .btn-submit:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
         .thank-you-msg {
             display: none;
             text-align: center;
@@ -216,7 +225,7 @@
                 <textarea id="comments" name="comments" placeholder="พิมพ์ข้อเสนอแนะของท่านที่นี่..."></textarea>
             </div>
 
-            <button type="submit" class="btn-submit">ส่งแบบประเมิน</button>
+            <button type="submit" id="submitBtn" class="btn-submit">ส่งแบบประเมิน</button>
         </form>
         
         <div class="thank-you-msg" id="thankYouMsg">
@@ -227,13 +236,54 @@
     </div>
 
     <script>
-        function submitFeedback(event) {
-            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
-            // ในการใช้งานจริง สามารถใส่โค้ดสำหรับส่งข้อมูลไปยัง Server หรือ Supabase/Google Sheets ที่นี่
+        // กำหนดค่าการเชื่อมต่อ Supabase
+        // *** กรุณาแก้ไข URL และ KEY ให้ตรงกับ Project ของคุณ ***
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function submitFeedback(event) {
+            event.preventDefault(); 
             
-            document.getElementById('feedbackForm').style.display = 'none';
-            document.getElementById('thankYouMsg').style.display = 'block';
-            window.scrollTo(0, 0);
+            // ป้องกันการกดปุ่มซ้ำ
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'กำลังส่งข้อมูล...';
+
+            // ดึงค่าจากฟอร์ม
+            const locationVal = document.getElementById('location').value;
+            const serviceTypeVal = document.getElementById('service_type').value;
+            const q1Val = document.querySelector('input[name="q1"]:checked').value;
+            const q2Val = document.querySelector('input[name="q2"]:checked').value;
+            const q3Val = document.querySelector('input[name="q3"]:checked').value;
+            const commentsVal = document.getElementById('comments').value;
+
+            // ส่งข้อมูลไปยังตาราง vasd_feedback
+            const { data, error } = await supabase
+                .from('vasd_feedback')
+                .insert([
+                    { 
+                        location: locationVal, 
+                        service_type: serviceTypeVal, 
+                        score_q1: parseInt(q1Val),
+                        score_q2: parseInt(q2Val),
+                        score_q3: parseInt(q3Val),
+                        comments: commentsVal 
+                    }
+                ]);
+
+            if (error) {
+                console.error('Error saving feedback:', error);
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'ส่งแบบประเมิน';
+            } else {
+                // บันทึกสำเร็จ ซ่อนฟอร์ม และแสดงข้อความขอบคุณ
+                document.getElementById('feedbackForm').style.display = 'none';
+                document.getElementById('thankYouMsg').style.display = 'block';
+                window.scrollTo(0, 0);
+            }
         }
     </script>
 </body>
