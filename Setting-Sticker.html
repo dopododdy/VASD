@@ -35,7 +35,7 @@ header {
 .line { position: absolute; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
 
 .editor-section { padding: 20px; max-width: 600px; margin: 0 auto; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; transition: 0.2s; }
 .label { font-size: 11px; color: var(--teal-light); margin-bottom: 6px; display: block; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
 input, select {
@@ -51,6 +51,12 @@ input:focus { border-color: var(--teal); }
 .btn-add:hover { background: var(--teal-glow); }
 .btn-save { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--teal), var(--teal-light)); border: none; color: #fff; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px var(--teal-glow); position: sticky; bottom: 20px; z-index: 100; }
 .btn-del { padding: 6px 12px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+/* ── Drag & Drop Styles ── */
+.drag-handle { cursor: grab; font-size: 18px; color: var(--text-dim); margin-right: 10px; display: flex; align-items: center; justify-content: center; height: 100%; padding-right: 8px; }
+.drag-handle:active { cursor: grabbing; color: var(--teal-light); }
+.card.dragging { opacity: 0.4; transform: scale(0.98); box-shadow: 0 0 15px rgba(14,165,160,0.5); border: 1px dashed var(--teal-light); }
+.card.drag-over { border-top: 3px solid var(--teal-light); margin-top: 25px; } /* เว้นระยะให้เห็นชัดตอนจะปล่อย */
 
 /* Variables Tooltip */
 .var-box { background: rgba(14,165,160,0.1); border: 1px solid var(--teal-glow); border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 11px; line-height: 1.8; color: var(--text-dim); }
@@ -81,7 +87,7 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; 
 </section>
 
 <div class="editor-section">
-  <div class="card">
+  <div class="card" style="margin-bottom: 16px;">
     <label class="label">ชนิดของ Sticker</label>
     <select id="templateType" onchange="loadTemplate()">
       <option value="queue">🏷 ฉลากคิว (Queue)</option>
@@ -121,25 +127,15 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; 
 <script type="module">
 import { supabase } from "./js/supabase.js";
 let currentConfig = [];
+let dragStartIndex = null; // เก็บ Index ตัวที่กำลังถูกลาก
 
-// ฟังก์ชันจัดการวันที่ (อัปเดตเป็นรูปแบบ พ.ศ. ภาษาไทยเต็มรูปแบบ)
+// ฟังก์ชันจัดการวันที่
 const getDates = () => {
   const now = new Date();
   const next7 = new Date(); next7.setDate(now.getDate() + 7);
-  
-  // กำหนดรูปแบบภาษาไทย: วัน เดือนปี พ.ศ. (เช่น 2 มีนาคม 2569)
-  const options = { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
-  };
-  
+  const options = { day: 'numeric', month: 'long', year: 'numeric' };
   const fmt = (d) => d.toLocaleDateString('th-TH', options); 
-  
-  return { 
-    today: fmt(now), 
-    next: fmt(next7) 
-  };
+  return { today: fmt(now), next: fmt(next7) };
 };
 
 function renderPreview() {
@@ -156,10 +152,8 @@ function renderPreview() {
     const type = l.type || 'text';
 
     if (type === 'image') {
-      // โหมดแสดงรูปภาพ
       div.innerHTML = `<img src="${l.src}" style="width: ${l.width}px; height: ${l.height}px; object-fit: contain;">`;
     } else {
-      // โหมดแสดงข้อความ
       div.style.fontSize = l.size + "px"; 
       div.style.textAlign = l.align || "left";
       div.style.fontFamily = l.font || "Sarabun";
@@ -181,8 +175,8 @@ function renderPreview() {
         .replace(/{{owner_id}}/g, "1234567890123")
         .replace(/{{address}}/g, "123 ม.4 ต.บางพระ อ.ศรีราชา จ.ชลบุรี")
         .replace(/{{phone}}/g, "081-234-5678")
-        .replace(/{{services}}/g, "ฉีดวัคซีน, ทำหมันเพศผู้") // จำลอง Checkbox
-        .replace(/{{txt_service}}/g, "ตัดไหม, ทำแผล") // จำลอง Textbox
+        .replace(/{{services}}/g, "ฉีดวัคซีน, ทำหมันเพศผู้")
+        .replace(/{{txt_service}}/g, "ตัดไหม, ทำแผล")
         .replace(/{{drug_name}}/g, "Amoxicillin (500mg)")
         .replace(/{{dose}}/g, "1 เม็ด")
         .replace(/{{freq}}/g, "เช้า - เย็น หลังอาหาร")
@@ -199,24 +193,31 @@ function renderPreview() {
 function renderEditor() {
   const area = document.getElementById("lineEditor");
   area.innerHTML = "";
+  
   currentConfig.forEach((l, i) => {
     const block = document.createElement("div");
     block.className = "card";
+    block.dataset.index = i;
 
     const type = l.type || 'text';
+    const typeLabel = type === 'image' ? 'IMAGE' : 'LINE';
+
+    // โครงสร้าง Header (เพิ่มไอคอนลาก)
+    const headerHtml = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+        <div style="display:flex; align-items:center;">
+          <div class="drag-handle" title="ลากเพื่อสลับตำแหน่ง">⠿</div>
+          <span style="font-size:12px; font-weight:700; color:var(--teal-light)">${typeLabel} ${i+1}</span>
+        </div>
+        <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
+      </div>
+    `;
 
     if (type === 'image') {
-      // UI สำหรับปรับแต่งรูปภาพ
-      block.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
-          <span style="font-size:12px; font-weight:700; color:var(--teal-light)">IMAGE ${i+1}</span>
-          <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
-        </div>
-        
+      block.innerHTML = headerHtml + `
         <div style="text-align: center; margin-bottom: 10px; background: #fff; border-radius: 4px; padding: 5px;">
           <img src="${l.src}" style="max-height: 60px; object-fit: contain;">
         </div>
-        
         <div class="prop-grid">
           <div><label class="label">ความกว้าง (px)</label><input type="number" value="${l.width}" oninput="updateLine(${i},'width',this.value)"></div>
           <div><label class="label">ความสูง (px)</label><input type="number" value="${l.height}" oninput="updateLine(${i},'height',this.value)"></div>
@@ -225,24 +226,17 @@ function renderEditor() {
         </div>
       `;
     } else {
-      // UI สำหรับปรับแต่งข้อความ (แบบเดิม)
-      block.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
-          <span style="font-size:12px; font-weight:700; color:var(--teal-light)">LINE ${i+1}</span>
-          <button class="btn-del" onclick="removeLine(${i})">ลบ</button>
-        </div>
-        
+      block.innerHTML = headerHtml + `
         <label class="label">ข้อความ / ตัวแปร</label>
         <input value="${l.text}" oninput="updateLine(${i},'text',this.value)" placeholder="เช่น ชื่อสัตว์: {{animal_name}}">
-        
         <div class="prop-grid">
           <div>
             <label class="label">Font</label>
             <select onchange="updateLine(${i},'font',this.value)">
-              <option value="Sarabun" ${l.font==='Sarabun'?'selected':''}>Sarabun (มาตรฐาน)</option>
+              <option value="Sarabun" ${l.font==='Sarabun'?'selected':''}>Sarabun</option>
               <option value="Prompt" ${l.font==='Prompt'?'selected':''}>Prompt</option>
               <option value="Kanit" ${l.font==='Kanit'?'selected':''}>Kanit</option>
-              <option value="Outfit" ${l.font==='Outfit'?'selected':''}>Outfit (EN)</option>
+              <option value="Outfit" ${l.font==='Outfit'?'selected':''}>Outfit</option>
             </select>
           </div>
           <div>
@@ -254,13 +248,11 @@ function renderEditor() {
             </select>
           </div>
         </div>
-
         <div class="prop-3-row">
           <div><label class="label">Size (px)</label><input type="number" value="${l.size}" oninput="updateLine(${i},'size',this.value)"></div>
           <div><label class="label">แกน X</label><input type="number" value="${l.x}" oninput="updateLine(${i},'x',this.value)"></div>
           <div><label class="label">แกน Y</label><input type="number" value="${l.y}" oninput="updateLine(${i},'y',this.value)"></div>
         </div>
-        
         <div style="margin-top:5px; display:flex; align-items:center; gap:8px;">
           <input type="checkbox" style="width:16px; margin:0;" ${l.bold?'checked':''} onchange="updateLine(${i},'bold',this.checked)">
           <span style="font-size:12px; color:var(--text-dim)">ตัวหนา (Bold)</span>
@@ -268,6 +260,57 @@ function renderEditor() {
       `;
     }
     
+    // ── ผูก Event Drag & Drop ──
+    const handle = block.querySelector('.drag-handle');
+    
+    // อนุญาตให้ Drag เฉพาะตอนเอาเมาส์ชี้ที่ไอคอน (ป้องกันลากติดตอนพิมพ์)
+    handle.addEventListener('mouseenter', () => block.setAttribute('draggable', true));
+    handle.addEventListener('mouseleave', () => block.removeAttribute('draggable'));
+    
+    // เริ่มลาก
+    block.addEventListener('dragstart', function(e) {
+      dragStartIndex = parseInt(this.dataset.index);
+      e.dataTransfer.effectAllowed = 'move';
+      // หน่วงเวลาใส่ class เล็กน้อยเพื่อให้รูปผีเสื้อเงาลากยังมีหน้าตาปกติ
+      setTimeout(() => this.classList.add('dragging'), 0); 
+    });
+
+    // ขณะลากผ่าน Card อื่น
+    block.addEventListener('dragover', function(e) {
+      e.preventDefault(); // จำเป็นต้องมีเพื่อให้ drop ทำงานได้
+      e.dataTransfer.dropEffect = 'move';
+      this.classList.add('drag-over');
+    });
+
+    // เมื่อลากออกจากการทับ Card อื่น
+    block.addEventListener('dragleave', function(e) {
+      this.classList.remove('drag-over');
+    });
+
+    // ปล่อยเมาส์สลับตำแหน่ง
+    block.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      this.classList.remove('drag-over');
+      
+      const dragEndIndex = parseInt(this.dataset.index);
+      
+      // ถ้าไม่ได้ปล่อยที่เดิม ให้ทำการสลับ Array
+      if (dragStartIndex !== null && dragStartIndex !== dragEndIndex) {
+        const itemToMove = currentConfig.splice(dragStartIndex, 1)[0];
+        currentConfig.splice(dragEndIndex, 0, itemToMove);
+        renderEditor(); // วาดกล่องเครื่องมือใหม่
+        renderPreview(); // วาดรูปตัวอย่างใหม่
+      }
+    });
+
+    // ลากจบ (คืนค่าต่างๆ กลับ)
+    block.addEventListener('dragend', function() {
+      this.classList.remove('dragging');
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
+      block.removeAttribute('draggable');
+      dragStartIndex = null;
+    });
+
     area.appendChild(block);
   });
 }
@@ -285,7 +328,6 @@ window.addLine = () => {
   renderEditor(); renderPreview(); 
 };
 
-// ฟังก์ชันจัดการเมื่ออัปโหลดรูปภาพ
 window.handleImageUpload = (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -294,15 +336,12 @@ window.handleImageUpload = (event) => {
   reader.onload = (e) => {
     currentConfig.push({
       type: 'image',
-      src: e.target.result, // บันทึกเป็น Base64
-      x: 10,
-      y: 10,
-      width: 50,
-      height: 50
+      src: e.target.result,
+      x: 10, y: 10, width: 50, height: 50
     });
     renderEditor();
     renderPreview();
-    event.target.value = ''; // เคลียร์ค่า input
+    event.target.value = '';
   };
   reader.readAsDataURL(file);
 };
@@ -336,7 +375,6 @@ window.printTest = () => {
   </style></head><body><div class="sticker">${contents}</div>
   <script>
     window.onload = function() {
-      // เผื่อเวลาให้เบราว์เซอร์โหลดรูปภาพ Base64 ลงในหน้าต่างใหม่
       setTimeout(function() {
         window.print();
         window.close();
