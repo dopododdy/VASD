@@ -92,14 +92,14 @@ header {
 
 .rx-item {
   display: flex; gap: 12px; background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; align-items: center;
+  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; align-items: center; flex-wrap: wrap;
 }
 .rx-idx {
   width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1);
   display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-dim);
   flex-shrink: 0; align-self: flex-start;
 }
-.rx-details { flex: 1; }
+.rx-details { flex: 1; min-width: 200px;}
 .rx-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .rx-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 2px; }
 .rx-desc b { color: var(--sky-light); }
@@ -109,13 +109,26 @@ header {
   color: var(--amber); padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; font-weight: 500;
 }
 
-.btn-print-single {
-  background: rgba(14, 165, 233, 0.1); border: 1px solid var(--sky);
-  color: var(--sky-light); border-radius: 8px; padding: 8px 12px;
-  cursor: pointer; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
-  transition: 0.2s; white-space: nowrap; flex-shrink: 0;
+/* Edit Inputs in Rx */
+.edit-input {
+  background: var(--navy); border: 1px solid var(--border-2); color: var(--text);
+  padding: 4px 8px; border-radius: 4px; font-family: "Sarabun", sans-serif; font-size: 13px;
+  width: 100%; margin-bottom: 4px; outline: none;
 }
-.btn-print-single:hover { background: var(--sky); color: #fff; }
+.edit-input:focus { border-color: var(--sky-light); }
+
+.rx-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.btn-action-single {
+  background: rgba(14, 165, 233, 0.1); border: 1px solid var(--sky);
+  color: var(--sky-light); border-radius: 8px; padding: 6px 12px;
+  cursor: pointer; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  transition: 0.2s; white-space: nowrap; width: 100%; text-align: center;
+}
+.btn-action-single:hover { background: var(--sky); color: #fff; }
+.btn-action-single.edit { background: rgba(245, 158, 11, 0.1); border-color: var(--amber); color: var(--amber); }
+.btn-action-single.edit:hover { background: var(--amber); color: #fff; }
+.btn-action-single.save { background: rgba(16, 185, 129, 0.1); border-color: var(--emerald); color: var(--emerald); }
+.btn-action-single.save:hover { background: var(--emerald); color: #fff; }
 
 .card-footer {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -192,7 +205,6 @@ const getDates = () => {
   const now = new Date();
   const next7 = new Date(); next7.setDate(now.getDate() + 7);
   
-  // กำหนดรูปแบบภาษาไทย: วัน เดือนปี พ.ศ. (เช่น 2 มีนาคม 2569)
   const options = { 
     day: 'numeric', 
     month: 'long', 
@@ -211,7 +223,6 @@ async function loadRxQueue() {
   const container = document.getElementById("rx-container");
   
   try {
-    // โหลดข้อมูล Queue พร้อมผูกสัมพันธ์ตารางฉบับ Version 2.3
     const { data: queueData, error } = await supabase
       .from("vasd_queue")
       .select(`
@@ -227,7 +238,6 @@ async function loadRxQueue() {
 
     if (error) throw error;
 
-    // กรองเอาเฉพาะเคสที่มียา หรือมีบริการ หรือพร้อมกลับบ้านแล้ว
     const animals = (queueData || []).filter(q => {
       if (!q.vasd_animal) return false;
       const hasRx = q.vasd_animal.vasd_prescription && q.vasd_animal.vasd_prescription.length > 0;
@@ -253,14 +263,35 @@ async function loadRxQueue() {
       let rxHtml = "";
       if (a.vasd_prescription && a.vasd_prescription.length > 0) {
         rxHtml = a.vasd_prescription.map((rx, i) => `
-          <div class="rx-item">
+          <div class="rx-item" id="rx-item-${rx.id}">
             <div class="rx-idx">${i + 1}</div>
-            <div class="rx-details">
+            
+            <!-- โหมดแสดงผลปกติ -->
+            <div class="rx-details" id="rx-view-${rx.id}">
               <div class="rx-name">${rx.drug_id}</div>
               <div class="rx-desc">วิธีใช้: ป้อน <b>${rx.dose}</b> · ${rx.freq}</div>
               <div class="rx-desc">จำนวนที่จ่าย: <b>${rx.total_pills}</b> เม็ด</div>
+              ${rx.days ? `<div class="rx-desc">สำหรับ <b>${rx.days}</b> วัน</div>` : ''}
             </div>
-            <button class="btn-print-single" onclick="printSingleRx('${a.id}', ${i})">🖨️ สติกเกอร์</button>
+
+            <!-- โหมดแก้ไข (ซ่อนไว้ก่อน) -->
+            <div class="rx-details" id="rx-edit-${rx.id}" style="display:none;">
+              <input type="text" id="edit-name-${rx.id}" class="edit-input" value="${rx.drug_id}" placeholder="ชื่อยา">
+              <div style="display:flex; gap:4px;">
+                <input type="text" id="edit-dose-${rx.id}" class="edit-input" value="${rx.dose}" placeholder="ปริมาณ (เช่น 1 เม็ด/ครั้ง)" style="flex:1;">
+                <input type="text" id="edit-freq-${rx.id}" class="edit-input" value="${rx.freq}" placeholder="ความถี่" style="flex:2;">
+              </div>
+              <div style="display:flex; gap:4px;">
+                <input type="text" id="edit-total-${rx.id}" class="edit-input" value="${rx.total_pills}" placeholder="จำนวนรวม (ตัวเลข)" style="flex:1;">
+                <input type="text" id="edit-days-${rx.id}" class="edit-input" value="${rx.days || ''}" placeholder="จำนวนวัน" style="flex:1;">
+              </div>
+            </div>
+
+            <div class="rx-actions">
+              <button class="btn-action-single" id="btn-print-${rx.id}" onclick="printSingleRx('${a.id}', ${i})">🖨️ สติกเกอร์</button>
+              <button class="btn-action-single edit" id="btn-edit-${rx.id}" onclick="editRx('${rx.id}')">✏️ แก้ไข</button>
+              <button class="btn-action-single save" id="btn-save-${rx.id}" style="display:none;" onclick="saveEditedRx('${rx.id}')">💾 บันทึก</button>
+            </div>
           </div>
         `).join('');
       } else {
@@ -294,6 +325,7 @@ async function loadRxQueue() {
       `;
       if(hasVaccine) smartButtons += `<button class="btn-sm" onclick="printStickerAction('vaccine', '${a.id}')">📒 สมุดวัคซีน</button>`;
       if(hasMicrochip) smartButtons += `<button class="btn-sm" onclick="printStickerAction('microchip', '${a.id}')">💳 สมุดไมโครชิพ</button>`;
+      
       const card = document.createElement("div");
       card.className = "rx-card";
       card.innerHTML = `
@@ -329,6 +361,50 @@ async function loadRxQueue() {
     container.innerHTML = `<div style="text-align:center; padding: 40px; color: #fca5a5;">❌ โหลดข้อมูลไม่สำเร็จ</div>`;
   }
 }
+
+// ==========================================
+// ระบบแก้ไขรายการยา (Edit Rx)
+// ==========================================
+window.editRx = function(rxId) {
+  document.getElementById(`rx-view-${rxId}`).style.display = 'none';
+  document.getElementById(`rx-edit-${rxId}`).style.display = 'block';
+  
+  document.getElementById(`btn-print-${rxId}`).style.display = 'none';
+  document.getElementById(`btn-edit-${rxId}`).style.display = 'none';
+  document.getElementById(`btn-save-${rxId}`).style.display = 'block';
+};
+
+window.saveEditedRx = async function(rxId) {
+  const btn = document.getElementById(`btn-save-${rxId}`);
+  btn.innerText = "⏳...";
+  btn.disabled = true;
+
+  const newName = document.getElementById(`edit-name-${rxId}`).value.trim();
+  const newDose = document.getElementById(`edit-dose-${rxId}`).value.trim();
+  const newFreq = document.getElementById(`edit-freq-${rxId}`).value.trim();
+  const newTotal = parseInt(document.getElementById(`edit-total-${rxId}`).value) || 0;
+  const newDays = parseInt(document.getElementById(`edit-days-${rxId}`).value) || 0;
+
+  try {
+    const { error } = await supabase.from('vasd_prescription').update({
+      drug_id: newName,
+      dose: newDose,
+      freq: newFreq,
+      total_pills: newTotal,
+      days: newDays
+    }).eq("id", rxId);
+
+    if (error) throw error;
+    
+    // โหลดหน้าจอใหม่เพื่อให้แสดงข้อมูลที่อัปเดตแล้ว
+    loadRxQueue();
+  } catch (err) {
+    alert("❌ บันทึกไม่สำเร็จ: " + err.message);
+    btn.innerText = "💾 บันทึก";
+    btn.disabled = false;
+  }
+};
+
 
 // ==========================================
 // ระบบพิมพ์ Sticker จาก Template (รองรับรูปภาพ)
