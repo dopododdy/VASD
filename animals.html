@@ -222,13 +222,12 @@ header {
   border-top: 0px solid var(--border);
 }
 .animal-card.open .card-detail {
-  max-height: 1000px; /* เพิ่ม max-height เผื่อพื้นที่ตอนแก้ไข */
+  max-height: 1000px;
   border-top: 1px solid var(--border);
 }
 
 .detail-body { padding: 14px; }
 
-/* Added parts: Services & Health Notes */
 .svc-chip {
   background: var(--surface-3); border: 1px solid var(--border-2);
   border-radius: 50px; padding: 4px 12px; font-size: 11px; font-weight: 500; color: var(--text);
@@ -242,7 +241,7 @@ header {
 
 /* Edit Services Checkbox Area */
 .edit-services {
-  display: none; /* ซ่อนไว้รอเปิดตอนกดแก้ไข */
+  display: none;
   gap: 15px; flex-wrap: wrap; margin-top: 8px; flex-direction: column;
 }
 .edit-services-grid { display: flex; flex-wrap: wrap; gap: 15px; }
@@ -493,16 +492,15 @@ async function loadAnimals() {
   applySortAndRender();
 }
 
-// 🛠️ 2. จัดการ Logic กรองและเรียง (ตัวจบเรื่องทุกบั๊ก)
+// 🛠️ 2. จัดการ Logic กรองและเรียง
 function applySortAndRender() {
-  // ดึงค่าสดๆ จากหน้าจอเสมอ ป้องกันการทำงานเพี้ยน
   const rawQuery = document.getElementById("searchInput").value || "";
   const query = rawQuery.trim().toLowerCase();
   const sortBy = document.getElementById("sortSelect").value;
 
   // กรองข้อมูล (Filter)
   let filteredData = allData.filter(a => {
-    if (query === "") return true; // ทันทีที่ลบข้อความทิ้งหมด บรรทัดนี้จะคืนค่าทุกรายการให้ทันที
+    if (query === "") return true;
     
     const name = String(a.animal_name || "").toLowerCase();
     const queue = String(a.queue_number || "").toLowerCase();
@@ -529,18 +527,14 @@ function applySortAndRender() {
   renderCards(filteredData, query);
 }
 
-// 🛠️ 3. จัดการวาดหน้าจอแบบปลอดภัย (Safe DOM Rendering)
+// 🛠️ 3. จัดการวาดหน้าจอ
 function renderCards(data, query) {
   const list = document.getElementById("animalList");
   document.getElementById("countBadge").textContent = `${data.length} รายการ`;
 
-  // สำรองสถานะการ์ดที่ถูกเปิดทิ้งไว้
   const openIds = new Set([...list.querySelectorAll(".animal-card.open")].map(el => el.dataset.id));
-
-  // ล้างเนื้อหาเก่าทิ้งหมด
   list.innerHTML = "";
 
-  // กรณีไม่พบข้อมูล จะสร้าง HTML ขึ้นมาใหม่สดๆ ป้องกันการขัดข้องทาง Reference
   if (data.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
@@ -551,7 +545,6 @@ function renderCards(data, query) {
     return;
   }
 
-  // กรณีมีข้อมูล ก็วาดการ์ดปกติ
   data.forEach((a, idx) => {
     const statusKey = a.vasd_queue?.status || "waiting";
     const s = statusMap[statusKey] || statusMap.waiting;
@@ -723,7 +716,6 @@ window.printQueue = async function(animalId) {
 
   // แปลงค่าจากฐานข้อมูลให้เป็น Text ปกติ
   const spcText  = a.species === "ส" ? "สุนัข" : "แมว";
-  const services = a.vasd_service?.map(s => s.service_type).join(", ") || "-";
   const phone    = a.vasd_owner?.phone || "ไม่ระบุ";
   const ownerName= a.vasd_owner?.owner_name || "";
 
@@ -735,6 +727,14 @@ window.printQueue = async function(animalId) {
   const sexImg = (a.sex === "ผู้" || a.sex === "Male")
     ? `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`
     : `<img src="./female.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
+  // ★ แยก Service ออกเป็น Checkbox และ Textbox สำหรับพารามิเตอร์ {{services}} และ {{txt_service}}
+  const rawServices = a.vasd_service ? a.vasd_service.map(srv => srv.service_type) : [];
+  const chkServices = rawServices.filter(srv => baseServices.includes(srv));
+  const txtServices = rawServices.filter(srv => !baseServices.includes(srv));
+
+  const servicesStr = chkServices.length > 0 ? chkServices.join(", ") : "-";
+  const txtServiceStr = txtServices.length > 0 ? txtServices.join(", ") : "-";
 
   const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
   if (!tmplData?.config) return alert("⚠️ ยังไม่ได้บันทึก Template สติ๊กเกอร์คิว กรุณาตั้งค่าเครื่องพิมพ์ก่อน");
@@ -757,7 +757,8 @@ window.printQueue = async function(animalId) {
         .replace(/{{sex_icon}}/g, sexImg)      
         .replace(/{{owner_name}}/g, ownerName)
         .replace(/{{phone}}/g, phone)
-        .replace(/{{services}}/g, services);
+        .replace(/{{services}}/g, servicesStr)
+        .replace(/{{txt_service}}/g, txtServiceStr);
       
       printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
     }
