@@ -208,14 +208,6 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 .modal-box p { font-size: 16px; color: var(--text); line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap; }
 .modal-actions { display: flex; gap: 12px; justify-content: center; }
 
-#printArea { display: none; }
-@media print {
-  body > :not(#printArea) { display: none !important; }
-  #printArea { display: block !important; }
-  .sticker-page { position: relative; width: 80mm; height: 50mm; page-break-after: always; background: #fff; }
-  .line { position: absolute; color: #000 !important; }
-}
-
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { from { opacity: 0.7; } to { opacity: 1; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -234,7 +226,6 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 <div class="wrap">
   <h2 class="page-title">ลงทะเบียนสัตว์</h2>
 
-  <!-- ★ NEW: Owner Search Card -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon violet">🔍</div>
@@ -277,7 +268,7 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
   <button type="button" id="btnCancelWait" class="btn btn-cancel-wait" onclick="window.cancelWait()">✖ ยกเลิกและเริ่มใหม่</button>
 </div>
 
-<!-- ★ Modal ถามพิมพ์คิว (ลดปัญหาเบราว์เซอร์บล็อกการพิมพ์อัตโนมัติ) -->
+<!-- Modal ถามพิมพ์คิว -->
 <div id="printModal" class="modal-overlay">
   <div class="modal-box">
     <h3>✅ บันทึกข้อมูลสำเร็จ!</h3>
@@ -288,8 +279,6 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
     </div>
   </div>
 </div>
-
-<div id="printArea"></div>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -504,7 +493,6 @@ window.addAnimal = function () {
     const card = document.createElement("div");
     card.className = "animal-card";
     
-    // ★ เพิ่ม HTML ส่วน Textbox สำหรับกรอกบริการเพิ่มเติมที่ท้ายของการ์ด
     card.innerHTML = `
         <div class="animal-card-header">
             <div class="animal-card-num">${animalCount}</div>
@@ -526,7 +514,6 @@ window.addAnimal = function () {
         <div class="svc-label-row field-label">บริการที่ต้องการ</div>
         <div class="svc-grid"></div>
         
-        <!-- ★ ส่วนที่เพิ่ม Textbox -->
         <div class="field-group" style="margin-top: 5px;">
             <label class="field-label">บริการอื่นๆ / ระบุเพิ่มเติม</label>
             <input type="text" class="customService" placeholder="พิมพ์บริการอื่นๆ ที่ต้องการ (ถ้ามี)">
@@ -583,10 +570,8 @@ window.requestConsent = function() {
         if (!animalName) { invalidName = true; return; }
         
         const svcs = [];
-        // เก็บจาก Checkbox
         c.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
         
-        // ★ เก็บข้อความจาก Textbox เพิ่มเข้าไป
         const customSvc = c.querySelector(".customService").value.trim();
         if (customSvc) {
             svcs.push(customSvc);
@@ -728,18 +713,15 @@ async function executeSave() {
             if (qErr) throw new Error('Queue: ' + qErr.message);
         }
 
-        // ★ แสดง Popup (Modal) เพื่อให้สตาฟฟ์คลิก (ปลดล็อก Browser Print Block)
         const queueList = saved.map(a => `• #${a.queue_number} ${a.animal_name}`).join('\n');
         document.getElementById('printModalText').textContent = 
             `เจ้าของ: ${pendingSaveData.owner.name} ${reused ? '(ใช้ประวัติเดิม)' : '(ลงทะเบียนใหม่)'}\n` +
             `เพิ่มสัตว์ใหม่ทั้งหมด ${pendingSaveData.animals.length} รายการ:\n${queueList}`;
         
-        // เก็บค่าไว้ใช้ตอนคลิกปุ่มใน Popup
         window._savedAnimalsToPrint = saved;
         window._ownerInfoToPrint = pendingSaveData.owner;
         pendingSaveData = null; 
 
-        // แสดง Modal
         document.getElementById('printModal').classList.add('show');
 
     } catch (e) {
@@ -771,7 +753,7 @@ window.confirmPrint = async function() {
 }
 
 /* ─────────────────────────────────────────────
-   ★ ฟังก์ชันพิมพ์คิวแบบ Batch (พิมพ์ทั้งหมดในทีเดียว)
+   ★ ฟังก์ชันพิมพ์คิวแบบ Batch (ใช้ window.open เหมือนหน้า animals)
 ───────────────────────────────────────────── */
 async function printMultipleQueues(savedAnimals, ownerInfo) {
     const { data: tmplData } = await supabase.from("vasd_print_template").select("config").eq("template_type","queue").single();
@@ -780,7 +762,6 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
         return;
     }
 
-    // สร้างลิสต์ของบริการพื้นฐานเพื่อคัดแยก Checkbox ออกจาก Textbox
     const baseServices = ["ทำหมันเมีย", "ทำหมันผู้", "ฉีดวัคซีน", "ฉีดเห็บ", "ตรวจเลือด", "ฝังไมโครชิฟ"];
     let allPagesHTML = "";
     
@@ -789,7 +770,6 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
         const phone    = ownerInfo.phone || "ไม่ระบุ";
         const ownerName= ownerInfo.name || "";
 
-        // ★ คัดแยกบริการที่เลือกผ่าน Checkbox ออกจากข้อความ Textbox (เพื่อลงตัวแปร {{services}} และ {{txt_service}})
         const rawServices = a.services || [];
         const chkServices = rawServices.filter(srv => baseServices.includes(srv));
         const txtServices = rawServices.filter(srv => !baseServices.includes(srv));
@@ -827,15 +807,32 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
                 printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
             }
         });
-        allPagesHTML += `<div class="sticker-page">${printContents}</div>`;
+        
+        allPagesHTML += `<div class="sticker">${printContents}</div>`;
     }
 
-    const printArea = document.getElementById("printArea");
-    printArea.innerHTML = allPagesHTML;
-
-    await new Promise(r => setTimeout(r, 400));
-    window.print();
-    printArea.innerHTML = "";
+    const pw = window.open("","_blank","width=800,height=600");
+    pw.document.write(`<html><head><title>Print</title>
+      <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+      <style>
+        body{margin:0; display: flex; flex-direction: column; align-items: center;}
+        .sticker{position:relative;width:80mm;height:50mm;background:#fff;overflow:hidden; page-break-after:always; margin-bottom:10px;}
+        .line{position:absolute;white-space:pre-wrap;word-break:break-word;padding-right:5px;box-sizing:border-box;color:#000!important; line-height: 1.2;}
+        @page{size:80mm 50mm;margin:0}
+        @media print { body{padding:0;} .sticker{margin-bottom:0; box-shadow:none;} }
+      </style>
+      </head><body>${allPagesHTML}
+      <script>
+        window.onload = function() {
+          document.fonts.ready.then(() => {
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 500);
+          });
+        }
+      <\/script></body></html>`);
+    pw.document.close();
 }
 
 window.addAnimal();
