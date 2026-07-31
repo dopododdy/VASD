@@ -243,8 +243,9 @@ header {
 /* Edit Services Checkbox Area */
 .edit-services {
   display: none; /* ซ่อนไว้รอเปิดตอนกดแก้ไข */
-  gap: 15px; flex-wrap: wrap; margin-top: 8px;
+  gap: 15px; flex-wrap: wrap; margin-top: 8px; flex-direction: column;
 }
+.edit-services-grid { display: flex; flex-wrap: wrap; gap: 15px; }
 .service-checkbox-label {
   display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text); cursor: pointer;
 }
@@ -463,6 +464,7 @@ const statusMap = {
 };
 
 const statusWeight = { waiting: 1, anesthesia: 2, surgery: 3, recovery: 4, ready_to_go_home: 5, done: 6, cancel: 7 };
+const baseServices = ["ทำหมันเมีย", "ทำหมันผู้", "ฉีดวัคซีน", "ฉีดเห็บ", "ตรวจเลือด", "ฝังไมโครชิฟ"];
 
 let allData = [];
 
@@ -558,16 +560,22 @@ function renderCards(data, query) {
     const note = a.health_note ? a.health_note.trim() : "";
     const hasNote = note.length > 0;
     
-    // จัดเตรียมข้อมูล Service เพื่อแสดงตอนอ่าน และ Checklist สำหรับตอนแก้
+    // จัดเตรียมข้อมูล Service เพื่อแสดงตอนอ่าน
     const rawServices = a.vasd_service ? a.vasd_service.map(srv => srv.service_type) : [];
     const services = rawServices.length > 0
       ? rawServices.map(srv => `<span class="svc-chip">${srv}</span>`).join("")
       : `<span style="font-size:11px; color:var(--text-faint);">ไม่ได้ระบุ</span>`;
       
-    // Checklist สำหรับตอนกด Edit
-    const isS1 = rawServices.includes("ทำหมัน");
-    const isS2 = rawServices.includes("ฉีดวัคซีนพิษสุนัขบ้า");
-    const isS3 = rawServices.includes("อื่นๆ");
+    // ตรวจสอบว่ามีบริการแปลกปลอม (Custom text) ที่ไม่ใช่ Checkbox พื้นฐานหรือไม่
+    const customServiceTexts = rawServices.filter(srv => !baseServices.includes(srv));
+    const customTextJoined = customServiceTexts.join(", ");
+
+    const isNeuterF = rawServices.includes("ทำหมันเมีย");
+    const isNeuterM = rawServices.includes("ทำหมันผู้");
+    const isVaccine = rawServices.includes("ฉีดวัคซีน");
+    const isTick = rawServices.includes("ฉีดเห็บ");
+    const isBlood = rawServices.includes("ตรวจเลือด");
+    const isMicro = rawServices.includes("ฝังไมโครชิฟ");
 
     const card = document.createElement("div");
     card.className = `animal-card ${s.cls}`;
@@ -601,15 +609,30 @@ function renderCards(data, query) {
             
             <!-- ส่วนแก้ไขบริการ (ซ่อนไว้รอเปิด) -->
             <div class="edit-services f-services">
-              <label class="service-checkbox-label">
-                <input type="checkbox" value="ทำหมัน" ${isS1 ? "checked" : ""}> ทำหมัน
-              </label>
-              <label class="service-checkbox-label">
-                <input type="checkbox" value="ฉีดวัคซีนพิษสุนัขบ้า" ${isS2 ? "checked" : ""}> ฉีดวัคซีนพิษสุนัขบ้า
-              </label>
-              <label class="service-checkbox-label">
-                <input type="checkbox" value="อื่นๆ" ${isS3 ? "checked" : ""}> อื่นๆ
-              </label>
+              <div class="edit-services-grid">
+                <label class="service-checkbox-label">
+                  <input type="checkbox" value="ทำหมันเมีย" class="chk-neuter-f" ${isNeuterF ? "checked" : ""}> ทำหมันเมีย
+                </label>
+                <label class="service-checkbox-label">
+                  <input type="checkbox" value="ทำหมันผู้" class="chk-neuter-m" ${isNeuterM ? "checked" : ""}> ทำหมันผู้
+                </label>
+                <label class="service-checkbox-label">
+                  <input type="checkbox" value="ฉีดวัคซีน" ${isVaccine ? "checked" : ""}> ฉีดวัคซีน
+                </label>
+                <label class="service-checkbox-label">
+                  <input type="checkbox" value="ฉีดเห็บ" ${isTick ? "checked" : ""}> ฉีดเห็บ
+                </label>
+                <label class="service-checkbox-label">
+                  <input type="checkbox" value="ตรวจเลือด" ${isBlood ? "checked" : ""}> ตรวจเลือด
+                </label>
+                <label class="service-checkbox-label">
+                  <input type="checkbox" value="ฝังไมโครชิฟ" ${isMicro ? "checked" : ""}> ฝังไมโครชิฟ
+                </label>
+              </div>
+              <div class="field-group" style="margin-top: 8px;">
+                <label class="field-label" style="font-size: 11px;">บริการอื่นๆ / ระบุเพิ่มเติม</label>
+                <input type="text" class="edit-input f-custom-svc" value="${customTextJoined}" placeholder="พิมพ์บริการอื่นๆ ที่ต้องการ" readonly>
+              </div>
             </div>
           </div>
 
@@ -668,6 +691,18 @@ function renderCards(data, query) {
         </div>
       </div>
     `;
+
+    // ผูก Event ให้สลับ Checkbox ทำหมันอัตโนมัติตามเพศที่เลือกตอน Edit Mode
+    const sexSelect = card.querySelector(".f-sex");
+    const chkNeuterF = card.querySelector(".chk-neuter-f");
+    const chkNeuterM = card.querySelector(".chk-neuter-m");
+    sexSelect.addEventListener("change", function() {
+        if (this.value === "เมีย") {
+            if (chkNeuterM.checked) { chkNeuterM.checked = false; chkNeuterF.checked = true; }
+        } else {
+            if (chkNeuterF.checked) { chkNeuterF.checked = false; chkNeuterM.checked = true; }
+        }
+    });
 
     if (openIds.has(a.id)) card.classList.add("open");
     list.appendChild(card);
@@ -753,11 +788,11 @@ window.enableEdit = function(btn, id) {
   if (pass !== ADMIN_PASSWORD) return;
   const card = btn.closest(".animal-card");
   
-  // ปลดล็อค Field พื้นฐาน
-  card.querySelectorAll(".f-name, .f-weight").forEach(el => el.readOnly = false);
+  // ปลดล็อค Field พื้นฐานและ Textbox ของ Service
+  card.querySelectorAll(".f-name, .f-weight, .f-custom-svc").forEach(el => el.readOnly = false);
   card.querySelectorAll(".f-species, .f-sex, .f-status").forEach(el => el.disabled = false);
   
-  // สลับให้แสดง Checkbox แก้ไขบริการ
+  // สลับให้แสดงหน้าแก้ไขบริการ
   card.querySelector(".display-services").style.display = "none";
   card.querySelector(".edit-services").style.display = "flex";
 
@@ -776,9 +811,17 @@ window.saveRow = async function(btn, id) {
 
   // 1. ดึงค่าจาก Checkbox ที่ถูกติ๊ก
   const selectedServices = [];
-  card.querySelectorAll(".f-services input:checked").forEach(chk => {
+  card.querySelectorAll(".f-services input[type=checkbox]:checked").forEach(chk => {
     selectedServices.push(chk.value);
   });
+  
+  // เพิ่มค่าจาก Textbox custom services
+  const customSvcText = card.querySelector(".f-custom-svc").value.trim();
+  if (customSvcText) {
+    // ผู้ใช้อาจจะพิมพ์มาคั่นด้วยลูกน้ำ จัดการจับแยกทีละคำ
+    const customItems = customSvcText.split(",").map(s => s.trim()).filter(s => s);
+    selectedServices.push(...customItems);
+  }
 
   try {
     btn.innerText = "กำลังบันทึก...";
