@@ -408,7 +408,7 @@ async function loadSurgeryQueue() {
                <div class="rx-name">${d.name}</div>
                <div class="rx-inputs">
                   <div class="rx-input-group">
-                     <input type="text" class="dose-input" id="dose-${d.id}-${a.id}" value="${displayDose}" oninput="recalcRx('${d.id}', '${a.id}')"> เม็ด/ครั้ง
+                     <input type="text" class="dose-input" id="dose-${d.id}-${a.id}" value="${displayDose}" oninput="recalcRx('${d.id}', '${a.id}')"> เม็ด
                   </div>
                   <div class="rx-input-group freq">
                      ${freqElement}
@@ -555,7 +555,7 @@ window.saveRx = async function(animalId) {
        inserts.push({
          animal_id: animalId,
          drug_id: d.name,
-         dose: document.getElementById(`dose-${d.id}-${animalId}`).value.trim() + ' เม็ด/ครั้ง', // เซฟข้อความเศษส่วนลงฐานข้อมูล
+         dose: document.getElementById(`dose-${d.id}-${animalId}`).value.trim() + ' เม็ด', // เซฟข้อความเศษส่วนลงฐานข้อมูล
          freq: document.getElementById(`freq-${d.id}-${animalId}`).value,
          days: parseInt(document.getElementById(`days-${d.id}-${animalId}`).value) || 0,
          total_pills: parseInt(document.getElementById(`total-${d.id}-${animalId}`).value) || 0
