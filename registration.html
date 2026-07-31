@@ -780,13 +780,22 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
         return;
     }
 
+    // สร้างลิสต์ของบริการพื้นฐานเพื่อคัดแยก Checkbox ออกจาก Textbox
+    const baseServices = ["ทำหมันเมีย", "ทำหมันผู้", "ฉีดวัคซีน", "ฉีดเห็บ", "ตรวจเลือด", "ฝังไมโครชิฟ"];
     let allPagesHTML = "";
     
     for (const a of savedAnimals) {
         const spcText  = a.species === "ส" ? "สุนัข" : "แมว";
-        const services = a.services?.join(", ") || "-";
         const phone    = ownerInfo.phone || "ไม่ระบุ";
         const ownerName= ownerInfo.name || "";
+
+        // ★ คัดแยกบริการที่เลือกผ่าน Checkbox ออกจากข้อความ Textbox (เพื่อลงตัวแปร {{services}} และ {{txt_service}})
+        const rawServices = a.services || [];
+        const chkServices = rawServices.filter(srv => baseServices.includes(srv));
+        const txtServices = rawServices.filter(srv => !baseServices.includes(srv));
+
+        const servicesStr = chkServices.length > 0 ? chkServices.join(", ") : "-";
+        const txtServiceStr = txtServices.length > 0 ? txtServices.join(", ") : "-";
 
         const spcImg = (a.species === "ม" || a.species === "แมว") 
           ? `<img src="./cat.png" style="height: 1em; width: auto; vertical-align: middle;">`
@@ -812,7 +821,8 @@ async function printMultipleQueues(savedAnimals, ownerInfo) {
                   .replace(/{{sex_icon}}/g, sexImg)
                   .replace(/{{owner_name}}/g, ownerName)
                   .replace(/{{phone}}/g, phone)
-                  .replace(/{{services}}/g, services);
+                  .replace(/{{services}}/g, servicesStr)
+                  .replace(/{{txt_service}}/g, txtServiceStr);
                 
                 printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${text}</div>`;
             }
