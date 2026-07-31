@@ -180,7 +180,7 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 .animal-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
 .animal-card-num { width: 26px; height: 26px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
 
-.svc-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.svc-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; margin-bottom: 12px;}
 .svc-chip { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; background: var(--surface); border: 1px solid var(--border-2); color: var(--text-dim); border-radius: 20px; padding: 6px 14px; transition: 0.2s; }
 .svc-chip.checked { background: rgba(14,165,160,0.15); border-color: var(--teal); color: var(--teal-light); }
 .svc-chip input { display: none; }
@@ -503,6 +503,8 @@ window.addAnimal = function () {
     animalCount++;
     const card = document.createElement("div");
     card.className = "animal-card";
+    
+    // ★ เพิ่ม HTML ส่วน Textbox สำหรับกรอกบริการเพิ่มเติมที่ท้ายของการ์ด
     card.innerHTML = `
         <div class="animal-card-header">
             <div class="animal-card-num">${animalCount}</div>
@@ -523,6 +525,12 @@ window.addAnimal = function () {
         </div>
         <div class="svc-label-row field-label">บริการที่ต้องการ</div>
         <div class="svc-grid"></div>
+        
+        <!-- ★ ส่วนที่เพิ่ม Textbox -->
+        <div class="field-group" style="margin-top: 5px;">
+            <label class="field-label">บริการอื่นๆ / ระบุเพิ่มเติม</label>
+            <input type="text" class="customService" placeholder="พิมพ์บริการอื่นๆ ที่ต้องการ (ถ้ามี)">
+        </div>
     `;
 
     const svcGrid = card.querySelector(".svc-grid");
@@ -573,8 +581,17 @@ window.requestConsent = function() {
     document.querySelectorAll(".animal-card").forEach(c => {
         const animalName = c.querySelector(".animalName").value.trim();
         if (!animalName) { invalidName = true; return; }
+        
         const svcs = [];
+        // เก็บจาก Checkbox
         c.querySelectorAll(".svc:checked").forEach(s => svcs.push(s.value));
+        
+        // ★ เก็บข้อความจาก Textbox เพิ่มเข้าไป
+        const customSvc = c.querySelector(".customService").value.trim();
+        if (customSvc) {
+            svcs.push(customSvc);
+        }
+
         animals.push({
             name: animalName,
             species: c.querySelector(".species").value,
