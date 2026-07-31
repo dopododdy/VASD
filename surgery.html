@@ -157,6 +157,8 @@ header {
   background: rgba(0,0,0,0.3); border: 1px solid var(--border-2); border-radius: 6px; color: #fff; text-align: center;
 }
 .rx-inputs input[type="text"] { text-align: left; font-size: 11px; }
+/* Override dose text alignment to look like number */
+.rx-inputs input.dose-input { text-align: center; font-size: 13px; }
 
 /* ★ Frequency dropdown */
 .rx-inputs select {
@@ -232,7 +234,7 @@ const drugList = [
     name: 'ปฏิชีวนะ Norfloxacin 100 mg',
     type: 'abx', mgPerKg: 10, mgPerTab: 100,
     freqOptions: [
-      { label: 'วันละ 1 ครั้ง พร้อมอาหารเย็น',       times: 1 },
+      { label: 'วันละ 1 ครั้ง พร้อมอาหารเย็น',        times: 1 },
       { label: 'วันละ 2 ครั้ง พร้อมอาหารเช้า-เย็น', times: 2 }
     ],
     defaultFreqIdx: 1,   // ★ default = 2 ครั้ง
@@ -243,7 +245,7 @@ const drugList = [
     name: 'ปฏิชีวนะ Norfloxacin 200 mg',
     type: 'abx', mgPerKg: 10, mgPerTab: 200,
     freqOptions: [
-      { label: 'วันละ 1 ครั้ง พร้อมอาหารเย็น',       times: 1 },
+      { label: 'วันละ 1 ครั้ง พร้อมอาหารเย็น',        times: 1 },
       { label: 'วันละ 2 ครั้ง พร้อมอาหารเช้า-เย็น', times: 2 }
     ],
     defaultFreqIdx: 1,   // ★ default = 2 ครั้ง
@@ -257,6 +259,45 @@ const drugList = [
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ฟังก์ชันแปลงทศนิยมเป็นเศษส่วน (เช่น 1.5 -> 1 + 1/2)
+function decimalToFractionText(num) {
+  if (!num || isNaN(num)) return "0";
+  const whole = Math.floor(num);
+  const frac = num - whole;
+  let fracStr = "";
+  
+  // เช็คจุดทศนิยม 0.25, 0.50, 0.75
+  if (Math.abs(frac - 0.25) < 0.01) fracStr = "1/4";
+  else if (Math.abs(frac - 0.5) < 0.01) fracStr = "1/2";
+  else if (Math.abs(frac - 0.75) < 0.01) fracStr = "3/4";
+  else if (frac > 0) fracStr = frac.toString(); 
+
+  if (whole > 0 && fracStr) return `${whole} + ${fracStr}`;
+  if (whole > 0) return `${whole}`;
+  if (fracStr) return fracStr;
+  return "0";
+}
+
+// ฟังก์ชันแปลงข้อความเศษส่วนกลับเป็นทศนิยมเพื่อคำนวณ (เช่น 1 + 1/2 -> 1.5)
+function parseFractionToDecimal(str) {
+  if (!str) return 0;
+  str = String(str).replace(/\+/g, ' ').replace(/\s+/g, ' ').trim();
+  const parts = str.split(' ');
+  let sum = 0;
+  for (const part of parts) {
+    if (part.includes('/')) {
+      const [n, d] = part.split('/');
+      const num = parseFloat(n);
+      const den = parseFloat(d);
+      if (den !== 0 && !isNaN(num) && !isNaN(den)) sum += num / den;
+    } else {
+      const val = parseFloat(part);
+      if (!isNaN(val)) sum += val;
+    }
+  }
+  return sum;
 }
 
 // ดึง timesPerDay เริ่มต้นของยา
@@ -327,7 +368,7 @@ async function loadSurgeryQueue() {
         atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";
       }
 
-      // ★ สร้างฟอร์ม Rx — Norfloxacin จะมี dropdown
+      // ★ สร้างฟอร์ม Rx — แปลงค่า Dose เป็นเศษส่วน
       let rxHtml = drugList.map(d => {
         let tabs = 0;
         if (weight > 0) {
@@ -340,6 +381,9 @@ async function loadSurgeryQueue() {
           }
         }
         if (tabs < 0) tabs = 0;
+        
+        // แปลงทศนิยมที่คำนวณได้เป็นข้อความเศษส่วน
+        const displayDose = decimalToFractionText(tabs);
 
         const defaultTimes = defaultTimesOf(d);
         const total = Math.ceil(tabs * defaultTimes * d.days);
@@ -364,7 +408,7 @@ async function loadSurgeryQueue() {
                <div class="rx-name">${d.name}</div>
                <div class="rx-inputs">
                   <div class="rx-input-group">
-                     <input type="number" step="0.25" id="dose-${d.id}-${a.id}" value="${tabs}" oninput="recalcRx('${d.id}', '${a.id}')"> เม็ด/ครั้ง
+                     <input type="text" class="dose-input" id="dose-${d.id}-${a.id}" value="${displayDose}" oninput="recalcRx('${d.id}', '${a.id}')"> เม็ด/ครั้ง
                   </div>
                   <div class="rx-input-group freq">
                      ${freqElement}
@@ -482,9 +526,10 @@ window.saveSurgeryInfo = async function(animalId) {
   }
 };
 
-// ★ คำนวณยอดรวม — ใช้ timesPerDay จาก dropdown หรือ data-times ของ input
+// ★ คำนวณยอดรวม — แปลงข้อความเศษส่วนเป็นทศนิยมเพื่อใช้คำนวณ
 window.recalcRx = function(drugId, animalId) {
-  const dose = parseFloat(document.getElementById(`dose-${drugId}-${animalId}`).value) || 0;
+  const doseInput = document.getElementById(`dose-${drugId}-${animalId}`).value;
+  const dose = parseFractionToDecimal(doseInput);
   const days = parseInt(document.getElementById(`days-${drugId}-${animalId}`).value) || 0;
 
   const freqEl = document.getElementById(`freq-${drugId}-${animalId}`);
@@ -510,7 +555,7 @@ window.saveRx = async function(animalId) {
        inserts.push({
          animal_id: animalId,
          drug_id: d.name,
-         dose: document.getElementById(`dose-${d.id}-${animalId}`).value + ' เม็ด/ครั้ง',
+         dose: document.getElementById(`dose-${d.id}-${animalId}`).value.trim() + ' เม็ด/ครั้ง', // เซฟข้อความเศษส่วนลงฐานข้อมูล
          freq: document.getElementById(`freq-${d.id}-${animalId}`).value,
          days: parseInt(document.getElementById(`days-${d.id}-${animalId}`).value) || 0,
          total_pills: parseInt(document.getElementById(`total-${d.id}-${animalId}`).value) || 0
