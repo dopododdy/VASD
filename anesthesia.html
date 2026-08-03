@@ -172,6 +172,26 @@ header {
   margin-bottom: 16px; color: var(--rose);
 }
 
+/* ── Blood Test Alert (Blinking Red) ── */
+@keyframes blink-red {
+  0%   { opacity: 1; color: #fca5a5; }
+  50%  { opacity: 0.3; color: var(--rose); }
+  100% { opacity: 1; color: #fca5a5; }
+}
+.blood-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px dashed var(--rose);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-family: "Sarabun", "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  animation: blink-red 1.2s infinite;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
 /* ── Anesthesia specific ── */
 .est-weight-strip {
   background: var(--amber-soft); border-radius: var(--radius-sm);
@@ -181,10 +201,10 @@ header {
 .est-label { font-size: 12px; color: var(--amber); font-weight: 600; }
 .est-val { font-size: 15px; font-weight: 700; color: var(--amber); }
 
-.input-label { display: block; font-size: 12px; font-weight: 600; color: var(--slate-400); margin-bottom: 8px; text-transform: uppercase; }
+.input-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-faint); margin-bottom: 8px; text-transform: uppercase; }
 .weight-input {
   width: 100%; background: var(--surface-2); border: 1px solid var(--border-2);
-  border-radius: var(--radius-md); padding: 14px 16px; color: var(--white);
+  border-radius: var(--radius-md); padding: 14px 16px; color: #fff;
   font-size: 20px; font-weight: 800; transition: all 0.2s; margin-bottom: 20px;
 }
 .weight-input:focus { border-color: var(--teal); outline: none; box-shadow: 0 0 0 3px var(--teal-glow); }
@@ -292,7 +312,8 @@ async function loadAnesthesiaQueue() {
           id, queue_number, animal_name, species, sex, est_weight, actual_weight,
           health_note,
           vasd_owner(owner_name),
-          vasd_service(service_type)
+          vasd_service(service_type),
+          vasd_blood_test(cbc_text)
         )
       `)
       .eq("status", "waiting")
@@ -328,6 +349,14 @@ async function loadAnesthesiaQueue() {
       const services = a.vasd_service && a.vasd_service.length > 0
         ? a.vasd_service.map(srv => `<span class="svc-chip">${srv.service_type}</span>`).join("")
         : `<span style="font-size:11px; color:var(--text-faint);">ไม่ได้ระบุ</span>`;
+
+      // ดึงข้อมูลผลเลือด (ดึงรายการล่าสุดถ้ามีการตรวจหลายครั้ง)
+      const bloodTests = a.vasd_blood_test || [];
+      const latestBlood = bloodTests.length > 0 ? bloodTests[bloodTests.length - 1].cbc_text : null;
+      
+      const bloodAlertMarkup = latestBlood 
+        ? `<div class="blood-alert">🩸 <b>ผลการตรวจเลือด (CBC):</b>\n${latestBlood}</div>` 
+        : "";
 
       // การจัดการข้อควรระวัง
       const note = a.health_note ? a.health_note.trim() : "";
@@ -382,7 +411,7 @@ async function loadAnesthesiaQueue() {
         <div class="card-top" onclick="window.toggleCard(this)">
           <div class="queue-badge">#${a.queue_number || '??'}</div>
           <div class="card-info">
-            <div class="animal-name">${a.animal_name} ${hasNote ? '<span title="มีข้อควรระวัง" style="font-size:14px; margin-left:6px;">⚠️</span>' : ''}</div>
+            <div class="animal-name">${a.animal_name} ${hasNote || latestBlood ? '<span title="มีการแจ้งเตือน" style="font-size:14px; margin-left:6px;">⚠️</span>' : ''}</div>
             <div class="animal-meta">${a.species === 'ม' ? '🐱' : '🐶'} ${speciesName} · ${sexName}</div>
           </div>
           <span class="status-pill">⚪ รอวางยา</span>
@@ -399,6 +428,7 @@ async function loadAnesthesiaQueue() {
               </div>
             </div>
 
+            ${bloodAlertMarkup}
             ${noteMarkup}
 
             <div class="est-weight-strip">
@@ -455,7 +485,7 @@ window.calcDrugs = function(animalId) {
     const el = document.getElementById(id);
     if(el) {
       el.innerText = val ? val + " ml" : "-";
-      el.style.color = val ? "var(--teal-light)" : "var(--slate-400)";
+      el.style.color = val ? "var(--teal-light)" : "var(--text-faint)";
     }
   };
 
