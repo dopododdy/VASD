@@ -112,6 +112,7 @@ header {
   100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
+/* ป้องกัน Grid Blowout ซ้อนทับกัน */
 .monitor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -123,42 +124,55 @@ header {
   border-radius: var(--radius-lg); padding: 16px;
   display: flex; flex-direction: column; gap: 16px;
   animation: slideUp 0.4s ease both;
+  min-width: 0; /* กุญแจสำคัญป้องกันทะลุกล่อง */
 }
 
 .mc-header {
   display: flex; justify-content: space-between; align-items: center;
   border-bottom: 1px solid var(--border); padding-bottom: 12px;
 }
-.mc-info { display: flex; align-items: center; gap: 12px; }
+.mc-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .mc-q {
   width: 36px; height: 36px; border-radius: 50%;
   background: var(--surface-2); border: 1px solid var(--border-2);
   display: flex; align-items: center; justify-content: center;
   font-family: "Outfit", sans-serif; font-weight: 800; font-size: 14px; color: #fff;
+  flex-shrink: 0;
 }
-.mc-name { font-size: 16px; font-weight: 700; color: #fff; }
+.mc-name { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mc-meta { font-size: 12px; color: var(--text-dim); }
 
 .status-badge {
-  padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
 .status-surgery { background: rgba(239,68,68,0.15); color: var(--rose-light); border: 1px solid rgba(239,68,68,0.3); }
 .status-recovery { background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
 
-/* Charts Area */
+/* ── Charts Area ── */
 .charts-container {
   display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  min-width: 0; /* กุญแจสำคัญป้องกันทะลุกล่อง */
 }
 .chart-box {
   background: var(--surface-2); border: 1px solid var(--border-2);
   border-radius: var(--radius-sm); padding: 8px;
   position: relative; height: 120px;
+  min-width: 0; /* กุญแจสำคัญป้องกันทะลุกล่อง */
+  transition: all 0.3s ease;
 }
+
+/* Wrapper ให้ Chart.js รู้ขอบเขตและไม่ขยายตัวอนันต์ */
+.canvas-wrapper {
+  position: absolute;
+  top: 30px; left: 5px; right: 5px; bottom: 5px;
+}
+
 .chart-title {
   position: absolute; top: 8px; left: 10px; font-size: 11px; font-weight: 700; font-family: "Outfit", sans-serif;
 }
 .val-latest {
   position: absolute; top: 6px; right: 10px; font-size: 16px; font-weight: 800; font-family: "Outfit", sans-serif;
+  transition: color 0.3s ease;
 }
 
 /* Specific Chart Colors */
@@ -166,6 +180,25 @@ header {
 .chart-rr .chart-title, .chart-rr .val-latest { color: var(--sky); }
 .chart-spo2 .chart-title, .chart-spo2 .val-latest { color: var(--teal-light); }
 .chart-temp .chart-title, .chart-temp .val-latest { color: var(--amber); }
+
+/* ── Alert Animations (Critical Value) ── */
+@keyframes critical-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); border-color: var(--rose); background: rgba(239, 68, 68, 0.15); }
+  70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); border-color: var(--rose); background: rgba(239, 68, 68, 0.15); }
+}
+@keyframes critical-text-blink {
+  0%, 100% { opacity: 1; color: var(--rose); }
+  50% { opacity: 0.5; color: #fff; }
+}
+
+.critical-alert {
+  animation: critical-pulse 1.2s infinite !important;
+}
+.critical-text {
+  animation: critical-text-blink 1.2s infinite !important;
+}
+
 
 /* ═══════════════════════════════════════════
    BOTTOM NAV
@@ -176,7 +209,7 @@ header {
   background: rgba(11,25,41,0.95); backdrop-filter: blur(20px);
   border-top: 1px solid var(--border-2);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-  grid-template-columns: repeat(6, 1fr); /* ปรับเป็น 6 เมนู */
+  grid-template-columns: repeat(6, 1fr);
 }
 .nav-item {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
@@ -192,6 +225,7 @@ header {
 @media (max-width: 600px) {
   .charts-container { grid-template-columns: 1fr; }
   .chart-box { height: 100px; }
+  .canvas-wrapper { top: 25px; }
 }
 </style>
 </head>
@@ -235,12 +269,30 @@ header {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
-// Global Object เก็บ Instances ของกราฟ (เพื่อเคลียร์ของเดิมตอนวาดใหม่)
+// Global Object เก็บ Instances ของกราฟ
 window.activeCharts = {};
 
 // ตั้งค่า Global ให้ Chart.js เป็น Dark Mode
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.font.family = "'Sarabun', sans-serif";
+
+// ── ฟังก์ชันตรวจสอบค่าวิกฤต (Critical Thresholds) ──
+function isCritical(type, value, species) {
+  if (!value || isNaN(value)) return false;
+  const v = parseFloat(value);
+  
+  if (type === 'hr') {
+    // สุนัข: ต่ำกว่า 60 หรือ สูงกว่า 160 | แมว: ต่ำกว่า 100 หรือ สูงกว่า 200
+    if (species === 'ส') return (v < 60 || v > 160);
+    if (species === 'ม') return (v < 100 || v > 200);
+    return false; // กรณีไม่ระบุ
+  }
+  if (type === 'rr') return (v < 8 || v > 50); // อัตราหายใจผิดปกติ
+  if (type === 'spo2') return (v < 95); // ออกซิเจนต่ำ
+  if (type === 'temp') return (v < 97 || v > 104); // อุณหภูมิวิกฤต (°F)
+  
+  return false;
+}
 
 async function loadMonitorData() {
   const container = document.getElementById("monitor-grid");
@@ -260,7 +312,7 @@ async function loadMonitorData() {
 
     if (error) throw error;
 
-    // ทำลายกราฟเก่าทั้งหมดเพื่อไม่ให้กิน Memory / ข้อมูลซ้อนทับ
+    // ทำลายกราฟเก่าทั้งหมด
     Object.values(window.activeCharts).forEach(chart => chart.destroy());
     window.activeCharts = {};
     container.innerHTML = "";
@@ -288,18 +340,22 @@ async function loadMonitorData() {
       // เรียงลำดับ Vital Signs ตามเวลา
       const vitals = (a.vasd_vital_signs || []).sort((x, y) => new Date(x.created_at) - new Date(y.created_at));
       
-      // ดึงข้อมูลค่าล่าสุดสำหรับแสดงโชว์ตัวเลขมุมขวาบน
+      // ดึงข้อมูลค่าล่าสุดสำหรับแสดงโชว์ และเช็ค Critical
       const latest = vitals.length > 0 ? vitals[vitals.length - 1] : {};
+
+      const hrCritical = isCritical('hr', latest.hr, a.species);
+      const rrCritical = isCritical('rr', latest.rr, a.species);
+      const spo2Critical = isCritical('spo2', latest.spo2, a.species);
+      const tempCritical = isCritical('temp', latest.temp, a.species);
 
       const card = document.createElement("div");
       card.className = "monitor-card";
       
-      // สร้าง Layout การ์ด 1 ใบ (มี 4 กราฟ)
       card.innerHTML = `
         <div class="mc-header">
           <div class="mc-info">
             <div class="mc-q">#${a.queue_number}</div>
-            <div>
+            <div style="min-width:0;">
               <div class="mc-name">${a.animal_name}</div>
               <div class="mc-meta">${spText} · ${a.sex}${tableInfo}</div>
             </div>
@@ -308,25 +364,26 @@ async function loadMonitorData() {
         </div>
 
         <div class="charts-container">
-          <div class="chart-box chart-hr">
+          <!-- กล่องกราฟเพิ่ม Class Alert ถ่าค่าวิกฤต -->
+          <div class="chart-box chart-hr ${hrCritical ? 'critical-alert' : ''}">
             <div class="chart-title">HR</div>
-            <div class="val-latest">${latest.hr || '-'}</div>
-            <canvas id="chart-hr-${a.id}"></canvas>
+            <div class="val-latest ${hrCritical ? 'critical-text' : ''}">${latest.hr || '-'}</div>
+            <div class="canvas-wrapper"><canvas id="chart-hr-${a.id}"></canvas></div>
           </div>
-          <div class="chart-box chart-rr">
+          <div class="chart-box chart-rr ${rrCritical ? 'critical-alert' : ''}">
             <div class="chart-title">RR</div>
-            <div class="val-latest">${latest.rr || '-'}</div>
-            <canvas id="chart-rr-${a.id}"></canvas>
+            <div class="val-latest ${rrCritical ? 'critical-text' : ''}">${latest.rr || '-'}</div>
+            <div class="canvas-wrapper"><canvas id="chart-rr-${a.id}"></canvas></div>
           </div>
-          <div class="chart-box chart-spo2">
+          <div class="chart-box chart-spo2 ${spo2Critical ? 'critical-alert' : ''}">
             <div class="chart-title">SpO2 %</div>
-            <div class="val-latest">${latest.spo2 || '-'}</div>
-            <canvas id="chart-spo2-${a.id}"></canvas>
+            <div class="val-latest ${spo2Critical ? 'critical-text' : ''}">${latest.spo2 || '-'}</div>
+            <div class="canvas-wrapper"><canvas id="chart-spo2-${a.id}"></canvas></div>
           </div>
-          <div class="chart-box chart-temp">
+          <div class="chart-box chart-temp ${tempCritical ? 'critical-alert' : ''}">
             <div class="chart-title">Temp (°F)</div>
-            <div class="val-latest">${latest.temp || '-'}</div>
-            <canvas id="chart-temp-${a.id}"></canvas>
+            <div class="val-latest ${tempCritical ? 'critical-text' : ''}">${latest.temp || '-'}</div>
+            <div class="canvas-wrapper"><canvas id="chart-temp-${a.id}"></canvas></div>
           </div>
         </div>
       `;
@@ -357,16 +414,16 @@ async function loadMonitorData() {
               pointRadius: 2,
               pointBackgroundColor: colorHex,
               fill: true,
-              tension: 0.4 // ทำให้เส้นโค้งสวยงาม
+              tension: 0.4
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 25, bottom: 0, left: -5, right: 0 } },
+            layout: { padding: { top: 10, bottom: 0, left: -5, right: 0 } },
             plugins: { legend: { display: false }, tooltip: { enabled: true } },
             scales: {
-              x: { display: false }, // ซ่อนแกน X ให้ดู Clean
+              x: { display: false },
               y: { 
                 display: true, 
                 position: 'right',
