@@ -157,7 +157,7 @@ header {
   transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
   border-top: 0px solid var(--border);
 }
-.animal-card.open .card-detail { max-height: 1200px; border-top: 1px solid var(--border); }
+.animal-card.open .card-detail { max-height: 1500px; border-top: 1px solid var(--border); }
 .detail-body { padding: 18px 14px; }
 
 /* ── Content inside detail ── */
@@ -172,7 +172,7 @@ header {
   margin-bottom: 16px; color: var(--rose);
 }
 
-/* ── Blood Test Alert (Blinking Red) ── */
+/* ── Alerts (Blinking Red) ── */
 @keyframes blink-red {
   0%   { opacity: 1; color: #fca5a5; }
   50%  { opacity: 0.3; color: var(--rose); }
@@ -302,6 +302,12 @@ import { supabase } from './js/supabase.js';
 const listContainer = document.getElementById("anesthesiaList");
 const loading = document.getElementById("loading-overlay");
 
+// รายชื่อบริการพื้นฐาน (หากพิมพ์ข้อความที่ไม่ตรงกับรายการนี้ จะถือว่าเป็น 'ระบุเพิ่มเติม' ทันที)
+const baseServices = [
+  "ทำหมันเพศเมีย", "ทำหมันเพศผู้", "ทำหมันเมีย", "ทำหมันผู้", 
+  "ฉีดวัคซีนพิษสุนัขบ้า", "ฉีดวัคซีน", "ฉีดเห็บ", "ตรวจเลือด", "ฝังไมโครชิฟ"
+];
+
 async function loadAnesthesiaQueue() {
   try {
     const { data: queueData, error } = await supabase
@@ -345,10 +351,19 @@ async function loadAnesthesiaQueue() {
       const speciesName = a.species === "ม" ? "แมว" : a.species === "ส" ? "สุนัข" : "ไม่ระบุ";
       const sexName = a.sex === "ผู้" ? "เพศผู้" : a.sex === "เมีย" ? "เพศเมีย" : (a.sex || "-");
       
-      // การจัดการบริการ (Services) แบบ Array
-      const services = a.vasd_service && a.vasd_service.length > 0
-        ? a.vasd_service.map(srv => `<span class="svc-chip">${srv.service_type}</span>`).join("")
-        : `<span style="font-size:11px; color:var(--text-faint);">ไม่ได้ระบุ</span>`;
+      // การจัดการบริการ (แยกบริการปกติ และ บริการระบุเพิ่มเติม)
+      const rawServices = a.vasd_service ? a.vasd_service.map(srv => srv.service_type) : [];
+      const normalServices = rawServices.filter(srv => baseServices.includes(srv));
+      const customServices = rawServices.filter(srv => !baseServices.includes(srv));
+
+      const servicesMarkup = normalServices.length > 0
+        ? normalServices.map(srv => `<span class="svc-chip">${srv}</span>`).join("")
+        : (customServices.length === 0 ? `<span style="font-size:11px; color:var(--text-faint);">ไม่ได้ระบุ</span>` : '');
+
+      // หากมี 'บริการระบุเพิ่มเติม' ให้แสดงเป็นแจ้งเตือนตัวแดงกระพริบ
+      const customAlertMarkup = customServices.length > 0
+        ? `<div class="blood-alert" style="margin-top: 8px;">🚨 <b>ระบุเพิ่มเติม (โรคประจำตัว/อื่นๆ):</b>\n${customServices.join(", ")}</div>`
+        : "";
 
       // ดึงข้อมูลผลเลือด (ดึงรายการล่าสุดถ้ามีการตรวจหลายครั้ง)
       const bloodTests = a.vasd_blood_test || [];
@@ -411,7 +426,7 @@ async function loadAnesthesiaQueue() {
         <div class="card-top" onclick="window.toggleCard(this)">
           <div class="queue-badge">#${a.queue_number || '??'}</div>
           <div class="card-info">
-            <div class="animal-name">${a.animal_name} ${hasNote || latestBlood ? '<span title="มีการแจ้งเตือน" style="font-size:14px; margin-left:6px;">⚠️</span>' : ''}</div>
+            <div class="animal-name">${a.animal_name} ${hasNote || latestBlood || customServices.length > 0 ? '<span title="มีการแจ้งเตือน" style="font-size:14px; margin-left:6px;">⚠️</span>' : ''}</div>
             <div class="animal-meta">${a.species === 'ม' ? '🐱' : '🐶'} ${speciesName} · ${sexName}</div>
           </div>
           <span class="status-pill">⚪ รอวางยา</span>
@@ -424,8 +439,9 @@ async function loadAnesthesiaQueue() {
             <div style="margin-bottom: 16px;">
               <div style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; margin-bottom:6px;">บริการที่เข้ารับ</div>
               <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                ${services}
+                ${servicesMarkup}
               </div>
+              ${customAlertMarkup}
             </div>
 
             ${bloodAlertMarkup}
