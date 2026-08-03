@@ -96,6 +96,7 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; 
       <option value="cage">🔒 ฉลากติดกรง (Cage)</option>
       <option value="vaccine">📒 ฉลากวัคซีน (Vaccine)</option>
       <option value="microchip_sticker">💳 ฉลากฝังไมโครชิฟ (Microchip)</option>
+      <option value="cbc">🩸 ผลเลือด (CBC)</option>
     </select>
   </div>
 
@@ -110,6 +111,7 @@ code { color: var(--teal-light); background: rgba(0,0,0,0.2); padding: 3px 6px; 
     <code>{{txt_service}}</code> บริการจาก Textbox ที่พิมพ์เพิ่ม<br>
     <code>{{drug_name}}</code> ชื่อยา | <code>{{dose}}</code> จำนวน/ครั้ง | <code>{{freq}}</code> ความถี่<br>
     <code>{{total_amount}}</code> จำนวนยารวมทั้งซอง<br>
+    <code>{{cbc_text}}</code> ข้อความผลเลือด (CBC)<br>
     <code>{{todayDate}}</code> วันที่ปัจจุบัน | <code>{{next7days}}</code> วันตัดไหม (อีก 7 วัน)
   </div>
 
@@ -181,6 +183,7 @@ function renderPreview() {
         .replace(/{{dose}}/g, "1 เม็ด")
         .replace(/{{freq}}/g, "เช้า - เย็น หลังอาหาร")
         .replace(/{{total_amount}}/g, "14 เม็ด")
+        .replace(/{{cbc_text}}/g, "RBC: 5.5\nWBC: 12.0\nHCT: 35%\nPLT: 350,000")
         .replace(/{{todayDate}}/g, dates.today)
         .replace(/{{next7days}}/g, dates.next);
       
