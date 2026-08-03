@@ -26,6 +26,7 @@
   --border-2:      rgba(255,255,255,0.14);
   --text:          #e2e8f0;
   --text-dim:      #94a3b8;
+  --radius-sm:     10px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -71,7 +72,28 @@ header {
   flex-shrink: 0;
 }
 
-.tabs { display: flex; gap: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
+/* ── Alerts (Blinking Red) ── */
+@keyframes blink-red {
+  0%   { opacity: 1; color: #fca5a5; }
+  50%  { opacity: 0.3; color: var(--rose); }
+  100% { opacity: 1; color: #fca5a5; }
+}
+.blood-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px dashed var(--rose);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-family: "Sarabun", "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  animation: blink-red 1.2s infinite;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.blood-alert:last-child { margin-bottom: 0; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 15px; margin-top: 15px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
 .tab-btn {
   flex: 1; padding: 10px; border: none; border-radius: 8px;
   background: transparent; color: var(--text-dim); font-size: 13px; font-weight: 600; cursor: pointer;
@@ -178,17 +200,24 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+const baseServices = [
+  "ทำหมันเพศเมีย", "ทำหมันเพศผู้", "ทำหมันเมีย", "ทำหมันผู้", 
+  "ฉีดวัคซีนพิษสุนัขบ้า", "ฉีดวัคซีน", "ฉีดเห็บ", "ตรวจเลือด", "ฝังไมโครชิฟ"
+];
+
 async function loadRecovery() {
   const container = document.getElementById("recovery-list");
   
-  // ดึงข้อมูลสัตว์ พร้อมข้อมูลคิว (Status: recovery) และ Vital Signs ทั้งหมด
+  // ดึงข้อมูลสัตว์ พร้อมข้อมูลคิว (Status: recovery) และ Vital Signs, Service, Blood Test ทั้งหมด
   const { data: animals, error } = await supabase
     .from('vasd_animal')
     .select(`
       *,
       vasd_owner(owner_name),
       vasd_queue!inner(*),
-      vasd_vital_signs(*)
+      vasd_vital_signs(*),
+      vasd_service(service_type),
+      vasd_blood_test(cbc_text)
     `)
     .eq('vasd_queue.status', 'recovery')
     .order('created_at', { foreignTable: 'vasd_vital_signs', ascending: true });
@@ -230,6 +259,31 @@ async function loadRecovery() {
       atipVol = ((weight * 0.1) / 5).toFixed(2) + " ml";
     }
 
+    // จัดการ Alerts (บริการเพิ่มเติม และ ผลเลือด)
+    const rawServices = ani.vasd_service ? ani.vasd_service.map(srv => srv.service_type) : [];
+    const customServices = rawServices.filter(srv => !baseServices.includes(srv));
+
+    const customAlertMarkup = customServices.length > 0
+      ? `<div class="blood-alert">🚨 <b>ระบุเพิ่มเติม (โรคประจำตัว/อื่นๆ):</b>\n${customServices.join(", ")}</div>`
+      : "";
+
+    const bloodTests = ani.vasd_blood_test || [];
+    const latestBlood = bloodTests.length > 0 ? bloodTests[bloodTests.length - 1].cbc_text : null;
+    
+    const bloodAlertMarkup = latestBlood 
+      ? `<div class="blood-alert">🩸 <b>ผลการตรวจเลือด (CBC):</b>\n${latestBlood}</div>` 
+      : "";
+
+    const hasAlerts = customAlertMarkup !== "" || bloodAlertMarkup !== "";
+    
+    // การแสดง Alerts อยู่เหนือ Tabs
+    const alertSection = hasAlerts 
+      ? `<div style="padding-top: 10px; border-top: 1px solid var(--border); margin-top: 15px;">
+           ${customAlertMarkup}
+           ${bloodAlertMarkup}
+         </div>`
+      : "";
+
     // ดึงข้อมูล โต๊ะ, Surgeon, Anes ที่บันทึกมาจากห้องผ่าตัด
     const qData = Array.isArray(ani.vasd_queue) ? ani.vasd_queue[0] : ani.vasd_queue;
     const table = escapeHtml(qData?.operating_table || '-');
@@ -241,7 +295,7 @@ async function loadRecovery() {
     card.innerHTML = `
       <div class="card-header">
         <div style="flex: 1;">
-          <h3 style="font-size:18px;">${ani.animal_name}</h3>
+          <h3 style="font-size:18px;">${ani.animal_name} ${hasAlerts ? '<span title="มีการแจ้งเตือน" style="font-size:14px; margin-left:4px;">⚠️</span>' : ''}</h3>
           <p style="font-size:12px; color:var(--text-dim)">เจ้าของ: ${ani.vasd_owner?.owner_name || '-'}</p>
           <p style="font-size:11px; color:var(--text-dim); margin-top:2px;">นน.: ${ani.actual_weight || '-'} kg</p>
           
@@ -253,6 +307,8 @@ async function loadRecovery() {
         </div>
         <div class="q-circle">${ani.queue_number}</div>
       </div>
+
+      ${alertSection}
 
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab(this, 'panel-monitor-${ani.id}')">Monitoring</button>
