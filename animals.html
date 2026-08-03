@@ -348,6 +348,8 @@ header {
 
 .btn-print  { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-2); }
 .btn-print:hover { border-color: var(--teal); color: var(--teal-light); }
+.btn-blood  { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+.btn-blood:hover { background: rgba(59, 130, 246, 0.25); }
 .btn-edit   { background: rgba(14,165,160,0.15); color: var(--teal-light); border: 1px solid rgba(14,165,160,0.3); }
 .btn-edit:hover { background: rgba(14,165,160,0.25); }
 .btn-save   { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
@@ -739,6 +741,7 @@ function renderCards(data, query) {
 
           <div class="action-row">
             <button class="btn btn-print" onclick="printQueue('${a.id}')">🖨 พิมพ์คิว</button>
+            <button class="btn btn-blood" onclick="recordBlood('${a.id}')">🩸 ผลเลือด</button>
             <button class="btn btn-edit"  onclick="enableEdit(this, '${a.id}')">✏️ แก้ไข</button>
             <button class="btn btn-save"  onclick="saveRow(this, '${a.id}')" disabled>💾 บันทึก</button>
             <button class="btn btn-cancel-status" onclick="cancelRow('${a.id}')">🚫 ยกเลิก</button>
@@ -769,6 +772,12 @@ function renderCards(data, query) {
 /* ── Toggle expand ── */
 window.toggleCard = function(card) {
   card.classList.toggle("open");
+};
+
+/* ── Record Blood (ฟังก์ชันใหม่) ── */
+window.recordBlood = function(animalId) {
+  // นำไปเปิดหน้าใหม่หรือ Modal สำหรับบันทึกค่า CBC ได้ทันที
+  window.location.href = `blood.html?id=${animalId}`;
 };
 
 /* ── Print ── */
