@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Vital Signs Monitor – VASD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- โหลด Chart.js สำหรับวาดกราฟ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS & BASE
+═══════════════════════════════════════════ */
+:root {
+  --navy:         #0b1929;
+  --navy-mid:      #112240;
+  --teal:          #0ea5a0;
+  --teal-light:    #14c4bc;
+  --teal-glow:     rgba(14,165,160,0.25);
+  --violet:        #8b5cf6;
+  --rose:          #ef4444;
+  --rose-light:    #fca5a5;
+  --sky:           #0ea5e9;
+  --sky-light:     #7dd3fc;
+  --amber:         #f59e0b;
+  --amber-light:   #fcd34d;
+  
+  --surface:       rgba(255,255,255,0.04);
+  --surface-2:     rgba(255,255,255,0.07);
+  --border:        rgba(255,255,255,0.08);
+  --border-2:      rgba(255,255,255,0.14);
+  --text:          #e2e8f0;
+  --text-dim:      #94a3b8;
+  --text-faint:    #4a5568;
+  
+  --radius-sm:     10px;
+  --radius:        16px;
+  --radius-lg:     22px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Sarabun", sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  padding-bottom: 90px;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(14,165,160,0.05) 0%, transparent 70%);
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(11,25,41,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon { font-size: 22px; }
+.brand-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 16px; font-weight: 700; color: #fff; line-height: 1;
+}
+.brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+.btn-home {
+  padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
+  transition: 0.2s;
+}
+.btn-home:hover { background: var(--surface-3); color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   LAYOUT & CARDS
+═══════════════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1400px; margin: 0 auto;
+  padding: 24px 16px;
+  width: 100%;
+}
+
+.dashboard-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.pulse-indicator {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: var(--emerald);
+  background: rgba(16, 185, 129, 0.1); padding: 6px 12px; border-radius: 20px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.pulse-dot {
+  width: 8px; height: 8px; background: var(--emerald); border-radius: 50%;
+  animation: pulse-glow 1.5s infinite;
+}
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.monitor-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px;
+  display: flex; flex-direction: column; gap: 16px;
+  animation: slideUp 0.4s ease both;
+}
+
+.mc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border); padding-bottom: 12px;
+}
+.mc-info { display: flex; align-items: center; gap: 12px; }
+.mc-q {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Outfit", sans-serif; font-weight: 800; font-size: 14px; color: #fff;
+}
+.mc-name { font-size: 16px; font-weight: 700; color: #fff; }
+.mc-meta { font-size: 12px; color: var(--text-dim); }
+
+.status-badge {
+  padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+}
+.status-surgery { background: rgba(239,68,68,0.15); color: var(--rose-light); border: 1px solid rgba(239,68,68,0.3); }
+.status-recovery { background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
+
+/* Charts Area */
+.charts-container {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.chart-box {
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm); padding: 8px;
+  position: relative; height: 120px;
+}
+.chart-title {
+  position: absolute; top: 8px; left: 10px; font-size: 11px; font-weight: 700; font-family: "Outfit", sans-serif;
+}
+.val-latest {
+  position: absolute; top: 6px; right: 10px; font-size: 16px; font-weight: 800; font-family: "Outfit", sans-serif;
+}
+
+/* Specific Chart Colors */
+.chart-hr .chart-title, .chart-hr .val-latest { color: var(--rose); }
+.chart-rr .chart-title, .chart-rr .val-latest { color: var(--sky); }
+.chart-spo2 .chart-title, .chart-spo2 .val-latest { color: var(--teal-light); }
+.chart-temp .chart-title, .chart-temp .val-latest { color: var(--amber); }
+
+/* ═══════════════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════════════ */
+.bottom-nav {
+  display: grid;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(11,25,41,0.95); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-2);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  grid-template-columns: repeat(6, 1fr); /* ปรับเป็น 6 เมนู */
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px; font-size: 9px; color: var(--text-dim);
+  text-decoration: none; transition: color 0.2s;
+}
+.nav-icon { font-size: 20px; line-height: 1; }
+.nav-item.active { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 600px) {
+  .charts-container { grid-template-columns: 1fr; }
+  .chart-box { height: 100px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">📈</div>
+    <div>
+      <div class="brand-name">Central Monitor</div>
+      <div class="brand-sub">Real-time Vital Signs Monitoring</div>
+    </div>
+  </div>
+  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
+</header>
+
+<div class="wrap">
+  <div class="dashboard-header">
+    <div style="font-size: 14px; color: var(--text-dim);">ผู้ป่วยกำลังผ่าตัด / พักฟื้น</div>
+    <div class="pulse-indicator">
+      <div class="pulse-dot"></div> Live Update
+    </div>
+  </div>
+
+  <div id="monitor-grid" class="monitor-grid">
+    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-dim);">
+      กำลังเชื่อมต่อฐานข้อมูล...
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html"><span class="nav-icon">🏠</span>หน้าหลัก</a>
+  <a class="nav-item" href="animals.html"><span class="nav-icon">🐾</span>สัตว์</a>
+  <a class="nav-item" href="anesthesia.html"><span class="nav-icon">💉</span>วางยา</a>
+  <a class="nav-item" href="surgery.html"><span class="nav-icon">🛏️</span>ผ่าตัด</a>
+  <a class="nav-item" href="recovery.html"><span class="nav-icon">❤️‍🩹</span>พักฟื้น</a>
+  <a class="nav-item active" href="monitor.html"><span class="nav-icon">📈</span>Monitor</a>
+</nav>
+
+<script type="module">
+import { supabase } from "./js/supabase.js";
+
+// Global Object เก็บ Instances ของกราฟ (เพื่อเคลียร์ของเดิมตอนวาดใหม่)
+window.activeCharts = {};
+
+// ตั้งค่า Global ให้ Chart.js เป็น Dark Mode
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = "'Sarabun', sans-serif";
+
+async function loadMonitorData() {
+  const container = document.getElementById("monitor-grid");
+
+  try {
+    const { data: queueData, error } = await supabase
+      .from("vasd_queue")
+      .select(`
+        id, animal_id, status, operating_table,
+        vasd_animal(
+          id, queue_number, animal_name, species, sex,
+          vasd_vital_signs(time_recorded, hr, rr, spo2, temp, created_at)
+        )
+      `)
+      .in("status", ["surgery", "recovery"])
+      .order("updated_at", { ascending: false });
+
+    if (error) throw error;
+
+    // ทำลายกราฟเก่าทั้งหมดเพื่อไม่ให้กิน Memory / ข้อมูลซ้อนทับ
+    Object.values(window.activeCharts).forEach(chart => chart.destroy());
+    window.activeCharts = {};
+    container.innerHTML = "";
+
+    const activeCases = (queueData || []).filter(q => q.vasd_animal);
+
+    if (activeCases.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; background: var(--surface-2); border-radius: 16px; border: 1px dashed var(--border-2);">
+          <div style="font-size: 40px; margin-bottom: 10px;">💤</div>
+          <div style="color: var(--text-dim);">ไม่มีเคสกำลังผ่าตัดหรือพักฟื้นในขณะนี้</div>
+        </div>
+      `;
+      return;
+    }
+
+    activeCases.forEach(q => {
+      const a = q.vasd_animal;
+      const spText = a.species === "ส" ? "🐶 สุนัข" : "🐱 แมว";
+      
+      const statusLabel = q.status === "surgery" ? "กำลังผ่าตัด" : "พักฟื้น";
+      const statusClass = q.status === "surgery" ? "status-surgery" : "status-recovery";
+      const tableInfo = q.operating_table ? ` · โต๊ะ: ${q.operating_table}` : '';
+
+      // เรียงลำดับ Vital Signs ตามเวลา
+      const vitals = (a.vasd_vital_signs || []).sort((x, y) => new Date(x.created_at) - new Date(y.created_at));
+      
+      // ดึงข้อมูลค่าล่าสุดสำหรับแสดงโชว์ตัวเลขมุมขวาบน
+      const latest = vitals.length > 0 ? vitals[vitals.length - 1] : {};
+
+      const card = document.createElement("div");
+      card.className = "monitor-card";
+      
+      // สร้าง Layout การ์ด 1 ใบ (มี 4 กราฟ)
+      card.innerHTML = `
+        <div class="mc-header">
+          <div class="mc-info">
+            <div class="mc-q">#${a.queue_number}</div>
+            <div>
+              <div class="mc-name">${a.animal_name}</div>
+              <div class="mc-meta">${spText} · ${a.sex}${tableInfo}</div>
+            </div>
+          </div>
+          <div class="status-badge ${statusClass}">${statusLabel}</div>
+        </div>
+
+        <div class="charts-container">
+          <div class="chart-box chart-hr">
+            <div class="chart-title">HR</div>
+            <div class="val-latest">${latest.hr || '-'}</div>
+            <canvas id="chart-hr-${a.id}"></canvas>
+          </div>
+          <div class="chart-box chart-rr">
+            <div class="chart-title">RR</div>
+            <div class="val-latest">${latest.rr || '-'}</div>
+            <canvas id="chart-rr-${a.id}"></canvas>
+          </div>
+          <div class="chart-box chart-spo2">
+            <div class="chart-title">SpO2 %</div>
+            <div class="val-latest">${latest.spo2 || '-'}</div>
+            <canvas id="chart-spo2-${a.id}"></canvas>
+          </div>
+          <div class="chart-box chart-temp">
+            <div class="chart-title">Temp (°F)</div>
+            <div class="val-latest">${latest.temp || '-'}</div>
+            <canvas id="chart-temp-${a.id}"></canvas>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+
+      // เตรียม Data สำหรับส่งให้ Chart.js
+      const labels = vitals.map(v => v.time_recorded || '');
+      const dataHR = vitals.map(v => parseFloat(v.hr) || null);
+      const dataRR = vitals.map(v => parseFloat(v.rr) || null);
+      const dataSpO2 = vitals.map(v => parseFloat(v.spo2) || null);
+      const dataTemp = vitals.map(v => parseFloat(v.temp) || null);
+
+      // ฟังก์ชันวาดกราฟย่อย
+      const renderMiniChart = (ctxId, labelStr, colorHex, bgColor, dataArr) => {
+        const ctx = document.getElementById(ctxId);
+        if (!ctx) return;
+        
+        window.activeCharts[ctxId] = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: labelStr,
+              data: dataArr,
+              borderColor: colorHex,
+              backgroundColor: bgColor,
+              borderWidth: 2,
+              pointRadius: 2,
+              pointBackgroundColor: colorHex,
+              fill: true,
+              tension: 0.4 // ทำให้เส้นโค้งสวยงาม
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 25, bottom: 0, left: -5, right: 0 } },
+            plugins: { legend: { display: false }, tooltip: { enabled: true } },
+            scales: {
+              x: { display: false }, // ซ่อนแกน X ให้ดู Clean
+              y: { 
+                display: true, 
+                position: 'right',
+                border: { display: false },
+                grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+                ticks: { font: { size: 9, family: 'Outfit' }, maxTicksLimit: 4, padding: 2 }
+              }
+            }
+          }
+        });
+      };
+
+      // วาด 4 กราฟให้แต่ละตัว
+      renderMiniChart(`chart-hr-${a.id}`, 'HR', '#ef4444', 'rgba(239, 68, 68, 0.1)', dataHR);
+      renderMiniChart(`chart-rr-${a.id}`, 'RR', '#0ea5e9', 'rgba(14, 165, 233, 0.1)', dataRR);
+      renderMiniChart(`chart-spo2-${a.id}`, 'SpO2', '#14c4bc', 'rgba(20, 196, 188, 0.1)', dataSpO2);
+      renderMiniChart(`chart-temp-${a.id}`, 'Temp', '#f59e0b', 'rgba(245, 158, 11, 0.1)', dataTemp);
+    });
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<div style="text-align:center; padding: 40px; color: #fca5a5;">❌ โหลดข้อมูลไม่สำเร็จ: ${err.message}</div>`;
+  }
+}
+
+// ── ดึงข้อมูลครั้งแรก
+loadMonitorData();
+
+// ── Realtime Updates
+supabase.channel('monitor-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_queue' }, loadMonitorData)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vasd_vital_signs' }, loadMonitorData)
+  .subscribe();
+
+</script>
+<script type="module" src="./js/global-alarm.js"></script>
+</body>
+</html>
