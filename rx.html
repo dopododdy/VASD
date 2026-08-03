@@ -424,14 +424,26 @@ async function renderStickers(templateType, dataArray) {
   dataArray.forEach(item => {
     htmlStr += `<div class="sticker">`;
     
+    // ดึงค่าสำหรับการเช็คว่าเป็นแมวเพศผู้หรือไม่
+    const isCat = (item.species === "ม" || item.species === "แมว");
+    const isMale = (item.sex === "ผู้" || item.sex === "Male");
+
     // เตรียมไอคอนหมาแมว
-    const spcImg = (item.species === "ม" || item.species === "แมว") 
+    const spcImg = isCat 
       ? `<img src="./cat.png" style="height: 1em; width: auto; vertical-align: middle;">`
       : `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
-    const sexImg = (item.sex === "ผู้" || item.sex === "Male")
+    const sexImg = isMale
       ? `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`
       : `<img src="./female.png" style="height: 1em; width: auto; vertical-align: middle;">`;
     const spcText = item.species === "ส" ? "สุนัข" : "แมว";
+
+    // กำหนดข้อความแทนที่ตัวแปรตัดไหม
+    let next7DaysText = dates.next;
+    
+    // [เพิ่มโค้ดที่นี่] ถ้าคลิกพิมพ์ถุงยา และเป็นแมวเพศผู้ ให้แสดง "ไม่ต้องตัดไหม"
+    if (templateType === 'drug_bag' && isCat && isMale) {
+      next7DaysText = "ไม่ต้องตัดไหม";
+    }
 
     config.forEach(l => {
       const type = l.type || 'text';
@@ -457,7 +469,7 @@ async function renderStickers(templateType, dataArray) {
           .replace(/{{freq}}/g, item.freq || "")
           .replace(/{{total_amount}}/g, item.total_amount || "")
           .replace(/{{todayDate}}/g, dates.today)
-          .replace(/{{next7days}}/g, dates.next);
+          .replace(/{{next7days}}/g, next7DaysText); // ใช้ข้อความตามที่ตรวจสอบจากเงื่อนไข
 
         htmlStr += `<div class="line" style="left:${l.x||0}px; top:${l.y||0}px; font-size:${l.size||12}px; text-align:${l.align||'left'}; font-family:'${l.font||'Sarabun'}', sans-serif; font-weight:${l.bold?'600':'400'}; width:${l.align==='center'?'100%':`calc(100% - ${l.x||0}px)`}; ${l.align==='center'?'left:0px;':''}">${txt}</div>`;
       }
