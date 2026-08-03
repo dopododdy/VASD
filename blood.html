@@ -197,10 +197,10 @@ async function loadData() {
   }
 
   try {
-    // 1. ดึงข้อมูลสัตว์
+    // 1. ดึงข้อมูลสัตว์ (ดึง address, phone, id_card เผื่อไว้ใช้ใน Template ด้วย)
     const { data: a, error: errA } = await supabase
       .from('vasd_animal')
-      .select('queue_number, animal_name, species, sex, vasd_owner(owner_name)')
+      .select('queue_number, animal_name, species, sex, vasd_owner(owner_name, phone, address, id_card)')
       .eq('id', animalId)
       .single();
 
@@ -221,7 +221,7 @@ async function loadData() {
       .eq('animal_id', animalId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .maybeSingle(); // ใช้ maybeSingle เพราะอาจจะยังไม่มีข้อมูล
+      .maybeSingle(); 
 
     if (b) {
       existingBloodId = b.id;
@@ -272,53 +272,97 @@ window.saveBlood = async function() {
   }
 };
 
-// ฟังก์ชันพิมพ์ผลเลือด (สลิป 80mm)
-window.printBlood = function() {
+// ฟังก์ชันพิมพ์ผลเลือดโดยดึงจาก Template
+window.printBlood = async function() {
   const text = document.getElementById("cbcText").value.trim();
   if (!text) return alert("โปรดกรอกผลเลือดก่อนทำการพิมพ์");
   
   if (!animalData) return;
 
-  const speciesTxt = animalData.species === 'ส' ? 'สุนัข' : 'แมว';
-  const ownerTxt = animalData.vasd_owner?.owner_name || '-';
-  const now = new Date().toLocaleString('th-TH');
+  // 1. ดึง Template การพิมพ์ของ CBC
+  const { data: tmplData, error } = await supabase
+    .from("vasd_print_template")
+    .select("config")
+    .eq("template_type", "cbc")
+    .maybeSingle();
 
-  const printContents = `
-    <div style="font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 10px;">
-      ผลการตรวจเลือด (CBC)
-    </div>
-    <div style="font-size: 12px; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 8px;">
-      คิว: <b>${animalData.queue_number}</b><br>
-      ชื่อสัตว์: ${animalData.animal_name} (${speciesTxt} ${animalData.sex})<br>
-      เจ้าของ: ${ownerTxt}<br>
-      เวลา: ${now}
-    </div>
-    <div style="font-size: 12px; white-space: pre-wrap; font-family: inherit; line-height: 1.5;">${text}</div>
-    <div style="text-align: center; font-size: 10px; margin-top: 15px; border-top: 1px dashed #000; padding-top: 5px;">
-      VASD Clinic
-    </div>
-  `;
+  if (error || !tmplData?.config || tmplData.config.length === 0) {
+    alert("⚠️ ยังไม่ได้ตั้งค่ารูปแบบสติกเกอร์สำหรับผลเลือด (CBC)\nกรุณาไปตั้งค่าในเมนู Designer Pro ก่อนครับ");
+    return;
+  }
 
-  const pw = window.open("", "_blank", "width=400,height=600");
+  // 2. เตรียมข้อมูลตัวแปรสำหรับ Replace
+  const spcText  = animalData.species === "ส" ? "สุนัข" : "แมว";
+  const phone    = animalData.vasd_owner?.phone || "-";
+  const address  = animalData.vasd_owner?.address || "-";
+  const idCard   = animalData.vasd_owner?.id_card || "-";
+  const ownerName= animalData.vasd_owner?.owner_name || "-";
+
+  const spcImg = (animalData.species === "ม" || animalData.species === "แมว") 
+    ? `<img src="./cat.png" style="height: 1em; width: auto; vertical-align: middle;">`
+    : `<img src="./dog.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
+  const sexImg = (animalData.sex === "ผู้" || animalData.sex === "Male")
+    ? `<img src="./male.png" style="height: 1em; width: auto; vertical-align: middle;">`
+    : `<img src="./female.png" style="height: 1em; width: auto; vertical-align: middle;">`;
+
+  const now = new Date();
+  const next7 = new Date(); next7.setDate(now.getDate() + 7);
+  const options = { day: 'numeric', month: 'long', year: 'numeric' };
+  const todayDate = now.toLocaleDateString('th-TH', options);
+  const next7days = next7.toLocaleDateString('th-TH', options);
+
+  // 3. ประกอบข้อความ HTML จาก Template
+  let printContents = "";
+  tmplData.config.forEach(l => {
+    const type = l.type || 'text';
+
+    if (type === 'image') {
+      printContents += `<div class="line" style="left:${l.x||0}px;top:${l.y||0}px;"><img src="${l.src}" style="width: ${l.width}px; height: ${l.height}px; object-fit: contain;"></div>`;
+    } else {
+      let txt = (l.text || "")
+        .replace(/{{queue_number}}/g, animalData.queue_number || "")
+        .replace(/{{animal_name}}/g, animalData.animal_name || "")
+        .replace(/{{species}}/g, spcText)
+        .replace(/{{species_icon}}/g, spcImg)  
+        .replace(/{{sex}}/g, animalData.sex || "")
+        .replace(/{{sex_icon}}/g, sexImg)      
+        .replace(/{{owner_name}}/g, ownerName)
+        .replace(/{{id_card}}/g, idCard)
+        .replace(/{{address}}/g, address)
+        .replace(/{{phone}}/g, phone)
+        .replace(/{{cbc_text}}/g, text)
+        .replace(/{{todayDate}}/g, todayDate)
+        .replace(/{{next7days}}/g, next7days);
+      
+      printContents += `<div class="line" style="left:${l.x||0}px;right:0;top:${l.y||0}px;font-size:${l.size}px;font-weight:${l.bold ? "600" : "400"};font-family:${l.font||"Sarabun"};text-align:${l.align||"left"};">${txt}</div>`;
+    }
+  });
+
+  // 4. สร้างหน้าต่างปริ้นใหม่
+  const pw = window.open("", "_blank", "width=800,height=600");
   pw.document.write(`
     <html>
       <head>
-        <title>Print Blood Test</title>
-        <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+        <title>Print CBC</title>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Kanit:wght@400;700&family=Prompt:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
         <style>
-          body { margin: 0; padding: 0; font-family: 'Sarabun', sans-serif; color: #000; }
-          .sticker { width: 80mm; background: #fff; padding: 5px; box-sizing: border-box; margin: 0 auto; }
-          @page { size: 80mm auto; margin: 0; }
+          body { margin: 0; background: #fff; }
+          .sticker { position: relative; width: 80mm; height: 50mm; background: #fff; overflow: hidden; }
+          .line { position: absolute; white-space: pre-wrap; word-break: break-word; padding-right: 5px; box-sizing: border-box; color: #000 !important; line-height: 1.2; }
+          @page { size: 80mm 50mm; margin: 0; }
         </style>
       </head>
       <body>
         <div class="sticker">${printContents}</div>
         <script>
           window.onload = function() {
-            setTimeout(() => {
-              window.print();
-              window.close();
-            }, 500);
+            document.fonts.ready.then(() => {
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 500);
+            });
           }
         <\/script>
       </body>
