@@ -83,6 +83,29 @@ header {
 .sc-animal-name { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 800; color: #fff; line-height: 1.1; }
 .sc-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
 
+/* ── Alerts (Blinking Red) ── */
+@keyframes blink-red {
+  0%   { opacity: 1; color: #fca5a5; }
+  50%  { opacity: 0.3; color: var(--rose); }
+  100% { opacity: 1; color: #fca5a5; }
+}
+.blood-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px dashed var(--rose);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-family: "Sarabun", "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  animation: blink-red 1.2s infinite;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.blood-alert:last-child {
+  margin-bottom: 0;
+}
+
 .tabs-header { display: flex; border-bottom: 1px solid var(--border); background: var(--surface-2); overflow-x: auto; scrollbar-width: none; }
 .tabs-header::-webkit-scrollbar { display: none; }
 .tab-btn {
@@ -224,9 +247,13 @@ header {
 <script type="module">
 import { supabase } from "./js/supabase.js";
 
+// รายการบริการมาตรฐาน สำหรับเช็คว่าอันไหนคือ บริการอื่นๆ/ระบุเพิ่มเติม
+const baseServices = [
+  "ทำหมันเพศเมีย", "ทำหมันเพศผู้", "ทำหมันเมีย", "ทำหมันผู้", 
+  "ฉีดวัคซีนพิษสุนัขบ้า", "ฉีดวัคซีน", "ฉีดเห็บ", "ตรวจเลือด", "ฝังไมโครชิฟ"
+];
+
 // รายการยามาตรฐาน
-// ★ ยาที่มี freqOptions = แสดงเป็น dropdown ให้เลือกความถี่ (1 หรือ 2 ครั้ง/วัน)
-// ★ defaultFreqIdx = index เริ่มต้นของ freqOptions (0=1ครั้ง, 1=2ครั้ง)
 const drugList = [
   { id: 'doxy100', name: 'ปฏิชีวนะ Doxycycline 100 mg', type: 'abx', mgPerKg: 10, mgPerTab: 100, freq: 'วันละ 1 ครั้ง พร้อมอาหารเย็น', timesPerDay: 1, days: 7 },
   {
@@ -261,14 +288,13 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ฟังก์ชันแปลงทศนิยมเป็นเศษส่วน (เช่น 1.5 -> 1 + 1/2)
+// ฟังก์ชันแปลงทศนิยมเป็นเศษส่วน
 function decimalToFractionText(num) {
   if (!num || isNaN(num)) return "0";
   const whole = Math.floor(num);
   const frac = num - whole;
   let fracStr = "";
   
-  // เช็คจุดทศนิยม 0.25, 0.50, 0.75
   if (Math.abs(frac - 0.25) < 0.01) fracStr = "1/4";
   else if (Math.abs(frac - 0.5) < 0.01) fracStr = "1/2";
   else if (Math.abs(frac - 0.75) < 0.01) fracStr = "3/4";
@@ -280,7 +306,7 @@ function decimalToFractionText(num) {
   return "0";
 }
 
-// ฟังก์ชันแปลงข้อความเศษส่วนกลับเป็นทศนิยมเพื่อคำนวณ (เช่น 1 + 1/2 -> 1.5)
+// ฟังก์ชันแปลงข้อความเศษส่วนกลับเป็นทศนิยม
 function parseFractionToDecimal(str) {
   if (!str) return 0;
   str = String(str).replace(/\+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -300,7 +326,6 @@ function parseFractionToDecimal(str) {
   return sum;
 }
 
-// ดึง timesPerDay เริ่มต้นของยา
 function defaultTimesOf(d) {
   if (d.freqOptions) return d.freqOptions[d.defaultFreqIdx || 0].times;
   return d.timesPerDay || 1;
@@ -314,7 +339,8 @@ async function loadSurgeryQueue() {
       .select(`id, animal_id, status, operating_table, surgeon_name, anesthetist,
         vasd_animal(id, event_id, queue_number, animal_name, species, sex, actual_weight,
         vasd_service(id, service_type, is_done),
-        vasd_vital_signs(*))
+        vasd_vital_signs(*),
+        vasd_blood_test(cbc_text))
       `)
       .eq("status", "surgery")
       .order("updated_at", { ascending: true });
@@ -342,6 +368,31 @@ async function loadSurgeryQueue() {
       const isMonitorActive = activeTab === `tab-monitor-${a.id}` ? 'active' : '';
       const isRxActive = activeTab === `tab-rx-${a.id}` ? 'active' : '';
       const isEmergencyActive = activeTab === `tab-emergency-${a.id}` ? 'active' : '';
+
+      // จัดการ Alerts (บริการเพิ่มเติม และ ผลเลือด)
+      const rawServices = a.vasd_service ? a.vasd_service.map(srv => srv.service_type) : [];
+      const customServices = rawServices.filter(srv => !baseServices.includes(srv));
+
+      const customAlertMarkup = customServices.length > 0
+        ? `<div class="blood-alert">🚨 <b>ระบุเพิ่มเติม (โรคประจำตัว/อื่นๆ):</b>\n${customServices.join(", ")}</div>`
+        : "";
+
+      const bloodTests = a.vasd_blood_test || [];
+      const latestBlood = bloodTests.length > 0 ? bloodTests[bloodTests.length - 1].cbc_text : null;
+      
+      const bloodAlertMarkup = latestBlood 
+        ? `<div class="blood-alert">🩸 <b>ผลการตรวจเลือด (CBC):</b>\n${latestBlood}</div>` 
+        : "";
+
+      const hasAlerts = customAlertMarkup !== "" || bloodAlertMarkup !== "";
+      
+      // การแสดง Alerts อยู่เหนือ Tabs
+      const alertSection = hasAlerts 
+        ? `<div style="padding: 0 16px 12px; background: var(--surface-2); border-bottom: 1px solid var(--border);">
+             ${customAlertMarkup}
+             ${bloodAlertMarkup}
+           </div>`
+        : "";
 
       const servicesHtml = (a.vasd_service || []).map(s => `
         <label class="svc-check">
@@ -428,13 +479,15 @@ async function loadSurgeryQueue() {
       const card = document.createElement("div");
       card.className = "surg-card";
       card.innerHTML = `
-        <div class="sc-header">
+        <div class="sc-header" style="${hasAlerts ? 'border-bottom: none;' : ''}">
           <div class="queue-circle">#${a.queue_number || "-"}</div>
           <div class="sc-title-block">
-            <div class="sc-animal-name">${a.animal_name}</div>
+            <div class="sc-animal-name">${a.animal_name} ${hasAlerts ? '<span title="มีการแจ้งเตือน" style="font-size:14px; margin-left:6px;">⚠️</span>' : ''}</div>
             <div class="sc-meta">${spText} · ${a.sex} · นน.: ${a.actual_weight || "-"} kg</div>
           </div>
         </div>
+        
+        ${alertSection}
 
         <div class="tabs-header">
           <button class="tab-btn ${isInfoActive}" id="btn-tab-info-${a.id}" onclick="switchTab(this, 'tab-info-${a.id}', '${a.id}')">ข้อมูล</button>
