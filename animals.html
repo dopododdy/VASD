@@ -104,6 +104,29 @@ header {
   width: 100%;
 }
 
+/* ── Dashboard Stats ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  animation: slideUp 0.3s ease both;
+}
+.stat-card {
+  background: linear-gradient(135deg, var(--surface-2), var(--surface));
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: var(--teal); }
+.stat-label { font-size: 11px; font-weight: 600; color: var(--text-dim); white-space: nowrap; }
+.stat-num { font-size: 22px; font-weight: 700; font-family: "Outfit", sans-serif; color: var(--teal-light); line-height: 1; }
+
 /* ── Section Title & Controls ── */
 .section-header {
   display: flex; align-items: center; gap: 10px;
@@ -383,7 +406,7 @@ header {
   header { height: 56px; padding: 0 14px; }
   .brand-sub { display: none; }
   .wrap { padding: 18px 12px 90px; }
-  
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .bottom-nav { display: grid; }
 }
 </style>
@@ -402,6 +425,26 @@ header {
 </header>
 
 <div class="wrap">
+
+  <!-- เพิ่ม Dashboard สรุปจำนวนสัตว์ -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">🐶 สุนัข เมีย</div>
+      <div class="stat-num" id="statDogF">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🐶 สุนัข ผู้</div>
+      <div class="stat-num" id="statDogM">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🐱 แมว เมีย</div>
+      <div class="stat-num" id="statCatF">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🐱 แมว ผู้</div>
+      <div class="stat-num" id="statCatM">0</div>
+    </div>
+  </div>
 
   <div class="section-header">
     <div class="section-title">
@@ -489,7 +532,28 @@ async function loadAnimals() {
   });
 
   allData = Array.from(uniqueQueues.values());
+  
+  // อัปเดตยอดสรุปด้านบน
+  updateDashboardStats();
+  // อัปเดตและวาดหน้าจอ
   applySortAndRender();
+}
+
+// 🛠️ ฟังก์ชันคำนวณและอัปเดตยอด Dashboard
+function updateDashboardStats() {
+  let dogF = 0, dogM = 0, catF = 0, catM = 0;
+  
+  allData.forEach(a => {
+    if (a.species === 'ส' && a.sex === 'เมีย') dogF++;
+    else if (a.species === 'ส' && a.sex === 'ผู้') dogM++;
+    else if (a.species === 'ม' && a.sex === 'เมีย') catF++;
+    else if (a.species === 'ม' && a.sex === 'ผู้') catM++;
+  });
+
+  document.getElementById("statDogF").textContent = dogF;
+  document.getElementById("statDogM").textContent = dogM;
+  document.getElementById("statCatF").textContent = catF;
+  document.getElementById("statCatM").textContent = catM;
 }
 
 // 🛠️ 2. จัดการ Logic กรองและเรียง
