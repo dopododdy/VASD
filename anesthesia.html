@@ -458,7 +458,10 @@ async function loadAnesthesiaQueue() {
               placeholder="0.00"
               value="${initialWeight}"
               oninput="window.calcDrugs('${animalId}')"
-              onclick="event.stopPropagation()"> <table class="drug-table">
+              onchange="window.saveActualWeight('${animalId}')"
+              onclick="event.stopPropagation()">
+
+            <table class="drug-table">
               <thead><tr><th>รายการยา (Drug List)</th><th style="text-align:right">ปริมาณ (Dose)</th></tr></thead>
               <tbody>${drugRows}</tbody>
             </table>
@@ -515,6 +518,20 @@ window.calcDrugs = function(animalId) {
   setV(`calc-xyla-${animalId}`, ((w * 1) / 20).toFixed(2));
   setV(`calc-zole-${animalId}`, ((w * 3) / 100).toFixed(2));
   setV(`calc-thio-${animalId}`, ((w * 5) / 10).toFixed(2)); 
+};
+
+// ── Auto-save น้ำหนัก ── //
+window.saveActualWeight = async function(animalId) {
+  const inputEl = document.getElementById(`weight-${animalId}`);
+  if(!inputEl || !inputEl.value) return;
+  
+  const weightVal = parseFloat(inputEl.value);
+  try {
+    await supabase.from("vasd_animal").update({ actual_weight: weightVal }).eq("id", animalId);
+    // เมื่อ update สำเร็จ ระบบ Real-time ของ Supabase จะส่งสัญญาณไปที่ animals.html อัตโนมัติ
+  } catch (err) {
+    console.error("Auto-save weight error:", err);
+  }
 };
 
 window.sendToSurgery = async function(animalId) {
