@@ -6,14 +6,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+<!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+</script>
+
 <style>
 /* ═══════════════════════════════════════════
-   TOKENS & THEME
+   TOKENS & THEME (Dark Mode - Default)
 ═══════════════════════════════════════════ */
 :root {
   --navy:         #0b1929;
   --text:         #f8fafc;
   --text-dark:    #064e3b;
+  --text-dim:     #cbd5e1;
+  --surface:      rgba(255,255,255,0.1);
+  --border:       rgba(255,255,255,0.2);
+  --header-bg:    rgba(11, 25, 41, 0.85);
   
   /* Status Gradients */
   --g-wait:       linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
@@ -21,6 +33,18 @@
   --g-surg:       linear-gradient(135deg, #f87171 0%, #dc2626 100%);
   --g-rec:        linear-gradient(135deg, #a7f3d0 0%, #34d399 100%);
   --g-ready:      linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME TOKENS
+═══════════════════════════════════════════ */
+[data-theme="light"] {
+  --navy:         #f8fafc;
+  --text:         #0f172a;
+  --text-dim:     #475569;
+  --surface:      #ffffff;
+  --border:       #cbd5e1;
+  --header-bg:    rgba(255, 255, 255, 0.9);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,40 +56,81 @@ body {
   display: flex; flex-direction: column;
   overflow-x: hidden;
   padding-bottom: 40px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -1;
   background: radial-gradient(circle at 50% -20%, rgba(14,165,160,0.15) 0%, transparent 70%);
+  transition: opacity 0.3s ease;
+}
+[data-theme="light"] body::before {
+  background: radial-gradient(circle at 50% -20%, rgba(14,165,160,0.05) 0%, transparent 70%);
 }
 
 /* ═══════════════════════════════════════════
-   HEADER (Glassmorphism)
+   HEADER (Stats & Glassmorphism)
 ═══════════════════════════════════════════ */
 header {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(11, 25, 41, 0.7);
+  background: var(--header-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding: clamp(12px, 2vw, 24px) 24px;
-  text-align: center;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  border-bottom: 1px solid var(--border);
+  padding: clamp(10px, 1.5vw, 20px) 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-.brand-title { 
-  font-family: "Sarabun", sans-serif; 
-  font-size: clamp(20px, 3vw, 36px); 
-  font-weight: 800; color: #fff; 
-  letter-spacing: 0.5px;
+
+.stats-header {
+  display: flex; gap: clamp(8px, 1vw, 16px); flex-wrap: wrap; align-items: center; flex: 1;
+}
+.stat-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 8px 16px; border-radius: 50px;
+  font-weight: 600; font-size: clamp(13px, 1.5vw, 18px);
+  color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+.stat-pill span {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800; font-size: 1.1em;
+}
+.stat-pill.highlight {
+  background: linear-gradient(135deg, #0ea5a0, #14c4bc);
+  color: #fff; border: none;
+}
+
+.header-actions {
+  display: flex; align-items: center; gap: 16px;
 }
 .live-indicator {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  font-size: clamp(12px, 1.5vw, 18px); font-weight: 600; color: #cbd5e1; margin-top: 8px;
+  font-size: clamp(12px, 1.5vw, 16px); font-weight: 700; color: var(--text-dim);
+  background: var(--surface); padding: 8px 16px; border-radius: 50px;
+  border: 1px solid var(--border);
 }
 .live-dot {
-  width: clamp(8px, 1vw, 12px); height: clamp(8px, 1vw, 12px); 
+  width: 10px; height: 10px; 
   background: #34d399; border-radius: 50%;
   animation: pulseDot 2s infinite;
 }
+
+/* Theme Toggle */
+.btn-theme {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; transition: background 0.2s, transform 0.2s;
+}
+.btn-theme:hover { transform: scale(1.05); }
+.btn-theme:active { transform: scale(0.95); }
+.icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: inline-block; }
 
 /* ═══════════════════════════════════════════
    MAIN GRID (Auto Responsive)
@@ -73,13 +138,12 @@ header {
 .wrap { 
   padding: clamp(16px, 3vw, 40px); 
   width: 100%; 
-  max-width: 1920px; /* ปลดล็อกขนาดให้รองรับจอทีวี 4K */
+  max-width: 1920px; 
   margin: 0 auto; 
 }
 
 #animalList {
   display: grid;
-  /* หัวใจสำคัญ: ย่อขยายคอลัมน์ตามขนาดจออัตโนมัติ */
   grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 20vw, 280px), 1fr));
   gap: clamp(12px, 2vw, 32px); 
 }
@@ -91,20 +155,20 @@ header {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: clamp(10px, 2vw, 24px);
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
   border: 1px solid rgba(255,255,255,0.1);
-  /* เปิดใช้งาน View Transition */
   view-transition-name: card-var(--id); 
 }
-.pet-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+[data-theme="light"] .pet-card { border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+.pet-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px rgba(0,0,0,0.25); }
 
 .pet-card .q-num {
   font-family: "Outfit", sans-serif;
   font-size: clamp(32px, 6vw, 80px); 
   font-weight: 900; line-height: 1;
   margin-bottom: clamp(4px, 1vw, 12px);
-  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 .pet-card .name {
   font-size: clamp(14px, 2.5vw, 28px); font-weight: 700;
@@ -133,7 +197,7 @@ header {
 .bg-rec .status { background: rgba(0,0,0,0.08); }
 
 .empty-state {
-  grid-column: 1 / -1; text-align: center; padding: 10vh 20px; color: #94a3b8;
+  grid-column: 1 / -1; text-align: center; padding: 10vh 20px; color: var(--text-dim);
   font-size: clamp(18px, 3vw, 32px); font-weight: 600;
 }
 
@@ -147,8 +211,9 @@ header {
   -webkit-backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, background-color 0.3s;
 }
+[data-theme="light"] #popupOverlay { background: rgba(255,255,255,0.85); }
 #popupOverlay.active { opacity: 1; pointer-events: auto; }
 
 .popup-box {
@@ -156,15 +221,15 @@ header {
   border-radius: clamp(30px, 5vw, 60px);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: 32px;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 2px 10px rgba(255,255,255,0.3);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 2px 10px rgba(255,255,255,0.3);
   transform: scale(0.5) translateY(50px);
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 #popupOverlay.active .popup-box { transform: scale(1) translateY(0); }
 
-.popup-box .q-num { font-family: "Outfit", sans-serif; font-size: clamp(80px, 15vw, 200px); font-weight: 900; line-height: 1; margin-bottom: 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.3);}
+.popup-box .q-num { font-family: "Outfit", sans-serif; font-size: clamp(80px, 15vw, 200px); font-weight: 900; line-height: 1; margin-bottom: 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.2);}
 .popup-box .name { font-size: clamp(30px, 5vw, 56px); font-weight: 800; margin-bottom: 24px; }
-.popup-box .status { font-size: clamp(24px, 4vw, 42px); font-weight: 700; background: rgba(255,255,255,0.25); padding: 12px 32px; border-radius: 50px; }
+.popup-box .status { font-size: clamp(24px, 4vw, 42px); font-weight: 700; background: rgba(255,255,255,0.3); padding: 12px 32px; border-radius: 50px; }
 
 @keyframes pulseDot {
   0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.7); }
@@ -174,13 +239,32 @@ header {
 
 /* ตั้งค่าให้ View Transition นุ่มนวลขึ้น */
 ::view-transition-group(*) { animation-duration: 0.5s; animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
+
+@media (max-width: 768px) {
+  .stats-header { justify-content: center; }
+  .header-actions { width: 100%; justify-content: space-between; margin-top: 10px; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand-title">🐾 สถานะคิวสัตว์เลี้ยง VASD</div>
-  <div class="live-indicator"><div class="live-dot"></div> อัปเดตล่าสุด (Real-Time)</div>
+  <div class="stats-header">
+    <div class="stat-pill">🐶 สุนัข เมีย <span id="h-dog-f">0</span></div>
+    <div class="stat-pill">🐶 สุนัข ผู้ <span id="h-dog-m">0</span></div>
+    <div class="stat-pill">🐱 แมว เมีย <span id="h-cat-f">0</span></div>
+    <div class="stat-pill">🐱 แมว ผู้ <span id="h-cat-m">0</span></div>
+    <div class="stat-pill highlight">รวมทั้งหมด <span id="h-total">0</span></div>
+  </div>
+  
+  <div class="header-actions">
+    <div class="live-indicator"><div class="live-dot"></div> Real-Time</div>
+    <!-- ปุ่ม Toggle สลับ Theme -->
+    <button id="themeToggle" class="btn-theme" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span>
+      <span class="icon-sun">☀️</span>
+    </button>
+  </div>
 </header>
 
 <div class="wrap">
@@ -196,6 +280,23 @@ header {
     <div class="status" id="popupStatus">สถานะ</div>
   </div>
 </div>
+
+<script>
+  /* ── Theme Switcher Logic ── */
+  const themeToggleBtn = document.getElementById('themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  }
+</script>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -218,9 +319,10 @@ const statusMap = {
 const allowedStatuses = ["waiting", "anesthesia", "surgery", "recovery"];
 
 async function loadAnimals() {
+  // ดึง species และ sex มาเพื่อคำนวณสรุปยอดด้วย
   const { data, error } = await supabase
     .from("vasd_animal")
-    .select(`id, queue_number, animal_name, vasd_queue(status)`);
+    .select(`id, queue_number, animal_name, species, sex, vasd_queue(status)`);
 
   if (error) {
     console.error("Database Fetch Error:", error);
@@ -230,6 +332,22 @@ async function loadAnimals() {
   
   const formattedData = data || [];
   
+  // ── คำนวณสรุปยอดสัตว์ทั้งหมด (Dashboard Header) ──
+  let dogF = 0, dogM = 0, catF = 0, catM = 0;
+  formattedData.forEach(a => {
+    if (a.species === 'ส' && a.sex === 'เมีย') dogF++;
+    else if (a.species === 'ส' && a.sex === 'ผู้') dogM++;
+    else if (a.species === 'ม' && a.sex === 'เมีย') catF++;
+    else if (a.species === 'ม' && a.sex === 'ผู้') catM++;
+  });
+  
+  document.getElementById('h-dog-f').textContent = dogF;
+  document.getElementById('h-dog-m').textContent = dogM;
+  document.getElementById('h-cat-f').textContent = catF;
+  document.getElementById('h-cat-m').textContent = catM;
+  document.getElementById('h-total').textContent = formattedData.length;
+
+  // ── จัดเรียงลำดับการ์ด ──
   formattedData.sort((a, b) => {
     const qDataA = Array.isArray(a.vasd_queue) ? a.vasd_queue[0] : a.vasd_queue;
     const qDataB = Array.isArray(b.vasd_queue) ? b.vasd_queue[0] : b.vasd_queue;
