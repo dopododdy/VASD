@@ -6,9 +6,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+</script>
+
 <style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS (Dark Mode - Default)
+═══════════════════════════════════════════ */
 :root {
-  --navy:         #0b1929;
+  --navy:          #0b1929;
   --navy-mid:      #112240;
   --primary:       #3b82f6;
   --primary-light: #60a5fa;
@@ -24,14 +35,34 @@
   --surface-3:  rgba(255,255,255,0.11);
   --border:     rgba(255,255,255,0.08);
   --border-2:   rgba(255,255,255,0.14);
+  
   --text:       #e2e8f0;
   --text-dim:   #94a3b8;
   --text-faint: #4a5568;
+  --text-heading: #ffffff;
 
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius:    16px;
   --radius-lg: 22px;
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME TOKENS
+═══════════════════════════════════════════ */
+[data-theme="light"] {
+  --navy:       #f8fafc;
+  --navy-mid:   #ffffff;
+  --surface:    #ffffff;
+  --surface-2:  #f1f5f9;
+  --surface-3:  #e2e8f0;
+  --border:     #e2e8f0;
+  --border-2:   #cbd5e1;
+  
+  --text:       #0f172a;
+  --text-dim:   #475569;
+  --text-faint: #64748b;
+  --text-heading: #0f172a;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,6 +71,7 @@ body {
   background: var(--navy); color: var(--text);
   min-height: 100vh; display: flex; flex-direction: column;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 header {
@@ -48,7 +80,12 @@ header {
   border-bottom: 1px solid var(--border);
   padding: 0 20px; height: 64px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+[data-theme="light"] header {
+  background: rgba(255,255,255,0.88);
+}
+
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-logo {
   width: 38px; height: 38px;
@@ -56,8 +93,21 @@ header {
   border-radius: 10px; display: flex; align-items: center; justify-content: center;
   font-size: 18px; box-shadow: 0 0 20px rgba(59,130,246,0.3);
 }
-.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1; }
+.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: var(--text-heading); line-height: 1; transition: color 0.3s; }
 .brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* Theme Toggle Button */
+.header-actions { display: flex; gap: 10px; align-items: center; }
+.btn-theme {
+  background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text);
+  width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: background 0.2s, transform 0.2s;
+}
+.btn-theme:hover { background: var(--surface-3); transform: scale(1.05); }
+.btn-theme:active { transform: scale(0.95); }
+.icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: inline-block; }
 
 .wrap { max-width: 900px; margin: 0 auto; padding: 16px 12px 100px; width: 100%; }
 
@@ -66,12 +116,15 @@ header {
   border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 16px;
   animation: slideUp 0.4s ease both;
   display: flex; flex-direction: column;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
+[data-theme="light"] .surg-card { box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
 .surg-card::before { content: ""; display: block; height: 3px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
 
 .sc-header {
   display: flex; align-items: center; gap: 12px; padding: 14px 16px;
   border-bottom: 1px solid var(--border); background: var(--surface-2);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 .queue-circle {
   font-family: "Outfit", sans-serif; width: 42px; height: 42px; border-radius: 50%;
@@ -79,8 +132,9 @@ header {
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 800; color: var(--primary); flex-shrink: 0;
 }
+[data-theme="light"] .queue-circle { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); }
 .sc-title-block { flex: 1; min-width: 0; }
-.sc-animal-name { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 800; color: #fff; line-height: 1.1; }
+.sc-animal-name { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 800; color: var(--text-heading); line-height: 1.1; transition: color 0.3s; }
 .sc-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
 
 /* ── Alerts (Blinking Red) ── */
@@ -88,6 +142,11 @@ header {
   0%   { opacity: 1; color: #fca5a5; }
   50%  { opacity: 0.3; color: var(--rose); }
   100% { opacity: 1; color: #fca5a5; }
+}
+[data-theme="light"] @keyframes blink-red {
+  0%   { opacity: 1; color: #ef4444; }
+  50%  { opacity: 0.4; color: #991b1b; }
+  100% { opacity: 1; color: #ef4444; }
 }
 .blood-alert {
   background: rgba(239, 68, 68, 0.1);
@@ -106,7 +165,7 @@ header {
   margin-bottom: 0;
 }
 
-.tabs-header { display: flex; border-bottom: 1px solid var(--border); background: var(--surface-2); overflow-x: auto; scrollbar-width: none; }
+.tabs-header { display: flex; border-bottom: 1px solid var(--border); background: var(--surface-2); overflow-x: auto; scrollbar-width: none; transition: background-color 0.3s, border-color 0.3s; }
 .tabs-header::-webkit-scrollbar { display: none; }
 .tab-btn {
   flex: 1; padding: 12px 10px; font-size: 13px; font-weight: 600; font-family: "Sarabun", sans-serif;
@@ -118,8 +177,8 @@ header {
 .tab-content { display: none; padding: 16px; flex: 1; }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
-.info-item { background: var(--surface-2); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px; }
-.info-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.info-item { background: var(--surface-2); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px; transition: background-color 0.3s, border-color 0.3s; }
+.info-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; transition: color 0.3s; }
 
 .service-list { display: flex; flex-direction: column; gap: 8px; }
 .svc-check {
@@ -132,13 +191,13 @@ header {
   width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);
 }
 .svc-check span { font-size: 14px; font-weight: 500; color: var(--text); }
-.svc-check input:checked + span { color: var(--primary-light); }
+.svc-check input:checked + span { color: var(--primary); }
 
 .form-grid { display: grid; grid-template-columns: 80px 1fr; gap: 8px; margin-bottom: 8px; }
 .f-input {
   width: 100%; padding: 10px 12px; font-size: 14px; font-family: "Sarabun", sans-serif;
   background: var(--surface-2); border: 1px solid var(--border-2);
-  border-radius: var(--radius-sm); color: var(--text); outline: none; transition: 0.2s;
+  border-radius: var(--radius-sm); color: var(--text); outline: none; transition: 0.2s, background-color 0.3s;
 }
 .f-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
 
@@ -158,27 +217,29 @@ header {
 
 .table-wrapper {
   margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-  overflow-x: auto; background: var(--surface-2);
+  overflow-x: auto; background: var(--surface-2); transition: background-color 0.3s, border-color 0.3s;
 }
 .vitals-table { width: 100%; min-width: 440px; border-collapse: collapse; font-size: 12px; text-align: center; }
-.vitals-table th { background: var(--surface-3); color: var(--text-dim); padding: 8px 6px; border-bottom: 1px solid var(--border); }
-.vitals-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
+.vitals-table th { background: var(--surface-3); color: var(--text-dim); padding: 8px 6px; border-bottom: 1px solid var(--border); transition: background-color 0.3s, border-color 0.3s; }
+.vitals-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--text); transition: border-color 0.3s; }
 
 /* ── Rx (Prescription) ── */
 .rx-item {
   display: flex; gap: 10px; align-items: flex-start;
   background: var(--surface-2); padding: 12px; border-radius: var(--radius-sm);
-  margin-bottom: 8px; border: 1px solid var(--border);
+  margin-bottom: 8px; border: 1px solid var(--border); transition: background-color 0.3s, border-color 0.3s;
 }
 .rx-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--teal); cursor: pointer; }
 .rx-info { flex: 1; }
-.rx-name { font-weight: 600; color: #fff; margin-bottom: 6px; font-size: 14px; }
+.rx-name { font-weight: 600; color: var(--text-heading); margin-bottom: 6px; font-size: 14px; transition: color 0.3s; }
 .rx-inputs { display: grid; grid-template-columns: minmax(70px, 1fr) 2fr minmax(60px, 1fr) minmax(60px, 1fr); gap: 6px; align-items: center; }
 .rx-input-group { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim); white-space: nowrap; }
 .rx-inputs input {
   width: 100%; padding: 6px; font-size: 13px; font-family: "Sarabun", sans-serif;
-  background: rgba(0,0,0,0.3); border: 1px solid var(--border-2); border-radius: 6px; color: #fff; text-align: center;
+  background: var(--surface-3); border: 1px solid var(--border-2); border-radius: 6px; color: var(--text-heading); text-align: center;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
+[data-theme="light"] .rx-inputs input { background: #ffffff; }
 .rx-inputs input[type="text"] { text-align: left; font-size: 11px; }
 /* Override dose text alignment to look like number */
 .rx-inputs input.dose-input { text-align: center; font-size: 13px; }
@@ -188,31 +249,37 @@ header {
   width: 100%; padding: 6px 6px; font-size: 11px; font-family: "Sarabun", sans-serif;
   background: rgba(14,165,160,0.12);
   border: 1px solid rgba(14,165,160,0.4); border-radius: 6px;
-  color: #fff; cursor: pointer; outline: none;
+  color: var(--text-heading); cursor: pointer; outline: none;
   appearance: none; -webkit-appearance: none; -moz-appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2314c4bc' stroke-width='3'><polyline points='6 9 12 15 18 9'/></svg>");
   background-repeat: no-repeat;
   background-position: right 6px center;
   padding-right: 22px;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
+[data-theme="light"] .rx-inputs select { background-color: rgba(14,165,160,0.08); color: var(--teal); font-weight: 600; }
 .rx-inputs select:focus { border-color: var(--teal-light); box-shadow: 0 0 0 2px rgba(14,165,160,0.2); }
-.rx-inputs select option { background: var(--navy); color: #fff; }
+.rx-inputs select option { background: var(--navy); color: var(--text); }
+[data-theme="light"] .rx-inputs select option { background: #ffffff; color: var(--text-heading); }
 
 @media (max-width: 500px) {
   .rx-inputs { grid-template-columns: 1fr 1fr; }
   .rx-input-group.freq { grid-column: span 2; }
 }
 
-.sc-footer { padding: 16px; background: var(--surface-2); border-top: 1px solid var(--border); }
+.sc-footer { padding: 16px; background: var(--surface-2); border-top: 1px solid var(--border); transition: background-color 0.3s, border-color 0.3s; }
 
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
   background: rgba(11,25,41,0.95); backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border); z-index: 200;
+  border-top: 1px solid var(--border-2); z-index: 200;
   display: flex; justify-content: space-around; align-items: center;
   padding-bottom: env(safe-area-inset-bottom);
+  transition: background-color 0.3s ease;
 }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim); text-decoration: none; font-size: 10px; font-weight: 600; width: 60px; }
+[data-theme="light"] .bottom-nav { background: rgba(255,255,255,0.95); }
+
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim); text-decoration: none; font-size: 10px; font-weight: 600; width: 60px; transition: color 0.2s; }
 .nav-item.active { color: var(--primary); }
 .nav-icon { font-size: 20px; }
 
@@ -230,6 +297,13 @@ header {
       <div class="brand-sub">Surgery Table Monitoring</div>
     </div>
   </div>
+  <div class="header-actions">
+    <!-- ปุ่ม Toggle สลับ Theme -->
+    <button id="themeToggle" class="btn-theme" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span>
+      <span class="icon-sun">☀️</span>
+    </button>
+  </div>
 </header>
 
 <div class="wrap" id="surgery-container">
@@ -243,6 +317,23 @@ header {
   <a href="#" class="nav-item active"><span class="nav-icon">🛏️</span><span>ผ่าตัด</span></a>
   <a href="recovery.html" class="nav-item"><span class="nav-icon">❤️‍🩹</span><span>พักฟื้น</span></a>
 </nav>
+
+<script>
+  /* ── Theme Switcher Logic ── */
+  const themeToggleBtn = document.getElementById('themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  }
+</script>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
