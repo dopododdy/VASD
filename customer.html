@@ -206,15 +206,16 @@ let oldStatuses = {};
 let popupQueue = [];
 let isPopupShowing = false;
 
+// กรองสถานะและตั้งชื่อให้ตรงกับความต้องการ
 const statusMap = {
-  ready_to_go_home: { text: "รอรับกลับ", colorClass: "bg-ready", weight: 1 },
-  done:             { text: "รอรับกลับ", colorClass: "bg-ready", weight: 1 }, 
-  recovery:         { text: "พักฟื้น",   colorClass: "bg-rec",   weight: 2 },
-  surgery:          { text: "กำลังผ่า",  colorClass: "bg-surg",  weight: 3 },
-  anesthesia:       { text: "วางยา",     colorClass: "bg-anes",  weight: 4 },
-  waiting:          { text: "รอผ่าตัด",  colorClass: "bg-wait",  weight: 5 },
-  cancel:           { text: "ยกเลิก",    colorClass: "bg-wait",  weight: 99 }
+  recovery:         { text: "พักฟื้น",       colorClass: "bg-rec",   weight: 1 },
+  surgery:          { text: "กำลังผ่าตัด",   colorClass: "bg-surg",  weight: 2 },
+  anesthesia:       { text: "รอวางยา",       colorClass: "bg-anes",  weight: 3 },
+  waiting:          { text: "รอวางยา",       colorClass: "bg-wait",  weight: 4 }
 };
+
+// กำหนดสถานะที่อนุญาตให้แสดงบนหน้าจอ
+const allowedStatuses = ["waiting", "anesthesia", "surgery", "recovery"];
 
 async function loadAnimals() {
   const { data, error } = await supabase
@@ -247,9 +248,11 @@ async function loadAnimals() {
 function renderGrid(data) {
   const list = document.getElementById("animalList");
   
+  // กรองแสดงเฉพาะสถานะที่อยู่ใน allowedStatuses เท่านั้น
   const activeData = data.filter(a => {
     const qData = Array.isArray(a.vasd_queue) ? a.vasd_queue[0] : a.vasd_queue;
-    return (qData?.status || "waiting") !== "cancel";
+    const status = qData?.status || "waiting";
+    return allowedStatuses.includes(status);
   });
 
   let htmlContent = "";
