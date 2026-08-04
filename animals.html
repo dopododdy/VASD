@@ -517,14 +517,21 @@ document.getElementById("searchInput").addEventListener("input", applySortAndRen
 document.getElementById("sortSelect").addEventListener("change", applySortAndRender);
 
 async function loadAnimals() {
-  // 🌟 เพิ่มฟิลด์ actual_weight ใน .select() 
   const { data, error } = await supabase
     .from("vasd_animal")
     .select(`id,queue_number,animal_name,species,sex,est_weight,actual_weight,health_note,vasd_owner(owner_name,phone),vasd_queue(status),vasd_service(service_type)`)
     .order("id", { ascending: false }) 
     .limit(200);
 
-  if (error) { console.error(error); return; }
+  if (error) { 
+    console.error(error); 
+    document.getElementById("animalList").innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">❌</div>
+        <div class="empty-state-text" style="color:var(--rose)">โหลดข้อมูลไม่สำเร็จ: ${error.message}</div>
+      </div>`;
+    return; 
+  }
 
   // กรองเฉพาะคิวล่าสุด ป้องกันข้อมูลซ้ำซ้อน
   const uniqueQueues = new Map();
@@ -642,9 +649,9 @@ function renderCards(data, query) {
     card.dataset.id = a.id;
     card.style.animationDelay = `${idx * 0.03}s`;
 
-    // 🌟 ดึงน้ำหนักจริงมาใช้ก่อน ถ้าน้ำหนักจริงไม่มีให้ใช้น้ำหนักประเมิน
-    const displayWeight = a.actual_weight || a.est_weight ?? "–";
-    const editWeightVal = a.actual_weight || a.est_weight ?? "";
+    // 🌟 ดึงน้ำหนักจริงมาใช้ก่อน ถ้าน้ำหนักจริงไม่มีให้ใช้น้ำหนักประเมิน (แก้ไข Syntax Error ตรงนี้แล้ว)
+    const displayWeight = a.actual_weight || a.est_weight || "–";
+    const editWeightVal = a.actual_weight || a.est_weight || "";
 
     card.innerHTML = `
       <div class="card-top" onclick="toggleCard(this.closest('.animal-card'))">
