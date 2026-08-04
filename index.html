@@ -5,9 +5,16 @@
 <title>RMUTTO – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+</script>
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS (Dark Mode - Default)
    ═══════════════════════════════════════════ */
 :root {
   --navy: #0b1929;
@@ -25,13 +32,17 @@
   --sky: #3b82f6;
   --emerald: #10b981;
   --slate: #64748b;
+  
   --surface: rgba(255,255,255,0.04);
   --surface-2: rgba(255,255,255,0.07);
   --border: rgba(255,255,255,0.08);
   --border-2: rgba(255,255,255,0.14);
+  
   --text: #e2e8f0;
   --text-dim: #94a3b8;
   --text-faint: #4a5568;
+  --text-heading: #ffffff;
+  
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius: 16px;
@@ -39,6 +50,7 @@
   --radius-xl: 28px;
   --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
   --shadow-glow: 0 0 30px rgba(14,165,160,0.2);
+  
   /* status palette */
   --c-waiting: #f59e0b;
   --c-surgery: #ef4444;
@@ -47,6 +59,29 @@
   --c-done: #10b981;
   --c-total: #94a3b8;
 }
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME TOKENS
+   ═══════════════════════════════════════════ */
+[data-theme="light"] {
+  --navy: #f8fafc;
+  --navy-mid: #f1f5f9;
+  --navy-card: #ffffff;
+  
+  --surface: rgba(0,0,0,0.03);
+  --surface-2: rgba(0,0,0,0.06);
+  --border: rgba(0,0,0,0.1);
+  --border-2: rgba(0,0,0,0.15);
+  
+  --text: #0f172a;
+  --text-dim: #334155;
+  --text-faint: #64748b;
+  --text-heading: #0f172a;
+  
+  --shadow-card: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-glow: 0 0 30px rgba(14,165,160,0.15);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
@@ -58,7 +93,10 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Background Gradients adaptation for Light Mode */
 body::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -66,7 +104,15 @@ body::before {
     radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.12) 0%, transparent 70%),
     radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 60%),
     radial-gradient(ellipse 40% 60% at 90% 20%, rgba(245,158,11,0.05) 0%, transparent 50%);
+  transition: opacity 0.3s ease;
 }
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 90% 20%, rgba(245,158,11,0.03) 0%, transparent 50%);
+}
+
 header {
   position: sticky; top: 0; z-index: 200;
   background: rgba(11,25,41,0.85);
@@ -79,7 +125,12 @@ header {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+[data-theme="light"] header {
+  background: rgba(255,255,255,0.85);
+}
+
 .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .brand-logo {
   width: 48px; height: 38px;
@@ -90,8 +141,37 @@ header {
   box-shadow: 0 0 20px var(--teal-glow);
   letter-spacing: -1px;
 }
-.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.3px; }
+.brand-name { 
+  font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; 
+  color: var(--text-heading); line-height: 1; letter-spacing: -0.3px; 
+}
 .brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+
+/* Header Right Area */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Theme Toggle Button */
+.btn-theme {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.2s;
+}
+.btn-theme:hover { background: var(--surface); transform: scale(1.05); }
+.btn-theme:active { transform: scale(0.95); }
+.icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: inline-block; }
+
 #loginPanel { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .login-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .input-field {
@@ -100,15 +180,19 @@ header {
   border: 1px solid var(--border-2);
   border-radius: var(--radius-sm);
   color: var(--text); outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s;
 }
 .input-field::placeholder { color: var(--text-faint); }
 .input-field:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
-.input-field option { background: var(--navy-mid); }
+.input-field option { background: var(--navy-mid); color: var(--text); }
+[data-theme="light"] .input-field option { background: #ffffff; }
+
 #userName  { width: 96px; }
 #userRole  { width: 116px; cursor: pointer; }
 #adminPwd  { width: 82px; }
 .input-hint { font-size: 10px; color: var(--teal-light); white-space: nowrap; letter-spacing: 0.2px; }
+[data-theme="light"] .input-hint { color: var(--teal); font-weight: 600; }
+
 .btn-login {
   padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
@@ -118,6 +202,7 @@ header {
   transition: opacity 0.2s, transform 0.15s;
 }
 .btn-login:active { opacity: 0.85; transform: scale(0.97); }
+
 #userInfo { display: none; align-items: center; gap: 8px; }
 .user-pill {
   display: flex; align-items: center; gap: 8px;
@@ -128,7 +213,7 @@ header {
   width: 26px; height: 26px;
   background: linear-gradient(135deg, var(--teal), var(--teal-light));
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 12px;
+  font-size: 12px; color: #fff;
 }
 #showUser { font-size: 12px; color: var(--text); font-weight: 500; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-logout {
@@ -138,12 +223,14 @@ header {
   transition: background 0.2s, color 0.2s;
 }
 .btn-logout:hover { background: var(--surface-2); color: var(--text); }
+
 .wrap {
   position: relative; z-index: 1;
   max-width: 900px; margin: 0 auto;
   padding: 28px 18px 100px;
   width: 100%;
 }
+
 .btn-call {
   width: 100%;
   background: linear-gradient(135deg, #ef4444, #b91c1c);
@@ -166,6 +253,7 @@ header {
   70%  { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
   100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
+
 .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .menu-card {
   background: var(--surface);
@@ -178,6 +266,7 @@ header {
   animation: slideUp 0.5s ease both;
   -webkit-tap-highlight-color: transparent;
 }
+[data-theme="light"] .menu-card { background: var(--navy-card); box-shadow: var(--shadow-card); border: 1px solid var(--border); }
 .menu-card:hover {
   border-color: var(--teal);
   background: rgba(14,165,160,0.06);
@@ -193,6 +282,8 @@ header {
   transition: opacity 0.2s, transform 0.2s;
 }
 .menu-card:hover::after { opacity: 1; transform: translateX(0); }
+
+/* Animation Delays */
 .menu-card:nth-child(1) { animation-delay: 0.1s; }
 .menu-card:nth-child(2) { animation-delay: 0.13s; }
 .menu-card:nth-child(3) { animation-delay: 0.16s; }
@@ -201,9 +292,11 @@ header {
 .menu-card:nth-child(6) { animation-delay: 0.25s; }
 .menu-card:nth-child(7) { animation-delay: 0.28s; }
 .menu-card:nth-child(8) { animation-delay: 0.31s; }
+
 .card-emoji { font-size: 28px; display: block; margin-bottom: 12px; line-height: 1; }
-.card-title { font-family: "Outfit", sans-serif; font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -0.2px; }
-.card-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; padding-right: 16px; }
+.card-title { font-family: "Outfit", sans-serif; font-size: 14px; font-weight: 700; color: var(--text-heading); margin-bottom: 4px; letter-spacing: -0.2px; transition: color 0.3s; }
+.card-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; padding-right: 16px; transition: color 0.3s; }
+
 .notif-badge {
   position: absolute; top: 14px; right: 14px;
   font-size: 10px; font-weight: 700;
@@ -217,6 +310,7 @@ header {
 .nb-ready    { background: rgba(59,130,246,0.2); color: var(--c-ready); border: 1px solid rgba(59,130,246,0.4); }
 .nb-done     { background: rgba(16,185,129,0.2); color: var(--c-done); border: 1px solid rgba(16,185,129,0.4); }
 .nb-total    { background: rgba(148,163,184,0.2); color: var(--c-total); border: 1px solid rgba(148,163,184,0.4); }
+
 .bottom-nav {
   display: none;
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
@@ -226,7 +320,10 @@ header {
   border-top: 1px solid var(--border-2);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
   grid-template-columns: repeat(5, 1fr);
+  transition: background-color 0.3s ease;
 }
+[data-theme="light"] .bottom-nav { background: rgba(255,255,255,0.95); }
+
 .nav-item {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   padding: 6px 4px;
@@ -239,6 +336,7 @@ header {
 .nav-icon { font-size: 21px; line-height: 1; }
 .nav-item.active { color: var(--teal); }
 .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--teal)); }
+
 .fab {
   display: none;
   position: fixed; bottom: 90px; right: 20px; z-index: 250;
@@ -251,6 +349,7 @@ header {
   -webkit-tap-highlight-color: transparent;
 }
 .fab:active { transform: scale(0.93); }
+
 .fab-schedule {
   position: fixed;
   bottom: 28px; left: 20px;
@@ -288,6 +387,7 @@ header {
     inset 0 1px 0 rgba(255,255,255,0.22);
 }
 .fab-schedule:active { transform: scale(0.93); }
+
 .fab-badge {
   position: absolute;
   top: -4px; right: -4px;
@@ -324,10 +424,12 @@ header {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s, transform 0.2s, background-color 0.3s;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
+[data-theme="light"] .fab-schedule .fab-tip { background: #ffffff; border-color: var(--border-2); }
 .fab-schedule:hover .fab-tip { opacity: 1; transform: translateY(-50%) translateX(0); }
+
 @keyframes fabPop {
   from { opacity: 0; transform: scale(0.5) translateY(20px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
@@ -347,6 +449,8 @@ footer {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.65; }
 }
+
+/* Responsive Rules */
 @media (max-width: 640px) {
   header { padding: 8px 14px; }
   .brand-sub { display: none; }
@@ -389,32 +493,42 @@ footer {
       <div class="brand-sub">Veterinary Academic Service Division</div>
     </div>
   </div>
-  <div id="loginPanel">
-    <div class="login-row">
-      <input id="userName" class="input-field" placeholder="ชื่อผู้ใช้">
-      <select id="userRole" class="input-field">
-        <option value="">บทบาท</option>
-        <option value="ผู้ดูแลระบบ">ผู้ดูแลระบบ</option>
-        <option value="อาจารย์">อาจารย์</option>
-        <option value="สัตวแพทย์">สัตวแพทย์</option>
-        <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
-        <option value="นศ ปี 4 วิสัญญี">นศ ปี 4 วิสัญญี</option>
-        <option value="นศ ปี 4 ศัลยแพทย์">นศ ปี 4 ศัลยแพทย์</option>
-        <option value="นศ พยาบาล">นศ พยาบาล</option>
-        <option value="นศ ผู้ช่วยผ่าตัด">นศ ผู้ช่วยผ่าตัด</option>
-        <option value="นศ ช่วยงานทั่วไป">นศ ช่วยงานทั่วไป</option>
-      </select>
-      <input id="adminPwd" type="password" class="input-field" placeholder="รหัสผ่าน" style="display:none">
-      <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
+  
+  <div class="header-actions">
+    <!-- ปุ่ม Toggle สลับ Theme -->
+    <button id="themeToggle" class="btn-theme" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span>
+      <span class="icon-sun">☀️</span>
+    </button>
+    
+    <div id="loginPanel">
+      <div class="login-row">
+        <input id="userName" class="input-field" placeholder="ชื่อผู้ใช้">
+        <select id="userRole" class="input-field">
+          <option value="">บทบาท</option>
+          <option value="ผู้ดูแลระบบ">ผู้ดูแลระบบ</option>
+          <option value="อาจารย์">อาจารย์</option>
+          <option value="สัตวแพทย์">สัตวแพทย์</option>
+          <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
+          <option value="นศ ปี 4 วิสัญญี">นศ ปี 4 วิสัญญี</option>
+          <option value="นศ ปี 4 ศัลยแพทย์">นศ ปี 4 ศัลยแพทย์</option>
+          <option value="นศ พยาบาล">นศ พยาบาล</option>
+          <option value="นศ ผู้ช่วยผ่าตัด">นศ ผู้ช่วยผ่าตัด</option>
+          <option value="นศ ช่วยงานทั่วไป">นศ ช่วยงานทั่วไป</option>
+        </select>
+        <input id="adminPwd" type="password" class="input-field" placeholder="รหัสผ่าน" style="display:none">
+        <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
+      </div>
+      <div class="input-hint">ตัวอย่าง: ต้น-วิสัญญี-โต๊ะ5 (ห้ามเว้นวรรค)</div>
     </div>
-    <div class="input-hint">ตัวอย่าง: ต้น-วิสัญญี-โต๊ะ5 (ห้ามเว้นวรรค)</div>
-  </div>
-  <div id="userInfo">
-    <div class="user-pill">
-      <div class="user-avatar">👤</div>
-      <span id="showUser"></span>
+    
+    <div id="userInfo">
+      <div class="user-pill">
+        <div class="user-avatar">👤</div>
+        <span id="showUser"></span>
+      </div>
+      <button class="btn-logout" onclick="logout()">ออก</button>
     </div>
-    <button class="btn-logout" onclick="logout()">ออก</button>
   </div>
 </header>
 
@@ -516,6 +630,21 @@ footer {
 </button>
 
 <footer>RMUTTO – VASD © 2026 · Veterinary Academic Service Division</footer>
+
+<script>
+  /* ── Theme Switcher Logic ── */
+  const themeToggleBtn = document.getElementById('themeToggle');
+  themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme === 'light') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+  });
+</script>
 
 <script type="module">
   import { supabase } from "./js/supabase.js";
