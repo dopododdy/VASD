@@ -6,7 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
+<!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+</script>
+
 <style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS (Dark Mode - Default)
+   ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
   --navy-mid:   #112240;
@@ -25,9 +36,26 @@
   --border-2:   rgba(255,255,255,0.14);
   --text:       #e2e8f0;
   --text-dim:   #94a3b8;
+  --text-heading: #ffffff;
   --radius-sm:  10px;
   --radius:     16px;
   --radius-lg:  22px;
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME TOKENS
+   ═══════════════════════════════════════════ */
+[data-theme="light"] {
+  --navy:       #f8fafc;
+  --navy-mid:   #ffffff;
+  --surface:    #ffffff;
+  --surface-2:  #f1f5f9;
+  --surface-3:  #e2e8f0;
+  --border:     #e2e8f0;
+  --border-2:   #cbd5e1;
+  --text:       #0f172a;
+  --text-dim:   #475569;
+  --text-heading: #0f172a;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,11 +66,16 @@ body {
   min-height: 100vh;
   display: flex; flex-direction: column;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body::before {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background: radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.10) 0%, transparent 70%);
+  transition: opacity 0.3s ease;
+}
+[data-theme="light"] body::before {
+  background: radial-gradient(ellipse 60% 50% at 20% 10%, rgba(14,165,160,0.05) 0%, transparent 70%);
 }
 
 header {
@@ -51,29 +84,48 @@ header {
   border-bottom: 1px solid var(--border);
   padding: 0 20px; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+[data-theme="light"] header {
+  background: rgba(255,255,255,0.88);
+}
+
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-logo { width: 38px; height: 38px; background: linear-gradient(135deg, var(--teal), var(--teal-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 20px var(--teal-glow); }
-.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+.brand-name { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; color: var(--text-heading); transition: color 0.3s; }
+
+/* Theme Toggle Button */
+.header-actions { display: flex; gap: 10px; align-items: center; }
+.btn-theme {
+  background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text);
+  width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: background 0.2s, transform 0.2s;
+}
+.btn-theme:hover { background: var(--surface-3); transform: scale(1.05); }
+.btn-theme:active { transform: scale(0.95); }
+.icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: inline-block; }
 
 .wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 24px 16px 100px; width: 100%; display: flex; flex-direction: column; gap: 16px; }
-.page-title { font-family: "Outfit", sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.page-title { font-family: "Outfit", sans-serif; font-size: 20px; font-weight: 800; color: var(--text-heading); margin-bottom: 4px; transition: color 0.3s; }
 
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-.card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface-2); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: background-color 0.3s, border-color 0.3s; }
+.card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface-2); transition: background-color 0.3s, border-color 0.3s; }
 .card-header-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 15px; }
 .card-header-icon.violet { background: var(--violet); }
-.card-header h4 { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
+.card-header h4 { font-size: 14px; font-weight: 700; color: var(--text-heading); flex: 1; transition: color 0.3s; }
 .card-body { padding: 18px; }
 
 .field-group { display: flex; flex-direction: column; gap: 5px; }
-.field-label { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.field-label { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.3s; }
 
 input, select, textarea {
   width: 100%; padding: 10px 12px; font-size: 14px; font-family: "Sarabun", sans-serif;
   background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-sm); color: var(--text); outline: none; transition: 0.2s;
 }
-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
+input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow); }
+select option { background: var(--navy-mid); color: var(--text); }
 
 .owner-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 12px; align-items: end; margin-bottom: 12px; }
 .owner-row-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
@@ -85,75 +137,56 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 
 /* ── Search Card ── */
 .search-wrap { position: relative; }
-.search-input-row {
-  display: flex; gap: 10px; align-items: center;
-}
-#ownerSearch {
-  font-size: 14px; padding: 12px 14px;
-}
+.search-input-row { display: flex; gap: 10px; align-items: center; }
+#ownerSearch { font-size: 14px; padding: 12px 14px; }
 #searchResults {
   margin-top: 10px;
   max-height: 320px; overflow-y: auto;
   display: none;
   border: 1px solid var(--border-2);
   border-radius: var(--radius-sm);
-  background: rgba(0,0,0,0.2);
+  background: var(--navy-mid);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 #searchResults.show { display: block; }
-.sr-item {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: 0.15s;
-}
+.sr-item { padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.15s; }
 .sr-item:last-child { border-bottom: none; }
 .sr-item:hover { background: rgba(14,165,160,0.08); }
-.sr-name { font-size: 14px; font-weight: 700; color: #fff; }
+.sr-name { font-size: 14px; font-weight: 700; color: var(--text-heading); }
 .sr-meta { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 .sr-today { color: var(--teal-light); font-weight: 700; }
 .sr-old { color: var(--text-dim); }
 .sr-animals { font-size: 12px; color: var(--amber); margin-top: 4px; }
-.sr-empty {
-  padding: 20px; text-align: center;
-  color: var(--text-dim); font-size: 13px;
-}
+.sr-empty { padding: 20px; text-align: center; color: var(--text-dim); font-size: 13px; }
 
 #selectedOwnerBadge {
-  display: none;
-  margin-top: 12px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #34d399;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  display: none; margin-top: 12px;
+  background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399;
+  padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px;
+  align-items: center; justify-content: space-between; gap: 12px;
 }
+[data-theme="light"] #selectedOwnerBadge { color: #059669; }
 #selectedOwnerBadge.show { display: flex; }
 #selectedOwnerBadge.cross-day {
-  background: rgba(245, 158, 11, 0.10);
-  border-color: rgba(245, 158, 11, 0.4);
-  color: var(--amber);
+  background: rgba(245, 158, 11, 0.10); border-color: rgba(245, 158, 11, 0.4); color: var(--amber);
 }
+[data-theme="light"] #selectedOwnerBadge.cross-day { color: #d97706; }
 .badge-clear-btn {
-  background: transparent; color: inherit;
-  border: 1px solid currentColor;
-  padding: 4px 10px; border-radius: 6px;
-  font-size: 11px; cursor: pointer;
-  font-family: inherit; white-space: nowrap;
+  background: transparent; color: inherit; border: 1px solid currentColor;
+  padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;
+  font-family: inherit; white-space: nowrap; transition: background 0.2s;
 }
-.badge-clear-btn:hover { background: rgba(255,255,255,0.08); }
+.badge-clear-btn:hover { background: rgba(0,0,0,0.05); }
 
 /* ── Buttons ── */
 .btn { padding: 10px 16px; font-size: 13px; font-weight: 600; border: none; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; white-space: nowrap; }
 .btn:active { transform: scale(0.96); }
 
 .btn-read-card { background: rgba(14,165,160,0.15); color: var(--teal-light); border: 1px solid rgba(14,165,160,0.4); }
+[data-theme="light"] .btn-read-card { color: var(--teal); }
 .btn-read-card:hover { background: rgba(14,165,160,0.25); box-shadow: 0 0 15px var(--teal-glow); }
 
-.btn-paste { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border-2); }
+.btn-paste { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-2); }
 .btn-add { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-2); margin-top: 10px; }
 
 .btn-del-animal { margin-left: auto; padding: 6px 12px; font-size: 12px; background: var(--rose-soft); color: var(--rose); border: 1px solid rgba(239,68,68,0.2); }
@@ -176,33 +209,27 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
 }
 .btn-cancel-wait.show { display: inline-block; }
 
-.animal-card { background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; animation: slideUp 0.3s ease both; }
+.animal-card { background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; animation: slideUp 0.3s ease both; transition: background-color 0.3s, border-color 0.3s; }
 .animal-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
 .animal-card-num { width: 26px; height: 26px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
 
 .svc-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; margin-bottom: 12px;}
 .svc-chip { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; background: var(--surface); border: 1px solid var(--border-2); color: var(--text-dim); border-radius: 20px; padding: 6px 14px; transition: 0.2s; }
 .svc-chip.checked { background: rgba(14,165,160,0.15); border-color: var(--teal); color: var(--teal-light); }
+[data-theme="light"] .svc-chip.checked { color: var(--teal); }
 .svc-chip input { display: none; }
 
 /* ── Custom Modal Popup ── */
 .modal-overlay {
   display: none;
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(11,25,41,0.85);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  align-items: center; justify-content: center;
-  padding: 20px;
+  background: rgba(11,25,41,0.85); backdrop-filter: blur(4px);
+  z-index: 1000; align-items: center; justify-content: center; padding: 20px;
 }
 .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
 .modal-box {
-  background: var(--navy-mid);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 30px; max-width: 500px; width: 100%;
-  text-align: center;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  background: var(--navy-mid); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 30px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 }
 .modal-box h3 { color: var(--emerald); font-size: 26px; margin-bottom: 12px; }
 .modal-box p { font-size: 16px; color: var(--text); line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap; }
@@ -220,7 +247,14 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
     <div class="brand-logo">📝</div>
     <div class="brand-name">VASD Registration</div>
   </div>
-  <button class="btn btn-paste" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
+  <div class="header-actions">
+    <!-- ปุ่ม Toggle สลับ Theme -->
+    <button id="themeToggle" class="btn-theme" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span>
+      <span class="icon-sun">☀️</span>
+    </button>
+    <button class="btn btn-paste" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
+  </div>
 </header>
 
 <div class="wrap">
@@ -279,6 +313,23 @@ input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
     </div>
   </div>
 </div>
+
+<script>
+  /* ── Theme Switcher Logic ── */
+  const themeToggleBtn = document.getElementById('themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  }
+</script>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -496,7 +547,7 @@ window.addAnimal = function () {
     card.innerHTML = `
         <div class="animal-card-header">
             <div class="animal-card-num">${animalCount}</div>
-            <span style="font-weight:700; font-size:14px;">สัตว์รายการที่ ${animalCount}</span>
+            <span style="font-weight:700; font-size:14px; color:var(--text-heading);">สัตว์รายการที่ ${animalCount}</span>
             <button type="button" class="btn btn-del-animal" onclick="this.closest('.animal-card').remove(); window.refreshCount();">🗑 ลบ</button>
         </div>
         <div class="animal-fields">
@@ -549,7 +600,10 @@ window.addAnimal = function () {
 
 window.refreshCount = () => {
     const cards = document.querySelectorAll(".animal-card");
-    cards.forEach((c, i) => c.querySelector(".animal-card-num").textContent = i + 1);
+    cards.forEach((c, i) => {
+        c.querySelector(".animal-card-num").textContent = i + 1;
+        c.querySelector("span").textContent = `สัตว์รายการที่ ${i + 1}`;
+    });
 };
 
 /* ─────────────────────────────────────────────
