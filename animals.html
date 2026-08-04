@@ -858,8 +858,6 @@ window.printQueue = async function(animalId) {
 
 /* ── Enable Edit ── */
 window.enableEdit = function(btn, id) {
-  const pass = prompt("กรอกรหัส admin");
-  if (pass !== ADMIN_PASSWORD) return;
   const card = btn.closest(".animal-card");
   
   // ปลดล็อค Field พื้นฐานและ Textbox ของ Service
@@ -931,6 +929,11 @@ window.saveRow = async function(btn, id) {
 
 /* ── Cancel Status ── */
 window.cancelRow = async function(id) {
+  const pass = prompt("กรอกรหัส admin เพื่อยืนยันการยกเลิก");
+  if (pass !== ADMIN_PASSWORD) {
+    if (pass !== null) alert("❌ รหัสผ่านไม่ถูกต้อง");
+    return;
+  }
   if (!confirm("ต้องการยกเลิกสถานะสัตว์ตัวนี้?")) return;
   await supabase.from("vasd_queue").update({ status: "cancel", updated_at: new Date() }).eq("animal_id", id);
   loadAnimals();
