@@ -6,12 +6,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+</script>
+
 <style>
 /* ═══════════════════════════════════════════
-   TOKENS & BASE
+   TOKENS & BASE (Dark Mode - Default)
 ═══════════════════════════════════════════ */
 :root {
-  --navy:         #0b1929;
+  --navy:          #0b1929;
   --navy-mid:      #112240;
   --teal:          #0ea5a0;
   --teal-light:    #14c4bc;
@@ -21,12 +29,37 @@
   --rose:          #ef4444;
   --amber:         #f59e0b;
   --emerald:       #10b981;
+  
   --surface:       rgba(255,255,255,0.04);
+  --surface-2:     rgba(255,255,255,0.07);
+  --surface-3:     rgba(255,255,255,0.11);
   --border:        rgba(255,255,255,0.08);
   --border-2:      rgba(255,255,255,0.14);
+  
   --text:          #e2e8f0;
   --text-dim:      #94a3b8;
+  --text-faint:    #4a5568;
+  --text-heading:  #ffffff;
+  
   --radius-sm:     10px;
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME TOKENS
+═══════════════════════════════════════════ */
+[data-theme="light"] {
+  --navy:       #f8fafc;
+  --navy-mid:   #ffffff;
+  --surface:    #ffffff;
+  --surface-2:  #f1f5f9;
+  --surface-3:  #e2e8f0;
+  --border:     #e2e8f0;
+  --border-2:   #cbd5e1;
+  
+  --text:       #0f172a;
+  --text-dim:   #475569;
+  --text-faint: #64748b;
+  --text-heading: #0f172a;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,6 +68,7 @@ body {
   background: var(--navy);
   color: var(--text);
   padding-bottom: 100px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 header {
@@ -44,7 +78,28 @@ header {
   position: sticky; top: 0; z-index: 100;
   border-bottom: 1px solid var(--border);
   display: flex; justify-content: space-between; align-items: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+[data-theme="light"] header {
+  background: rgba(255,255,255,0.88);
+}
+header h2 {
+  color: var(--text-heading);
+  transition: color 0.3s;
+}
+
+/* Theme Toggle Button & Header Actions */
+.header-actions { display: flex; gap: 12px; align-items: center; }
+.btn-theme {
+  background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text);
+  width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: background 0.2s, transform 0.2s;
+}
+.btn-theme:hover { background: var(--surface-3); transform: scale(1.05); }
+.btn-theme:active { transform: scale(0.95); }
+.icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: inline-block; }
 
 .container { padding: 20px; max-width: 800px; margin: 0 auto; }
 
@@ -60,7 +115,10 @@ header {
   position: relative;
   overflow: hidden;
   animation: slideUp 0.4s ease both;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
+[data-theme="light"] .rec-card { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
 .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
@@ -78,6 +136,11 @@ header {
   50%  { opacity: 0.3; color: var(--rose); }
   100% { opacity: 1; color: #fca5a5; }
 }
+[data-theme="light"] @keyframes blink-red {
+  0%   { opacity: 1; color: #ef4444; }
+  50%  { opacity: 0.4; color: #991b1b; }
+  100% { opacity: 1; color: #ef4444; }
+}
 .blood-alert {
   background: rgba(239, 68, 68, 0.1);
   border: 1px dashed var(--rose);
@@ -93,7 +156,7 @@ header {
 }
 .blood-alert:last-child { margin-bottom: 0; }
 
-.tabs { display: flex; gap: 8px; margin-bottom: 15px; margin-top: 15px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 15px; margin-top: 15px; background: var(--surface-2); border: 1px solid var(--border); padding: 5px; border-radius: 12px; transition: background-color 0.3s, border-color 0.3s; }
 .tab-btn {
   flex: 1; padding: 10px; border: none; border-radius: 8px;
   background: transparent; color: var(--text-dim); font-size: 13px; font-weight: 600; cursor: pointer;
@@ -107,18 +170,20 @@ header {
 
 /* Vitals Table */
 .vitals-history { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-.vitals-history th { color: var(--teal-light); border-bottom: 1px solid var(--border); padding: 8px 4px; text-align: center; }
-.vitals-history td { text-align: center; padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.vitals-history th { color: var(--teal-light); border-bottom: 1px solid var(--border); padding: 8px 4px; text-align: center; transition: border-color 0.3s; }
+[data-theme="light"] .vitals-history th { color: var(--teal); }
+.vitals-history td { text-align: center; padding: 8px 4px; border-bottom: 1px solid var(--border); transition: border-color 0.3s; }
 
 /* Form Elements */
 .monitor-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
 .monitor-inputs .wide { grid-column: span 4; }
 input {
-  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-  padding: 10px 8px; border-radius: 10px; color: white; width: 100%;
+  background: var(--surface-3); border: 1px solid var(--border-2);
+  padding: 10px 8px; border-radius: 10px; color: var(--text-heading); width: 100%;
   font-size: 13px; font-family: "Sarabun", sans-serif; text-align: center;
-  outline: none; transition: 0.2s;
+  outline: none; transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
+[data-theme="light"] input { background: #ffffff; }
 input:focus { border-color: var(--violet); }
 
 .btn-save {
@@ -146,7 +211,10 @@ input:focus { border-color: var(--violet); }
   border-top: 1px solid var(--border-2);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
   grid-template-columns: repeat(5, 1fr);
+  transition: background-color 0.3s ease;
 }
+[data-theme="light"] .bottom-nav { background: rgba(255,255,255,0.95); }
+
 .nav-item {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   padding: 6px 4px;
@@ -166,7 +234,14 @@ input:focus { border-color: var(--violet); }
 
 <header>
   <h2 style="font-family:'Outfit';">หน่วยพักฟื้น</h2>
-  <div id="count-badge" style="background:var(--violet); padding:4px 12px; border-radius:20px; font-size:12px;">0 สัตว์พักฟื้น</div>
+  <div class="header-actions">
+    <!-- ปุ่ม Toggle สลับ Theme -->
+    <button id="themeToggle" class="btn-theme" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span>
+      <span class="icon-sun">☀️</span>
+    </button>
+    <div id="count-badge" style="background:var(--violet); padding:4px 12px; border-radius:20px; font-size:12px; color: white;">0 สัตว์พักฟื้น</div>
+  </div>
 </header>
 
 <div class="container" id="recovery-list">
@@ -190,6 +265,23 @@ input:focus { border-color: var(--violet); }
     <span class="nav-icon">❤️‍🩹</span>พักฟื้น
   </a>
 </nav>
+
+<script>
+  /* ── Theme Switcher Logic ── */
+  const themeToggleBtn = document.getElementById('themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  }
+</script>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
@@ -295,14 +387,14 @@ async function loadRecovery() {
     card.innerHTML = `
       <div class="card-header">
         <div style="flex: 1;">
-          <h3 style="font-size:18px;">${ani.animal_name} ${hasAlerts ? '<span title="มีการแจ้งเตือน" style="font-size:14px; margin-left:4px;">⚠️</span>' : ''}</h3>
+          <h3 style="font-size:18px; color:var(--text-heading); transition:color 0.3s;">${ani.animal_name} ${hasAlerts ? '<span title="มีการแจ้งเตือน" style="font-size:14px; margin-left:4px;">⚠️</span>' : ''}</h3>
           <p style="font-size:12px; color:var(--text-dim)">เจ้าของ: ${ani.vasd_owner?.owner_name || '-'}</p>
           <p style="font-size:11px; color:var(--text-dim); margin-top:2px;">นน.: ${ani.actual_weight || '-'} kg</p>
           
-          <div style="font-size:11px; color:var(--teal-light); margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-            <span>🛏️ โต๊ะ: <b style="color:#fff">${table}</b></span>
-            <span>🔪 หมอ: <b style="color:#fff">${surgeon}</b></span>
-            <span>💉 วิสัญญี: <b style="color:#fff">${anes}</b></span>
+          <div style="font-size:11px; color:var(--teal); margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; background: var(--surface-2); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
+            <span>🛏️ โต๊ะ: <b style="color:var(--text-heading)">${table}</b></span>
+            <span>🔪 หมอ: <b style="color:var(--text-heading)">${surgeon}</b></span>
+            <span>💉 วิสัญญี: <b style="color:var(--text-heading)">${anes}</b></span>
           </div>
         </div>
         <div class="q-circle">${ani.queue_number}</div>
@@ -325,7 +417,7 @@ async function loadRecovery() {
         </div>
         <button class="btn-save" onclick="saveVital('${ani.id}', this)">+ บันทึกสัญญาณชีพลงระบบ</button>
 
-        <div style="overflow-x:auto; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;">
+        <div style="overflow-x:auto; background:var(--surface-2); border-radius:12px; padding:10px; border: 1px solid var(--border);">
           <table class="vitals-history">
             <thead>
               <tr>
