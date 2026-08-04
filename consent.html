@@ -6,9 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+<!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+</script>
+
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS (Dark Mode - Default)
 ═══════════════════════════════════════════ */
 :root {
   --navy:       #0b1929;
@@ -22,11 +30,28 @@
   --surface:    rgba(255,255,255,0.06);
   --surface-2:  rgba(255,255,255,0.1);
   --border:     rgba(255,255,255,0.15);
-  --text:       #ffffff;
-  --text-dim:   #cbd5e1;
+  
+  --text:         #ffffff;
+  --text-dim:     #cbd5e1;
+  --text-heading: #ffffff;
 
   --radius-lg:  16px;
   --radius-xl:  24px;
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME TOKENS
+═══════════════════════════════════════════ */
+[data-theme="light"] {
+  --navy:       #f8fafc;
+  --navy-mid:   #ffffff;
+  --surface:    #ffffff;
+  --surface-2:  #f1f5f9;
+  --border:     #cbd5e1;
+  
+  --text:       #334155;
+  --text-dim:   #64748b;
+  --text-heading: #0f172a;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,10 +66,15 @@ body {
   align-items: center; 
   justify-content: center;
   touch-action: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 body::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background: radial-gradient(circle at 50% 0%, rgba(14,165,160,0.15) 0%, transparent 60%);
+  transition: opacity 0.3s ease;
+}
+[data-theme="light"] body::before {
+  background: radial-gradient(circle at 50% 0%, rgba(14,165,160,0.05) 0%, transparent 60%);
 }
 
 .container {
@@ -54,7 +84,25 @@ body::before {
   padding: 5dvh 40px; 
   display: flex;
   flex-direction: column;
+  position: relative;
 }
+
+/* Theme Toggle Button (มุมขวาบน) */
+.btn-theme {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text-heading);
+  width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 20px; transition: background 0.2s, transform 0.2s;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn-theme:hover { background: var(--surface); transform: scale(1.05); }
+.btn-theme:active { transform: scale(0.95); }
+.icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: inline-block; }
 
 /* ── STATES ── */
 #standbyScreen, #successScreen, #consentScreen {
@@ -93,7 +141,9 @@ body::before {
   color: var(--teal-light);
   font-weight: 800;
   line-height: 1.4;
+  transition: color 0.3s;
 }
+[data-theme="light"] .brand-th { color: var(--teal); }
 
 /* 2. Warning Box */
 .standby-warning {
@@ -104,7 +154,14 @@ body::before {
   max-width: 800px;
   width: 100%;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
+[data-theme="light"] .standby-warning {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
 .warning-title {
   color: var(--amber);
   font-size: 24px;
@@ -116,6 +173,8 @@ body::before {
   justify-content: center;
   gap: 12px;
 }
+[data-theme="light"] .warning-title { color: #d97706; }
+
 .warning-body {
   font-size: 20px;
   line-height: 1.6;
@@ -135,9 +194,11 @@ body::before {
   font-size: 18px;
   text-align: center;
 }
+[data-theme="light"] .warning-footer { border-top-color: rgba(0,0,0,0.1); }
 
 .highlight-rose { color: var(--rose); font-weight: 700; }
 .highlight-amber { color: var(--amber); font-weight: 700; }
+[data-theme="light"] .highlight-amber { color: #d97706; }
 
 /* 3. Loading Area */
 .standby-loading {
@@ -149,12 +210,14 @@ body::before {
   border: 1px solid var(--border);
   padding: 12px 24px;
   border-radius: 50px;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 .spinner {
   width: 28px; height: 28px;
   border: 4px solid var(--surface-2); border-top-color: var(--teal-light);
   border-radius: 50%; animation: spin 1s linear infinite;
 }
+[data-theme="light"] .spinner { border-top-color: var(--teal); }
 .standby-loading span {
   font-size: 18px;
   color: var(--text-dim);
@@ -186,7 +249,9 @@ body::before {
   background: var(--surface); border: 2px solid var(--border);
   border-radius: var(--radius-xl); padding: 24px;
   display: flex; flex-direction: column;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
+[data-theme="light"] .card { box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
 .card.flex-1 { flex: 1; min-height: 0; }
 
 .card-title {
@@ -194,13 +259,15 @@ body::before {
   margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
   border-bottom: 2px solid var(--border); padding-bottom: 12px;
   flex-shrink: 0; /* ห้ามหัวข้อยุบตัว */
+  transition: color 0.3s;
 }
+[data-theme="light"] .card-title { color: var(--teal); }
 
 /* ข้อมูลเจ้าของ */
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .info-item { display: flex; flex-direction: column; gap: 4px; }
 .info-label { font-size: 16px; color: var(--text-dim); font-weight: 600; }
-.info-value { font-size: 22px; font-weight: 700; color: #fff; line-height: 1.3; }
+.info-value { font-size: 22px; font-weight: 700; color: var(--text-heading); line-height: 1.3; transition: color 0.3s; }
 
 /* รายการสัตว์ (ทำให้ไถเลื่อนเฉพาะตรงนี้ได้ถ้าสัตว์เยอะ) */
 #dispAnimals { 
@@ -213,10 +280,13 @@ body::before {
   background: var(--surface-2); border-radius: 16px; border: 1px solid var(--border);
   padding: 16px 20px; margin-bottom: 12px;
   display: flex; justify-content: space-between; align-items: center;
+  transition: background-color 0.3s, border-color 0.3s;
 }
-.animal-name { font-size: 22px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;}
-.animal-spc { font-size: 16px; color: var(--navy); background: var(--teal-light); font-weight: 700; padding: 4px 12px; border-radius: 20px;}
+.animal-name { font-size: 22px; font-weight: 800; color: var(--text-heading); display: flex; align-items: center; gap: 10px; transition: color 0.3s;}
+.animal-spc { font-size: 16px; color: var(--navy); background: var(--teal-light); font-weight: 700; padding: 4px 12px; border-radius: 20px; transition: background-color 0.3s, color 0.3s;}
+[data-theme="light"] .animal-spc { background: var(--teal); color: #ffffff; }
 .animal-svcs { font-size: 20px; color: var(--amber); font-weight: 700; }
+[data-theme="light"] .animal-svcs { color: #d97706; }
 
 /* กล่องข้อตกลง (ไถเลื่อนได้ถ้าจอกว้างไม่พอ) */
 .consent-box {
@@ -225,10 +295,15 @@ body::before {
   flex: 1; 
   overflow-y: auto;
   display: flex; flex-direction: column; gap: 12px;
+  transition: background-color 0.3s, border-color 0.3s;
 }
-.consent-box h3 { color: var(--amber); font-size: 26px; margin-bottom: 8px; text-align: center; font-weight: 800;}
+[data-theme="light"] .consent-box { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.4); }
+
+.consent-box h3 { color: var(--amber); font-size: 26px; margin-bottom: 8px; text-align: center; font-weight: 800; transition: color 0.3s;}
+[data-theme="light"] .consent-box h3 { color: #d97706; }
 .consent-box p { font-size: 18px; line-height: 1.6; color: var(--text); }
-.consent-box strong { font-size: 20px; color: var(--amber); }
+.consent-box strong { font-size: 20px; color: var(--amber); transition: color 0.3s; }
+[data-theme="light"] .consent-box strong { color: #d97706; }
 
 /* ปุ่มยอมรับ */
 .btn-accept {
@@ -238,7 +313,7 @@ body::before {
   border: none; border-radius: 100px;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
   box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
-  transition: transform 0.2s, background 0.2s;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.3s;
   flex-shrink: 0; /* 🛑 ตรึงปุ่มไว้ ห้ามยุบ ห้ามหาย */
 }
 .btn-accept:active { transform: scale(0.97); background: #059669; }
@@ -250,6 +325,12 @@ body::before {
 <body>
 
 <div class="container">
+  
+  <!-- ปุ่ม Theme Toggle -->
+  <button id="themeToggle" class="btn-theme" title="สลับโหมดมืด/สว่าง">
+    <span class="icon-moon">🌙</span>
+    <span class="icon-sun">☀️</span>
+  </button>
 
   <div id="standbyScreen">
     <div class="standby-header">
@@ -316,11 +397,28 @@ body::before {
   <div id="successScreen">
     <div style="font-size: 100px; margin-bottom: 16px;">🎉</div>
     <h2 style="font-size: 54px; color: var(--emerald); font-weight: 800;">ขอบคุณค่ะ/ครับ</h2>
-    <p style="font-size: 32px; color: #fff; margin-top: 16px;">กรุณานั่งรอสักครู่</p>
-    <p style="font-size: 26px; color: var(--text-dim); margin-top: 10px;">เจ้าหน้าที่กำลังจัดพิมพ์บัตรคิว</p>
+    <p style="font-size: 32px; color: var(--text-heading); margin-top: 16px; transition: color 0.3s;">กรุณานั่งรอสักครู่</p>
+    <p style="font-size: 26px; color: var(--text-dim); margin-top: 10px; transition: color 0.3s;">เจ้าหน้าที่กำลังจัดพิมพ์บัตรคิว</p>
   </div>
 
 </div>
+
+<script>
+  /* ── Theme Switcher Logic ── */
+  const themeToggleBtn = document.getElementById('themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  }
+</script>
 
 <script type="module">
 import { supabase } from "./js/supabase.js";
