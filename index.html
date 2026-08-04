@@ -5,16 +5,19 @@
 <title>RMUTTO – VASD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
 <script>
+  // ตั้งค่าให้ Theme สว่าง (Light) เป็นค่าเริ่มต้น
   const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+  if (savedTheme !== 'dark') {
     document.documentElement.setAttribute('data-theme', 'light');
   }
 </script>
+
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS (Dark Mode - Default)
+   DESIGN TOKENS (Dark Mode)
    ═══════════════════════════════════════════ */
 :root {
   --navy: #0b1929;
