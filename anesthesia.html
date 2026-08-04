@@ -6,9 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Script สำหรับเช็ค Theme ก่อนเรนเดอร์หน้าเว็บเพื่อป้องกันการกระพริบ (FOUC) -->
+<script>
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+</script>
+
 <style>
 /* ═══════════════════════════════════════════
-   TOKENS (Match animals.html)
+   TOKENS (Dark Mode - Default)
 ═══════════════════════════════════════════ */
 :root {
   --navy:         #0b1929;
@@ -26,14 +34,34 @@
   --surface-3:    rgba(255,255,255,0.11);
   --border:       rgba(255,255,255,0.08);
   --border-2:     rgba(255,255,255,0.14);
+  
   --text:         #e2e8f0;
   --text-dim:     #94a3b8;
   --text-faint:   #4a5568;
+  --text-heading: #ffffff;
 
   --radius-md:    12px;
   --radius-sm:    10px;
   --radius:       16px;
   --radius-lg:    22px;
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME TOKENS
+═══════════════════════════════════════════ */
+[data-theme="light"] {
+  --navy:       #f8fafc;
+  --navy-mid:   #ffffff;
+  --surface:    #ffffff;
+  --surface-2:  #f1f5f9;
+  --surface-3:  #e2e8f0;
+  --border:     #e2e8f0;
+  --border-2:   #cbd5e1;
+  
+  --text:       #0f172a;
+  --text-dim:   #475569;
+  --text-faint: #64748b;
+  --text-heading: #0f172a;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,12 +75,19 @@ body {
   display: flex; flex-direction: column;
   overflow-x: hidden;
   padding-bottom: 90px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 body::before {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
     radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14,165,160,0.10) 0%, transparent 70%),
     radial-gradient(ellipse 40% 50% at 85% 80%, rgba(99,102,241,0.07) 0%, transparent 60%);
+  transition: opacity 0.3s ease;
+}
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14,165,160,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 85% 80%, rgba(99,102,241,0.03) 0%, transparent 60%);
 }
 
 /* ═══════════════════════════════════════════
@@ -66,14 +101,33 @@ header {
   border-bottom: 1px solid var(--border);
   padding: 0 20px; height: 64px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+[data-theme="light"] header {
+  background: rgba(255,255,255,0.88);
+}
+
 .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .brand-icon { font-size: 22px; }
 .brand-name {
   font-family: "Outfit", sans-serif;
-  font-size: 16px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.3px;
+  font-size: 16px; font-weight: 700; color: var(--text-heading); line-height: 1; letter-spacing: -0.3px;
+  transition: color 0.3s;
 }
 .brand-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* Theme Toggle Button & Header Actions */
+.header-actions { display: flex; gap: 10px; align-items: center; }
+.btn-theme {
+  background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text);
+  width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: background 0.2s, transform 0.2s;
+}
+.btn-theme:hover { background: var(--surface-3); transform: scale(1.05); }
+.btn-theme:active { transform: scale(0.95); }
+.icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: inline-block; }
 
 .btn-home {
   padding: 8px 14px; font-size: 12px; font-weight: 600; font-family: "Sarabun", sans-serif;
@@ -81,6 +135,7 @@ header {
   border: 1px solid var(--border-2); border-radius: var(--radius-sm); cursor: pointer;
   display: flex; align-items: center; gap: 5px;
   transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-home:hover { background: var(--surface-3); color: var(--text); }
 
@@ -116,8 +171,9 @@ header {
   border-radius: var(--radius);
   overflow: hidden;
   animation: slideUp 0.35s ease both;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.3s, box-shadow 0.3s;
 }
+[data-theme="light"] .animal-card { box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
 .animal-card::before { content: ""; display: block; height: 3px; width: 100%; background: #64748b; }
 
 .card-top {
@@ -133,11 +189,13 @@ header {
   display: flex; align-items: center; justify-content: center;
   color: var(--teal-light); flex-shrink: 0;
 }
+[data-theme="light"] .queue-badge { color: var(--teal); }
 .card-info { flex: 1; min-width: 0; }
 .animal-name {
-  font-size: 15px; font-weight: 700; color: #fff;
+  font-size: 15px; font-weight: 700; color: var(--text-heading);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   display: flex; align-items: center;
+  transition: color 0.3s;
 }
 .animal-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
@@ -147,6 +205,7 @@ header {
   font-size: 11px; font-weight: 600; flex-shrink: 0;
   background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3);
 }
+[data-theme="light"] .status-pill { color: #64748b; }
 
 .expand-icon { font-size: 16px; color: var(--text-dim); transition: transform 0.25s; flex-shrink: 0; }
 .animal-card.open .expand-icon { transform: rotate(180deg); }
@@ -178,6 +237,11 @@ header {
   50%  { opacity: 0.3; color: var(--rose); }
   100% { opacity: 1; color: #fca5a5; }
 }
+[data-theme="light"] @keyframes blink-red {
+  0%   { opacity: 1; color: #ef4444; }
+  50%  { opacity: 0.4; color: #991b1b; }
+  100% { opacity: 1; color: #ef4444; }
+}
 .blood-alert {
   background: rgba(239, 68, 68, 0.1);
   border: 1px dashed var(--rose);
@@ -199,21 +263,24 @@ header {
   margin-bottom: 16px;
 }
 .est-label { font-size: 12px; color: var(--amber); font-weight: 600; }
+[data-theme="light"] .est-label { color: #d97706; }
 .est-val { font-size: 15px; font-weight: 700; color: var(--amber); }
+[data-theme="light"] .est-val { color: #d97706; }
 
 .input-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-faint); margin-bottom: 8px; text-transform: uppercase; }
 .weight-input {
   width: 100%; background: var(--surface-2); border: 1px solid var(--border-2);
-  border-radius: var(--radius-md); padding: 14px 16px; color: #fff;
-  font-size: 20px; font-weight: 800; transition: all 0.2s; margin-bottom: 20px;
+  border-radius: var(--radius-md); padding: 14px 16px; color: var(--text-heading);
+  font-size: 20px; font-weight: 800; transition: all 0.2s, background-color 0.3s; margin-bottom: 20px;
 }
 .weight-input:focus { border-color: var(--teal); outline: none; box-shadow: 0 0 0 3px var(--teal-glow); }
 
 .drug-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
 .drug-table th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--text-faint); padding: 8px 4px; border-bottom: 1px solid var(--border-2); }
-.drug-table td { padding: 12px 4px; font-size: 14px; border-bottom: 1px solid var(--border); }
-.drug-name { font-weight: 700; color: var(--text); }
+.drug-table td { padding: 12px 4px; font-size: 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+.drug-name { font-weight: 700; color: var(--text-heading); transition: color 0.3s; }
 .drug-calc { font-weight: 800; color: var(--teal-light); text-align: right; font-size: 16px; }
+[data-theme="light"] .drug-calc { color: var(--teal); }
 
 .btn-primary {
   width: 100%; background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: var(--navy); border: none;
@@ -221,6 +288,7 @@ header {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   cursor: pointer; transition: transform 0.1s, box-shadow 0.2s;
 }
+[data-theme="light"] .btn-primary { color: #ffffff; }
 .btn-primary:active { transform: scale(0.97); }
 
 .empty-state { text-align: center; padding: 60px 16px; color: var(--text-faint); animation: slideUp 0.4s ease both; }
@@ -232,6 +300,7 @@ header {
 #loading-overlay {
   position: fixed; inset: 0; background: var(--navy); z-index: 1000;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;
+  transition: background-color 0.3s ease;
 }
 .spinner { width: 40px; height: 40px; border: 4px solid rgba(14,165,160,0.1); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -241,7 +310,10 @@ header {
   background: rgba(11,25,41,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border-2); padding: 8px 0 max(8px, env(safe-area-inset-bottom));
   grid-template-columns: repeat(5, 1fr);
+  transition: background-color 0.3s ease;
 }
+[data-theme="light"] .bottom-nav { background: rgba(255,255,255,0.95); }
+
 .nav-item {
   display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px;
   font-size: 9px; color: var(--text-dim); text-decoration: none; transition: color 0.2s; -webkit-tap-highlight-color: transparent;
@@ -275,7 +347,14 @@ header {
       <div class="brand-sub">RMUTTO – Veterinary Academic Service Division</div>
     </div>
   </div>
-  <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
+  <div class="header-actions">
+    <!-- ปุ่ม Toggle สลับ Theme -->
+    <button id="themeToggle" class="btn-theme" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span>
+      <span class="icon-sun">☀️</span>
+    </button>
+    <button class="btn-home" onclick="location.href='index.html'">🏠 หน้าหลัก</button>
+  </div>
 </header>
 
 <div class="wrap">
@@ -295,6 +374,23 @@ header {
   <a class="nav-item" href="surgery.html"><span class="nav-icon">📋</span>ผ่าตัด</a>
   <a class="nav-item" href="recovery.html"><span class="nav-icon">❤️‍🩹</span>พักฟื้น</a>
 </nav>
+
+<script>
+  /* ── Theme Switcher Logic ── */
+  const themeToggleBtn = document.getElementById('themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  }
+</script>
 
 <script type="module">
 import { supabase } from './js/supabase.js';
@@ -505,6 +601,7 @@ window.calcDrugs = function(animalId) {
     if(el) {
       el.innerText = val ? val + " ml" : "-";
       el.style.color = val ? "var(--teal-light)" : "var(--text-faint)";
+      // เมื่ออยู่ Light mode จะให้เป็น var(--teal) จัดการด้วย CSS ข้างบนแล้ว
     }
   };
 
